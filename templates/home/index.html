@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabler-ui/dist/css/tabler.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+
+<link rel="shortcut icon" href={% static "assets/img/logo.png" %} type="image/x-icon">
+
+    <title>Reform CRM</title>
+    <style>
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:url('static/assets/img/hero.avif');
+            background-size: cover;
+            filter: blur(5px); /* Adjust the blur value as needed */
+            z-index: -1;
+            opacity: 0.9; /* Adjust the opacity value as needed */
+          }
+        
+          body {
+            color: white; /* Text color on top of the background image */
+          }
+          html, body {
+            height: 100%;
+            margin: 0;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            flex: 1;
+        }
+        
+        
+        .container-content {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 80vh; 
+        }
+
+        .navbar {
+          color: #fff; /* Text color */
+          background-color:#fff;
+      }
+      .navbar-brand {
+          font-size: 24px;
+          font-weight: bold;
+      }
+      
+        footer {
+          background-color: #343a40; /* Footer background color */
+          color: white; /* Footer text color */
+          padding: 20px;
+          margin-top: auto;
+        }
+      
+        footer a {
+          color: white; /* Footer link color */
+          margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-white-700">
+        <div class="container">
+            <a class="navbar-brand text-primary" href="/">Reform</a>
+            {% if user.is_authenticated %}
+            <a class="nav-link text-azure" href="{% url "user:logout" %}"><button class="btn btn-primary">Sign out</button></a>
+            {% else %}
+            <a class="nav-link text-azure" href="{% url "user:login" %}"><button class="btn btn-primary">Sign In</button></a>
+            {% endif %}
+        </div>
+    </nav>
+    {% for message in messages %}
+          <div class="container p-0" style="width:350px">
+            <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="True">&times;</span>
+              </button>
+             {{ message }}
+            </div>
+          </div>
+          {% endfor %}
+   
+        <div class="container-content">
+          
+            <div class="text-center">
+                <h1>Welcome to Reform CRM</h1>
+                <p>This is your personalized CRM solution for efficient business management.</p>
+                <a href="/dashboard" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6">
+              <p>&copy; 2024 Reform</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+              <!-- Add more footer links as needed -->
+            </div>
+          </div>
+        </div>
+      </footer>
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tabler@1.1/dist/js/tabler.min.js"></script>
+</body>
+</html>
