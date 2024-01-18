@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ["*"]
 
 SITE_ID = 1
 # Application definition
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app','https://businesscardgenerator-production.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'home',
     'user'
 ]
@@ -50,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'reform_crm.urls'
