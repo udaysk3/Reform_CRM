@@ -12,5 +12,4 @@ urlpatterns = [
     path("finance", views.Finance, name="finance" ),
     path("adminview", views.Admin, name="admin" ),
     path("hr", views.HR, name="hr" ),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]

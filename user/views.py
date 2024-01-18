@@ -31,7 +31,6 @@ def signin(request):
     return render(request, 'user/login.html')
 
 def logout_view(request):
-    
     del request.session['email']
     request.session.save()
     logout(request)
