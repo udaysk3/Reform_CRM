@@ -23,6 +23,6 @@ def Finance(request):
 
 @login_required
 def HR(request):
-    return render(request, "home/HR.html")
+    return render(request, "home/hr.html")
 
 
