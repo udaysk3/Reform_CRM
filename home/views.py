@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from user.models import User
 
 def home(request):
     return render(request, "home/index.html")
@@ -14,7 +15,12 @@ def Customer(request):
 
 @login_required
 def Admin(request):
-    return render(request, "home/admin.html")
+    if request.GET.get('page') == 'edit':
+        user_id = request.GET.get('id')
+        user = User.objects.get(pk=user_id)
+        return render(request, 'home/admin.html', {'user': user})
+    users = User.objects.filter(is_superuser=False).values()
+    return render(request, "home/admin.html", {"users":users})
 
 
 @login_required

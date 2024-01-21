@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reform CRM</title>
   <link rel="shortcut icon" type="image/png" href={% static "images/logos/favicon.png" %} />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href={% static "css/styles.min.css" %} />
 </head>
 
@@ -33,6 +34,7 @@
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Home</span>
             </li>
+            {% if request.user.customer %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="/dashboard" aria-expanded="false">
                 <span>
@@ -41,10 +43,12 @@
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
+            {% endif %}
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Your Tabs</span>
             </li>
+            {% if request.user.customer %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:customer" %}" aria-expanded="false">
                 <span>
@@ -53,6 +57,8 @@
                 <span class="hide-menu">Customer</span>
               </a>
             </li>
+            {% endif %}
+            {% if request.user.admin %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:admin" %}" aria-expanded="false">
                 <span>
@@ -61,6 +67,8 @@
                 <span class="hide-menu">Admin</span>
               </a>
             </li>
+            {% endif %}
+            {% if request.user.finance %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:finance" %}" aria-expanded="false">
                 <span>
@@ -69,6 +77,8 @@
                 <span class="hide-menu">Finance</span>
               </a>
             </li>
+            {% endif %}
+            {% if request.user.hr %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:hr" %}" aria-expanded="false">
                 <span>
@@ -76,6 +86,8 @@
                 </span>
                 <span class="hide-menu">HR</span>
               </a>
+            </li>
+            {% endif %}
             {% comment %} </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">
@@ -219,6 +231,8 @@
   <script src="{% static "libs/apexcharts/dist/apexcharts.min.js" %}"></script>
   <script src="{% static "libs/simplebar/dist/simplebar.js" %}"></script>
   <script src="{% static "js/dashboard.js" %}"></script>
-</body>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script></body>
 
 </html>

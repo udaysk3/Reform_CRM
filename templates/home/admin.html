@@ -2,33 +2,230 @@
 {% load static %}
 
 {% block content %}
+
 <div class="container-fluid">
-  <!--  Row 1 -->
+  <!-- Row 1 -->
   <div class="row">
     <div class="col-lg-12 d-flex align-items-strech">
       <div class="card w-100">
         <div class="card-body">
-          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
-            <div class="mb-3 mb-sm-0">
-              <h5 class="card-title fw-semibold">Sample Card</h5>
+          
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <!-- <div>
-              <select class="form-select">
-                <option value="1">March 2023</option>
-                <option value="2">April 2023</option>
-                <option value="3">May 2023</option>
-                <option value="4">June 2023</option>
-              </select>
-            </div> -->
+        {% endfor %}
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            
+            <div class="mb-3 mb-sm-0">
+             <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">User Management</h5></a>
+            </div>
+            <div>
+              <a href="?page=add" class="btn btn-primary">Add User</a>
+            </div>
           </div>
           <div>
-            <h1>
-              Welcome to Admin Page
-            </h1>
+            <!-- User Table -->
+            
+            {% if request.GET.page == 'add' %}
+              <h3>Add User</h3>
+                        <!-- User Addition Form -->
+                        <form id="addUserForm" method="post" action="{% url "user:add_user" %}">
+                          {% csrf_token %}
+                          <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="dashboard" name="dashboard" checked>
+                            <label class="form-check-label" for="dashboard">Dashboard</label>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="customer" name="customer" checked>
+                            <label class="form-check-label" for="customer">Customer</label>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="admin" name="admin">
+                            <label class="form-check-label" for="admin">Admin</label>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="finance" name="finance">
+                            <label class="form-check-label" for="finance">Finance</label>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="hr" name="hr">
+                            <label class="form-check-label" for="hr">HR</label>
+                          </div>
+                          <button type="submit" class="btn btn-primary">Add User</button>
+                        </form>
+                        <!-- End User Addition Form -->
+                        {% elif request.GET.page == 'edit' %}
+                        {% if user %}
+                          <!-- User Edit Form -->
+                          <button  class="mb-3 btn-outline-info btn">{{user.email}}</button>
+                          <form id="editUserForm" method="post" action="{% url 'user:edit_user' user.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                              <label for="editEmail" class="form-label">Email address</label>
+                              <input type="email" value={{user.email}} class="form-control" id="editEmail" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="editPassword" class="form-label">Password</label>
+                              <input type="password"   class="form-control" id="password" name="password" >
+                            </div>
+                            <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.dashboard %}checked{% endif %} class="form-check-input" id="editDashboard" name="dashboard" >
+                              <label class="form-check-label"  for="editDashboard">Dashboard</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.customer %}checked{% endif %} class="form-check-input" id="editCustomer" name="customer" >
+                              <label class="form-check-label"  for="editCustomer">Customer</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.admin %}checked{% endif %} class="form-check-input" id="editAdmin" name="admin">
+                              <label class="form-check-label"  for="editAdmin">Admin</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.finance %}checked{% endif %} class="form-check-input" id="editFinance"  name="finance" >
+                              <label class="form-check-label" for="editFinance">Finance</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.hr %}checked{% endif %} class="form-check-input" id="editHr" name="hr">
+                              <label class="form-check-label" for="editHr">HR</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update User</button>
+                          </form>
+                      <!-- End User Edit Form -->
+                      {% else %}
+                          <p>User not found.</p>
+                        {% endif %}
+                      {% else %}
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Dashboard</th>
+                      <th>Customer</th>
+                      <th>Admin</th>
+                      <th>Finance</th>
+                      <th>HR</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if users %}
+                      {% for user in users %}
+                        <tr>
+                          <td>{{ user.id }}</td>
+                          <td>{{ user.username }}</td>
+                          <td>{{ user.email }}</td>
+                          {% if user.dashboard %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          
+                          {% if user.customer %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          {% if user.admin %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          {% if user.finance %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          {% if user.hr %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          <td>
+                            <a href="#" class="edit-user-btn" data-user-id="{{ user.id }}">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+                            </a>
+                            <a href="#" class="delete-user-btn" data-user-id="{{ user.id }}">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                            </a>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                {% else %}
+                  <tr class="text-center display-flex align-items-center justify-content-center">
+                    <td colspan="9" class="text-center">No Users</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+              {% endif %}
+
+
           </div>
         </div>
       </div>
     </div>
-    
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const editButtons = document.querySelectorAll('.edit-user-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        const userId = button.getAttribute('data-user-id');
+        window.location.href = `?page=edit&id=${userId}`;
+      });
+    });
+  });
+  document.addEventListener('DOMContentLoaded', function () {
+    const deleteButtons = document.querySelectorAll('.delete-user-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        const userId = button.getAttribute('data-user-id');
+        const confirmDelete = confirm('Are you sure you want to delete this user?');
+
+        if (confirmDelete) {
+          // Redirect to the delete URL if the user confirms
+          window.location.href = `user/remove_user/${userId}`;
+        }
+      });
+    });
+  });
+</script>
+
 
   {% endblock content %}

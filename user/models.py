@@ -16,15 +16,25 @@ class UserManager(BaseUserManager):
         else:
             user.set_unusable_password()
 
+        user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
 
-        extra_fields = {**extra_fields, "is_staff": True, "is_superuser": True}
+         extra_fields = {
+            "dashboard": True,
+            "customer": True,
+            "admin": True,
+            "finance": True,
+            "hr": True,
+            "is_staff": True,
+            "is_superuser": True,
+            **extra_fields,
+        }
+         
+         user = self.create_user(email=email, password=password,  **extra_fields)
 
-        user = self.create_user(email=email, password=password, **extra_fields)
-
-        return user
+         return user
     
 USER_CHOICES = [
     ('employee', 'Employee'),
@@ -37,5 +47,10 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    type = models.CharField(max_length=10, choices=USER_CHOICES, default='employee')
+    dashboard = models.BooleanField(default=True)
+    customer = models.BooleanField(default=True)
+    admin = models.BooleanField(default=False)
+    finance = models.BooleanField(default=False)
+    hr = models.BooleanField(default=False)
     
+    objects = UserManager()
