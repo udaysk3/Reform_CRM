@@ -10,6 +10,10 @@ def dashboard(request):
     return render(request, "home/dashboard.html")
 
 @login_required
+def customer_detail(request):
+    return render(request,"home/customer-detail.html")
+
+@login_required
 def Customer(request):
     return render(request, "home/customer.html")
 
