@@ -1,34 +1,347 @@
+
 {% extends "base.html" %}
 {% load static %}
 
 {% block content %}
-<div class="container-fluid">
-  <!--  Row 1 -->
+
+<div class="container-fluid" style="max-width:1500px">
+  <!-- Row 1 -->
   <div class="row">
-    <div class="col-lg-12 d-flex align-items-strech">
+    <div class="col-lg-12 d-flex align-items-strech w-100">
       <div class="card w-100">
         <div class="card-body">
-          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
-            <div class="mb-3 mb-sm-0">
-              <h5 class="card-title fw-semibold">Sample Card</h5>
+          
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            {% comment %} <div>
-              <select class="form-select">
-                <option value="1">March 2023</option>
-                <option value="2">April 2023</option>
-                <option value="3">May 2023</option>
-                <option value="4">June 2023</option>
-              </select>
-            </div> {% endcomment %}
+          {% endfor %}
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            
+            <div class="mb-3 mb-sm-0">
+             <a href="{% url "app:customer" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Customer Management</h5></a>
+            </div>
+            <div>
+              <a href="?page=add_customer" class="btn btn-primary">Add Customer</a>
+            </div>
           </div>
           <div>
-            <h1>
-              Welcome to Customer Page
-            </h1>
+            <!-- Customer Table -->
+            
+            {% if request.GET.page == 'add_customer' %}
+              <h3>Add Customer</h3>
+              
+              <form id="addCustomerForm" method="post" action="{% url 'app:add_customer' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="home_owner" class="form-label">Home Owner</label>
+                    <input type="text" class="form-control" id="home_owner" name="home_owner">
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Customer</button>
+            </form>
+              
+            {% elif request.GET.page == 'edit_customer' %}
+              <!-- Similar to the user edit form, create a form for editing a customer -->
+              <!-- Adjust the form action URL and method accordingly -->
+              {% if customer %}
+                <h3>Edit Customer</h3>
+                <form id="editCustomerForm" method="post" action="{% url 'app:edit_customer' customer.id %}">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                      <label for="edit_first_name" class="form-label">First Name</label>
+                      <input type="text" class="form-control" id="edit_first_name" name="first_name" value="{{ customer.first_name }}" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="edit_last_name" class="form-label">Last Name</label>
+                      <input type="text" class="form-control" id="edit_last_name" name="last_name" value="{{ customer.last_name }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{{ customer.phone_number }}">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email"  value="{{ customer.email }}">
+                </div>
+                <div class="mb-3">
+                    <label for="home_owner" class="form-label">Home Owner</label>
+                    <input type="text" class="form-control" id="home_owner" name="home_owner" value="{{ customer.home_owner }}">
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" value="{{ customer.address }}"></textarea>
+                </div>
+                  <button type="submit" class="btn btn-primary">Update Customer</button>
+              </form>
+              {% else %}
+                <p>Customer not found.</p>
+              {% endif %}
+              
+            {% else %}
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th style="width: 5%;">ID</th>
+                      <th style="width: 20%;">Customer</th>
+                      <th style="width: 10%;">Stage</th>
+                      <th style="width: 20%;">Next Action</th>
+                      <th style="width: 20%;">History</th>
+                      <th style="width: 20%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if customers %}
+                    {% for customer in customers %}
+                      <tr>
+                        <td style="width: 10%;"><a href="/customer-detail/{{customer.id}}">{{ customer.id }}</a></td>
+                        <td class="text-underlined" style="width: 20%;"><a href="/customer-detail/{{customer.id}}">{{ customer.first_name }} {{ customer.last_name }}</a></td>
+                        <td style="width: 10%;">stage 1</td>
+                        {% with latest_action=customer.get_action_history.first %}
+                          <td style="width: 30%;"><b>{{ latest_action.date_time }} </b>- {{ latest_action.text|truncatechars:50 }}</td>
+                        {% endwith %}
+                        {% with all_actions=customer.get_action_history %}
+                          {% if all_actions|length > 1 %}
+                            {% with second_action=all_actions.1 %}
+                              <td style="width: 30%;"><b>{{ second_action.date_time }}</b> - {{ second_action.text|truncatechars:50 }}</td>
+                            {% endwith %}
+                          {% else %}
+                          <td style="width: 10%;">-</td>
+                          {% endif %}
+                        {% endwith %}
+                        <td style="width: 20%;">
+                          <a href="#" class="edit-customer-btn" data-customer-id="{{ customer.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+                          </a>
+                          <a href="#" class="delete-customer-btn" data-customer-id="{{ customer.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr class="text-center display-flex align-items-center justify-content-center">
+                      <td colspan="6" class="text-center">No Customers</td>
+                    </tr>
+                  {% endif %}
+                  </tbody>
+                </table>
+            {% endif %}
+
           </div>
         </div>
       </div>
     </div>
-    
+  </div>
+</div>
 
-  {% endblock content %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const editButtons = document.querySelectorAll('.edit-customer-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        const customerId = button.getAttribute('data-customer-id');
+        window.location.href = `?page=edit_customer&id=${customerId}`;
+      });
+    });
+
+    const deleteButtons = document.querySelectorAll('.delete-customer-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        const customerId = button.getAttribute('data-customer-id');
+        const confirmDelete = confirm('Are you sure you want to delete this customer?');
+        if (confirmDelete) {
+          window.location.href = `remove_customer/${customerId}`;
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock content %}
+
+{% comment %} {% extends "base.html" %} {% load static %} {% block search %}
+
+<input
+  class="form-control me-2"
+  type="search"
+  placeholder="Search"
+  aria-label="Search"
+  id="myInput"
+/> {% endcomment %}
+
+{% comment %} {% endblock %} {% block content %}
+<div class="container-fluid">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="container mr">
+            <h1>Customer</h1>
+            <table class="table table-striped mt-3">
+              <thead>
+                <tr>
+                  <th onclick="sortTable(0)">
+                    Customer <span id="arrow0">&#9650;</span>
+                  </th>
+                  <th onclick="sortTable(1)">
+                    Stage <span id="arrow1"></span>
+                  </th>
+                  <th onclick="sortTable(2)">
+                    Next action <span id="arrow2"></span>
+                  </th>
+                  <th onclick="sortTable(3)">
+                    History <span id="arrow3"></span>
+                  </th>
+                  <th onclick="sortTable(4)">
+                    Customer Field <span id="arrow4"></span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="myTable"> {% endcomment %}
+                <!-- Iterate through customers and create rows -->
+                {% comment %} {% for customer in customers %}
+                <tr>
+                  <td>{{ customer.name }}</td>
+                  <td>{{ customer.stage }}</td>
+                  <td>{{ customer.next_action }}</td>
+                  <td>{{ customer.history }}</td>
+                  <td>{{ customer.customer_field }}</td>
+                </tr>
+                {% endfor %} {% endcomment %}
+                {% comment %} <a href="/customer1">
+                  <tr>
+                    <td>Customer 1</td>
+                    <td>Stage 1</td>
+                    <td>Next action 1</td>
+                    <td>History 1</td>
+                    <td>Customer Field 1</td>
+                  </tr>
+                </a>
+                <tr>
+                  <td>Customer 2</td>
+                  <td>Stage 2</td>
+                  <td>Next action 2</td>
+                  <td>History 2</td>
+                  <td>Customer Field 2</td>
+                </tr>
+                <tr>
+                  <td>Customer 3</td>
+                  <td>Stage 3</td>
+                  <td>Next action 3</td>
+                  <td>History 3</td>
+                  <td>Customer Field 3</td>
+                </tr>
+                <tr>
+                  <td>Customer 4</td>
+                  <td>Stage 4</td>
+                  <td>Next action 4</td>
+                  <td>History 4</td>
+                  <td>Customer Field 4</td>
+                </tr>
+                <tr>
+                  <td>Customer 5</td>
+                  <td>Stage 5</td>
+                  <td>Next action 5</td>
+                  <td>History 5</td>
+                  <td>Customer Field 5</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %} {% block js %}
+<script>
+  function sortTable(colIndex) {
+    var table,
+      rows,
+      switching,
+      i,
+      x,
+      y,
+      shouldSwitch,
+      dir,
+      switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+    dir = "asc"; // Set the sorting direction to ascending by default
+
+    // Reset arrow indicators
+    for (var i = 0; i < table.rows[0].cells.length; i++) {
+      document.getElementById("arrow" + i).innerHTML = "";
+    }
+
+    // Set default arrow indicator
+    document.getElementById("arrow" + colIndex).innerHTML = " &#9650;"; // Up arrow
+
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 0; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("td")[colIndex];
+        y = rows[i + 1].getElementsByTagName("td")[colIndex];
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+
+    // Set arrow indicator for each row
+    for (i = 0; i < rows.length; i++) {
+      var arrow = rows[i].getElementsByTagName("span")[0];
+      if (i === 0) {
+        arrow.innerHTML = " &#9650;"; // Up arrow for the header row
+      } else {
+        arrow.innerHTML = dir === "asc" ? " &#9650;" : " &#9660;"; // Up or down arrow
+      }
+    }
+  }
+</script>
+{% endblock js %} {% endcomment %}

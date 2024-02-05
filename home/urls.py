@@ -12,4 +12,9 @@ urlpatterns = [
     path("finance", views.Finance, name="finance" ),
     path("adminview", views.Admin, name="admin" ),
     path("hr", views.HR, name="hr" ),
+    path('add_customer', views.add_customer, name="add_customer"),
+    path('action_submit/<int:customer_id>', views.action_submit, name="action_submit"),
+    path('edit_customer/<int:customer_id>', views.edit_customer, name="edit_customer"),
+    path('remove_customer/<int:customer_id>', views.remove_customer, name="remove_customer"),
+    path("customer-detail/<int:customer_id>",views.customer_detail,name="customer_detail"),
 ]
