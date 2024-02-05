@@ -3,6 +3,7 @@ from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Customers
+from time import gmtime, strftime
 from datetime import datetime 
 
 def home(request):
@@ -104,6 +105,32 @@ def action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str}"
         date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M')
         text = request.POST.get('text')
+        customer.add_action(date_time, text)
+
+        messages.success(request, 'Action added successfully!')
+        return render(request, 'home/customer-detail.html', {'customer': customer})
+
+def na_action_submit(request, customer_id):
+    if request.method == 'POST':
+        customer = Customers.objects.get(id=customer_id)
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        time_str = strftime("%H:%M", gmtime())
+        date_time_str = f"{date_str} {time_str}"
+        date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M')
+        text = 'Not Accepted'
+        customer.add_action(date_time, text)
+
+        messages.success(request, 'Action added successfully!')
+        return render(request, 'home/customer-detail.html', {'customer': customer})
+
+def cb_action_submit(request, customer_id):
+    if request.method == 'POST':
+        customer = Customers.objects.get(id=customer_id)
+        date_str = request.POST.get("date_field")
+        time_str = request.POST.get("time_field")
+        date_time_str = f"{date_str} {time_str}"
+        date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M')
+        text = 'Call Back'
         customer.add_action(date_time, text)
 
         messages.success(request, 'Action added successfully!')
