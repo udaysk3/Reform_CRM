@@ -35,6 +35,11 @@
             <div>
               <a href="?page=add_customer" class="btn btn-primary">Add Customer</a>
             </div>
+            <div class="mb-3">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                Import Customers
+              </button>
+            </div>
           </div>
           <div>
             <!-- Customer Table -->
@@ -113,9 +118,12 @@
                   
                   <thead>
   <tr>
-    <th onclick="sortTable(0)">
-      ID <span id="arrow0"></span>
+    <th>
+      <input type="checkbox" id="selectAll">
     </th>
+    {% comment %} <th onclick="sortTable(0)">
+      ID <span id="arrow0"></span>
+    </th> {% endcomment %}
     <th onclick="sortTable(1)">
       Customer <span id="arrow1"></span>
     </th>
@@ -128,9 +136,9 @@
     <th onclick="sortTable(4)">
       History <span id="arrow4"></span>
     </th>
-    <th onclick="sortTable(5)">
+    {% comment %} <th onclick="sortTable(5)">
       Action <span id="arrow5"></span>
-    </th>
+    </th> {% endcomment %}
   </tr>
 </thead>
 
@@ -138,7 +146,10 @@
                     {% if customers %}
                     {% for customer in customers %}
                       <tr>
-                        <td style="width: 10%;"><a href="/customer-detail/{{customer.id}}">{{ customer.id }}</a></td>
+                        <td>
+                          <input type="checkbox" class="select-customer" data-customer-id="{{ customer.id }}">
+                        </td>
+                        {% comment %} <td style="width: 10%;"><a href="/customer-detail/{{customer.id}}">{{ customer.id }}</a></td> {% endcomment %}
                         <td class="text-underlined" style="width: 20%;"><a href="/customer-detail/{{customer.id}}">{{ customer.first_name }} {{ customer.last_name }}</a></td>
                         <td style="width: 10%;">stage 1</td>
                         {% with latest_action=customer.get_action_history.first %}
@@ -153,14 +164,14 @@
                           <td style="width: 10%;">-</td>
                           {% endif %}
                         {% endwith %}
-                        <td style="width: 20%;">
+                        {% comment %} <td style="width: 20%;">
                           <a href="#" class="edit-customer-btn" data-customer-id="{{ customer.id }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
                           </a>
                           <a href="#" class="delete-customer-btn" data-customer-id="{{ customer.id }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
                           </a>
-                        </td>
+                        </td> {% endcomment %}
                       </tr>
                     {% endfor %}
                   {% else %}
@@ -169,11 +180,34 @@
                     </tr>
                   {% endif %}
                   </tbody>
+                  <div>
+                    <button type="button" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
+                  </div>
                 </table>
             {% endif %}
 
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importModalLabel">Import Customers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{% url 'app:import_customers' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="fileInput" class="form-label">Select Excel file:</label>
+            <input type="file" class="form-control" id="fileInput" name="excel_file" accept=".xls, .xlsx" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Import</button>
+        </form>
       </div>
     </div>
   </div>
@@ -281,6 +315,38 @@ function sortTable(colIndex) {
 }
 
 
+</script>
+<!-- At the bottom of the template, after existing scripts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select/deselect all checkboxes
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const customerCheckboxes = document.querySelectorAll('.select-customer');
+
+    selectAllCheckbox.addEventListener('change', function () {
+      customerCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+      });
+    });
+
+    // Bulk delete
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+    deleteSelectedBtn.addEventListener('click', function () {
+      const selectedCustomerIds = Array.from(customerCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.getAttribute('data-customer-id'));
+
+      if (selectedCustomerIds.length > 0) {
+        const confirmDelete = confirm('Are you sure you want to delete selected customers?');
+        if (confirmDelete) {
+          window.location.href = `bulk_remove_customers/?ids=${selectedCustomerIds.join(',')}`;
+        }
+      } else {
+        alert('Please select customers to delete.');
+      }
+    });
+  });
 </script>
 
 

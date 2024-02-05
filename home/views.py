@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import Customers
 from time import gmtime, strftime
 from datetime import datetime 
+import pandas as pd
 
 def home(request):
     return render(request, "home/index.html")
@@ -135,3 +136,43 @@ def cb_action_submit(request, customer_id):
 
         messages.success(request, 'Action added successfully!')
         return render(request, 'home/customer-detail.html', {'customer': customer})
+
+
+def import_customers_view(request):
+    if request.method == 'POST':
+        excel_file = request.FILES['excel_file']
+        try:
+            df = pd.read_excel(excel_file)
+            for index, row in df.iterrows():
+                Customers.objects.create(
+                    first_name=row['First Name'],
+                    last_name=row['Last Name'],
+                    phone_number=row['Phone Number'],
+                    email=row['Email'],
+                    home_owner=row['Home Owner'],
+                    address=row['Address']
+                )
+
+            messages.success(request, 'Customers imported successfully.')
+        except Exception as e:
+            messages.error(request, f'Error importing customers: {e}')
+
+        return redirect('app:customer') 
+
+    return render(request, 'app/import_customers.html')
+
+
+def bulk_remove_customers(request):
+    if request.method == 'GET':
+        customer_ids_str = request.GET.get('ids', '')
+        try:
+            customer_ids = [int(id) for id in customer_ids_str.split(',') if id.isdigit()]
+            if customer_ids:
+                Customers.objects.filter(id__in=customer_ids).delete()
+                messages.success(request, 'Selected customers deleted successfully.')
+            else:
+                messages.warning(request, 'No valid customer IDs provided for deletion.')
+        except Exception as e:
+            messages.error(request, f'Error deleting customers: {e}')
+        return redirect('app:customer')  
+    return render(request, 'app/customer_list.html') 
