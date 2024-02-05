@@ -118,9 +118,11 @@
                   
                   <thead>
   <tr>
-    <th>
-      <input type="checkbox" id="selectAll">
-    </th>
+    {% if user.is_staff %}
+      <th>
+        <input type="checkbox" id="selectAll">
+      </th>
+    {% endif %}
     {% comment %} <th onclick="sortTable(0)">
       ID <span id="arrow0"></span>
     </th> {% endcomment %}
@@ -146,9 +148,11 @@
                     {% if customers %}
                     {% for customer in customers %}
                       <tr>
+                        {% if user.is_staff %}
                         <td>
                           <input type="checkbox" class="select-customer" data-customer-id="{{ customer.id }}">
                         </td>
+                      {% endif %}
                         {% comment %} <td style="width: 10%;"><a href="/customer-detail/{{customer.id}}">{{ customer.id }}</a></td> {% endcomment %}
                         <td class="text-underlined" style="width: 20%;"><a href="/customer-detail/{{customer.id}}">{{ customer.first_name }} {{ customer.last_name }}</a></td>
                         <td style="width: 10%;">stage 1</td>
@@ -180,9 +184,11 @@
                     </tr>
                   {% endif %}
                   </tbody>
+                  {% if user.is_staff %}
                   <div>
                     <button type="button" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
                   </div>
+                {% endif %}
                 </table>
             {% endif %}
 
