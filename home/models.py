@@ -8,8 +8,8 @@ class Customers(models.Model):
     home_owner = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
 
-    def add_action(self, date_time, text):
-        return Action.objects.create(customer=self, date_time=date_time, text=text)
+    def add_action(self, date_time, text, date , time):
+        return Action.objects.create(customer=self, date_time=date_time, text=text, date=date, time=time)
 
     def get_action_history(self):
         return Action.objects.filter(customer=self).order_by('-date_time')
@@ -17,6 +17,8 @@ class Customers(models.Model):
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     date_time = models.DateTimeField()
+    date= models.DateField(null=True, blank=True)
+    time= models.TimeField(null=True, blank=True)
     text = models.TextField(max_length=999)
 
     def __str__(self):
