@@ -1,0 +1,26 @@
+# Byte-compiled Python files
+*.pyc
+
+
+# Secret key file
+secret_key.txt
+
+# Environment variables file (if you're using .env)
+.env
+
+# IDE/Editor specific files or directories
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Compiled Python bytecode
+__pycache__/
+*.py[cod]
+
+# Log files
+*.log
+
+# Django migration files
+**/migrations/*.py
+**/migrations/*.pyc
