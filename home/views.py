@@ -7,6 +7,7 @@ from time import gmtime, strftime
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 import pandas as pd
+from django.db.models import Count
 
 def home(request):
     return render(request, "home/index.html")
@@ -59,9 +60,8 @@ def Customer(request):
         customer_id = request.GET.get("id")
         customer = Customers.objects.get(pk=customer_id)
         return render(request, "home/customer.html", {"customer": customer})
-    customers = Customers.objects.all()
+    customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     return render(request, "home/customer.html", {"customers": customers})
-
 
 @login_required
 def Admin(request):

@@ -342,7 +342,7 @@
           "Are you sure you want to delete this customer?"
         );
         if (confirmDelete) {
-          window.location.href = `remove_customer/${customerId}`;
+          window.location.href = `/remove_customer/${customerId}`;
         }
       });
     });
@@ -351,7 +351,6 @@
   var currentDate = new Date();
   var formattedDate = currentDate.toISOString().split("T")[0];
   var formattedTime = currentDate.toTimeString().split(" ")[0].split(":");
-
   const dates = document.querySelectorAll(".date");
   const time = document.querySelectorAll(".time");
 
