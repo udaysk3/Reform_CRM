@@ -30,7 +30,7 @@
 
         <a
           class="btn btn-primary cnav-item fs-6 position-absolute"
-          style="right: -265px"
+          style="right: -200px"
           href="/customer-detail/{{next.id}}"
           >Next</a
         >
@@ -109,11 +109,10 @@
                     action="{% url 'app:na_action_submit' customer.id %}"
                   >
                     {% csrf_token %}
-
                     <button class="btn btn-primary" type="submit">NA</button>
                   </form>
 
-                  <form
+                  {% comment %} <form
                     method="post"
                     class="col"
                     action="{% url 'app:cb_action_submit' customer.id %}"
@@ -126,7 +125,7 @@
                       data-bs-target="#staticBackdrop"
                     >
                       Call Back
-                    </button>
+                    </button> {% endcomment %}
 
                     <!-- Modal -->
                     <div
@@ -307,7 +306,7 @@
 <div class="d-flex container-fluid pt-2 position-relative">
   <a
     href="#"
-    class="edit-customer-btn btn btn-success position-absolute start-0"
+    class="edit-customer-btn btn btn-success position-absolute "
     data-customer-id="{{ customer.id }}"
   >
     Edit
@@ -315,7 +314,7 @@
   <a
     href="#"
     class="delete-customer-btn btn btn-danger position-absolute"
-    style="right: 10px"
+    style="right:20px"
     data-customer-id="{{ customer.id }}"
   >
     Delete

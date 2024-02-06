@@ -23,17 +23,21 @@ def customer_detail(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     prev = None
     next = None
-    for i in range(len(all_customers)):
-        if all_customers[i].id == customer_id:
-            if i == 0:
-                prev = all_customers[len(all_customers) - 1]
-                next = all_customers[i + 1]
-            elif i == len(all_customers) - 1:
-                prev = all_customers[i - 1]
-                next = all_customers[0]
-            else:
-                prev = all_customers[i - 1]
-                next = all_customers[i + 1]
+    if len(all_customers) == 1:
+        prev = customer
+        next = customer
+    else:
+        for i in range(len(all_customers)):
+            if all_customers[i].id == customer_id:
+                if i == 0:
+                    prev = all_customers[len(all_customers) - 1]
+                    next = all_customers[i + 1]
+                elif i == len(all_customers) - 1:
+                    prev = all_customers[i - 1]
+                    next = all_customers[0]
+                else:
+                    prev = all_customers[i - 1]
+                    next = all_customers[i + 1]
     history = {}
     actions = customer.get_action_history()
     for i in actions:
