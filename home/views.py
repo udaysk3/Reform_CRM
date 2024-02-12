@@ -174,29 +174,35 @@ def action_submit(request, customer_id):
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
-
 def import_customers_view(request):
+    excel_columns = []
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         try:
             df = pd.read_excel(excel_file)
-            for index, row in df.iterrows():
-                Customers.objects.create(
-                    first_name=row["First Name"],
-                    last_name=row["Last Name"],
-                    phone_number=row["Phone Number"],
-                    email=row["Email"],
-                    home_owner=row["Home Owner"],
-                    address=row["Address"],
-                )
+            excel_columns = df.columns.tolist()
 
+            column_mappings = {}
+            for i, column in enumerate(excel_columns):
+                # Retrieve user's selection for each column
+                attribute = request.POST.get(f"column{i}", "")
+                column_mappings[i] = attribute
+            print(column_mappings)
+            for index, row in df.iterrows():
+                customer_data = {}
+                for i, column in enumerate(excel_columns):
+                    if i in column_mappings:  
+                        customer_data[column_mappings[i]] = row[i]
+                Customers.objects.create(**customer_data)
             messages.success(request, "Customers imported successfully.")
+            return redirect("app:customer")
         except Exception as e:
             messages.error(request, f"Error importing customers: {e}")
 
-        return redirect("app:customer")
+    return render(request, "home/import_customers.html", {"excel_columns": excel_columns})
 
-    return render(request, "app/import_customers.html")
+
+
 
 
 def bulk_remove_customers(request):
@@ -216,7 +222,7 @@ def bulk_remove_customers(request):
         except Exception as e:
             messages.error(request, f"Error deleting customers: {e}")
         return redirect("app:customer")
-    return render(request, "app/customer_list.html")
+    return render(request, "home/customer_list.html")
 
 
 def na_action_submit(request, customer_id):
@@ -250,6 +256,5 @@ def cb_action_submit(request, customer_id):
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "Call Back"
         customer.add_action(date_time, text, date_str, time_str)
-
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
