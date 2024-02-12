@@ -14,6 +14,7 @@
 {% endblock %}
 {% block content %}
 
+
 <div class="container-fluid" style="max-width:1500px">
   <!-- Row 1 -->
   <div class="row">
@@ -144,6 +145,7 @@
                   <tbody id="myTable">
                     {% if customers %}
                     {% for customer in customers %}
+
                       <tr>
                         {% if user.is_staff %}
                         <td>
@@ -187,6 +189,10 @@
     </div>
   </div>
 </div>
+
+
+
+
 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -210,11 +216,15 @@
 
 
 
+
 {% endblock content %}
 
 
 {% block js %}
 <script>
+
+
+
 $(document).ready(function(){
   $("#myInput").on("keyup", function() {
     var value = $(this).val().toLowerCase();

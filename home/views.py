@@ -2,12 +2,13 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Action
-from time import gmtime, strftime
+from .models import Customers,Action
 from datetime import datetime, timedelta
+from datetime import date
 from django.http import HttpResponseRedirect
 import pandas as pd
-from django.db.models import Count
+from django.db.models import Max,Min
+
 
 def home(request):
     return render(request, "home/index.html")
@@ -40,17 +41,37 @@ def customer_detail(request, customer_id):
                     prev = all_customers[i - 1]
                     next = all_customers[i + 1]
     history = {}
+    future = {}
     actions = customer.get_action_history()
+    haction = []
+    faction = []
+
+
     for i in actions:
+        if i.date <= date.today() and i.time <= datetime.now().time():
+            haction.append(i)
+        else:
+            faction.append(i)
+    for i in haction:
         if i.date not in history:
             history[i.date] = []
-    for i in actions:
+    for i in haction:
         history[i.date].append([i.time, i.text])
-
+    for i in faction:
+        if i.date not in future:
+            future[i.date] = []
+    for i in faction:
+        future[i.date].append([i.time, i.text])
     return render(
         request,
         "home/customer-detail.html",
-        {"customer": customer, "history": history, "prev": prev, "next": next},
+        {
+            "customer": customer,
+            "history": history,
+            "future": future,
+            "prev": prev,
+            "next": next,
+        },
     )
 
 
@@ -60,8 +81,15 @@ def Customer(request):
         customer_id = request.GET.get("id")
         customer = Customers.objects.get(pk=customer_id)
         return render(request, "home/customer.html", {"customer": customer})
-    customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
+    # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
+    customers = Customers.objects.annotate(
+        earliest_action_date=Max("action__date_time")
+    ).order_by("earliest_action_date")
+    # for customer in customers:
+    #     print(customer.get_action_history())
+
     return render(request, "home/customer.html", {"customers": customers})
+
 
 @login_required
 def Admin(request):
@@ -152,44 +180,47 @@ def action_submit(request, customer_id):
 
 
 def import_customers_view(request):
-    if request.method == 'POST':
-        excel_file = request.FILES['excel_file']
+    if request.method == "POST":
+        excel_file = request.FILES["excel_file"]
         try:
             df = pd.read_excel(excel_file)
             for index, row in df.iterrows():
                 Customers.objects.create(
-                    first_name=row['First Name'],
-                    last_name=row['Last Name'],
-                    phone_number=row['Phone Number'],
-                    email=row['Email'],
-                    home_owner=row['Home Owner'],
-                    address=row['Address']
+                    first_name=row["First Name"],
+                    last_name=row["Last Name"],
+                    phone_number=row["Phone Number"],
+                    email=row["Email"],
+                    home_owner=row["Home Owner"],
+                    address=row["Address"],
                 )
 
-            messages.success(request, 'Customers imported successfully.')
+            messages.success(request, "Customers imported successfully.")
         except Exception as e:
-            messages.error(request, f'Error importing customers: {e}')
+            messages.error(request, f"Error importing customers: {e}")
 
-        return redirect('app:customer') 
+        return redirect("app:customer")
 
-    return render(request, 'app/import_customers.html')
+    return render(request, "app/import_customers.html")
 
 
 def bulk_remove_customers(request):
-    if request.method == 'GET':
-        customer_ids_str = request.GET.get('ids', '')
+    if request.method == "GET":
+        customer_ids_str = request.GET.get("ids", "")
         try:
-            customer_ids = [int(id) for id in customer_ids_str.split(',') if id.isdigit()]
+            customer_ids = [
+                int(id) for id in customer_ids_str.split(",") if id.isdigit()
+            ]
             if customer_ids:
                 Customers.objects.filter(id__in=customer_ids).delete()
-                messages.success(request, 'Selected customers deleted successfully.')
+                messages.success(request, "Selected customers deleted successfully.")
             else:
-                messages.warning(request, 'No valid customer IDs provided for deletion.')
+                messages.warning(
+                    request, "No valid customer IDs provided for deletion."
+                )
         except Exception as e:
-            messages.error(request, f'Error deleting customers: {e}')
-        return redirect('app:customer')  
-    return render(request, 'app/customer_list.html') 
-        
+            messages.error(request, f"Error deleting customers: {e}")
+        return redirect("app:customer")
+    return render(request, "app/customer_list.html")
 
 
 def na_action_submit(request, customer_id):
