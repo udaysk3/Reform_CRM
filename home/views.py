@@ -241,7 +241,7 @@ def na_action_submit(request, customer_id):
 
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "Next Action"
+        text = "Call Back"
         customer.add_action(date_time, text, date_str, time_str_updated)
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
