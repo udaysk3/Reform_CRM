@@ -155,13 +155,19 @@
                         {% comment %} <td style="width: 10%;"><a href="/customer-detail/{{customer.id}}">{{ customer.id }}</a></td> {% endcomment %}
                         <td class="text-underlined" style="width: 20%;"><a href="/customer-detail/{{customer.id}}">{{ customer.first_name }} {{ customer.last_name }}</a></td>
                         <td style="width: 10%;">stage 1</td>
-                        {% with latest_action=customer.get_action_history.first %}
-                          <td style="width: 30%;"><b>{{ latest_action.date_time }} </b>- {{ latest_action.text|truncatechars:50 }}</td>
+                        {% with all_actions=customer.get_action_future %}
+                          {% if all_actions|length >= 1 %}
+                            {% with action=all_actions.0 %}
+                              <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
+                            {% endwith %}
+                          {% else %}
+                          <td style="width: 10%;">-</td>
+                          {% endif %}
                         {% endwith %}
                         {% with all_actions=customer.get_action_history %}
-                          {% if all_actions|length > 1 %}
-                            {% with second_action=all_actions.1 %}
-                              <td style="width: 30%;"><b>{{ second_action.date_time }}</b> - {{ second_action.text|truncatechars:50 }}</td>
+                          {% if all_actions|length >= 1 %}
+                            {% with action=all_actions.0 %}
+                              <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
                             {% endwith %}
                           {% else %}
                           <td style="width: 10%;">-</td>
