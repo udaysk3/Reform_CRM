@@ -228,9 +228,6 @@
 
 {% block js %}
 <script>
-
-
-
 $(document).ready(function(){
   $("#myInput").on("keyup", function() {
     var value = $(this).val().toLowerCase();
@@ -239,8 +236,6 @@ $(document).ready(function(){
     });
   });
 });
-
-
 
 function sortTable(colIndex) {
   var table,
@@ -255,14 +250,6 @@ function sortTable(colIndex) {
   table = document.getElementById("myTable");
   switching = true;
   dir = "asc"; // Set the sorting direction to ascending by default
-
-  // Reset arrow indicators
-  for (var i = 0; i < table.rows[0].cells.length; i++) {
-    document.getElementById("arrow" + i).innerHTML = "";
-  }
-
-  // Set default arrow indicator
-  document.getElementById("arrow" + colIndex).innerHTML = dir === "asc" ? " &#9650;" : " &#9660;"; // Up or down arrow
 
   while (switching) {
     switching = false;
@@ -295,47 +282,44 @@ function sortTable(colIndex) {
     }
   }
 
-  // Set arrow indicator for each row
-  for (i = 0; i < rows.length; i++) {
-    var arrow = document.getElementById("arrow" + colIndex);
-    arrow.innerHTML = dir === "asc" ? " &#9650;" : " &#9660;"; // Up or down arrow
+  // Remove arrow indicators from all columns
+  for (var j = 0; j < table.rows[0].cells.length; j++) {
+    document.getElementById("arrow" + j).innerHTML = "";
   }
+
+  // Set arrow indicator for the sorted column
+  document.getElementById("arrow" + colIndex).innerHTML = dir === "asc" ? " &#9650;" : " &#9660;";
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+  // Select/deselect all checkboxes
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const customerCheckboxes = document.querySelectorAll('.select-customer');
 
-</script>
-<!-- At the bottom of the template, after existing scripts -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Select/deselect all checkboxes
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const customerCheckboxes = document.querySelectorAll('.select-customer');
-
-    selectAllCheckbox.addEventListener('change', function () {
-      customerCheckboxes.forEach(checkbox => {
-        checkbox.checked = selectAllCheckbox.checked;
-      });
-    });
-
-    // Bulk delete
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-
-    deleteSelectedBtn.addEventListener('click', function () {
-      const selectedCustomerIds = Array.from(customerCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.getAttribute('data-customer-id'));
-
-      if (selectedCustomerIds.length > 0) {
-        const confirmDelete = confirm('Are you sure you want to delete selected customers?');
-        if (confirmDelete) {
-          window.location.href = `bulk_remove_customers/?ids=${selectedCustomerIds.join(',')}`;
-        }
-      } else {
-        alert('Please select customers to delete.');
-      }
+  selectAllCheckbox.addEventListener('change', function () {
+    customerCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
     });
   });
+
+  // Bulk delete
+  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+  deleteSelectedBtn.addEventListener('click', function () {
+    const selectedCustomerIds = Array.from(customerCheckboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.getAttribute('data-customer-id'));
+
+    if (selectedCustomerIds.length > 0) {
+      const confirmDelete = confirm('Are you sure you want to delete selected customers?');
+      if (confirmDelete) {
+        window.location.href = `bulk_remove_customers/?ids=${selectedCustomerIds.join(',')}`;
+      }
+    } else {
+      alert('Please select customers to delete.');
+    }
+  });
+});
 </script>
-
-
 {% endblock js %}
+

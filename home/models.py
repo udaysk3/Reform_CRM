@@ -1,6 +1,6 @@
 from django.db import models
-from datetime import datetime, timedelta
-from datetime import date
+from datetime import datetime
+
 import pytz
 
 utc = pytz.UTC
@@ -12,6 +12,7 @@ class Customers(models.Model):
     email = models.EmailField(max_length=255)
     home_owner = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now())
 
     def add_action(self, date_time, text, date , time):
         return Action.objects.create(customer=self, date_time=date_time, text=text, date=date, time=time)
