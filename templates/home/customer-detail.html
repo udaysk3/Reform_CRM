@@ -99,7 +99,7 @@
             <div class="card m-0">
               <div class="card-body m-0">
                 <h6>
-                  Next Action: {% with latest_action=customer.get_action_history.first %}
+                  Next Action: {% with  latest_action=customer.get_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
                 </h6>
                 <div class="d-grid gap-2 d-md-block mt-3">
@@ -112,7 +112,8 @@
                     <button class="btn btn-primary" type="submit">NA</button>
                   </form>
 
-                  {% comment %} <form
+                  {% comment %}
+                  <form
                     method="post"
                     class="col"
                     action="{% url 'app:cb_action_submit' customer.id %}"
@@ -125,7 +126,8 @@
                       data-bs-target="#staticBackdrop"
                     >
                       Call Back
-                    </button> {% endcomment %}
+                    </button>
+                    {% endcomment %}
 
                     <!-- Modal -->
                     <div
@@ -297,6 +299,15 @@
                     </ul>
                   </div>
                 </div>
+                <h6>Key Events</h6>
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style="height: 150px; overflow-y: auto"
+                  >
+                    Customer added at {{ customer.created_at }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -324,7 +335,7 @@
 <div class="d-flex container-fluid pt-2 position-relative">
   <a
     href="#"
-    class="edit-customer-btn btn btn-success position-absolute "
+    class="edit-customer-btn btn btn-success position-absolute"
     data-customer-id="{{ customer.id }}"
   >
     Edit
@@ -332,7 +343,7 @@
   <a
     href="#"
     class="delete-customer-btn btn btn-danger position-absolute"
-    style="right:20px"
+    style="right: 20px"
     data-customer-id="{{ customer.id }}"
   >
     Delete
