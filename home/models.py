@@ -1,4 +1,9 @@
 from django.db import models
+from datetime import datetime, timedelta
+from datetime import date
+import pytz
+
+utc = pytz.UTC
 
 class Customers(models.Model):
     first_name = models.CharField(max_length=255)
@@ -11,8 +16,19 @@ class Customers(models.Model):
     def add_action(self, date_time, text, date , time):
         return Action.objects.create(customer=self, date_time=date_time, text=text, date=date, time=time)
 
+    def get_action_future(self):
+        return (
+            Action.objects.filter(customer=self)
+            .filter(date_time__gte=datetime.now().replace(tzinfo=utc))
+            .order_by("-date_time")
+        )
+
     def get_action_history(self):
-        return Action.objects.filter(customer=self).order_by('-date_time')
+        return (
+            Action.objects.filter(customer=self)
+            .filter(date_time__lt=datetime.now().replace(tzinfo=utc))
+            .order_by("-date_time")
+        )
 
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)

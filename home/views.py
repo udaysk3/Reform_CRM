@@ -8,6 +8,7 @@ from datetime import date
 from django.http import HttpResponseRedirect
 import pandas as pd
 from django.db.models import Max,Min
+import pytz
 
 
 def home(request):
@@ -40,28 +41,23 @@ def customer_detail(request, customer_id):
                 else:
                     prev = all_customers[i - 1]
                     next = all_customers[i + 1]
-    history = {}
+
     future = {}
+    factions = customer.get_action_future()
+    history = {}
     actions = customer.get_action_history()
-    haction = []
-    faction = []
-
-
     for i in actions:
-        if i.date <= date.today() and i.time <= datetime.now().time():
-            haction.append(i)
-        else:
-            faction.append(i)
-    for i in haction:
         if i.date not in history:
             history[i.date] = []
-    for i in haction:
+    for i in actions:
         history[i.date].append([i.time, i.text])
-    for i in faction:
+
+    for i in factions:
         if i.date not in future:
             future[i.date] = []
-    for i in faction:
+    for i in factions:
         future[i.date].append([i.time, i.text])
+
     return render(
         request,
         "home/customer-detail.html",
