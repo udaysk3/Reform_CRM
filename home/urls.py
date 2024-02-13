@@ -17,7 +17,6 @@ urlpatterns = [
      path('bulk_remove_customers/', views.bulk_remove_customers, name='bulk_remove_customers'),
     path("action_submit/<int:customer_id>", views.action_submit, name="action_submit"),
     path("na_action_submit/<int:customer_id>", views.na_action_submit, name="na_action_submit"),
-    path("cb_action_submit/<int:customer_id>", views.cb_action_submit, name="cb_action_submit"),
     path("edit_customer/<int:customer_id>", views.edit_customer, name="edit_customer"),
     path(
         "remove_customer/<int:customer_id>",

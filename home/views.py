@@ -9,6 +9,9 @@ from django.http import HttpResponseRedirect
 import pandas as pd
 from django.db.models import Max,Min
 import pytz
+from user.models import User
+
+utc = pytz.UTC
 
 
 def home(request):
@@ -42,21 +45,16 @@ def customer_detail(request, customer_id):
                     prev = all_customers[i - 1]
                     next = all_customers[i + 1]
 
-    future = {}
-    factions = customer.get_action_future()
     history = {}
     actions = customer.get_action_history()
-    for i in actions:
-        if i.date not in history:
-            history[i.date] = []
-    for i in actions:
-        history[i.date].append([i.time, i.text])
 
-    for i in factions:
-        if i.date not in future:
-            future[i.date] = []
-    for i in factions:
-        future[i.date].append([i.time, i.text])
+    for i in actions:
+        if i.added_date_time.replace(tzinfo=utc).date() not in history:
+            history[i.added_date_time.replace(tzinfo=utc).date()] = []
+    for i in actions:
+        history[i.added_date_time.replace(tzinfo=utc).date()].append(
+            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name]
+        )
 
     return render(
         request,
@@ -64,7 +62,6 @@ def customer_detail(request, customer_id):
         {
             "customer": customer,
             "history": history,
-            "future": future,
             "prev": prev,
             "next": next,
         },
@@ -116,6 +113,7 @@ def add_customer(request):
         email = request.POST.get("email")
         home_owner = request.POST.get("home_owner")
         address = request.POST.get("address")
+        agent = User.objects.get(email=request.user)
 
         customer = Customers.objects.create(
             first_name=first_name,
@@ -124,6 +122,7 @@ def add_customer(request):
             email=email,
             home_owner=home_owner,
             address=address,
+            agent = agent,
         )
 
         messages.success(request, "Customer added successfully!")
@@ -169,7 +168,7 @@ def action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = request.POST.get("text")
-        customer.add_action(date_time, text, date_str, time_str)
+        customer.add_action(date_time, text, User.objects.get(email=request.user))
 
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -178,31 +177,23 @@ def import_customers_view(request):
     excel_columns = []
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
-        try:
-            df = pd.read_excel(excel_file)
-            excel_columns = df.columns.tolist()
-
-            column_mappings = {}
+        df = pd.read_excel(excel_file)
+        excel_columns = df.columns.tolist()
+        column_mappings = {}
+        for i, column in enumerate(excel_columns):
+            # Retrieve user's selection for each column
+            attribute = request.POST.get(f"column{i}", "")
+            column_mappings[i] = attribute
+        for index, row in df.iterrows():
+            customer_data = {}
             for i, column in enumerate(excel_columns):
-                # Retrieve user's selection for each column
-                attribute = request.POST.get(f"column{i}", "")
-                column_mappings[i] = attribute
-            print(column_mappings)
-            for index, row in df.iterrows():
-                customer_data = {}
-                for i, column in enumerate(excel_columns):
-                    if i in column_mappings:  
-                        customer_data[column_mappings[i]] = row[i]
-                Customers.objects.create(**customer_data)
-            messages.success(request, "Customers imported successfully.")
-            return redirect("app:customer")
-        except Exception as e:
-            messages.error(request, f"Error importing customers: {e}")
+                if i in column_mappings:  
+                    customer_data[column_mappings[i]] = row[i]
+            Customers.objects.create(**customer_data)
+        messages.success(request, "Customers imported successfully.")
+        return redirect("app:customer")
 
     return render(request, "home/import_customers.html", {"excel_columns": excel_columns})
-
-
-
 
 
 def bulk_remove_customers(request):
@@ -242,19 +233,6 @@ def na_action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "Call Back"
-        customer.add_action(date_time, text, date_str, time_str_updated)
-        messages.success(request, "Action added successfully!")
-        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
-
-
-def cb_action_submit(request, customer_id):
-    if request.method == "POST":
-        customer = Customers.objects.get(id=customer_id)
-        date_str = request.POST.get("date_field")
-        time_str = request.POST.get("time_field")
-        date_time_str = f"{date_str} {time_str}"
-        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "Call Back"
-        customer.add_action(date_time, text, date_str, time_str)
+        customer.add_action(date_time, text, User.objects.get(email=request.user))
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))

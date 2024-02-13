@@ -263,24 +263,6 @@
                     </div>
                   </div>
                 </form>
-                <h6>Action</h6>
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 150px; overflow-y: auto"
-                  >
-                    <ul>
-                      {% for key,value in future.items %}
-                      <li><b>{{ key }}</b></li>
-                      <ul class="ps-3">
-                        {% for v in value %}
-                        <li>{{ v.0 }} - {{ v.1 }}</li>
-                        {% endfor %}
-                      </ul>
-                      {% endfor %}
-                    </ul>
-                  </div>
-                </div>
                 <h6>History</h6>
                 <div class="card p-0 m-0">
                   <div
@@ -292,7 +274,7 @@
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li>{{ v.0 }} - {{ v.1 }}</li>
+                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
                         {% endfor %}
                       </ul>
                       {% endfor %}
@@ -305,7 +287,7 @@
                     class="card-body p-3 m-0"
                     style="height: 150px; overflow-y: auto"
                   >
-                    Customer added at {{ customer.created_at }}
+                    At {{ customer.created_at }} Customer Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }}
                   </div>
                 </div>
               </div>
