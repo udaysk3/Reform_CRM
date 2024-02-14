@@ -46,15 +46,17 @@ def customer_detail(request, customer_id):
                     next = all_customers[i + 1]
 
     history = {}
-    actions = customer.get_action_history()
+    actions = customer.get_created_at_action_history()
 
     for i in actions:
         if i.added_date_time.replace(tzinfo=utc).date() not in history:
             history[i.added_date_time.replace(tzinfo=utc).date()] = []
     for i in actions:
         history[i.added_date_time.replace(tzinfo=utc).date()].append(
-            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name]
+            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
+        print(i.imported)
+
 
     return render(
         request,
@@ -168,13 +170,46 @@ def action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = request.POST.get("text")
-        customer.add_action(date_time, text, User.objects.get(email=request.user))
-
+        customer.add_action(
+            text,
+            User.objects.get(email=request.user),
+            date_time,
+        )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
+
+def na_action_submit(request, customer_id):
+    if request.method == "POST":
+        customer = Customers.objects.get(id=customer_id)
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        time_str = datetime.now().strftime("%H:%M")
+        time_obj = datetime.strptime(time_str, "%H:%M")
+        time_obj += timedelta(minutes=20)
+        time_str_updated = time_obj.strftime("%H:%M")
+        date_time_str = f"{date_str} {time_str_updated}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = "Call Back"
+        customer.add_action(
+            text,
+            User.objects.get(email=request.user),
+            date_time,
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
+
 def import_customers_view(request):
     excel_columns = []
+    expected_columns = [
+        "First Name",
+        "Surname",
+        "TelePhone",
+        "email",
+        "House Owner",
+        "Address Line",
+    ]
+    history = {}
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         df = pd.read_excel(excel_file)
@@ -184,12 +219,18 @@ def import_customers_view(request):
             # Retrieve user's selection for each column
             attribute = request.POST.get(f"column{i}", "")
             column_mappings[i] = attribute
+
         for index, row in df.iterrows():
             customer_data = {}
             for i, column in enumerate(excel_columns):
-                if i in column_mappings:  
+                if excel_columns[i] in expected_columns:
                     customer_data[column_mappings[i]] = row[i]
-            Customers.objects.create(**customer_data)
+                elif excel_columns[i] not in expected_columns:
+                    history[excel_columns[i]] = row[i]
+            print(customer_data,history)
+            customer = Customers.objects.create(**customer_data, agent=User.objects.get(email=request.user))
+            for i in history:
+                customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True)
         messages.success(request, "Customers imported successfully.")
         return redirect("app:customer")
 
@@ -214,25 +255,3 @@ def bulk_remove_customers(request):
             messages.error(request, f"Error deleting customers: {e}")
         return redirect("app:customer")
     return render(request, "home/customer_list.html")
-
-
-def na_action_submit(request, customer_id):
-    if request.method == "POST":
-        customer = Customers.objects.get(id=customer_id)
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        time_str = datetime.now().strftime("%H:%M")
-
-        # Convert time_str to a datetime object
-        time_obj = datetime.strptime(time_str, "%H:%M")
-
-        # Add 20 minutes
-        time_obj += timedelta(minutes=20)
-
-        time_str_updated = time_obj.strftime("%H:%M")
-
-        date_time_str = f"{date_str} {time_str_updated}"
-        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "Call Back"
-        customer.add_action(date_time, text, User.objects.get(email=request.user))
-        messages.success(request, "Action added successfully!")
-        return HttpResponseRedirect("/customer-detail/" + str(customer_id))

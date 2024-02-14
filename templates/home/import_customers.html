@@ -18,6 +18,7 @@
               <div class="mb-3">
                 <label for="column{{ forloop.counter }}" class="form-label">Map to {{ column }} Column:</label>
                 <select class="form-select" id="column{{ forloop.counter }}" name="column{{ forloop.counter }}">
+                  <option value="history">History</option>
                   <option value="first_name">First Name</option>
                   <option value="last_name">Last Name</option>
                   <option value="phone_number">Phone Number</option>
@@ -70,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         columnSelect.innerHTML = `
           <label for="column${i}" class="form-label">Map to ${columnNames[i]} Column:</label>
           <select class="form-select" id="column${i}" name="column${i}">
+            <option value="history">History</option>
             <option value="first_name">First Name</option>
             <option value="last_name">Last Name</option>
             <option value="phone_number">Phone Number</option>

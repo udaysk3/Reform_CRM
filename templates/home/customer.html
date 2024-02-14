@@ -154,7 +154,12 @@
                         {% with all_actions=customer.get_action_history %}
                           {% if all_actions|length >= 1 %}
                             {% with action=all_actions.0 %}
-                              <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
+                            {% if action.imported %}
+                            <td style="width: 10%;">-</td>
+                            {% else %}
+                            <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
+
+                            {% endif %}
                             {% endwith %}
                           {% else %}
                           <td style="width: 10%;">-</td>
@@ -163,7 +168,11 @@
                         {% with all_actions=customer.get_action_history %}
                           {% if all_actions|length > 1 %}
                             {% with action=all_actions.1 %}
-                              <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
+                            {% if action.imported %}
+                            <td style="width: 10%;">-</td>
+                            {% else %}
+                            <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
+                            {% endif %}
                             {% endwith %}
                           {% else %}
                           <td style="width: 10%;">-</td>
