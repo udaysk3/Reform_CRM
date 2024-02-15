@@ -202,32 +202,33 @@ def na_action_submit(request, customer_id):
 def import_customers_view(request):
     excel_columns = []
     expected_columns = [
-        "First Name",
-        "Surname",
-        "TelePhone",
-        "email",
-        "House Owner",
-        "Address Line",
+        'history'
     ]
     history = {}
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         df = pd.read_excel(excel_file)
         excel_columns = df.columns.tolist()
-        column_mappings = {}
+        column_mappings = []
         for i, column in enumerate(excel_columns):
             # Retrieve user's selection for each column
             attribute = request.POST.get(f"column{i}", "")
-            column_mappings[i] = attribute
+            column_mappings.append(attribute)
+        print(column_mappings)
+
+        if 'email' and 'first_name' not in column_mappings:
+            messages.error(request, 'First Name and Email fields should be mapped')
+            return redirect("app:import_customers")
+            
 
         for index, row in df.iterrows():
             customer_data = {}
             for i, column in enumerate(excel_columns):
-                if excel_columns[i] in expected_columns:
-                    customer_data[column_mappings[i]] = row[i]
-                elif excel_columns[i] not in expected_columns:
+                if column_mappings[i]== 'history':
                     history[excel_columns[i]] = row[i]
-            print(customer_data,history)
+                else :
+                    customer_data[column_mappings[i]] = row[i]
+            
             customer = Customers.objects.create(**customer_data, agent=User.objects.get(email=request.user))
             for i in history:
                 customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True)
