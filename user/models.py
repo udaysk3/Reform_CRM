@@ -4,12 +4,12 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, password=None, first_name=None, last_name=None,  **extra_fields):
         extra_fields = {"is_staff": False, "is_superuser": False, **extra_fields}
         if not email:
             raise ValueError("Users must have an email address")
 
-        user = User(email=email, **extra_fields)
+        user = User(email=email, first_name=first_name, last_name=last_name, **extra_fields)
 
         if password:
             user.set_password(password)
@@ -21,7 +21,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None, **extra_fields):
 
-         extra_fields = {
+        extra_fields = {
             "dashboard": True,
             "customer": True,
             "admin": True,
@@ -31,11 +31,11 @@ class UserManager(BaseUserManager):
             "is_superuser": True,
             **extra_fields,
         }
-         
-         user = self.create_user(email=email, password=password,  **extra_fields)
 
-         return user
-    
+        user = self.create_user(email=email, password=password,  **extra_fields)
+
+        return user
+
 USER_CHOICES = [
     ('employee', 'Employee'),
     ('HR', 'HR'),

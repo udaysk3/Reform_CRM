@@ -1,0 +1,391 @@
+{% extends 'base.html' %} {% load static %} {% block css %}
+
+<style>
+  .cnav-item {
+    margin-right: 8%;
+    font-size: 15px;
+  }
+  h6 {
+    font-size: 14px;
+  }
+</style>
+
+{% endblock %} {% block content %}
+
+<div class="row container-fluid">
+  <div class="cnav-item fs-6 col">
+    <span class="col"> Stage - value </span>
+  </div>
+  <div class="cnav-item fs-6 col">
+    <span class="col"> Campaign - value </span>
+  </div>
+  <div class="cnav-item fs-6 col"><span class="col"> Route - value </span></div>
+  <div class="cnav-item fs-6 col">
+    <span class="col"> Client - value </span>
+  </div>
+</div>
+<div class="container-fluid pt-2">
+  <div class="row">
+    <div class="card p-0">
+      <div class="d-grid gap-2 d-md-block position-relative">
+        <a
+          class="btn btn-primary fs-6 position-absolute start-0"
+          href="/customer-detail/{{prev.id}}"
+          >Prev</a
+        >
+
+        <a
+          class="btn btn-primary fs-6 position-absolute"
+          style="right: 0px"
+          href="/customer-detail/{{next.id}}"
+          >Next</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid pt-2">
+  <div class="row">
+    <div class="card p-0">
+      <div class="card-body p-3 m-0">
+        <div class="row">
+          <div class="col-sm-4 mb-sm-0">
+            <div class="card m-0">
+              <div class="card-body">
+                <h6>
+                  <b> Name : </b> {{customer.first_name}} {{customer.last_name}}
+                </h6>
+                <h6><b> Telephone : </b> {{customer.phone_number}}</h6>
+                <h6><b> Email: </b> {{customer.email}}</h6>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="card m-0">
+              <div class="card-body">
+                <h6>Address : {{customer.address}}</h6>
+                <h6>Postcode : {{customer.postcode}}</h6>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="card m-0">
+              <div class="card-body">
+                <h6>Local Authority</h6>
+                <h6>Managed by</h6>
+                <h6 style="color: white">Postcode</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% for message in messages %}
+    <div
+      class="alert {{ message.tags }} alert-dismissible fade show"
+      role="alert"
+    >
+      {{ message }}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endfor %}
+
+    <div class="card p-0">
+      <div class="card-body p-3 m-0">
+        <div class="row">
+          <div class="col-sm-6 mb-3 mb-sm-0">
+            <div class="card m-0">
+              <div class="card-body m-0">
+                <h6>
+                  Next Action: {% with latest_action=customer.get_action_history.first %}
+                  {{latest_action.date_time }} {% endwith %}
+                </h6>
+                <div class="d-grid gap-2 d-md-block mt-3">
+                  <form
+                    method="post"
+                    class="col"
+                    action="{% url 'app:na_action_submit' customer.id %}"
+                  >
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">NA</button>
+                  </form>
+
+                  {% comment %}
+                  <form
+                    method="post"
+                    class="col"
+                    action="{% url 'app:cb_action_submit' customer.id %}"
+                  >
+                    {% csrf_token %}
+                    <button
+                      type="button"
+                      class="btn btn-primary my-3"
+                      data-bs-toggle="modal"
+                      data-bs-target="#staticBackdrop"
+                    >
+                      Call Back
+                    </button>
+                    {% endcomment %}
+
+                    <!-- Modal -->
+                    <div
+                      class="modal fade"
+                      id="staticBackdrop"
+                      data-bs-backdrop="static"
+                      data-bs-keyboard="false"
+                      tabindex="-1"
+                      aria-labelledby="staticBackdropLabel"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-body">
+                            <div class="form-floating p-2">
+                              <label for="date_field">Date</label>
+                              <input
+                                type="date"
+                                id="date_field"
+                                name="date_field"
+                                class="form-control date"
+                                data-target="#datetimepicker1"
+                                required
+                              />
+                            </div>
+                            <div class="form-floating p-2">
+                              <label for="time_field">Time</label>
+                              <input
+                                type="time"
+                                id="time_field"
+                                name="time_field"
+                                class="form-control time"
+                                data-target="#datetimepicker1"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button
+                              type="button"
+                              class="btn btn-secondary"
+                              data-bs-dismiss="modal"
+                            >
+                              Close
+                            </button>
+                            <button class="btn btn-primary" type="submit">
+                              Submit
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <form
+                  id="action_submit_form"
+                  method="post"
+                  action="{% url 'app:action_submit' customer.id %}"
+                >
+                  {% csrf_token %}
+                  <div class="form-floating">
+                    <textarea
+                      class="form-control mt-3"
+                      placeholder="Leave a comment here"
+                      id="floatingTextarea2"
+                      style="height: 100px"
+                      name="text"
+                    ></textarea>
+                    <label for="floatingTextarea2">Comments</label>
+                  </div>
+
+                  <!-- Button trigger modal -->
+
+                  <button
+                    type="button"
+                    class="btn btn-primary my-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop1"
+                  >
+                    Submit
+                  </button>
+
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="staticBackdrop1"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    tabindex="-1"
+                    aria-labelledby="staticBackdropLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-body">
+                          <div class="form-floating p-2">
+                            <label for="date_field">Date</label>
+                            <input
+                              type="date"
+                              id="date_field"
+                              name="date_field"
+                              class="form-control date"
+                              default=""
+                              data-target="#datetimepicker1"
+                              required
+                            />
+                          </div>
+                          <div class="form-floating p-2">
+                            <label for="time_field">Time</label>
+                            <input
+                              type="time"
+                              id="time_field"
+                              name="time_field"
+                              class="form-control time"
+                              data-target="#datetimepicker1"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                          <button class="btn btn-primary" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <h6>History</h6>
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style="height: 150px; overflow-y: auto"
+                  >
+                    <ul>
+                      {% for key,value in history.items %}
+                      <li><b>{{ key }}</b></li>
+                      <ul class="ps-3">
+                        {% if value.0.4 %}  
+                        <li>{{ value.0.0 }} - {{ value.0.2 }} {{ value.0.3 }} - </li>
+                        <ul class="ps-3">
+                          {% for v in value %}
+                          <li>{{ v.1 }}</li>
+                          {% endfor %}
+                        </ul>
+                        {% else %}
+                        {% for v in value %}
+                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
+
+                         {% endfor %}{% endif %}
+                      </ul>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+                <h6>Key Events</h6>
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style="height: 150px; overflow-y: auto"
+                  >
+                    <b>{{ customer.created_at }}</b> Customer Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="card m-0">
+              <div class="card-body">
+                <div class="d-grid gap-2 d-md-block">
+                  <button class="btn btn-primary" type="button">
+                    Action Required
+                  </button>
+                </div>
+                <div class="card p-0 m-0">
+                  <div class="card-body p-3 m-0" style="height: 390px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex container-fluid pt-2 position-relative">
+  <a
+    href="#"
+    class="edit-customer-btn btn btn-success position-absolute"
+    data-customer-id="{{ customer.id }}"
+  >
+    Edit
+  </a>
+  <a
+    href="#"
+    class="delete-customer-btn btn btn-danger position-absolute"
+    style="right: 20px"
+    data-customer-id="{{ customer.id }}"
+  >
+    Delete
+  </a>
+</div>
+
+{% endblock %} {% block js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const editButtons = document.querySelectorAll(".edit-customer-btn");
+    editButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        const customerId = button.getAttribute("data-customer-id");
+        window.location.href = `/customer?page=edit_customer&id=${customerId}`;
+      });
+    });
+
+    const deleteButtons = document.querySelectorAll(".delete-customer-btn");
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        const customerId = button.getAttribute("data-customer-id");
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this customer?"
+        );
+        if (confirmDelete) {
+          window.location.href = `/remove_customer/${customerId}`;
+        }
+      });
+    });
+  });
+
+  var currentDate = new Date();
+  var formattedDate = currentDate.toISOString().split("T")[0];
+  var formattedTime = currentDate.toTimeString().split(" ")[0].split(":");
+  const dates = document.querySelectorAll(".date");
+  const time = document.querySelectorAll(".time");
+
+  dates.forEach((date) => {
+    date.value = formattedDate;
+  });
+
+  time.forEach((time) => {
+    time.value = `${formattedTime[0]}:${formattedTime[1]}`;
+  });
+</script>
+{% endblock %}
