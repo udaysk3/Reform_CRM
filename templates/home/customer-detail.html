@@ -279,18 +279,20 @@
                       {% for key,value in history.items %}
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
-                        {% if value.0.4 %}  
+                        {% for v in value %}
+                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
+                         {% endfor %}
+                      </ul>
+                      {% endfor %}
+                      {% for key,value in imported.items %}
+                      <li><b>{{ key }}</b></li>
+                      <ul class="ps-3">
                         <li>{{ value.0.0 }} - {{ value.0.2 }} {{ value.0.3 }} - </li>
                         <ul class="ps-3">
                           {% for v in value %}
                           <li>{{ v.1 }}</li>
                           {% endfor %}
                         </ul>
-                        {% else %}
-                        {% for v in value %}
-                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
-
-                         {% endfor %}{% endif %}
                       </ul>
                       {% endfor %}
                     </ul>

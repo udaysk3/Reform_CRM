@@ -47,15 +47,25 @@ def customer_detail(request, customer_id):
 
     history = {}
     actions = customer.get_created_at_action_history()
+    imported = {}
 
     for i in actions:
-        if i.added_date_time.replace(tzinfo=utc).date() not in history:
-            history[i.added_date_time.replace(tzinfo=utc).date()] = []
+        if i.imported:
+            if i.added_date_time.replace(tzinfo=utc).date() not in imported:
+                imported[i.added_date_time.replace(tzinfo=utc).date()] = []
+        else:
+            if i.added_date_time.replace(tzinfo=utc).date() not in history:
+                history[i.added_date_time.replace(tzinfo=utc).date()] = []
     for i in actions:
-        history[i.added_date_time.replace(tzinfo=utc).date()].append(
+        if i.imported:
+            imported[i.added_date_time.replace(tzinfo=utc).date()].append(
             [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
-        print(i.imported)
+        else:
+            history[i.added_date_time.replace(tzinfo=utc).date()].append(
+            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+        )
+        print(i.added_date_time.replace(tzinfo=utc).time())
 
 
     return render(
@@ -64,6 +74,7 @@ def customer_detail(request, customer_id):
         {
             "customer": customer,
             "history": history,
+            "imported": imported,
             "prev": prev,
             "next": next,
         },
