@@ -113,7 +113,7 @@ def add_customer(request):
         last_name = request.POST.get("last_name")
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
-        home_owner = request.POST.get("home_owner")
+        postcode = request.POST.get("postcode")
         address = request.POST.get("address")
         agent = User.objects.get(email=request.user)
 
@@ -122,7 +122,7 @@ def add_customer(request):
             last_name=last_name,
             phone_number=phone_number,
             email=email,
-            home_owner=home_owner,
+            postcode=postcode,
             address=address,
             agent = agent,
         )
@@ -141,7 +141,7 @@ def edit_customer(request, customer_id):
         customer.last_name = request.POST.get("last_name")
         customer.phone_number = request.POST.get("phone_number")
         customer.email = request.POST.get("email")
-        customer.home_owner = request.POST.get("home_owner")
+        customer.postcode = request.POST.get("postcode")
         customer.address = request.POST.get("address")
 
         customer.save()
