@@ -7,7 +7,7 @@ class Customers(models.Model):
     last_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
     email = models.EmailField(max_length=255)
-    home_owner = models.CharField(max_length=255, blank=True, null=True)
+    postcode = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
     created_at = models.DateTimeField(default=datetime.now())
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)

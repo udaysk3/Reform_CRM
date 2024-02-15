@@ -8,9 +8,10 @@ class UserManager(BaseUserManager):
         extra_fields = {"is_staff": False, "is_superuser": False, **extra_fields}
         if not email:
             raise ValueError("Users must have an email address")
-
-        user = User(email=email, first_name=first_name, last_name=last_name, **extra_fields)
-
+        if first_name and last_name:
+            user = User(email=email, first_name=first_name, last_name=last_name, **extra_fields)
+        else:
+            user = User(email=email, **extra_fields)
         if password:
             user.set_password(password)
         else:
