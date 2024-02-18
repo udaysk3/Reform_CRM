@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers,Action
+from .models import Customers,Action, Client, Campaign
 from datetime import datetime, timedelta
 from datetime import date
 from django.http import HttpResponseRedirect
@@ -92,8 +92,13 @@ def Admin(request):
         user_id = request.GET.get("id")
         user = User.objects.get(pk=user_id)
         return render(request, "home/admin.html", {"user": user})
+    if request.GET.get("page") == "edit_client":
+        client_id = request.GET.get("id")
+        client = Client.objects.get(pk=client_id)
+        return render(request, "home/admin.html", {"client": client})
     users = User.objects.filter(is_superuser=False).values()
-    return render(request, "home/admin.html", {"users": users})
+    clients = Client.objects.filter()
+    return render(request, "home/admin.html", {"users": users, "clients" : clients})
 
 
 @login_required
@@ -256,3 +261,63 @@ def bulk_remove_customers(request):
             messages.error(request, f"Error deleting customers: {e}")
         return redirect("app:customer")
     return render(request, "home/customer_list.html")
+
+
+def add_client(request):
+    if request.method == 'POST':
+        # email = request.POST.get('email')
+        # if Client.objects.filter(email=email).exists():
+        #     messages.error(request, 'Client with this email already exists!')
+            # return redirect('app:client') 
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        client = Client.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+        )
+        messages.success(request, 'Client added successfully!')
+        return redirect('app:admin')  
+    return render(request, 'admin.html')
+
+def add_campaign(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        client_id = request.POST.get('client_id')
+        if Campaign.objects.filter(name=name).exists():
+            messages.error(request, 'Campaign with this name already exists!')
+            return redirect('app:admin') 
+        name = request.POST.get('name')
+        campaign = Campaign.objects.create(
+            client_id = client_id,
+            name=name,
+        )
+        messages.success(request, 'Campaign added successfully!')
+        return redirect('app:admin')  
+    return render(request, 'admin.html')
+
+def edit_client(request, client_id):
+    client = Client.objects.get(pk=client_id)
+    if request.method == 'POST':
+        print(request.POST)
+        client.first_name = request.POST.get('first_name')
+        client.last_name = request.POST.get('last_name')
+        client.save()
+        messages.success(request, 'Client updated successfully!')
+        return redirect('app:admin')  
+    context = {'client': client}
+    return redirect('app:adminview')
+
+def remove_client(request, client_id):
+    client = Client.objects.get(pk=client_id)
+    if not request.user.is_superuser:
+        messages.error(request, "You don't have permission to do this!")
+        return redirect('app:admin')
+    client.delete()
+    messages.success(request, 'Client deleted successfully!')
+    return redirect('app:admin')
+
+def remove_campaign(request, campaign_id):
+    campaign = Campaign.objects.get(pk=campaign_id)
+    campaign.delete()
+    messages.success(request, 'Campaign deleted successfully!')
+    return redirect('app:admin')
