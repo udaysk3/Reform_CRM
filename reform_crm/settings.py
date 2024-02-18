@@ -116,7 +116,7 @@ AUTHENTICATION_BACKENDS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
@@ -133,7 +133,7 @@ import os
 
 import os
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static') ]
+STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), os.path.join(BASE_DIR, 'node_modules')]
 STATIC_ROOT =os.path.join(BASE_DIR, 'staticfiles')
 # print(STATIC_ROOT, STATIC_URL, STATICFILES_DIRS)
 # Default primary key field type

@@ -25,6 +25,10 @@
             <h1>
               Welcome to Dashboard Page
             </h1>
+            <div class="example">
+              <input class="timepicker-ui-input" value="12:00 AM" />
+            </div>
+            
           </div>
         </div>
       </div>
@@ -32,3 +36,12 @@
     
 
   {% endblock content %}
+
+  {% block js %}
+  <script>
+    const element = document.querySelector('.example');
+const myTimePicker = new TimepickerUI(element);
+myTimePicker.create();
+
+  </script>
+  {% endblock js %}

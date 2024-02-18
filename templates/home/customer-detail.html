@@ -118,24 +118,6 @@
                     <button class="btn btn-primary" type="submit">NA</button>
                   </form>
 
-                  {% comment %}
-                  <form
-                    method="post"
-                    class="col"
-                    action="{% url 'app:cb_action_submit' customer.id %}"
-                  >
-                    {% csrf_token %}
-                    <button
-                      type="button"
-                      class="btn btn-primary my-3"
-                      data-bs-toggle="modal"
-                      data-bs-target="#staticBackdrop"
-                    >
-                      Call Back
-                    </button>
-                    {% endcomment %}
-
-                    <!-- Modal -->
                     <div
                       class="modal fade"
                       id="staticBackdrop"
@@ -377,8 +359,11 @@
   });
 
   var currentDate = new Date();
-  var formattedDate = currentDate.toISOString().split("T")[0];
-  var formattedTime = currentDate.toTimeString().split(" ")[0].split(":");
+  var londonDate = currentDate.toLocaleString('en-GB', { timeZone: 'Europe/London' });
+var formattedDate = londonDate.split(", ")[0].split("/").reverse().join("-");
+var formattedTime = londonDate.split(", ")[1].split(":");
+  
+  console.log(formattedDate, formattedTime);
   const dates = document.querySelectorAll(".date");
   const time = document.querySelectorAll(".time");
 

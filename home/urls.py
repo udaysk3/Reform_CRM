@@ -28,4 +28,9 @@ urlpatterns = [
         views.customer_detail,
         name="customer_detail",
     ),
+    path('add_client',views.add_client,name='add_client'),
+    path('add_campaign',views.add_campaign,name='add_campaign'),
+    path('edit_client/<int:client_id>',views.edit_client,name='edit_client'),
+    path('remove_client/<int:client_id>',views.remove_client,name='remove_client'),
+    path('remove_campaign/<int:campaign_id>',views.remove_campaign,name='remove_campaign'),
 ]

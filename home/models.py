@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import datetime
 from user.models import User
+import pytz
+
 
 class Customers(models.Model):
     first_name = models.CharField(max_length=255)
@@ -28,10 +30,25 @@ class Customers(models.Model):
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     date_time = models.DateTimeField(blank=True, null=True)
-    added_date_time = models.DateTimeField(default=datetime.now())
+    london_tz = pytz.timezone('Europe/London')
+    added_date_time = models.DateTimeField(default=datetime.now(london_tz))
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(max_length=999)
     imported = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.customer.first_name} {self.customer.last_name} - {self.date_time}"
+
+class Client(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+class Campaign(models.Model):
+    name = models.CharField(max_length=255)
+    client = models.ForeignKey(Client, related_name='campaigns', on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.client.first_name} {self.client.last_name} {self.name}"
+    
+    
