@@ -44,6 +44,8 @@ def add_user(request):
         if User.objects.filter(email=email).exists():
             messages.error(request, 'User with this email already exists!')
             return redirect('app:admin') 
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         password = request.POST.get('password') 
         dashboard = request.POST.get('dashboard') == 'on'
         customer = request.POST.get('customer') == 'on'
@@ -54,6 +56,8 @@ def add_user(request):
         user = User.objects.create(
             username=email,
             email=email,
+            first_name=first_name,
+            last_name=last_name,
             password= hashed_password,
             dashboard=dashboard,
             customer=customer,
