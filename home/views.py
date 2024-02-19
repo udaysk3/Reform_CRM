@@ -10,6 +10,7 @@ import pandas as pd
 from django.db.models import Max,Min
 import pytz
 from user.models import User
+from pytz import timezone
 
 utc = pytz.UTC
 
@@ -47,13 +48,24 @@ def customer_detail(request, customer_id):
 
     history = {}
     actions = customer.get_created_at_action_history()
+    imported = {}
+    london_tz = timezone('Europe/London')
 
     for i in actions:
-        if i.added_date_time.replace(tzinfo=utc).date() not in history:
-            history[i.added_date_time.replace(tzinfo=utc).date()] = []
+        if i.imported:
+            if i.added_date_time.replace(tzinfo=london_tz).date() not in imported:
+                imported[i.added_date_time.replace(tzinfo=london_tz).date()] = []
+        else:
+            if i.added_date_time.replace(tzinfo=london_tz).date() not in history:
+                history[i.added_date_time.replace(tzinfo=london_tz).date()] = []
     for i in actions:
-        history[i.added_date_time.replace(tzinfo=utc).date()].append(
-            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+        if i.imported:
+            imported[i.added_date_time.replace(tzinfo=london_tz).date()].append(
+            [i.added_date_time.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+        )
+        else:
+            history[i.added_date_time.replace(tzinfo=london_tz).date()].append(
+            [i.added_date_time.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
         print(i.imported)
 
@@ -121,6 +133,17 @@ def add_customer(request):
         postcode = request.POST.get("postcode")
         address = request.POST.get("address")
         agent = User.objects.get(email=request.user)
+
+        if phone_number[0] == '0':
+            phone_number = phone_number[1:]
+            phone_number = '+44' + phone_number
+        elif phone_number[0] == '+' and (phone_number[1] != '4' or phone_number[2] != '4'):
+            phone_number = phone_number[3:]
+            phone_number = '+44' + phone_number            
+        elif phone_number[0] == '+' and phone_number[1] == '4' and phone_number[1] == '4':
+            phone_number = phone_number
+        else:
+            phone_number = '+44' + phone_number
 
         customer = Customers.objects.create(
             first_name=first_name,
@@ -194,7 +217,7 @@ def na_action_submit(request, customer_id):
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "Call Back"
+        text = "NA"
         customer.add_action(
             text,
             User.objects.get(email=request.user),

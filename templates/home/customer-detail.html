@@ -2,7 +2,7 @@
 
 <style>
   .cnav-item {
-    margin-right: 8%;
+    margin-right: 0%;
     font-size: 15px;
   }
   h6 {
@@ -17,11 +17,11 @@
     <span class="col"> <b>Stage</b> - </span> Stage1
   </div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Campaign</b> - </span> value
+    <span class="col"> <b>Campaign</b> - </span> {{ customer.campaign.name }}
   </div>
   <div class="cnav-item fs-6 col"><span class="col"> <b>Route</b> - </span> value</div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Client</b> - </span> value
+    <span class="col"> <b>Client</b> - </span> {{ customer.client.first_name }} {{ customer.client.last_name }}
   </div>
 </div>
 <div class="container-fluid pt-2">
