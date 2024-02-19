@@ -76,7 +76,7 @@
               <div class="card-body">
                 <h6>Local Authority</h6>
                 <h6>Managed by</h6>
-                <h6 style="color: white">Postcode</h6>
+                <h6>{{customer.district}}</h6>
               </div>
             </div>
           </div>
@@ -117,25 +117,6 @@
                     {% csrf_token %}
                     <button class="btn btn-primary" type="submit">NA</button>
                   </form>
-
-                  {% comment %}
-                  <form
-                    method="post"
-                    class="col"
-                    action="{% url 'app:cb_action_submit' customer.id %}"
-                  >
-                    {% csrf_token %}
-                    <button
-                      type="button"
-                      class="btn btn-primary my-3"
-                      data-bs-toggle="modal"
-                      data-bs-target="#staticBackdrop"
-                    >
-                      Call Back
-                    </button>
-                    {% endcomment %}
-
-                    <!-- Modal -->
                     <div
                       class="modal fade"
                       id="staticBackdrop"

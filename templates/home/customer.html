@@ -71,7 +71,41 @@
                     <label for="address" class="form-label">Address</label>
                     <textarea class="form-control" id="address" name="address"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Customer</button>
+                
+
+                <!-- Button trigger modal -->
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    Add Customer
+                  </button>
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label for="campaign" class="form-label">Campaign</label>
+                            <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
+                              <option selected>Select the campaign</option>
+                              {% for campaign in campaigns %}
+                                <option value="{{campaign.id}}">{{campaign.name}}</option>
+                              {% endfor %}
+                            </select>
+                        </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
             </form>
               
             {% elif request.GET.page == 'edit_customer' %}
@@ -242,7 +276,7 @@ function sortTable(colIndex) {
       shouldSwitch = false;
       x = rows[i].getElementsByTagName("td")[colIndex];
       y = rows[i + 1].getElementsByTagName("td")[colIndex];
-      if (dir === "asc") {
+      if (dir === "asc") {form
         if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
           shouldSwitch = true;
           break;
@@ -304,6 +338,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+const form = document.querySelector('#addCustomerForm');
+
+
+
 </script>
 {% endblock js %}
-

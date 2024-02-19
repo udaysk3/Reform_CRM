@@ -37,7 +37,42 @@
               </div>
               {% endfor %}
             </div>
-            <button type="submit" class="btn btn-primary">Import</button>
+
+
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+              Import
+            </button>
+            
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label for="campaign" class="form-label">Campaign</label>
+                      <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
+                        <option selected>Select the campaign</option>
+                        {% for campaign in campaigns %}
+                          <option value="{{campaign.id}}">{{campaign.name}}</option>
+                        {% endfor %}
+                      </select>
+                  </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
           </form>
         </div>
       </div>
@@ -89,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </select>
         `;
         columnMappings.appendChild(columnSelect);
-      }
+      };
 
       // Show column mappings
       columnMappings.style.display = 'block';

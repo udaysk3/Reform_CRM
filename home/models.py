@@ -16,6 +16,7 @@ class Customers(models.Model):
     campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.CASCADE, null=True)
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.CASCADE, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    district = models.CharField(max_length=255, blank=True, null=True)
 
     def add_action(
         self,
