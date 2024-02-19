@@ -245,7 +245,7 @@ def na_action_submit(request, customer_id):
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "Call Back"
+        text = "NA"
         customer.add_action(
             text,
             User.objects.get(email=request.user),
