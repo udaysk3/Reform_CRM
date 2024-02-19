@@ -10,6 +10,10 @@
   }
 </style>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
 {% endblock %} {% block content %}
 
 <div class="row container-fluid">
@@ -117,58 +121,6 @@
                     {% csrf_token %}
                     <button class="btn btn-primary" type="submit">NA</button>
                   </form>
-
-                    <div
-                      class="modal fade"
-                      id="staticBackdrop"
-                      data-bs-backdrop="static"
-                      data-bs-keyboard="false"
-                      tabindex="-1"
-                      aria-labelledby="staticBackdropLabel"
-                      aria-hidden="true"
-                    >
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-body">
-                            <div class="form-floating p-2">
-                              <label for="date_field">Date</label>
-                              <input
-                                type="date"
-                                id="date_field"
-                                name="date_field"
-                                class="form-control date"
-                                data-target="#datetimepicker1"
-                                required
-                              />
-                            </div>
-                            <div class="form-floating p-2">
-                              <label for="time_field">Time</label>
-                              <input
-                                type="time"
-                                id="time_field"
-                                name="time_field"
-                                class="form-control time"
-                                data-target="#datetimepicker1"
-                                required
-                              />
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button
-                              type="button"
-                              class="btn btn-secondary"
-                              data-bs-dismiss="modal"
-                            >
-                              Close
-                            </button>
-                            <button class="btn btn-primary" type="submit">
-                              Submit
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
                 </div>
                 <form
                   id="action_submit_form"
@@ -223,16 +175,9 @@
                               required
                             />
                           </div>
-                          <div class="form-floating p-2">
-                            <label for="time_field">Time</label>
-                            <input
-                              type="time"
-                              id="time_field"
-                              name="time_field"
-                              class="form-control time"
-                              data-target="#datetimepicker1"
-                              required
-                            />
+                          <div class="mb-0">
+                            <label for="kt_datepicker_3" class="form-label">Time</label>
+                            <input class="form-control time form-control-solid" placeholder="Pick date & time" name='time_field' id="kt_datepicker_3"/>
                           </div>
                         </div>
                         <div class="modal-footer">
@@ -331,8 +276,16 @@
   </a>
 </div>
 
+
 {% endblock %} {% block js %}
-<script>
+<script type="module" >
+
+  
+
+
+  
+
+
   document.addEventListener("DOMContentLoaded", function () {
     const editButtons = document.querySelectorAll(".edit-customer-btn");
     editButtons.forEach((button) => {
@@ -363,10 +316,15 @@
 var formattedDate = londonDate.split(", ")[0].split("/").reverse().join("-");
 var formattedTime = londonDate.split(", ")[1].split(":");
   
-  console.log(formattedDate, formattedTime);
   const dates = document.querySelectorAll(".date");
   const time = document.querySelectorAll(".time");
+  flatpickr("#kt_datepicker_3", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    defaultDate: `${formattedTime[0]}:${formattedTime[1]}`
 
+  });
   dates.forEach((date) => {
     date.value = formattedDate;
   });

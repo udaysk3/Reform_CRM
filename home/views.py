@@ -92,8 +92,10 @@ def Customer(request):
     ).order_by("earliest_action_date")
     # for customer in customers:
     #     print(customer.get_action_history())
+    
+    campaigns = Campaign.objects.all()
 
-    return render(request, "home/customer.html", {"customers": customers})
+    return render(request, "home/customer.html", {"customers": customers, "campaigns": campaigns})
 
 
 @login_required
@@ -125,12 +127,21 @@ def HR(request):
 def add_customer(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
+        last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
         postcode = request.POST.get("postcode")
         address = request.POST.get("address")
+        campaign = request.POST.get("campaign")
         agent = User.objects.get(email=request.user)
+
+        if phone_number[0] == '0':
+            phone_number = phone_number[1:]
+            phone_number = '+44' + phone_number
+        elif phone_number[0] == '+':
+            phone_number = phone_number
+        else:
+            phone_number = '+44' + phone_number
 
         customer = Customers.objects.create(
             first_name=first_name,
@@ -140,6 +151,8 @@ def add_customer(request):
             postcode=postcode,
             address=address,
             agent = agent,
+            campaign = Campaign.objects.get(id=campaign),
+            client = Campaign.objects.get(id=campaign).client
         )
 
         messages.success(request, "Customer added successfully!")
@@ -225,6 +238,7 @@ def import_customers_view(request):
     history = {}
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
+        campaign = request.POST["campaign"]
         df = pd.read_excel(excel_file)
         excel_columns = df.columns.tolist()
         column_mappings = []
@@ -244,16 +258,28 @@ def import_customers_view(request):
             for i, column in enumerate(excel_columns):
                 if column_mappings[i]== 'history':
                     history[excel_columns[i]] = row[i]
+                elif column_mappings[i]== 'last_name':
+                    customer_data[column_mappings[i]] = row[i].upper()
+                elif column_mappings[i]== 'phone_number':
+                    phone_number = row[i]
+                    if phone_number[0] == '0':
+                        phone_number = phone_number[1:]
+                        phone_number = '+44' + phone_number
+                    elif phone_number[0] == '+':
+                        phone_number = phone_number
+                    else:
+                        phone_number = '+44' + phone_number
+                    customer_data[column_mappings[i]] = phone_number
                 else :
                     customer_data[column_mappings[i]] = row[i]
             
-            customer = Customers.objects.create(**customer_data, agent=User.objects.get(email=request.user))
+            customer = Customers.objects.create(**customer_data, campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client ,agent=User.objects.get(email=request.user,))
             for i in history:
                 customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True)
         messages.success(request, "Customers imported successfully.")
         return redirect("app:customer")
-
-    return render(request, "home/import_customers.html", {"excel_columns": excel_columns})
+    campaigns = Campaign.objects.all()
+    return render(request, "home/import_customers.html", {"excel_columns": excel_columns, "campaigns": campaigns })
 
 
 def bulk_remove_customers(request):
