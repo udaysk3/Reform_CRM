@@ -2,17 +2,13 @@
 
 <style>
   .cnav-item {
-    margin-right: 8%;
+    margin-right: 0%;
     font-size: 15px;
   }
   h6 {
     font-size: 14px;
   }
 </style>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 
 {% endblock %} {% block content %}
 
@@ -21,11 +17,11 @@
     <span class="col"> <b>Stage</b> - </span> Stage1
   </div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Campaign</b> - </span> value
+    <span class="col"> <b>Campaign</b> - </span> {{ customer.campaign.name }}
   </div>
   <div class="cnav-item fs-6 col"><span class="col"> <b>Route</b> - </span> value</div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Client</b> - </span> value
+    <span class="col"> <b>Client</b> - </span> {{ customer.client.first_name }} {{ customer.client.last_name }}
   </div>
 </div>
 <div class="container-fluid pt-2">
@@ -80,7 +76,7 @@
               <div class="card-body">
                 <h6>Local Authority</h6>
                 <h6>Managed by</h6>
-                <h6 style="color: white">Postcode</h6>
+                <h6>{{customer.district}}</h6>
               </div>
             </div>
           </div>
@@ -120,6 +116,57 @@
                   >
                     {% csrf_token %}
                     <button class="btn btn-primary" type="submit">NA</button>
+                  </form>
+                    <div
+                      class="modal fade"
+                      id="staticBackdrop"
+                      data-bs-backdrop="static"
+                      data-bs-keyboard="false"
+                      tabindex="-1"
+                      aria-labelledby="staticBackdropLabel"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-body">
+                            <div class="form-floating p-2">
+                              <label for="date_field">Date</label>
+                              <input
+                                type="date"
+                                id="date_field"
+                                name="date_field"
+                                class="form-control date"
+                                data-target="#datetimepicker1"
+                                required
+                              />
+                            </div>
+                            <div class="form-floating p-2">
+                              <label for="time_field">Time</label>
+                              <input
+                                type="time"
+                                id="time_field"
+                                name="time_field"
+                                class="form-control time"
+                                data-target="#datetimepicker1"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button
+                              type="button"
+                              class="btn btn-secondary"
+                              data-bs-dismiss="modal"
+                            >
+                              Close
+                            </button>
+                            <button class="btn btn-primary" type="submit">
+                              Submit
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </form>
                 </div>
                 <form
@@ -175,9 +222,16 @@
                               required
                             />
                           </div>
-                          <div class="mb-0">
-                            <label for="kt_datepicker_3" class="form-label">Time</label>
-                            <input class="form-control time form-control-solid" placeholder="Pick date & time" name='time_field' id="kt_datepicker_3"/>
+                          <div class="form-floating p-2">
+                            <label for="time_field">Time</label>
+                            <input
+                              type="time"
+                              id="time_field"
+                              name="time_field"
+                              class="form-control time"
+                              data-target="#datetimepicker1"
+                              required
+                            />
                           </div>
                         </div>
                         <div class="modal-footer">
@@ -206,20 +260,18 @@
                       {% for key,value in history.items %}
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
-                        {% for v in value %}
-                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
-                         {% endfor %}
-                      </ul>
-                      {% endfor %}
-                      {% for key,value in imported.items %}
-                      <li><b>{{ key }}</b></li>
-                      <ul class="ps-3">
+                        {% if value.0.4 %}  
                         <li>{{ value.0.0 }} - {{ value.0.2 }} {{ value.0.3 }} - </li>
                         <ul class="ps-3">
                           {% for v in value %}
                           <li>{{ v.1 }}</li>
                           {% endfor %}
                         </ul>
+                        {% else %}
+                        {% for v in value %}
+                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
+
+                         {% endfor %}{% endif %}
                       </ul>
                       {% endfor %}
                     </ul>
@@ -276,16 +328,8 @@
   </a>
 </div>
 
-
 {% endblock %} {% block js %}
-<script type="module" >
-
-  
-
-
-  
-
-
+<script>
   document.addEventListener("DOMContentLoaded", function () {
     const editButtons = document.querySelectorAll(".edit-customer-btn");
     editButtons.forEach((button) => {
@@ -312,19 +356,11 @@
   });
 
   var currentDate = new Date();
-  var londonDate = currentDate.toLocaleString('en-GB', { timeZone: 'Europe/London' });
-var formattedDate = londonDate.split(", ")[0].split("/").reverse().join("-");
-var formattedTime = londonDate.split(", ")[1].split(":");
-  
+  var formattedDate = currentDate.toISOString().split("T")[0];
+  var formattedTime = currentDate.toTimeString().split(" ")[0].split(":");
   const dates = document.querySelectorAll(".date");
   const time = document.querySelectorAll(".time");
-  flatpickr("#kt_datepicker_3", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    defaultDate: `${formattedTime[0]}:${formattedTime[1]}`
 
-  });
   dates.forEach((date) => {
     date.value = formattedDate;
   });

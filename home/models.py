@@ -3,6 +3,7 @@ from datetime import datetime
 from user.models import User
 import pytz
 
+london_tz = pytz.timezone('Europe/London')
 
 class Customers(models.Model):
     first_name = models.CharField(max_length=255)
@@ -11,10 +12,11 @@ class Customers(models.Model):
     email = models.EmailField(max_length=255)
     postcode = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
-    created_at = models.DateTimeField(default=datetime.now())
+    created_at = models.DateTimeField(default=datetime.now(london_tz))
     campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.CASCADE, null=True)
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.CASCADE, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    district = models.CharField(max_length=255, blank=True, null=True)
 
     def add_action(
         self,
@@ -32,7 +34,6 @@ class Customers(models.Model):
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     date_time = models.DateTimeField(blank=True, null=True)
-    london_tz = pytz.timezone('Europe/London')
     added_date_time = models.DateTimeField(default=datetime.now(london_tz))
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(max_length=999)

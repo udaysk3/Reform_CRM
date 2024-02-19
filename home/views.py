@@ -7,9 +7,11 @@ from datetime import datetime, timedelta
 from datetime import date
 from django.http import HttpResponseRedirect
 import pandas as pd
+import requests
 from django.db.models import Max,Min
 import pytz
 from user.models import User
+from pytz import timezone
 
 utc = pytz.UTC
 
@@ -48,23 +50,25 @@ def customer_detail(request, customer_id):
     history = {}
     actions = customer.get_created_at_action_history()
     imported = {}
+    london_tz = timezone('Europe/London')
 
     for i in actions:
         if i.imported:
-            if i.added_date_time.replace(tzinfo=utc).date() not in imported:
-                imported[i.added_date_time.replace(tzinfo=utc).date()] = []
+            if i.added_date_time.replace(tzinfo=london_tz).date() not in imported:
+                imported[i.added_date_time.replace(tzinfo=london_tz).date()] = []
         else:
-            if i.added_date_time.replace(tzinfo=utc).date() not in history:
-                history[i.added_date_time.replace(tzinfo=utc).date()] = []
+            if i.added_date_time.replace(tzinfo=london_tz).date() not in history:
+                history[i.added_date_time.replace(tzinfo=london_tz).date()] = []
     for i in actions:
         if i.imported:
-            imported[i.added_date_time.replace(tzinfo=utc).date()].append(
-            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+            imported[i.added_date_time.replace(tzinfo=london_tz).date()].append(
+            [i.added_date_time.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
         else:
-            history[i.added_date_time.replace(tzinfo=utc).date()].append(
-            [i.added_date_time.replace(tzinfo=utc).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+            history[i.added_date_time.replace(tzinfo=london_tz).date()].append(
+            [i.added_date_time.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
+        print(i.imported)
 
 
     return render(
@@ -73,7 +77,6 @@ def customer_detail(request, customer_id):
         {
             "customer": customer,
             "history": history,
-            "imported": imported,
             "prev": prev,
             "next": next,
         },
@@ -92,8 +95,8 @@ def Customer(request):
     ).order_by("earliest_action_date")
     # for customer in customers:
     #     print(customer.get_action_history())
-    
     campaigns = Campaign.objects.all()
+
 
     return render(request, "home/customer.html", {"customers": customers, "campaigns": campaigns})
 
@@ -127,7 +130,7 @@ def HR(request):
 def add_customer(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name").upper()
+        last_name = request.POST.get("last_name")
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
         postcode = request.POST.get("postcode")
@@ -138,10 +141,31 @@ def add_customer(request):
         if phone_number[0] == '0':
             phone_number = phone_number[1:]
             phone_number = '+44' + phone_number
-        elif phone_number[0] == '+':
+        elif phone_number[0] == '+' and (phone_number[1] != '4' or phone_number[2] != '4'):
+            phone_number = phone_number[3:]
+            phone_number = '+44' + phone_number            
+        elif phone_number[0] == '+' and phone_number[1] == '4' and phone_number[1] == '4':
             phone_number = phone_number
         else:
             phone_number = '+44' + phone_number
+            url = "https://api.postcodes.io/postcodes/" + postcode.strip()
+
+        try:
+            response = requests.get(url, headers={'muteHttpExceptions': 'true'})
+
+            if response.status_code == 200:
+                json_data = response.json()
+                status = json_data.get('status')
+                if status == 200:
+                    district = json_data['result']['admin_district']
+                else:
+                    district = "Invalid postcode or not found"
+            else:
+                district = "Error fetching data"
+        except requests.exceptions.RequestException as e:
+            district = f"Request Error: {e}"
+
+        print(district)
 
         customer = Customers.objects.create(
             first_name=first_name,
@@ -151,6 +175,7 @@ def add_customer(request):
             postcode=postcode,
             address=address,
             agent = agent,
+            district=district,
             campaign = Campaign.objects.get(id=campaign),
             client = Campaign.objects.get(id=campaign).client
         )
@@ -220,7 +245,7 @@ def na_action_submit(request, customer_id):
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "Call Back"
+        text = "NA"
         customer.add_action(
             text,
             User.objects.get(email=request.user),
@@ -238,7 +263,7 @@ def import_customers_view(request):
     history = {}
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
-        campaign = request.POST["campaign"]
+        campaign = request.POST.get("campaign")
         df = pd.read_excel(excel_file)
         excel_columns = df.columns.tolist()
         column_mappings = []
@@ -273,13 +298,15 @@ def import_customers_view(request):
                 else :
                     customer_data[column_mappings[i]] = row[i]
             
-            customer = Customers.objects.create(**customer_data, campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client ,agent=User.objects.get(email=request.user,))
+            customer = Customers.objects.create(**customer_data,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user))
             for i in history:
                 customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True)
         messages.success(request, "Customers imported successfully.")
         return redirect("app:customer")
+    
     campaigns = Campaign.objects.all()
-    return render(request, "home/import_customers.html", {"excel_columns": excel_columns, "campaigns": campaigns })
+
+    return render(request, "home/import_customers.html", {"excel_columns": excel_columns ,"campaigns": campaigns})
 
 
 def bulk_remove_customers(request):
