@@ -3,16 +3,16 @@ from datetime import datetime
 from user.models import User
 import pytz
 
-london_tz = pytz.timezone('Europe/London')
 
 class Customers(models.Model):
+    london_tz = pytz.timezone('Europe/London')
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
     email = models.EmailField(max_length=255)
     postcode = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
-    created_at = models.DateTimeField(default=datetime.now(london_tz))
+    created_at = models.DateTimeField(blank= True, null=True)
     campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.CASCADE, null=True)
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.CASCADE, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
@@ -21,20 +21,21 @@ class Customers(models.Model):
     def add_action(
         self,
         text,
-        agent, date_time=None, imported=False
+        agent, date_time=None, imported=False, created_at=None
     ):
-        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported)
+        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at)
 
     def get_created_at_action_history(self):
-        return (Action.objects.filter(customer=self).order_by("-added_date_time"))
+        return (Action.objects.filter(customer=self).order_by("-created_at"))
 
     def get_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-date_time"))
 
 class Action(models.Model):
+    london_tz = pytz.timezone('Europe/London')
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     date_time = models.DateTimeField(blank=True, null=True)
-    added_date_time = models.DateTimeField(default=datetime.now(london_tz))
+    created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(max_length=999)
     imported = models.BooleanField(default=False)

@@ -12,8 +12,9 @@ from django.db.models import Max,Min
 import pytz
 from user.models import User
 from pytz import timezone
+london_tz = pytz.timezone('Europe/London')
 
-utc = pytz.UTC
+
 
 
 def home(request):
@@ -54,21 +55,20 @@ def customer_detail(request, customer_id):
 
     for i in actions:
         if i.imported:
-            if i.added_date_time.replace(tzinfo=london_tz).date() not in imported:
-                imported[i.added_date_time.replace(tzinfo=london_tz).date()] = []
+            if i.created_at.replace(tzinfo=london_tz).date() not in imported:
+                imported[i.created_at.replace(tzinfo=london_tz).date()] = []
         else:
-            if i.added_date_time.replace(tzinfo=london_tz).date() not in history:
-                history[i.added_date_time.replace(tzinfo=london_tz).date()] = []
+            if i.created_at.replace(tzinfo=london_tz).date() not in history:
+                history[i.created_at.replace(tzinfo=london_tz).date()] = []
     for i in actions:
         if i.imported:
-            imported[i.added_date_time.replace(tzinfo=london_tz).date()].append(
-            [i.added_date_time.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+            imported[i.created_at.replace(tzinfo=london_tz).date()].append(
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
         else:
-            history[i.added_date_time.replace(tzinfo=london_tz).date()].append(
-            [i.added_date_time.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+            history[i.created_at.replace(tzinfo=london_tz).date()].append(
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
-        print(i.imported)
 
 
     return render(
@@ -165,7 +165,6 @@ def add_customer(request):
         except requests.exceptions.RequestException as e:
             district = f"Request Error"
 
-        print(district)
 
         customer = Customers.objects.create(
             first_name=first_name,
@@ -177,7 +176,8 @@ def add_customer(request):
             agent = agent,
             district=district,
             campaign = Campaign.objects.get(id=campaign),
-            client = Campaign.objects.get(id=campaign).client
+            client = Campaign.objects.get(id=campaign).client,
+            created_at = datetime.now(pytz.timezone('Europe/London'))
         )
 
         messages.success(request, "Customer added successfully!")
@@ -227,6 +227,8 @@ def action_submit(request, customer_id):
             text,
             User.objects.get(email=request.user),
             date_time,
+            False,
+            datetime.now(pytz.timezone('Europe/London'))
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -234,7 +236,6 @@ def action_submit(request, customer_id):
 
 def na_action_submit(request, customer_id):
     if request.method == "POST":
-        london_tz = pytz.timezone('Europe/London')
         print(datetime.now(pytz.timezone('Europe/London')))
 
         customer = Customers.objects.get(id=customer_id)
@@ -250,6 +251,7 @@ def na_action_submit(request, customer_id):
             text,
             User.objects.get(email=request.user),
             date_time,
+            created_at=datetime.now(pytz.timezone('Europe/London'))
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -271,7 +273,6 @@ def import_customers_view(request):
             # Retrieve user's selection for each column
             attribute = request.POST.get(f"column{i}", "")
             column_mappings.append(attribute)
-        print(column_mappings)
 
         if 'email' and 'first_name' not in column_mappings:
             messages.error(request, 'First Name and Email fields should be mapped')
@@ -300,7 +301,7 @@ def import_customers_view(request):
             
             customer = Customers.objects.create(**customer_data,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user))
             for i in history:
-                customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True)
+                customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True, created_at=datetime.now(pytz.timezone('Europe/London')))
         messages.success(request, "Customers imported successfully.")
         return redirect("app:customer")
     
@@ -364,7 +365,6 @@ def add_campaign(request):
 def edit_client(request, client_id):
     client = Client.objects.get(pk=client_id)
     if request.method == 'POST':
-        print(request.POST)
         client.first_name = request.POST.get('first_name')
         client.last_name = request.POST.get('last_name').upper()
         client.save()
