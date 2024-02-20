@@ -163,7 +163,7 @@ def add_customer(request):
             else:
                 district = "Error fetching data"
         except requests.exceptions.RequestException as e:
-            district = f"Request Error: {e}"
+            district = f"Request Error"
 
         print(district)
 
