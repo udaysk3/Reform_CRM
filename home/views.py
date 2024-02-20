@@ -130,7 +130,7 @@ def HR(request):
 def add_customer(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
+        last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
         postcode = request.POST.get("postcode")
@@ -191,7 +191,7 @@ def edit_customer(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     if request.method == "POST":
         customer.first_name = request.POST.get("first_name")
-        customer.last_name = request.POST.get("last_name")
+        customer.last_name = request.POST.get("last_name").upper()
         customer.phone_number = request.POST.get("phone_number")
         customer.email = request.POST.get("email")
         customer.postcode = request.POST.get("postcode")
@@ -336,7 +336,7 @@ def add_client(request):
         #     messages.error(request, 'Client with this email already exists!')
             # return redirect('app:client') 
         first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
+        last_name = request.POST.get('last_name').upper()
         client = Client.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -366,7 +366,7 @@ def edit_client(request, client_id):
     if request.method == 'POST':
         print(request.POST)
         client.first_name = request.POST.get('first_name')
-        client.last_name = request.POST.get('last_name')
+        client.last_name = request.POST.get('last_name').upper()
         client.save()
         messages.success(request, 'Client updated successfully!')
         return redirect('app:admin')  
