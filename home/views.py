@@ -148,7 +148,7 @@ def add_customer(request):
             phone_number = phone_number
         else:
             phone_number = '+44' + phone_number
-            url = "https://api.postcodes.io/postcodes/" + postcode.strip()
+        url = "https://api.postcodes.io/postcodes/" + postcode.strip()
 
         try:
             response = requests.get(url, headers={'muteHttpExceptions': 'true'})
