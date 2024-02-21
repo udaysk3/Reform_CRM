@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "jquery-clock-timepicker": "^2.6.5",
+    "jquery-datepicker": "^1.12.3"
+  }
+}

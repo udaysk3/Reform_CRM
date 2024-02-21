@@ -7,13 +7,131 @@
   h6 {
     font-size: 14px;
   }
+  ::after,
+::before {
+    box-sizing: border-box;
+}
+
+
+.wrapper {
+	max-width: 18rem;
+	padding: 0 0.5rem;
+}
+label {
+	font-size: 0.75rem;
+	font-weight: 400;
+	display: block;
+	color: #B0BEC5;
+	border: 1px solid #ECEFF1;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.5rem;
+}
+input {
+	font-family: 'Roboto', sans-serif;
+	display:block;
+	border: none;
+	border-radius: 0.25rem;
+	border: 1px solid transparent;
+	line-height: 1.5rem;
+	padding: 0;
+	font-size: 1rem;
+	color: #607D8B;
+	width: 100%;
+	margin-top: 0.5rem;
+}
+input:focus {outline: none;}
+#ui-datepicker-div {
+	display: none;
+	background-color: #fff;
+	box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+	margin-top: 0.25rem;
+	border-radius: 0.5rem;
+	padding: 0.5rem;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+.ui-datepicker-calendar thead th {
+	padding:0;
+	text-align: center;
+	font-size: 0.75rem;
+	font-weight: 400;
+	color: #78909C;
+}
+.ui-datepicker-calendar tbody td {
+	width: 2.5rem;
+	text-align: center;
+	padding: 0;
+}
+.ui-datepicker-calendar tbody td a {
+	display: block;
+	border-radius: 0.25rem;
+	line-height: 2rem;
+	transition: 0.3s all;
+	color: #546E7A;
+	font-size: 0.875rem;
+	text-decoration: none;
+}
+.ui-datepicker-calendar tbody td a:hover {	
+	background-color: #E0F2F1;
+}
+.ui-datepicker-calendar tbody td a.ui-state-active {
+	background-color: #009688;
+	color: white;
+}
+.ui-datepicker-header a.ui-corner-all {
+	cursor: pointer;
+	position: absolute;
+	top: 0;
+	width: 2rem;
+	height: 2rem;
+	margin: 0.5rem;
+	border-radius: 0.25rem;
+	transition: 0.3s all;
+}
+.ui-datepicker-header a.ui-corner-all:hover {
+	background-color: #ECEFF1;
+}
+.ui-datepicker-header a.ui-datepicker-prev {	
+	left: 0;	
+	background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgdmlld0JveD0iMCAwIDEzIDEzIj48cGF0aCBmaWxsPSIjNDI0NzcwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03LjI4OCA2LjI5NkwzLjIwMiAyLjIxYS43MS43MSAwIDAgMSAuMDA3LS45OTljLjI4LS4yOC43MjUtLjI4Ljk5OS0uMDA3TDguODAzIDUuOGEuNjk1LjY5NSAwIDAgMSAuMjAyLjQ5Ni42OTUuNjk1IDAgMCAxLS4yMDIuNDk3bC00LjU5NSA0LjU5NWEuNzA0LjcwNCAwIDAgMS0xLS4wMDcuNzEuNzEgMCAwIDEtLjAwNi0uOTk5bDQuMDg2LTQuMDg2eiIvPjwvc3ZnPg==");
+	background-repeat: no-repeat;
+	background-size: 0.5rem;
+	background-position: 50%;
+	transform: rotate(180deg);
+}
+.ui-datepicker-header a.ui-datepicker-next {
+	right: 0;
+	background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgdmlld0JveD0iMCAwIDEzIDEzIj48cGF0aCBmaWxsPSIjNDI0NzcwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03LjI4OCA2LjI5NkwzLjIwMiAyLjIxYS43MS43MSAwIDAgMSAuMDA3LS45OTljLjI4LS4yOC43MjUtLjI4Ljk5OS0uMDA3TDguODAzIDUuOGEuNjk1LjY5NSAwIDAgMSAuMjAyLjQ5Ni42OTUuNjk1IDAgMCAxLS4yMDIuNDk3bC00LjU5NSA0LjU5NWEuNzA0LjcwNCAwIDAgMS0xLS4wMDcuNzEuNzEgMCAwIDEtLjAwNi0uOTk5bDQuMDg2LTQuMDg2eiIvPjwvc3ZnPg==');
+	background-repeat: no-repeat;
+	background-size: 10px;
+	background-position: 50%;
+}
+.ui-datepicker-header a>span {
+	display: none;
+}
+.ui-datepicker-title {
+	text-align: center;
+	line-height: 2rem;
+	margin-bottom: 0.25rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+.ui-datepicker-week-col {
+	color: #78909C;
+	font-weight: 400;
+	font-size: 0.75rem;
+}
+
+#ui-datepicker-div{
+  top: 100px !important;
+}
+
 </style>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-
 {% endblock %} {% block content %}
+
 
 <div class="row container-fluid">
   <div class="cnav-item fs-6 col">
@@ -24,7 +142,7 @@
   </div>
   <div class="cnav-item fs-6 col"><span class="col"> <b>Route</b> - </span> value</div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Client</b> - </span> {{ customer.client.first_name }} {{ customer.client.last_name }}
+    <span class="col"> <b>Client</b> - </span> {{ customer.client.name }}
   </div>
 </div>
 <div class="container-fluid pt-2">
@@ -68,8 +186,8 @@
           <div class="col-sm-4">
             <div class="card m-0">
               <div class="card-body">
-                <h6>Address : {{customer.address}}</h6>
-                <h6>Postcode : {{customer.postcode}}</h6>
+                <h6><b>Address</b> : {{customer.address}}</h6>
+                <h6><b>Postcode</b> : {{customer.postcode}}</h6>
               </div>
             </div>
           </div>
@@ -77,9 +195,8 @@
           <div class="col-sm-4">
             <div class="card m-0">
               <div class="card-body">
-                <h6>Local Authority</h6>
-                <h6>Managed by</h6>
-                <h6>{{ customer.district }}</h6>
+                <h6><b>Local Authority</b>: {{ customer.district }}</h6>
+                <h6><b>Managed by</b>: </h6>
               </div>
             </div>
           </div>
@@ -108,7 +225,7 @@
             <div class="card m-0">
               <div class="card-body m-0">
                 <h6>
-                  Next Action: {% with latest_action=customer.get_action_history.first %}
+                  <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
                 </h6>
                 <div class="d-grid gap-2 d-md-block mt-3">
@@ -116,6 +233,7 @@
                     method="post"
                     class="col"
                     action="{% url 'app:na_action_submit' customer.id %}"
+                    
                   >
                     {% csrf_token %}
                     <button class="btn btn-primary" type="submit">NA</button>
@@ -124,6 +242,8 @@
                 <form
                   id="action_submit_form"
                   method="post"
+                  name="action_submit_form"
+                  onSubmit="DoSubmit();"
                   action="{% url 'app:action_submit' customer.id %}"
                 >
                   {% csrf_token %}
@@ -163,20 +283,20 @@
                       <div class="modal-content">
                         <div class="modal-body">
                           <div class="form-floating p-2">
-                            <label for="date_field">Date</label>
-                            <input
-                              type="date"
-                              id="date_field"
-                              name="date_field"
-                              class="form-control date"
-                              default=""
-                              data-target="#datetimepicker1"
-                              required
-                            />
+                            
+                            <div class="wrapper">
+                              <p>Date</p>
+                              <label for="date_field">
+                                <input type="text" class="date cadate" id="date_field" name="date_field" autocomplete="off">
+                              </label>	
+                            </div>
+                            
                           </div>
                           <div class="mb-0">
-                            <label for="kt_datepicker_3" class="form-label">Time</label>
-                            <input class="form-control time form-control-solid" placeholder="Pick date & time" name='time_field' id="kt_datepicker_3"/>
+                            <div class="wrapper">
+                            <p class=mb-1>Time</p>
+                            <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
+                          </div>
                           </div>
                         </div>
                         <div class="modal-footer">
@@ -275,12 +395,26 @@
   </a>
 </div>
 
-
 {% endblock %} {% block js %}
-<script type="module" >
 
+<script scr="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+<script src="{% static 'node_modules/jquery-clock-timepicker/jquery-clock-timepicker.min.js' %}"></script>
+<script >
+
+  function DoSubmit(){
+    document.action_submit_form.date_field.value = document.action_submit_form.date_field.value.split("-").reverse().join("-");
+    return confirm(date);
+  }
   
-
+  
+  $( function() {
+    $( "#date_field" ).datepicker({
+      dateFormat: "dd-mm-yy"
+      ,	duration: "fast"
+    });
+  } );
 
   
 
@@ -312,18 +446,32 @@
 
   var currentDate = new Date();
   var londonDate = currentDate.toLocaleString('en-GB', { timeZone: 'Europe/London' });
-var formattedDate = londonDate.split(", ")[0].split("/").reverse().join("-");
+var formattedDate = londonDate.split(", ")[0].split("/").join("-");
 var formattedTime = londonDate.split(", ")[1].split(":");
   
   const dates = document.querySelectorAll(".date");
   const time = document.querySelectorAll(".time");
-  flatpickr("#kt_datepicker_3", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    defaultDate: `${formattedTime[0]}:${formattedTime[1]}`
+  
 
+  $('.time').clockTimePicker({
+    duration: true,
+    durationNegative: false,
+    alwaysSelectHoursFirst: true,
+    colors: {
+      buttonTextColor: 'black',
+      clockFaceColor: '#F1F1F1',
+      clockInnerCircleTextColor: '#000',
+      clockInnerCircleUnselectableTextColor: '#000',
+      
+    },
+    precision: 5,
+    i18n: {
+      cancelButton: 'Abbrechen',
+      
+      
+    },
   });
+
   dates.forEach((date) => {
     date.value = formattedDate;
   });
@@ -332,4 +480,6 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     time.value = `${formattedTime[0]}:${formattedTime[1]}`;
   });
 </script>
+
+
 {% endblock %}

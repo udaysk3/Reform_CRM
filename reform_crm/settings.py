@@ -133,7 +133,7 @@ import os
 
 import os
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), os.path.join(BASE_DIR, 'node_modules')]
+STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ('node_modules', os.path.join(BASE_DIR, 'node_modules/'))]
 STATIC_ROOT =os.path.join(BASE_DIR, 'staticfiles')
 # print(STATIC_ROOT, STATIC_URL, STATICFILES_DIRS)
 # Default primary key field type

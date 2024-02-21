@@ -69,6 +69,7 @@ def customer_detail(request, customer_id):
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
             [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
         )
+        
 
 
     return render(
@@ -77,6 +78,7 @@ def customer_detail(request, customer_id):
         {
             "customer": customer,
             "history": history,
+            "imported": imported,
             "prev": prev,
             "next": next,
         },
@@ -140,11 +142,8 @@ def add_customer(request):
 
         if phone_number[0] == '0':
             phone_number = phone_number[1:]
-            phone_number = '+44' + phone_number
-        elif phone_number[0] == '+' and (phone_number[1] != '4' or phone_number[2] != '4'):
-            phone_number = phone_number[3:]
-            phone_number = '+44' + phone_number            
-        elif phone_number[0] == '+' and phone_number[1] == '4' and phone_number[1] == '4':
+            phone_number = '+44' + phone_number          
+        elif phone_number[0] == '+':
             phone_number = phone_number
         else:
             phone_number = '+44' + phone_number
@@ -219,6 +218,7 @@ def action_submit(request, customer_id):
     if request.method == "POST":
         customer = Customers.objects.get(id=customer_id)
         date_str = request.POST.get("date_field")
+
         time_str = request.POST.get("time_field")
         date_time_str = f"{date_str} {time_str}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
@@ -283,11 +283,11 @@ def import_customers_view(request):
             customer_data = {}
             for i, column in enumerate(excel_columns):
                 if column_mappings[i]== 'history':
-                    history[excel_columns[i]] = row[i]
+                    history[excel_columns[i]] = str(row[i])
                 elif column_mappings[i]== 'last_name':
-                    customer_data[column_mappings[i]] = row[i].upper()
+                    customer_data[column_mappings[i]] = str(row[i]).upper()
                 elif column_mappings[i]== 'phone_number':
-                    phone_number = row[i]
+                    phone_number = str(row[i])
                     if phone_number[0] == '0':
                         phone_number = phone_number[1:]
                         phone_number = '+44' + phone_number
@@ -297,9 +297,9 @@ def import_customers_view(request):
                         phone_number = '+44' + phone_number
                     customer_data[column_mappings[i]] = phone_number
                 else :
-                    customer_data[column_mappings[i]] = row[i]
+                    customer_data[column_mappings[i]] = str(row[i])
             
-            customer = Customers.objects.create(**customer_data,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user))
+            customer = Customers.objects.create(**customer_data,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user),created_at=datetime.now(pytz.timezone('Europe/London')))
             for i in history:
                 customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True, created_at=datetime.now(pytz.timezone('Europe/London')))
         messages.success(request, "Customers imported successfully.")

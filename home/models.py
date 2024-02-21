@@ -28,8 +28,6 @@ class Customers(models.Model):
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
 
-    def get_action_history(self):
-        return (Action.objects.filter(customer=self).order_by("-date_time"))
 
 class Action(models.Model):
     london_tz = pytz.timezone('Europe/London')
@@ -44,15 +42,14 @@ class Action(models.Model):
         return f"{self.customer.first_name} {self.customer.last_name} - {self.date_time}"
 
 class Client(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.name}"
 
 class Campaign(models.Model):
     name = models.CharField(max_length=255)
     client = models.ForeignKey(Client, related_name='campaigns', on_delete=models.CASCADE)
     def __str__(self):
-        return f"{self.client.first_name} {self.client.last_name} {self.name}"
+        return f"{self.client.name} {self.name}"
     
     
