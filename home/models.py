@@ -14,6 +14,7 @@ class Customers(models.Model):
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     district = models.CharField(max_length=255, blank=True, null=True)
+    inner_customers = models.ManyToManyField('self', blank=True, null=True,symmetrical=False)
 
     def add_action(
         self,

@@ -13,7 +13,12 @@ import pytz
 from user.models import User
 from pytz import timezone
 london_tz = pytz.timezone('Europe/London')
+from datetime import datetime
 
+def convert_time_format(time_string):
+  
+  time = datetime.strptime(time_string, '%I:%M %p')
+  return time.strftime('%H:%M')
 
 
 
@@ -304,10 +309,28 @@ def import_customers_view(request):
                     else:
                         phone_number = '+44' + phone_number
                     customer_data[column_mappings[i]] = phone_number
+                elif column_mappings[i] == 'postcode':
+                    postcode = str(row[i])
+                    url = "https://api.postcodes.io/postcodes/" + postcode.strip()
+                    try:
+                        response = requests.get(url, headers={'muteHttpExceptions': 'true'})
+
+                        if response.status_code == 200:
+                            json_data = response.json()
+                            status = json_data.get('status')
+                            if status == 200:
+                                district = json_data['result']['admin_district']
+                            else:
+                                district = "Invalid postcode or not found"
+                        else:
+                            district = "Error fetching data"
+                    except requests.exceptions.RequestException as e:
+                        district = f"Request Error"
+                    customer_data[column_mappings[i]] = postcode
                 else :
                     customer_data[column_mappings[i]] = str(row[i])
             
-            customer = Customers.objects.create(**customer_data,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user),created_at=datetime.now(pytz.timezone('Europe/London')))
+            customer = Customers.objects.create(**customer_data,district=district,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user),created_at=datetime.now(pytz.timezone('Europe/London')))
             for i in history:
                 customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True, created_at=datetime.now(pytz.timezone('Europe/London')))
         messages.success(request, "Customers imported successfully.")
