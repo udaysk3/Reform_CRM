@@ -140,6 +140,10 @@ def add_customer(request):
         campaign = request.POST.get("campaign")
         agent = User.objects.get(email=request.user)
 
+        if campaign == 'nan':
+            messages.error(request, "Select a Campaign")
+            return redirect("app:customer")
+
         if phone_number[0] == '0':
             phone_number = phone_number[1:]
             phone_number = '+44' + phone_number          
@@ -148,6 +152,7 @@ def add_customer(request):
         else:
             phone_number = '+44' + phone_number
         url = "https://api.postcodes.io/postcodes/" + postcode.strip()
+
 
         try:
             response = requests.get(url, headers={'muteHttpExceptions': 'true'})
@@ -266,6 +271,9 @@ def import_customers_view(request):
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         campaign = request.POST.get("campaign")
+        if campaign == 'nan':
+            messages.error(request, "Select a Campaign")
+            return redirect("app:import_customers")
         df = pd.read_excel(excel_file)
         excel_columns = df.columns.tolist()
         column_mappings = []
@@ -336,11 +344,15 @@ def add_client(request):
         # if Client.objects.filter(email=email).exists():
         #     messages.error(request, 'Client with this email already exists!')
             # return redirect('app:client') 
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name').upper()
+        name = request.POST.get('name')
+        telephone = request.POST.get('telephone')
+        main_contact = request.POST.get('main_contact')
+        email = request.POST.get('email')
         client = Client.objects.create(
-            first_name=first_name,
-            last_name=last_name,
+            name=name,
+            main_contact=main_contact,
+            email=email,
+            telephone=telephone,
         )
         messages.success(request, 'Client added successfully!')
         return redirect('app:admin')  
@@ -365,8 +377,10 @@ def add_campaign(request):
 def edit_client(request, client_id):
     client = Client.objects.get(pk=client_id)
     if request.method == 'POST':
-        client.first_name = request.POST.get('first_name')
-        client.last_name = request.POST.get('last_name').upper()
+        client.name = request.POST.get('name')
+        client.main_contact= request.POST.get('main_contact')
+        client.telephone= request.POST.get('telephone')
+        client.email= request.POST.get('email')
         client.save()
         messages.success(request, 'Client updated successfully!')
         return redirect('app:admin')  

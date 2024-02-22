@@ -232,29 +232,45 @@
                         <form id="addUserForm" method="post" action="{% url "app:add_client" %}">
                           {% csrf_token %}
                           <div class="mb-3">
-                            <label for="first_name" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
                           </div>
                           <div class="mb-3">
-                            <label for="last_name" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="main_contact" class="form-label">Main Contact</label>
+                            <input type="text" class="form-control" id="main_contact" name="main_contact" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="tel" class="form-label">Telephone</label>
+                            <input type="text" class="form-control" id="tel" name="telephone" required>
                           </div>
                           <button type="submit" class="btn btn-primary">Add Client</button>
                         </form>
                         <!-- End User Addition Form -->
                         {% elif request.GET.page == 'edit_client' %}
                         {% if client %}
-                          <button  class="mb-3 btn-outline-info btn">{{client.first_name}}</button>
+                          <button  class="mb-3 btn-outline-info btn">{{client.name}}</button>
                           <form id="editUserForm" method="post" action="{% url 'app:edit_client' user.id %}">
                             {% csrf_token %}
                             <div class="mb-3">
-                              <label for="editFirstName" class="form-label">First Name</label>
-                              <input type="text" value={{client.first_name}} class="form-control" id="editFirstName" name="first_name" required>
+                              <label for="editFirstName" class="form-label">Name</label>
+                              <input type="text" value={{client.name}} class="form-control" id="editFirstName" name="name" required>
                             </div>
                             <div class="mb-3">
-                              <label for="editFirstName" class="form-label">Last Name</label>
-                              <input type="text" value={{client.last_name}} class="form-control" id="editFirstName" name="last_name" required>
+                              <label for="email" class="form-label">Email</label>
+                              <input type="email" class="form-control" id="email" value="{{client.email}}" name="email" required>
                             </div>
+                            <div class="mb-3">
+                              <label for="main_contact" class="form-label">Main Contact</label>
+                              <input type="text" class="form-control" id="main_contact" value="{{client.main_contact}}" name="main_contact" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="tel" class="form-label">Telephone</label>
+                              <input type="text" class="form-control" id="tel" value="{{client.telephone}}" name="telephone" required>
+                            
                             <h5>Campaigns:</h5>
                               <ul>
                                 {% for campaign in client.campaigns.all %}
@@ -285,7 +301,7 @@
                       {% for client in clients %}
                         <tr>
                           <td>{{ client.id }}</td>
-                          <td>{{ client.first_name }} {{ client.last_name }}</td>
+                          <td>{{ client.name }}</td>
                           <td>
                             {% for campaign in client.campaigns.all %}
                              <b> {{ campaign.name }} </b>

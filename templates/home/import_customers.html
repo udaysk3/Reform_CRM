@@ -56,7 +56,7 @@
                     <div class="mb-3">
                       <label for="campaign" class="form-label">Campaign</label>
                       <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
-                        <option selected>Select the campaign</option>
+                        <option selected value="nan">Select the campaign</option>
                         {% for campaign in campaigns %}
                           <option value="{{campaign.id}}">{{campaign.name}}</option>
                         {% endfor %}

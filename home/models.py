@@ -1,11 +1,8 @@
 from django.db import models
-from datetime import datetime
 from user.models import User
-import pytz
 
 
 class Customers(models.Model):
-    london_tz = pytz.timezone('Europe/London')
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
@@ -13,8 +10,8 @@ class Customers(models.Model):
     postcode = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
-    campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.CASCADE, null=True)
-    client = models.ForeignKey('Client', related_name='customers', on_delete=models.CASCADE, null=True)
+    campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.SET_NULL, null=True)
+    client = models.ForeignKey('Client', related_name='customers', on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     district = models.CharField(max_length=255, blank=True, null=True)
 
@@ -30,7 +27,6 @@ class Customers(models.Model):
 
 
 class Action(models.Model):
-    london_tz = pytz.timezone('Europe/London')
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     date_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
@@ -42,7 +38,11 @@ class Action(models.Model):
         return f"{self.customer.first_name} {self.customer.last_name} - {self.date_time}"
 
 class Client(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,blank=True, null=True)
+    main_contact = models.CharField(max_length=225,blank=True, null=True)
+    telephone = models.CharField(max_length=225,blank=True, null=True)
+    email= models.EmailField(max_length=225,blank=True, null=True)
+
     def __str__(self):
         return f"{self.name}"
 
@@ -51,5 +51,4 @@ class Campaign(models.Model):
     client = models.ForeignKey(Client, related_name='campaigns', on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.client.name} {self.name}"
-    
     

@@ -138,11 +138,21 @@ table {
     <span class="col"> <b>Stage</b> - </span> Stage1
   </div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Campaign</b> - </span> {{ customer.campaign.name }}
+    <span class="col"> <b>Campaign</b> - </span>
+    {% if customer.campaign %}
+     {{ customer.campaign.name }}
+    {% else %}
+      Unassigned
+    {% endif %}
   </div>
   <div class="cnav-item fs-6 col"><span class="col"> <b>Route</b> - </span> value</div>
   <div class="cnav-item fs-6 col">
-    <span class="col"> <b>Client</b> - </span> {{ customer.client.name }}
+    <span class="col"> <b>Client</b> - </span>
+    {% if customer.client %}
+     {{ customer.client.name }}
+    {% else %}
+      Unassigned
+    {% endif %}
   </div>
 </div>
 <div class="container-fluid pt-2">
