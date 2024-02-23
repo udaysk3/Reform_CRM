@@ -33,4 +33,6 @@ urlpatterns = [
     path('edit_client/<int:client_id>',views.edit_client,name='edit_client'),
     path('remove_client/<int:client_id>',views.remove_client,name='remove_client'),
     path('remove_campaign/<int:campaign_id>',views.remove_campaign,name='remove_campaign'),
+    path('add_child_customer/<int:customer_id>', views.add_child_customer,name='add_child_customer'),
+    path('make_primary/<int:parent_customer_id>/<int:child_customer_id>', views.make_primary, name='make_primary')
 ]

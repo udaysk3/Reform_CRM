@@ -14,14 +14,15 @@ class Customers(models.Model):
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     district = models.CharField(max_length=255, blank=True, null=True)
-    inner_customers = models.ManyToManyField('self', blank=True, null=True,symmetrical=False)
+    parent_customer = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
+    primary_customer = models.BooleanField(default=False)
 
     def add_action(
         self,
         text,
-        agent, date_time=None, imported=False, created_at=None
+        agent, date_time=None, imported=False, created_at=None, talked_with=None
     ):
-        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at)
+        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
 
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
@@ -34,6 +35,7 @@ class Action(models.Model):
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(max_length=999)
     imported = models.BooleanField(default=False)
+    talked_with = models.CharField(max_length=225,blank= True, null=True)
 
     def __str__(self):
         return f"{self.customer.first_name} {self.customer.last_name} - {self.date_time}"
