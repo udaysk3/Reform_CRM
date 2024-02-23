@@ -132,15 +132,14 @@ table {
 
 {% endblock %} {% block content %}
 
-<div class="container-fluid pt-2">
+<div class="container-fluid row">
   <div class="row">
     <div class="card p-0">
       <div class="d-grid gap-2 d-md-block position-relative">
         <a
           class="btn btn-primary fs-6 position-absolute start-0"
           href="/customer-detail/{{prev.id}}"
-          >Prev</a
-        >
+          >Prev</a>
 
         <a
           class="btn btn-primary fs-6 position-absolute"
@@ -180,6 +179,54 @@ table {
 <div class="container-fluid pt-2">
   <div class="row">
     <div class="card p-0">
+      <form method="post" action="{% url 'app:add_child_customer' customer.id %}">
+        {% csrf_token %}
+<button type="button" class="btn btn-primary my-3 position-relative" style="left:15px;" data-bs-toggle="modal" data-bs-target="#add_child_customer">
+Add Customer
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="add_child_customer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h1 class="modal-title fs-5" id="staticBackdropLabel">Customer</h1>
+<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+<div class="mb-3">
+<label for="name" class="form-label">First Name</label>
+<input type="text" class="form-control" id="name" name="first_name" required>
+</div>
+<div class="mb-3">
+<label for="name" class="form-label">Last Name</label>
+<input type="text" class="form-control" id="name" name="last_name" required>
+</div>
+<div class="mb-3">
+<label for="phone_number" class="form-label">Phone Number</label>
+<input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ customer.phone_number }}" required>
+</div>
+<div class="mb-3">
+<label for="email" class="form-label">Email</label>
+<input type="email" class="form-control" id="email" name="email" value="{{ customer.email }}" required>
+</div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</div>
+</div>
+      </form>
+      <form class="col position-absolute " style="top:15px; right:35px;" method="post" action="/make_primary/{{ customer.id }}/{{ customer.id }}">
+        {% csrf_token %}
+        {% if customer.primary_customer %}
+        <button type="button" class="btn btn-outline-primary">Primary</button>
+        {% else %}
+      <button type="submit" class="btn btn-primary">Make Primary</button>
+    {% endif %} 
+      </form>
       <div class="card-body p-3 m-0">
         <div class="row">
           <div class="col-sm-4 mb-sm-0">
@@ -212,6 +259,23 @@ table {
             </div>
           </div>
         </div>
+        {% for c_customer in child_customers %}
+        <div class="card mt-2 mb-0" >
+          <div class="card-body row">
+            <h6 class="col-3"><b>Name</b>: {{ c_customer.first_name }} {{ c_customer.last_name }} </h6>
+            <h6 class="col-4"><b>Email</b>: {{ c_customer.email }} </h6>
+            <h6 class="col-3"><b>Phone Number</b>: {{ c_customer.phone_number }} </h6>
+            <form class="col-2 d-flex justify-content-end" method="post" action="/make_primary/{{ customer.id }}/{{ c_customer.id }}">
+              {% csrf_token %}
+              {% if c_customer.primary_customer %}
+              <button type="button" class="btn btn-outline-primary ">Primary</button>
+              {% else %}
+            <button type="submit" class="btn btn-primary ">Make Primary</button>
+          {% endif %}  
+          </form>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
     {% for message in messages %}
@@ -292,22 +356,34 @@ table {
                   >
                     <div class="modal-dialog">
                       <div class="modal-content">
-                        <div class="modal-body">
+                        <div class="modal-body row">
+                          <div class="col">
                           <div class="form-floating p-2">
-                            
                             <div class="wrapper">
                               <p>Date</p>
                               <label for="date_field">
                                 <input type="text" class="date cadate" id="date_field" name="date_field" autocomplete="off">
                               </label>	
                             </div>
-                            
                           </div>
+
                           <div class="mb-0">
                             <div class="wrapper">
                             <p class=mb-1>Time</p>
                             <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
                           </div>
+                        </div>
+
+                          </div>
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
+                            <select id=select class="form-select" aria-label="Default select example" name="talked_customer">
+                              <option selected value="nan">Open this select menu</option>
+                              <option value="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
+                              {% for i in child_customers %}
+                              <option value="{{ i.id }}"> {{ i.first_name }} {{ i.last_name }} </option>
+                              {% endfor %}
+                            </select>
                           </div>
                         </div>
                         <div class="modal-footer">
@@ -337,7 +413,10 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li>{{ v.0 }} - {{ v.2 }} {{ v.3 }} - {{ v.1 }}</li>
+                        <li><b>{{ v.0 }}</b> - <b>{{ v.2 }} {{ v.3 }}</b> spoke to 
+                          {% if v.5 %}                          
+                          <b> {{ v.5.first_name }} {{ v.5.last_name }} </b> - {{ v.1 }} </li>
+                          {% endif %}
                          {% endfor %}
                       </ul>
                       {% endfor %}
@@ -418,16 +497,6 @@ table {
     document.action_submit_form.date_field.value = document.action_submit_form.date_field.value.split("-").reverse().join("-");
     return confirm(date);
   }
-  
-  
-  $( function() {
-    $( "#date_field" ).datepicker({
-      dateFormat: "dd-mm-yy"
-      ,	duration: "fast"
-    });
-  } );
-
-  
 
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -463,6 +532,14 @@ var formattedTime = londonDate.split(", ")[1].split(":");
   const dates = document.querySelectorAll(".date");
   const time = document.querySelectorAll(".time");
   
+  $( function() {
+    $( "#date_field" ).datepicker({
+      dateFormat: "dd-mm-yy"
+      ,	duration: "fast",
+      minDate: formattedDate
+    });
+  } );
+
 
   $('.time').clockTimePicker({
     duration: true,
@@ -478,8 +555,6 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     precision: 5,
     i18n: {
       cancelButton: 'Cancle',
-      
-      
     },
   });
 

@@ -15,13 +15,6 @@ from pytz import timezone
 london_tz = pytz.timezone('Europe/London')
 from datetime import datetime
 
-def convert_time_format(time_string):
-  
-  time = datetime.strptime(time_string, '%I:%M %p')
-  return time.strftime('%H:%M')
-
-
-
 def home(request):
     return render(request, "home/index.html")
 
@@ -33,8 +26,10 @@ def dashboard(request):
 
 @login_required
 def customer_detail(request, customer_id):
-    all_customers = Customers.objects.all()
+    all_customers = Customers.objects.all().filter(parent_customer=None)
     customer = Customers.objects.get(pk=customer_id)
+    child_customers= Customers.objects.all().filter(parent_customer=customer)
+    
     prev = None
     next = None
     if len(all_customers) == 1:
@@ -66,13 +61,16 @@ def customer_detail(request, customer_id):
             if i.created_at.replace(tzinfo=london_tz).date() not in history:
                 history[i.created_at.replace(tzinfo=london_tz).date()] = []
     for i in actions:
+        talked_with= None
+        if i.talked_with:
+            talked_with = Customers.objects.get(pk=int(i.talked_with))
         if i.imported:
             imported[i.created_at.replace(tzinfo=london_tz).date()].append(
-            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, talked_with]
         )
         else:
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
-            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported]
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, talked_with]
         )
         
 
@@ -86,6 +84,7 @@ def customer_detail(request, customer_id):
             "imported": imported,
             "prev": prev,
             "next": next,
+            "child_customers": child_customers,
         },
     )
 
@@ -99,7 +98,7 @@ def Customer(request):
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     customers = Customers.objects.annotate(
         earliest_action_date=Max("action__date_time")
-    ).order_by("earliest_action_date")
+    ).filter(parent_customer=None).order_by("earliest_action_date")
     # for customer in customers:
     #     print(customer.get_action_history())
     campaigns = Campaign.objects.all()
@@ -186,8 +185,10 @@ def add_customer(request):
             district=district,
             campaign = Campaign.objects.get(id=campaign),
             client = Campaign.objects.get(id=campaign).client,
-            created_at = datetime.now(pytz.timezone('Europe/London'))
+            created_at = datetime.now(pytz.timezone('Europe/London')),
+            primary_customer= True
         )
+
 
         messages.success(request, "Customer added successfully!")
         return redirect("app:customer")
@@ -228,17 +229,23 @@ def action_submit(request, customer_id):
     if request.method == "POST":
         customer = Customers.objects.get(id=customer_id)
         date_str = request.POST.get("date_field")
-
+        talked_with = request.POST.get("talked_customer")
         time_str = request.POST.get("time_field")
         date_time_str = f"{date_str} {time_str}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = request.POST.get("text")
+
+        if talked_with == 'nan':
+            messages.error(request, 'Customer field should be mapped')
+            return redirect(f"/customer-detail/{customer_id}")
+
         customer.add_action(
             text,
             User.objects.get(email=request.user),
             date_time,
             False,
-            datetime.now(pytz.timezone('Europe/London'))
+            datetime.now(pytz.timezone('Europe/London')),
+            talked_with=talked_with,
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -246,8 +253,6 @@ def action_submit(request, customer_id):
 
 def na_action_submit(request, customer_id):
     if request.method == "POST":
-        print(datetime.now(pytz.timezone('Europe/London')))
-
         customer = Customers.objects.get(id=customer_id)
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
@@ -257,11 +262,21 @@ def na_action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "NA"
+        talked_with= None
+        if customer.primary_customer:
+            talked_with= customer_id
+        else:
+            c_customers =  Customers.objects.all().filter(parent_customer=customer)
+            for child_customer in c_customers:
+                if child_customer.primary_customer:
+                    talked_with= child_customer.id
+
         customer.add_action(
             text,
             User.objects.get(email=request.user),
             date_time,
-            created_at=datetime.now(pytz.timezone('Europe/London'))
+            created_at=datetime.now(pytz.timezone('Europe/London')),
+            talked_with=talked_with
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -293,6 +308,7 @@ def import_customers_view(request):
             
 
         for index, row in df.iterrows():
+            district = None
             customer_data = {}
             for i, column in enumerate(excel_columns):
                 if column_mappings[i]== 'history':
@@ -331,6 +347,9 @@ def import_customers_view(request):
                     customer_data[column_mappings[i]] = str(row[i])
             
             customer = Customers.objects.create(**customer_data,district=district,campaign = Campaign.objects.get(id=campaign), client = Campaign.objects.get(id=campaign).client, agent=User.objects.get(email=request.user),created_at=datetime.now(pytz.timezone('Europe/London')))
+            customer.primary_customer = True
+
+            customer.save()
             for i in history:
                 customer.add_action(f'{i} : {history[i]}', User.objects.get(email=request.user), imported=True, created_at=datetime.now(pytz.timezone('Europe/London')))
         messages.success(request, "Customers imported successfully.")
@@ -424,3 +443,53 @@ def remove_campaign(request, campaign_id):
     campaign.delete()
     messages.success(request, 'Campaign deleted successfully!')
     return redirect('app:admin')
+
+def add_child_customer(request, customer_id):
+    if request.method == 'POST':
+        parent_customer = Customers.objects.get(pk=customer_id)
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name').upper()
+        phone_number = request.POST.get('phone_number')
+        if parent_customer.primary_customer:
+            parent_customer.primary_customer = False
+            parent_customer.save()
+        else:
+            primaryc = Customers.objects.all().filter(parent_customer=parent_customer)
+            for i in primaryc:
+                if i.primary_customer:
+                    i.primary_customer = False
+                    i.save()
+        child_customer = Customers.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            phone_number=phone_number,
+            email=parent_customer.email,
+            postcode=parent_customer.postcode,
+            address=parent_customer.address,
+            agent = parent_customer.agent,
+            district=parent_customer.district,
+            campaign = Campaign.objects.get(id=parent_customer.campaign.id),
+            client = Campaign.objects.get(id=parent_customer.campaign.id).client,
+            created_at = datetime.now(pytz.timezone('Europe/London')),
+            parent_customer= parent_customer,
+            primary_customer = True,
+        )
+        messages.success(request, "Customer added successfully!")
+        return redirect(f"/customer-detail/{customer_id}")
+
+def make_primary(request, parent_customer_id, child_customer_id):
+    parent_customer = Customers.objects.get(pk=parent_customer_id)
+    child_customer = Customers.objects.get(pk=child_customer_id)
+    if parent_customer.primary_customer:
+       parent_customer.primary_customer = False
+       parent_customer.save()
+    else:
+       primaryc = Customers.objects.all().filter(parent_customer=parent_customer)
+       for i in primaryc:
+           if i.primary_customer:
+               i.primary_customer = False
+               i.save()
+    child_customer.primary_customer = True
+    child_customer.save()
+    messages.success(request, "Customer made primary successfully!")
+    return redirect(f"/customer-detail/{parent_customer_id}")
