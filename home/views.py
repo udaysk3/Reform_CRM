@@ -262,11 +262,21 @@ def na_action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "NA"
+        talked_with= None
+        if customer.primary_customer:
+            talked_with= customer_id
+        else:
+            c_customers =  Customers.objects.all().filter(parent_customer=customer)
+            for child_customer in c_customers:
+                if child_customer.primary_customer:
+                    talked_with= child_customer.id
+
         customer.add_action(
             text,
             User.objects.get(email=request.user),
             date_time,
-            created_at=datetime.now(pytz.timezone('Europe/London'))
+            created_at=datetime.now(pytz.timezone('Europe/London')),
+            talked_with=talked_with
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
