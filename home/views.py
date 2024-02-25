@@ -61,16 +61,13 @@ def customer_detail(request, customer_id):
             if i.created_at.replace(tzinfo=london_tz).date() not in history:
                 history[i.created_at.replace(tzinfo=london_tz).date()] = []
     for i in actions:
-        talked_with= None
-        if i.talked_with:
-            talked_with = Customers.objects.get(pk=int(i.talked_with))
         if i.imported:
             imported[i.created_at.replace(tzinfo=london_tz).date()].append(
-            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, talked_with]
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
         else:
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
-            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, talked_with]
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
         
 
@@ -91,10 +88,11 @@ def customer_detail(request, customer_id):
 
 @login_required
 def Customer(request):
-    if request.GET.get("page") == "edit_customer":
+    if request.GET.get("page") == "edit_customer" and request.GET.get("backto") is None:
         customer_id = request.GET.get("id")
         customer = Customers.objects.get(pk=customer_id)
         return render(request, "home/customer.html", {"customer": customer})
+    
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     customers = Customers.objects.annotate(
         earliest_action_date=Max("action__date_time")
@@ -105,6 +103,7 @@ def Customer(request):
 
 
     return render(request, "home/customer.html", {"customers": customers, "campaigns": campaigns})
+
 
 
 @login_required
@@ -262,21 +261,12 @@ def na_action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "NA"
-        talked_with= None
-        if customer.primary_customer:
-            talked_with= customer_id
-        else:
-            c_customers =  Customers.objects.all().filter(parent_customer=customer)
-            for child_customer in c_customers:
-                if child_customer.primary_customer:
-                    talked_with= child_customer.id
 
         customer.add_action(
             text,
             User.objects.get(email=request.user),
             date_time,
             created_at=datetime.now(pytz.timezone('Europe/London')),
-            talked_with=talked_with
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -302,8 +292,8 @@ def import_customers_view(request):
             attribute = request.POST.get(f"column{i}", "")
             column_mappings.append(attribute)
 
-        if 'email' and 'first_name' not in column_mappings:
-            messages.error(request, 'First Name and Email fields should be mapped')
+        if 'email' and 'first_name' and 'last_name' and 'phone_number'  not in column_mappings:
+            messages.error(request, 'First Name, Last Name, Phone Number and  Email fields should be mapped')
             return redirect("app:import_customers")
             
 

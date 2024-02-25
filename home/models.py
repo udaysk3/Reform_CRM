@@ -26,6 +26,9 @@ class Customers(models.Model):
 
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Action(models.Model):
@@ -35,7 +38,7 @@ class Action(models.Model):
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(max_length=999)
     imported = models.BooleanField(default=False)
-    talked_with = models.CharField(max_length=225,blank= True, null=True)
+    talked_with = models.CharField(max_length=225, blank= True, null=True)
 
     def __str__(self):
         return f"{self.customer.first_name} {self.customer.last_name} - {self.date_time}"
@@ -52,6 +55,7 @@ class Client(models.Model):
 class Campaign(models.Model):
     name = models.CharField(max_length=255)
     client = models.ForeignKey(Client, related_name='campaigns', on_delete=models.CASCADE)
+    
     def __str__(self):
         return f"{self.client.name} {self.name}"
     
