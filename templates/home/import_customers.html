@@ -1,119 +1,261 @@
-{% extends "base.html" %}
-{% block content %}
-{% for message in messages %}
+{% extends "base.html" %}{% block content %} {% for message in messages %}
 
-<div class="alert {{ message.tags }} alert-dismissible fade show mt-5" role="alert">
-      {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div
+  class="alert {{ message.tags }} alert-dismissible fade show mt-5"
+  role="alert"
+>
+  {{ message }}
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endfor %}
 
-<div class="container-fluid" style="max-width:1500px">
+<div class="container-fluid" style="max-width: 1500px">
   <div class="row">
     <div class="col-lg-12">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Import Customers</h5>
-          <form id="importForm" method="post" action="{% url 'app:import_customers' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label for="fileInput" class="form-label">Select Excel file:</label>
-              <input type="file" class="form-control" id="fileInput" name="excel_file" accept=".xls, .xlsx" required>
-            </div>
-            <div id="columnMappings" style="display: none;">
-              <!-- Column mappings will be rendered here -->
-              {% for column in excel_columns %}
+      <div class="card" style="min-height: 280px">
+        <div class="card-body row">
+          <div class="col-8">
+            <h5 class="card-title">Import Customers</h5>
+            <form
+              id="importForm"
+              method="post"
+              action="{% url 'app:import_customers' %}"
+              enctype="multipart/form-data"
+            >
+              {% csrf_token %}
               <div class="mb-3">
-                <label for="column{{ forloop.counter }}" class="form-label">Map to {{ column }} Column:</label>
-                <select class="form-select" id="column{{ forloop.counter }}" name="column{{ forloop.counter }}">
-                  <option value="history">History</option>
-                  <option value="first_name">First Name</option>
-                  <option value="last_name">Last Name</option>
-                  <option value="phone_number">Phone Number</option>
-                  <option value="email">Email</option>
-                  <option value="postcode">Postcode</option>
-                  <option value="address">Address</option>
-                </select>
+                <label for="fileInput" class="form-label"
+                  >Select Excel file:</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="fileInput"
+                  name="excel_file"
+                  accept=".xls, .xlsx"
+                  required
+                />
               </div>
-              {% endfor %}
-            </div>
+              <div id="columnMappings" style="display: none">
+                <!-- Column mappings will be rendered here -->
+                {% for column in excel_columns %}
+                <div class="mb-3">
+                  <label for="column{{ forloop.counter }}" class="form-label"
+                    >Map to {{ column }} Column:</label
+                  >
+                  <select
+                    class="form-select"
+                    id="column{{ forloop.counter }}"
+                    name="column{{ forloop.counter }}"
+                  >
+                    <option value="history">History</option>
+                    <option value="first_name">First Name</option>
+                    <option value="last_name">Last Name</option>
+                    <option value="phone_number">Phone Number</option>
+                    <option value="email">Email</option>
+                    <option value="postcode">Postcode</option>
+                    <option value="address">Address</option>
+                  </select>
+                </div>
+                {% endfor %}
+              </div>
 
+              <!-- Button trigger modal -->
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#staticBackdrop"
+              >
+                Import
+              </button>
 
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-              Import
-            </button>
-            
-            <!-- Modal -->
-            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label for="campaign" class="form-label">Campaign</label>
-                      <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
-                        <option selected value="nan">Select the campaign</option>
-                        {% for campaign in campaigns %}
-                          <option value="{{campaign.id}}">{{campaign.name}}</option>
-                        {% endfor %}
-                      </select>
-                  </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Import</button>
+              <!-- Modal -->
+              <div
+                class="modal fade"
+                id="staticBackdrop"
+                data-bs-backdrop="static"
+                data-bs-keyboard="false"
+                tabindex="-1"
+                aria-labelledby="staticBackdropLabel"
+                aria-hidden="true"
+              >
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                        Modal title
+                      </h1>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      ></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label for="campaign" class="form-label"
+                          >Campaign</label
+                        >
+                        <select
+                          class="form-select"
+                          id="campaign"
+                          name="campaign"
+                          aria-label="Default select example"
+                        >
+                          <option selected value="nan">
+                            Select the campaign
+                          </option>
+                          {% for campaign in campaigns %}
+                          <option value="{{campaign.id}}">
+                            {{campaign.name}}
+                          </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Close
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                        Import
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            </form>
+          </div>
+          <div class="col-3">
+            <div class="card position-fixed" style="width: 18rem">
+              <div class="card-header">Featured</div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <i
+                    class="bi bi-square me-2 first_name"
+                    style="font-weight: 100"
+                  ></i>
+                  First Name
+                </li>
+                <li class="list-group-item">
+                  <i class="bi bi-square me-2 last_name"></i>
+                  Last Name
+                </li>
+                <li class="list-group-item">
+                  <i class="bi bi-square me-2 phone_number"></i>
+                  Phone Number
+                </li>
+                <li class="list-group-item">
+                  <i class="bi bi-square me-2 email"></i>
+                  Email
+                </li>
+              </ul>
             </div>
-
-
-
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block js %}
+{% endblock %} {% block js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Function to handle file upload
-  document.getElementById('fileInput').addEventListener('change', function() {
-    const file = this.files[0];
-    const reader = new FileReader();
+  function check(e) {
+    const first_name = document.querySelector(".first_name");
+    const last_name = document.querySelector(".last_name");
+    const phone_number = document.querySelector(".phone_number");
+    const email = document.querySelector(".email");
+    const selects = document.querySelectorAll("select");
+    first_name.classList.remove("bi-check2-square");
+    first_name.classList.add("bi-square");
+    first_name.style.color = "black";
+    first_name.parentNode.style.textDecoration = "none";
+    
+    last_name.classList.remove("bi-check2-square");
+    last_name.classList.add("bi-square");
+    last_name.style.color = "black";
+    last_name.parentNode.style.textDecoration = "none";
+    
+    phone_number.classList.remove("bi-check2-square");
+    phone_number.classList.add("bi-square");
+    phone_number.style.color = "black";
+    phone_number.parentNode.style.textDecoration = "none";
+    
+    email.classList.remove("bi-check2-square");
+    email.classList.add("bi-square");
+    email.style.color = "black";
+    email.parentNode.style.textDecoration = "none";
+    selects.forEach((select) => {
 
-    reader.onload = function(e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
+      
+      
+    if (select.value == "first_name") {
+      first_name.classList.remove("bi-square");
+      first_name.classList.add("bi-check2-square");
+      first_name.style.color = "green";
+      first_name.parentNode.style.textDecoration = "line-through";
+    } else if (select.value == "last_name") {
+      last_name.classList.remove("bi-square");
+      last_name.classList.add("bi-check2-square");
+      last_name.style.color = "green";
+      last_name.parentNode.style.textDecoration = "line-through";
+    } else if (select.value == "phone_number") {
+      phone_number.classList.remove("bi-square");
+      phone_number.classList.add("bi-check2-square");
+      phone_number.style.color = "green";
+      phone_number.parentNode.style.textDecoration = "line-through";
+    } else if (select.value == "email") {
+      email.classList.remove("bi-square");
+      email.classList.add("bi-check2-square");
+      email.style.color = "green";
+      email.parentNode.style.textDecoration = "line-through";
+    }
+  });
+}
 
-      // Get the first sheet of the workbook
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
+  document.addEventListener("DOMContentLoaded", function () {
+    // Function to handle file upload
+    document
+      .getElementById("fileInput")
+      .addEventListener("change", function () {
+        const file = this.files[0];
+        const reader = new FileReader();
 
-      // Convert the sheet data to JSON format
-      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        reader.onload = function (e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
 
-      // Extract column names from the first row of the JSON data
-      const columnNames = jsonData[0];
+          // Get the first sheet of the workbook
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
 
-      // Render column mappings
-      const columnMappings = document.getElementById('columnMappings');
-      columnMappings.innerHTML = '';
-      for (let i = 0; i < columnNames.length; i++) {
-        const columnSelect = document.createElement('div');
-        columnSelect.classList.add('mb-3');
-        columnSelect.innerHTML = `
+          // Convert the sheet data to JSON format
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+          // Extract column names from the first row of the JSON data
+          const columnNames = jsonData[0];
+
+          // Render column mappings
+          const columnMappings = document.getElementById("columnMappings");
+          columnMappings.innerHTML = "";
+          for (let i = 0; i < columnNames.length; i++) {
+            const columnSelect = document.createElement("div");
+            columnSelect.classList.add("mb-3");
+            columnSelect.innerHTML = `
           <label for="column${i}" class="form-label">Map to ${columnNames[i]} Column:</label>
-          <select class="form-select" id="column${i}" name="column${i}">
+          <select class="form-select" onChange="check(column${i});" id="column${i}" name="column${i}">
             <option value="history">History</option>
             <option value="first_name">First Name</option>
             <option value="last_name">Last Name</option>
@@ -123,15 +265,15 @@ document.addEventListener('DOMContentLoaded', function() {
             <option value="address">Address</option>
           </select>
         `;
-        columnMappings.appendChild(columnSelect);
-      };
+            columnMappings.appendChild(columnSelect);
+          }
 
-      // Show column mappings
-      columnMappings.style.display = 'block';
-    };
+          // Show column mappings
+          columnMappings.style.display = "block";
+        };
 
-    reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(file);
+      });
   });
-});
 </script>
 {% endblock %}

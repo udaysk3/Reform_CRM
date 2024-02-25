@@ -8,6 +8,7 @@
   <link rel="shortcut icon" type="image/png" href={% static "images/logos/favicon.png" %} />
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href={% static "css/styles.min.css" %} />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   {% block css %}
   {% endblock %}
 </head>
@@ -179,8 +180,6 @@
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
               {% block search %}
               {% endblock %}
-
-              <a href="/dashboard" target="_blank" class="btn btn-primary">Button</a>
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
