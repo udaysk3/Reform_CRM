@@ -440,6 +440,7 @@ def add_child_customer(request, customer_id):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name').upper()
         phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email')
         if parent_customer.primary_customer:
             parent_customer.primary_customer = False
             parent_customer.save()
@@ -453,7 +454,7 @@ def add_child_customer(request, customer_id):
             first_name=first_name,
             last_name=last_name,
             phone_number=phone_number,
-            email=parent_customer.email,
+            email=email,
             postcode=parent_customer.postcode,
             address=parent_customer.address,
             agent = parent_customer.agent,

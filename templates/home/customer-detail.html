@@ -23,8 +23,12 @@
 	display: block;
 	color: #B0BEC5;
 	border: 1px solid #ECEFF1;
-	padding: 0.5rem 0.75rem;
 	border-radius: 0.5rem;
+  width:195px;
+  padding: 0px 0px 5px 5px;
+      margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2A3547 !important;
 }
 .input {
 	font-family: 'Roboto', sans-serif;
@@ -44,7 +48,6 @@
 	display: none;
 	background-color: #fff;
 	box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
-	margin-top: 0.25rem;
 	border-radius: 0.5rem;
 	padding: 0.5rem;
 }
@@ -406,9 +409,9 @@ table {
                       <div class="modal-content">
                         <div class="modal-body row">
                           <div class="col">
-                          <div class="form-floating p-2">
+                          <div class="form-floating">
                             <div class="wrapper">
-                              <p>Date</p>
+                              <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
                               <label class="label" for="date_field">
                                 <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
                               </label>	
@@ -417,7 +420,7 @@ table {
 
                           <div class="mb-0">
                             <div class="wrapper">
-                            <p class=mb-1>Time</p>
+                            <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
                             <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
                           </div>
                         </div>
