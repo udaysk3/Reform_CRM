@@ -164,7 +164,7 @@ table {
           </svg></a>
   </div>
   <div class="cnav-item fs-6 col-10">
-    <span class="col"> <b>Council</b> - </span> Stage1
+    <span class="col"> <b>Council</b> - </span> {{ council.name }}
   </div>
   <div class="cnav-item fs-6 col-1">
     <a
@@ -185,8 +185,16 @@ table {
         <div class="row">
           <div class="col-sm-4 mb-sm-0">
             <div class="card m-0">
-              <div class="card-body py-3 contacts-container">
-                <div class="contacts py-2">
+              <div class="card-body py-3 ">
+                <a data-council-id="{{ council.id }}" href="#" class="edit-council-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+                </a>
+                {% if user.admin %}
+                <a data-council-id="{{ council.id }}"href="#" class="delete-council-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                </a>
+                {% endif %}
+                <div class=" py-2">
                 <h6>
                   <b> Name : </b> {{council.name}}
                 </h6>
@@ -300,9 +308,9 @@ table {
                   >
                     <div class="modal-dialog">
                       <div class="modal-content">
-                        <div class="modal-body row">
-                          <div class="col">
-                          <div class="form-floating">
+                        <div class="modal-body ">
+                          <div class="row">
+                          <div class="form-floating col">
                             <div class="wrapper">
                               <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
                               <label class="label" for="date_field">
@@ -311,31 +319,13 @@ table {
                             </div>
                           </div>
 
-                          <div class="mb-0">
+                          <div class="mb-0 col">
                             <div class="wrapper">
-                            <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
+                            <p for="time_field" class="mb-3" style="font-weight: 600; color: #2A3547">Time</p>
                             <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
                           </div>
                         </div>
 
-                          </div>
-                           <div class="col">
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Client</label>
-                            <select id=select class="form-select" aria-label="Default select example" name="talked_customer">
-                              <option value="nan">Open this select menu</option>
-                              <option
-                              {% if customer.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ council.name }}"> {{ council.name }} </option>
-                              {% for i in child_customers %}
-                              <option
-                              {% if i.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
-                              {% endfor %}
-                            </select>
                           </div>
                         </div>
                         <div class="modal-footer">
@@ -365,12 +355,7 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li><b>{{ v.0 }}</b> - <b>{{ v.2 }} {{ v.3 }}</b>
-                          {% if v.5 %}
-                           spoke to <b> {{ v.5}}</b> - {{ v.1 }} </li>
-                          {% else %}
-                          - {{ v.1 }}
-                          {% endif %}
+                        <li><b>{{ v.0 }}</b> - {{ v.1 }} </li>
                          {% endfor %}
                       </ul>
                       {% endfor %}
@@ -385,7 +370,7 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
-                  <button class="btn btn-primary position-relative" style="right:-70%" type="button" >
+                  <button class="btn btn-primary position-relative mb-3" style="right:-70%" type="button" >
                     <i class="bi bi-plus-lg"></i> Funding Route
                   </button>
                 </div>
@@ -399,24 +384,6 @@ table {
       </div>
     </div>
   </div>
-</div>
-
-<div class="d-flex container-fluid pt-2 position-relative">
-  <a
-    href="#"
-    class="edit-council-btn btn btn-success position-absolute"
-    data-council-id="{{ council.id }}"
-  >
-    Edit
-  </a>
-  <a
-    href="#"
-    class="delete-council-btn btn btn-danger position-absolute"
-    style="right: 20px"
-    data-council-id="{{ council.id }}"
-  >
-    Delete
-  </a>
 </div>
 
 
