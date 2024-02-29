@@ -2,13 +2,12 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers,Action, Client, Campaign
+from .models import Customers, Client, Campaign, Councils
 from datetime import datetime, timedelta
-from datetime import date
 from django.http import HttpResponseRedirect
 import pandas as pd
 import requests
-from django.db.models import Max,Min
+from django.db.models import Max
 import pytz
 from user.models import User
 from pytz import timezone
@@ -69,7 +68,7 @@ def customer_detail(request, customer_id):
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
             [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
-        
+
 
 
     return render(
@@ -82,6 +81,53 @@ def customer_detail(request, customer_id):
             "prev": prev,
             "next": next,
             "child_customers": child_customers,
+        },
+    )
+
+@login_required
+def council_detail(request, council_id):
+    all_councils = Councils.objects.all()
+    council = Councils.objects.get(pk=council_id)
+
+    prev = None
+    next = None
+    if len(all_councils) == 1:
+        prev = council
+        next = council
+    else:
+        for i in range(len(all_councils)):
+            if all_councils[i].id == council_id:
+                if i == 0:
+                    prev = all_councils[len(all_councils) - 1]
+                    next = all_councils[i + 1]
+                elif i == len(all_councils) - 1:
+                    prev = all_councils[i - 1]
+                    next = all_councils[0]
+                else:
+                    prev = all_councils[i - 1]
+                    next = all_councils[i + 1]
+
+    history = {}
+    actions = council.get_created_at_council_action_history()
+    london_tz = timezone('Europe/London')
+
+    for i in actions:
+        if i.created_at.replace(tzinfo=london_tz).date() not in history:
+            history[i.created_at.replace(tzinfo=london_tz).date()] = []
+
+    for i in actions:
+        history[i.created_at.replace(tzinfo=london_tz).date()].append(
+            [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
+        )
+
+    return render(
+        request,
+        "home/council-detail.html",
+        {
+            "council": council,
+            "history": history,
+            "prev": prev,
+            "next": next,
         },
     )
 
@@ -104,6 +150,24 @@ def Customer(request):
 
     return render(request, "home/customer.html", {"customers": customers, "campaigns": campaigns})
 
+
+@login_required
+def Council(request):
+    if request.GET.get("page") == "edit_council" and request.GET.get("backto") is None:
+        council_id = request.GET.get("id")
+        council = Councils.objects.get(pk=council_id)
+        return render(request, "home/council.html", {"council": council})
+
+    councils = Councils.objects.annotate(
+        earliest_action_date=Max("action__date_time")
+    ).order_by("earliest_action_date")
+
+
+    campaigns = Campaign.objects.all()
+
+    for i in councils:
+        print(i)
+    return render(request, "home/council.html", {"councils": councils, "campaigns": campaigns})
 
 
 @login_required
@@ -195,6 +259,24 @@ def add_customer(request):
     return render(request, "home/customer.html")
 
 
+def add_council(request):
+    
+    try:
+        response = requests.get("https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-united-kingdom-local-authority-district/records?select=lad_name&limit=-1")
+        if response.status_code == 200:
+            json_data = response.json()
+            for data in json_data['results']:
+                name = data['lad_name'][0]
+                council = Councils.objects.create(name=name)
+
+        else:
+            district = "Error fetching data"
+    except requests.exceptions.RequestException as e:
+        district = f"Request Error"
+    messages.success(request, "Councils added successfully!")
+    return redirect("app:council")
+
+
 @login_required
 def edit_customer(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
@@ -216,12 +298,41 @@ def edit_customer(request, customer_id):
 
 
 @login_required
+def edit_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    if request.method == "POST":
+        council.name = request.POST.get("name")
+        council.phone_number = request.POST.get("phone_number")
+        council.email = request.POST.get("email")
+        council.postcode = request.POST.get("postcode")
+        council.address = request.POST.get("address")
+
+
+        council.save()
+
+        messages.success(request, "Council updated successfully!")
+        return redirect("app:council")
+
+    context = {"council": council}
+    return render(request, "home/council.html", context)
+
+
+@login_required
 def remove_customer(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     customer.delete()
 
     messages.success(request, "Customer deleted successfully!")
     return redirect("app:customer")
+
+
+@login_required
+def remove_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    council.delete()
+
+    messages.success(request, "council deleted successfully!")
+    return redirect("app:council")
 
 
 def action_submit(request, customer_id):
@@ -249,6 +360,53 @@ def action_submit(request, customer_id):
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
+def council_action_submit(request, council_id):
+    if request.method == "POST":
+        council = Councils.objects.get(id=council_id)
+        date_str = request.POST.get("date_field")
+        talked_with = request.POST.get("talked_customer")
+        time_str = request.POST.get("time_field")
+        date_time_str = f"{date_str} {time_str}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = request.POST.get("text")
+
+        if talked_with == 'nan':
+            messages.error(request, 'Council field should be mapped')
+            return redirect(f"/council-detail/{council_id}")
+
+        council.add_council_action(
+            text,
+            User.objects.get(email=request.user),
+            date_time,
+            False,
+            datetime.now(pytz.timezone('Europe/London')),
+            talked_with=talked_with,
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/council-detail/" + str(council_id))
+
+
+def na_council_action_submit(request, council_id):
+    if request.method == "POST":
+        council = Councils.objects.get(id=council_id)
+        date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
+        time_str = datetime.now(london_tz).strftime("%H:%M")
+        time_obj = datetime.strptime(time_str, "%H:%M")
+        time_obj += timedelta(minutes=20)
+        time_str_updated = time_obj.strftime("%H:%M")
+        date_time_str = f"{date_str} {time_str_updated}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = "NA"
+        print('hi')
+
+        council.add_council_action(
+            text,
+            User.objects.get(email=request.user),
+            date_time,
+            created_at=datetime.now(pytz.timezone('Europe/London')),
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/council-detail/" + str(council_id))
 
 def na_action_submit(request, customer_id):
     if request.method == "POST":

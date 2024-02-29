@@ -20,9 +20,9 @@ class Customers(models.Model):
     def add_action(
         self,
         text,
-        agent, date_time=None, imported=False, created_at=None, talked_with=None
+        agent, date_time=None, imported=False, created_at=None, talked_with=None, council=None,
     ):
-        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
+        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, council=council)
 
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
@@ -30,9 +30,35 @@ class Customers(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+class Councils(models.Model):
+    name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
+    postcode = models.CharField(max_length=255, blank=True, null=True)
+    address = models.TextField(max_length=999, blank=True, null=True)
+    created_at = models.DateTimeField(blank= True, null=True)
+    campaign = models.ForeignKey('Campaign', related_name='council', on_delete=models.SET_NULL, blank=True, null=True)
+    client = models.ForeignKey('Client', related_name='council', on_delete=models.SET_NULL, blank=True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True)
+    district = models.CharField(max_length=255, blank=True, null=True)
+
+    def add_council_action(
+        self,
+        text,
+        agent, date_time=None, imported=False, created_at=None, talked_with=None,customer=None
+    ):
+        return Action.objects.create(council=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, customer=customer)
+
+    def get_created_at_council_action_history(self):
+        return (Action.objects.filter(council=self).order_by("-created_at"))
+
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Action(models.Model):
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customers, on_delete=models.CASCADE, null=True)
+    council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True)
     date_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
@@ -40,8 +66,7 @@ class Action(models.Model):
     imported = models.BooleanField(default=False)
     talked_with = models.CharField(max_length=225, blank= True, null=True)
 
-    def __str__(self):
-        return f"{self.customer.first_name} {self.customer.last_name} - {self.date_time}"
+
 
 class Client(models.Model):
     name = models.CharField(max_length=255,blank=True, null=True)
@@ -51,6 +76,7 @@ class Client(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
 
 class Campaign(models.Model):
     name = models.CharField(max_length=255)

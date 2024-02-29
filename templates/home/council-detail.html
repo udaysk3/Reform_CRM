@@ -158,35 +158,18 @@ table {
   <div class="cnav-item fs-6 col-1">
     <a
           class="btn btn-primary fs-6 "
-          href="/customer-detail/{{prev.id}}"
+          href="/council-detail/{{prev.id}}"
           ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
           </svg></a>
   </div>
-  <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Stage</b> - </span> Stage1
-  </div>
-  <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Campaign</b> - </span>
-    {% if customer.campaign %}
-     {{ customer.campaign.name }}
-    {% else %}
-      Unassigned
-    {% endif %}
-  </div>
-  <div class="cnav-item fs-6 col-2"><span class="col"> <b>Route</b> - </span> value</div>
-  <div class="cnav-item fs-6 col-4">
-    <span class="col"> <b>Client</b> - </span>
-    {% if customer.client %}
-     {{ customer.client.name }}
-    {% else %}
-      Unassigned
-    {% endif %}
+  <div class="cnav-item fs-6 col-10">
+    <span class="col"> <b>Council</b> - </span> Stage1
   </div>
   <div class="cnav-item fs-6 col-1">
     <a
           class="btn btn-primary fs-6"
-          href="/customer-detail/{{next.id}}"
+          href="/council-detail/{{next.id}}"
           ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
           </svg></a
@@ -204,105 +187,15 @@ table {
             <div class="card m-0">
               <div class="card-body py-3 contacts-container">
                 <div class="contacts py-2">
-                <div class=" d-flex  justify-content-between mb-2">
-                  <form  method="post" action="/make_primary/{{ customer.id }}/{{ customer.id }}">
-                    {% csrf_token %}
-                    {% if customer.primary_customer %}
-                    <input type="checkbox" checked class="make_primary"> Primary
-                    {% else %}
-                    <input type="checkbox" class="make_primary"> Primary
-                    {% endif %} 
-                  </form>
-
-                  <div>
-                    <a href="#" class="edit-user-btn" data-user-id="{{ customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-                    </a>
-                    <a href="#" class="delete-user-btn" data-user-id="{{ customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                    </a>
-                       
-<span data-bs-toggle="modal" data-bs-target="#add_child_customer">
-<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-</svg>
-</span>
-
-<!-- Modal -->
-<div class="modal fade" id="add_child_customer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Customer</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-  <form method="post" action="{% url 'app:add_child_customer' customer.id %}">
-          {% csrf_token %}
-<div class="mb-3">
-<label for="first_name" class="form-label">First Name</label>
-<input type="text" class="form-control" id="first_name" name="first_name" required>
-</div>
-<div class="mb-3">
-<label for="last_name" class="form-label">Last Name</label>
-<input type="text" class="form-control" id="last_name" name="last_name" required>
-</div>
-<div class="mb-3">
-<label for="phone_number" class="form-label">Phone Number</label>
-<input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ customer.phone_number }}" required>
-</div>
-<div class="mb-3">
-<label for="email" class="form-label">Email</label>
-<input type="email" class="form-control" id="email" name="email" value="{{ customer.email }}" required>
-</div>
-</div>
-<div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-<button type="submit" class="btn btn-primary">Submit</button>
-</div>
-</div>
-</div>
-</div>
-      </form>
-                  </div>
-                </div>
                 <h6>
-                  <b> Name : </b> {{customer.first_name}} {{customer.last_name}}
+                  <b> Name : </b> {{council.name}}
                 </h6>
-                <h6><b> Telephone : </b> {{customer.phone_number}}</h6>
-                <h6><b> Email: </b> {{customer.email}}</h6>
+                <h6><b> Telephone : </b> {{council.phone_number}}</h6>
+                <h6><b> Email: </b> {{council.email}}</h6>
               </div>
 
 
-                {% for c_customer in child_customers %}
-                <div class="contacts py-2">
-                  <div class=" d-flex  justify-content-between mb-2">
-                  <form  method="post" action="/make_primary/{{ customer.id }}/{{ c_customer.id }}">
-                    {% csrf_token %}
-                    {% if c_customer.primary_customer %}
-                    <input type="checkbox" checked class="make_primary"> Primary
-                    {% else %}
-                    <input type="checkbox" class="make_primary"> Primary
-                    {% endif %} 
-                  </form>
 
-                  <div>
-                    <a href="#" class="edit-user-btn" data-user-id="{{ c_customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-                    </a>
-                    <a href="#" class="delete-user-btn" data-user-id="{{ c_customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                    </a>
-                  </div>
-                </div>
-                <h6>
-                  <b> Name : </b> {{c_customer.first_name}} {{c_customer.last_name}}
-                </h6>
-                <h6><b> Telephone : </b> {{c_customer.phone_number}}</h6>
-                <h6><b> Email: </b> {{c_customer.email}}</h6>
-              </div>
-                {% endfor %}
 
 
               </div>
@@ -312,8 +205,8 @@ table {
           <div class="col-sm-4">
             <div class="card m-0">
               <div class="card-body">
-                <h6><b>Address</b> : {{customer.address}}</h6>
-                <h6><b>Postcode</b> : {{customer.postcode}}</h6>
+                <h6><b>Address</b> : {{council.address}}</h6>
+                <h6><b>Postcode</b> : {{council.postcode}}</h6>
               </div>
             </div>
           </div>
@@ -321,7 +214,7 @@ table {
           <div class="col-sm-4">
             <div class="card m-0">
               <div class="card-body">
-                <h6><b>Local Authority</b>: {{ customer.district }}</h6>
+                <h6><b>Local Authority</b>: {{ council.district }}</h6>
                 <h6><b>Managed by</b>: </h6>
               </div>
             </div>
@@ -351,14 +244,14 @@ table {
             <div class="card m-0">
               <div class="card-body m-0">
                 <h6>
-                  <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
+                  <b>Next Action</b>: {% with latest_action=council.get_created_at_council_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
                 </h6>
                 <div class="d-grid gap-2 d-md-block mt-3">
                   <form
                     method="post"
                     class="col"
-                    action="{% url 'app:na_action_submit' customer.id %}"
+                    action="{% url 'app:na_council_action_submit' council.id %}"
                     
                   >
                     {% csrf_token %}
@@ -370,7 +263,7 @@ table {
                   method="post"
                   name="action_submit_form"
                   onSubmit="DoSubmit();"
-                  action="{% url 'app:action_submit' customer.id %}"
+                  action="{% url 'app:council_action_submit' council.id %}"
                 >
                   {% csrf_token %}
                   <div class="form-floating">
@@ -426,15 +319,15 @@ table {
                         </div>
 
                           </div>
-                          <div class="col">
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
+                           <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Client</label>
                             <select id=select class="form-select" aria-label="Default select example" name="talked_customer">
                               <option value="nan">Open this select menu</option>
                               <option
                               {% if customer.primary_customer %}
                               selected
                               {% endif %}
-                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
+                               value="{{ council.name }}"> {{ council.name }} </option>
                               {% for i in child_customers %}
                               <option
                               {% if i.primary_customer %}
@@ -460,7 +353,7 @@ table {
                       </div>
                     </div>
                   </div>
-                </form>
+                </form> 
                 <h6>History</h6>
                 <div class="card p-0 m-0">
                   <div
@@ -481,27 +374,7 @@ table {
                          {% endfor %}
                       </ul>
                       {% endfor %}
-                      {% for key,value in imported.items %}
-                      <li><b>{{ key }}</b></li>
-                      <ul class="ps-3">
-                        <li><b>{{ value.0.0 }}</b> - <b>{{ value.0.2 }} {{ value.0.3 }}</b> - </li>
-                        <ul class="ps-3">
-                          {% for v in value %}
-                          <li>{{ v.1 }}</li>
-                          {% endfor %}
-                        </ul>
-                      </ul>
-                      {% endfor %}
                     </ul>
-                  </div>
-                </div>
-                <h6 class="mt-3">Key Events</h6>
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 150px; overflow-y: auto"
-                  >
-                    <b>{{ customer.created_at }}</b> Customer Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }}
                   </div>
                 </div>
               </div>
@@ -512,7 +385,7 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
-                  <button class="btn btn-primary position-relative" style="right:-70%" type="button">
+                  <button class="btn btn-primary position-relative" style="right:-70%" type="button" >
                     Action Required
                   </button>
                 </div>
@@ -528,6 +401,24 @@ table {
   </div>
 </div>
 
+<div class="d-flex container-fluid pt-2 position-relative">
+  <a
+    href="#"
+    class="edit-council-btn btn btn-success position-absolute"
+    data-council-id="{{ council.id }}"
+  >
+    Edit
+  </a>
+  <a
+    href="#"
+    class="delete-council-btn btn btn-danger position-absolute"
+    style="right: 20px"
+    data-council-id="{{ council.id }}"
+  >
+    Delete
+  </a>
+</div>
+
 
 {% endblock %} {% block js %}
 
@@ -537,40 +428,6 @@ table {
 <script src="{% static 'node_modules/jquery-clock-timepicker/jquery-clock-timepicker.min.js' %}"></script>
 <script >
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const ceditButtons = document.querySelectorAll('.edit-user-btn');
-    ceditButtons.forEach(cbutton => {
-      cbutton.addEventListener('click', function (event) {
-        event.preventDefault();
-        const userId = cbutton.getAttribute('data-user-id');
-        window.location.href = `/customer?page=edit_customer&id=${userId}`;
-      });
-    });
-  });
-
-  document.addEventListener('DOMContentLoaded', function () {
-    const cdeleteButtons = document.querySelectorAll('.delete-user-btn');
-    cdeleteButtons.forEach(cbutton => {
-      cbutton.addEventListener('click', function (event) {
-        event.preventDefault();
-        const userId = cbutton.getAttribute('data-user-id');
-        const confirmDelete = confirm('Are you sure you want to delete this user?');
-
-        if (confirmDelete) {
-          // Redirect to the delete URL if the user confirms
-          window.location.href = `/remove_customer/${userId}`;
-        }
-      });
-    });
-  });
-
-  const checkbox = document.querySelectorAll('.make_primary');
-
-  checkbox.forEach((button) => {
-    button.addEventListener('click',()=>{
-      button.parentNode.submit()
-    })
-  });
 
   function DoSubmit(){
     document.action_submit_form.date_field.value = document.action_submit_form.date_field.value.split("-").reverse().join("-");
@@ -579,25 +436,25 @@ table {
 
 
   document.addEventListener("DOMContentLoaded", function () {
-    const editButtons = document.querySelectorAll(".edit-customer-btn");
+    const editButtons = document.querySelectorAll(".edit-council-btn");
     editButtons.forEach((button) => {
       button.addEventListener("click", function (event) {
         event.preventDefault();
-        const customerId = button.getAttribute("data-customer-id");
-        window.location.href = `/customer?page=edit_customer&id=${customerId}`;
+        const councilId = button.getAttribute("data-council-id");
+        window.location.href = `/council?page=edit_council&id=${councilId}`;
       });
     });
 
-    const deleteButtons = document.querySelectorAll(".delete-customer-btn");
+    const deleteButtons = document.querySelectorAll(".delete-council-btn");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", function (event) {
         event.preventDefault();
-        const customerId = button.getAttribute("data-customer-id");
+        const councilId = button.getAttribute("data-council-id");
         const confirmDelete = confirm(
-          "Are you sure you want to delete this customer?"
+          "Are you sure you want to delete this council?"
         );
         if (confirmDelete) {
-          window.location.href = `/remove_customer/${customerId}`;
+          window.location.href = `/remove_council/${councilId}`;
         }
       });
     });
