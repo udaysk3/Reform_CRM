@@ -58,6 +58,10 @@
                             <label class="form-check-label" for="customer">Customer</label>
                           </div>
                           <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="council" name="council">
+                            <label class="form-check-label" for="council">Council</label>
+                          </div>
+                          <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="admin" name="admin">
                             <label class="form-check-label" for="admin">Admin</label>
                           </div>
@@ -95,6 +99,10 @@
                               <label class="form-check-label"  for="editCustomer">Customer</label>
                             </div>
                             <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.council %}checked{% endif %} class="form-check-input" id="editCouncil" name="council" >
+                              <label class="form-check-label"  for="editouncil">Council</label>
+                            </div>
+                            <div class="mb-3 form-check">
                               <input type="checkbox" {% if user.admin %}checked{% endif %} class="form-check-input" id="editAdmin" name="admin">
                               <label class="form-check-label"  for="editAdmin">Admin</label>
                             </div>
@@ -121,6 +129,7 @@
                       <th>Email</th>
                       <th>Dashboard</th>
                       <th>Customer</th>
+                      <th>Council</th>
                       <th>Admin</th>
                       <th>Finance</th>
                       <th>HR</th>
@@ -153,6 +162,17 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
                           </td>
                           {% endif %}
+                          
+                          {% if user.council %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+
                           {% if user.admin %}
                           <td>
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
