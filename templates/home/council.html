@@ -33,7 +33,9 @@
             <div class="mb-3 mb-sm-0">
              <a href="{% url "app:council" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Council Management</h5></a>
             </div>
-            
+            <div class="">
+              <a href="{% url 'app:import_customers' %}" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Global Funding Route</a>
+            </div>
           </div>
           <div>
             
@@ -88,9 +90,9 @@
     <th onclick="sortTable(0)">
       Council <span id="arrow0"></span>
     </th>
-    <th onclick="sortTable(1)">
+    {% comment %} <th onclick="sortTable(1)">
       Stage <span id="arrow1"></span>
-    </th>
+    </th>  {% endcomment %}
     <th >
       Next Action <span id="arrow3"></span>
     </th>
@@ -111,7 +113,7 @@
                         </td>
                       {% endif %} {% endcomment %}
                         <td class="text-underlined" style="width: 20%;"><a href="/council-detail/{{council.id}}">{{ council.name }}</a></td>
-                        <td style="width: 10%;">stage 1</td>
+                        {% comment %} <td style="width: 10%;">stage 1</td> {% endcomment %}
                         {% with all_actions=council.get_created_at_council_action_history %}
                           {% if all_actions|length >= 1 %}
                             {% with action=all_actions.0 %}
@@ -187,6 +189,7 @@ $(document).ready(function(){
     });
   });
 });
+
 
 function sortTable(colIndex) {
   var table,

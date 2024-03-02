@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Client, Campaign, Councils
+from .models import Customers, Client, Campaign, Councils, Route
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 import pandas as pd
@@ -69,6 +69,7 @@ def customer_detail(request, customer_id):
             [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
 
+    routes = Route.objects.all().filter(customer=customer)
 
 
     return render(
@@ -81,6 +82,7 @@ def customer_detail(request, customer_id):
             "prev": prev,
             "next": next,
             "child_customers": child_customers,
+            "routes": routes,
         },
     )
 
@@ -119,6 +121,8 @@ def council_detail(request, council_id):
         history[i.created_at.replace(tzinfo=london_tz).date()].append(
             [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
+    routes = Route.objects.all().filter(council=council)
+
 
     return render(
         request,
@@ -128,6 +132,7 @@ def council_detail(request, council_id):
             "history": history,
             "prev": prev,
             "next": next,
+            "routes": routes,
         },
     )
 
@@ -158,10 +163,11 @@ def Council(request):
         council = Councils.objects.get(pk=council_id)
         return render(request, "home/council.html", {"council": council})
 
-    councils = Councils.objects.annotate(
-        earliest_action_date=Max("action__date_time")
-    ).order_by("earliest_action_date")
+    # councils = Councils.objects.annotate(
+    #     earliest_action_date=Max("action__date_time")
+    # ).order_by("earliest_action_date")
 
+    councils = Councils.objects.all().order_by('name')
 
     campaigns = Campaign.objects.all()
 
@@ -642,3 +648,45 @@ def make_primary(request, parent_customer_id, child_customer_id):
     child_customer.save()
     messages.success(request, "Customer made primary successfully!")
     return redirect(f"/customer-detail/{parent_customer_id}")
+
+def add_funding_route(request,customer_id):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        telephone = request.POST.get('telephone')
+        main_contact = request.POST.get('main_contact')
+        email = request.POST.get('email')
+        another_contact = request.POST.get('another_contact')
+        customer = Customers.objects.get(pk=customer_id)
+        route = Route.objects.create(
+            name=name,
+            telephone=telephone,
+            main_contact=main_contact,
+            email=email,
+            another_contact=another_contact,
+            customer=customer,
+        )
+        messages.success(request, 'Funding Route added successfully!')
+        return redirect(f'/customer-detail/{customer_id}')  
+    return render(request, 'admin.html')
+
+
+def add_council_funding_route(request,council_id):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        telephone = request.POST.get('telephone')
+        main_contact = request.POST.get('main_contact')
+        email = request.POST.get('email')
+        another_contact = request.POST.get('another_contact')
+        council = Councils.objects.get(id=council_id)
+        route = Route.objects.create(
+            name=name,
+            telephone=telephone,
+            main_contact=main_contact,
+            email=email,
+            another_contact=another_contact,
+            council=council,
+        )
+        messages.success(request, 'Funding Route added successfully!')
+        return redirect(f'/council-detail/{council_id}')  
+    return render(request, 'admin.html')
+

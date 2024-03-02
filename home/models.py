@@ -62,10 +62,18 @@ class Action(models.Model):
     date_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    text = models.TextField(max_length=999)
+    text = models.TextField(max_length=999, blank= True, null=True)
     imported = models.BooleanField(default=False)
     talked_with = models.CharField(max_length=225, blank= True, null=True)
 
+class Route(models.Model):
+    name = models.CharField(max_length=999, blank= True, null=True)
+    main_contact = models.CharField(max_length=999, blank= True, null=True)
+    telephone = models.CharField(max_length=15)
+    email = models.EmailField(max_length=255)
+    another_contact = models.CharField(max_length=999, blank= True, null=True)
+    customer = models.ForeignKey(Customers, on_delete=models.CASCADE, null=True, blank= True)
+    council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank= True)
 
 
 class Client(models.Model):
