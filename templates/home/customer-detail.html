@@ -428,8 +428,7 @@ table {
                           </div>
                           <div class="col">
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
-                            <select id=select class="form-select" aria-label="Default select example" name="talked_customer">
-                              <option value="nan">Open this select menu</option>
+                            <select id="select" class="form-select"  name="talked_customer">
                               <option
                               {% if customer.primary_customer %}
                               selected
@@ -526,7 +525,7 @@ table {
                             <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Funding Route</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
-                          <form method='post' action="{% url 'app:add_funding_route' customer.id %}">
+                          <form method='post' action="{% url 'app:add_funding_route' %}">
                             {% csrf_token %}
                           <div class="modal-body">
                             <div class="mb-3">

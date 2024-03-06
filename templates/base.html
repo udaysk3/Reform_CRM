@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reform CRM</title>
+  <link rel="stylesheet" href="{% static "css/comboTreeStyle.css" %}" />
   <link rel="shortcut icon" type="image/png" href={% static "images/logos/favicon.png" %} />
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href={% static "css/styles.min.css" %} />
@@ -61,13 +62,13 @@
               </a>
             </li>
             {% endif %}
-            {% if request.user.council %}
+            {% if request.user.funding_route %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:council" %}" aria-expanded="false">
+              <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
                 <span>
                   <i class="ti ti-article"></i>
                 </span>
-                <span class="hide-menu">Council</span>
+                <span class="hide-menu">Funding Route</span>
               </a>
             </li>
             {% endif %}
@@ -245,9 +246,14 @@
   <script src="{% static "libs/apexcharts/dist/apexcharts.min.js" %}"></script>
   <script src="{% static "libs/simplebar/dist/simplebar.js" %}"></script>
   <script src="{% static "js/dashboard.js" %}"></script>
+ 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+
+  <script src="{% static 'js/comboTreePlugin.js' %} " type="text/javascript"></script>
   {% block js %}
   {% endblock js %}
 

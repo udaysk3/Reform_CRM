@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
         extra_fields = {
             "dashboard": True,
             "customer": True,
-            "council":True,
+            "funding_route":True,
             "admin": True,
             "finance": True,
             "hr": True,
@@ -51,7 +51,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
     dashboard = models.BooleanField(default=True)
     customer = models.BooleanField(default=True)
-    council = models.BooleanField(default=False)
+    funding_route = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     finance = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)

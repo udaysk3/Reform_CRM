@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Client, Campaign, Councils, Route
+from .models import Customers, Client, Campaign, FundingRoutes
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 import pandas as pd
@@ -69,7 +69,7 @@ def customer_detail(request, customer_id):
             [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
 
-    routes = Route.objects.all().filter(customer=customer)
+    # routes = Route.objects.all().filter(customer=customer)
 
 
     return render(
@@ -82,35 +82,35 @@ def customer_detail(request, customer_id):
             "prev": prev,
             "next": next,
             "child_customers": child_customers,
-            "routes": routes,
+            # "routes": routes,
         },
     )
 
 @login_required
-def council_detail(request, council_id):
-    all_councils = Councils.objects.all()
-    council = Councils.objects.get(pk=council_id)
+def funding_route_detail(request, funding_route_id):
+    all_funding_routes = FundingRoutes.objects.all()
+    funding_route = FundingRoutes.objects.get(pk=funding_route_id)
 
     prev = None
     next = None
-    if len(all_councils) == 1:
-        prev = council
-        next = council
+    if len(all_funding_routes) == 1:
+        prev = funding_route
+        next = funding_route
     else:
-        for i in range(len(all_councils)):
-            if all_councils[i].id == council_id:
+        for i in range(len(all_funding_routes)):
+            if all_funding_routes[i].id == funding_route_id:
                 if i == 0:
-                    prev = all_councils[len(all_councils) - 1]
-                    next = all_councils[i + 1]
-                elif i == len(all_councils) - 1:
-                    prev = all_councils[i - 1]
-                    next = all_councils[0]
+                    prev = all_funding_routes[len(all_funding_routes) - 1]
+                    next = all_funding_routes[i + 1]
+                elif i == len(all_funding_routes) - 1:
+                    prev = all_funding_routes[i - 1]
+                    next = all_funding_routes[0]
                 else:
-                    prev = all_councils[i - 1]
-                    next = all_councils[i + 1]
+                    prev = all_funding_routes[i - 1]
+                    next = all_funding_routes[i + 1]
 
     history = {}
-    actions = council.get_created_at_council_action_history()
+    actions = funding_route.get_created_at_funding_route_action_history()
     london_tz = timezone('Europe/London')
 
     for i in actions:
@@ -121,18 +121,18 @@ def council_detail(request, council_id):
         history[i.created_at.replace(tzinfo=london_tz).date()].append(
             [i.created_at.replace(tzinfo=london_tz).time(), i.text, i.agent.first_name, i.agent.last_name, i.imported, i.talked_with]
         )
-    routes = Route.objects.all().filter(council=council)
+    # routes = Route.objects.all().filter(funding_route=funding_route)
 
 
     return render(
         request,
-        "home/council-detail.html",
+        "home/funding_route-detail.html",
         {
-            "council": council,
+            "funding_route": funding_route,
             "history": history,
             "prev": prev,
             "next": next,
-            "routes": routes,
+            # "routes": routes,
         },
     )
 
@@ -157,23 +157,23 @@ def Customer(request):
 
 
 @login_required
-def Council(request):
-    if request.GET.get("page") == "edit_council" and request.GET.get("backto") is None:
-        council_id = request.GET.get("id")
-        council = Councils.objects.get(pk=council_id)
-        return render(request, "home/council.html", {"council": council})
+def funding_route(request):
+    if request.GET.get("page") == "edit_funding_route" and request.GET.get("backto") is None:
+        funding_route_id = request.GET.get("id")
+        funding_route = FundingRoutes.objects.get(pk=funding_route_id)
+        return render(request, "home/funding_route.html", {"funding_route": funding_route})
 
-    # councils = Councils.objects.annotate(
+    # funding_routes = FundingRoutes.objects.annotate(
     #     earliest_action_date=Max("action__date_time")
     # ).order_by("earliest_action_date")
 
-    councils = Councils.objects.all().order_by('name')
+    funding_routes = FundingRoutes.objects.all().order_by('name')
 
     campaigns = Campaign.objects.all()
 
-    for i in councils:
+    for i in funding_routes:
         print(i)
-    return render(request, "home/council.html", {"councils": councils, "campaigns": campaigns})
+    return render(request, "home/funding_route.html", {"funding_routes": funding_routes, "campaigns": campaigns})
 
 
 @login_required
@@ -265,22 +265,20 @@ def add_customer(request):
     return render(request, "home/customer.html")
 
 
-def add_council(request):
-    
-    try:
-        response = requests.get("https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-united-kingdom-local-authority-district/records?select=lad_name&limit=-1")
-        if response.status_code == 200:
-            json_data = response.json()
-            for data in json_data['results']:
-                name = data['lad_name'][0]
-                council = Councils.objects.create(name=name)
-
-        else:
-            district = "Error fetching data"
-    except requests.exceptions.RequestException as e:
-        district = f"Request Error"
-    messages.success(request, "Councils added successfully!")
-    return redirect("app:council")
+# def add_funding_route(request):
+#     try:
+#         response = requests.get("https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-united-kingdom-local-authority-district/records?select=lad_name&limit=-1")
+#         if response.status_code == 200:
+#             json_data = response.json()
+#             for data in json_data['results']:
+#                 name = data['lad_name'][0]
+#                 funding_route = FundingRoutes.objects.create(name=name)
+#         else:
+#             district = "Error fetching data"
+#     except requests.exceptions.RequestException as e:
+#         district = f"Request Error"
+#     messages.success(request, "funding_routes added successfully!")
+#     return redirect("app:funding_route")
 
 
 @login_required
@@ -304,23 +302,23 @@ def edit_customer(request, customer_id):
 
 
 @login_required
-def edit_council(request, council_id):
-    council = Councils.objects.get(pk=council_id)
+def edit_funding_route(request, funding_route_id):
+    funding_route = FundingRoutes.objects.get(pk=funding_route_id)
     if request.method == "POST":
-        council.name = request.POST.get("name")
-        council.phone_number = request.POST.get("phone_number")
-        council.email = request.POST.get("email")
-        council.postcode = request.POST.get("postcode")
-        council.address = request.POST.get("address")
+        funding_route.name = request.POST.get("name")
+        funding_route.phone_number = request.POST.get("phone_number")
+        funding_route.email = request.POST.get("email")
+        funding_route.postcode = request.POST.get("postcode")
+        funding_route.address = request.POST.get("address")
 
 
-        council.save()
+        funding_route.save()
 
-        messages.success(request, "Council updated successfully!")
-        return redirect("app:council")
+        messages.success(request, "funding_route updated successfully!")
+        return redirect("app:funding_route")
 
-    context = {"council": council}
-    return render(request, "home/council.html", context)
+    context = {"funding_route": funding_route}
+    return render(request, "home/funding_route.html", context)
 
 
 @login_required
@@ -333,12 +331,12 @@ def remove_customer(request, customer_id):
 
 
 @login_required
-def remove_council(request, council_id):
-    council = Councils.objects.get(pk=council_id)
-    council.delete()
+def remove_funding_route(request, funding_route_id):
+    funding_route = FundingRoutes.objects.get(pk=funding_route_id)
+    funding_route.delete()
 
-    messages.success(request, "council deleted successfully!")
-    return redirect("app:council")
+    messages.success(request, "funding_route deleted successfully!")
+    return redirect("app:funding_route")
 
 
 def action_submit(request, customer_id):
@@ -366,9 +364,9 @@ def action_submit(request, customer_id):
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
-def council_action_submit(request, council_id):
+def funding_route_action_submit(request, funding_route_id):
     if request.method == "POST":
-        council = Councils.objects.get(id=council_id)
+        funding_route = FundingRoutes.objects.get(id=funding_route_id)
         date_str = request.POST.get("date_field")
         talked_with = request.POST.get("talked_customer")
         time_str = request.POST.get("time_field")
@@ -377,10 +375,10 @@ def council_action_submit(request, council_id):
         text = request.POST.get("text")
 
         if talked_with == 'nan':
-            messages.error(request, 'Council field should be mapped')
-            return redirect(f"/council-detail/{council_id}")
+            messages.error(request, 'funding_route field should be mapped')
+            return redirect(f"/funding_route-detail/{funding_route_id}")
 
-        council.add_council_action(
+        funding_route.add_funding_route_action(
             text,
             User.objects.get(email=request.user),
             date_time,
@@ -389,12 +387,12 @@ def council_action_submit(request, council_id):
             talked_with=talked_with,
         )
         messages.success(request, "Action added successfully!")
-        return HttpResponseRedirect("/council-detail/" + str(council_id))
+        return HttpResponseRedirect("/funding_route-detail/" + str(funding_route_id))
 
 
-def na_council_action_submit(request, council_id):
+def na_funding_route_action_submit(request, funding_route_id):
     if request.method == "POST":
-        council = Councils.objects.get(id=council_id)
+        funding_route = FundingRoutes.objects.get(id=funding_route_id)
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
@@ -405,14 +403,14 @@ def na_council_action_submit(request, council_id):
         text = "NA"
         print('hi')
 
-        council.add_council_action(
+        funding_route.add_funding_route_action(
             text,
             User.objects.get(email=request.user),
             date_time,
             created_at=datetime.now(pytz.timezone('Europe/London')),
         )
         messages.success(request, "Action added successfully!")
-        return HttpResponseRedirect("/council-detail/" + str(council_id))
+        return HttpResponseRedirect("/funding_route-detail/" + str(funding_route_id))
 
 def na_action_submit(request, customer_id):
     if request.method == "POST":
@@ -649,44 +647,52 @@ def make_primary(request, parent_customer_id, child_customer_id):
     messages.success(request, "Customer made primary successfully!")
     return redirect(f"/customer-detail/{parent_customer_id}")
 
-def add_funding_route(request,customer_id):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        telephone = request.POST.get('telephone')
-        main_contact = request.POST.get('main_contact')
-        email = request.POST.get('email')
-        another_contact = request.POST.get('another_contact')
-        customer = Customers.objects.get(pk=customer_id)
-        route = Route.objects.create(
-            name=name,
-            telephone=telephone,
-            main_contact=main_contact,
-            email=email,
-            another_contact=another_contact,
-            customer=customer,
-        )
-        messages.success(request, 'Funding Route added successfully!')
-        return redirect(f'/customer-detail/{customer_id}')  
-    return render(request, 'admin.html')
+# def add_funding_route(request,customer_id):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         telephone = request.POST.get('telephone')
+#         main_contact = request.POST.get('main_contact')
+#         email = request.POST.get('email')
+#         another_contact = request.POST.get('another_contact')
+#         customer = Customers.objects.get(pk=customer_id)
+#         route = Route.objects.create(
+#             name=name,
+#             telephone=telephone,
+#             main_contact=main_contact,
+#             email=email,
+#             another_contact=another_contact,
+#             customer=customer,
+#         )
+#         messages.success(request, 'Funding Route added successfully!')
+#         return redirect(f'/customer-detail/{customer_id}')  
+#     return render(request, 'admin.html')
 
 
-def add_council_funding_route(request,council_id):
+def add_funding_route(request):
     if request.method == 'POST':
         name = request.POST.get('name')
-        telephone = request.POST.get('telephone')
-        main_contact = request.POST.get('main_contact')
-        email = request.POST.get('email')
-        another_contact = request.POST.get('another_contact')
-        council = Councils.objects.get(id=council_id)
-        route = Route.objects.create(
-            name=name,
-            telephone=telephone,
-            main_contact=main_contact,
-            email=email,
-            another_contact=another_contact,
-            council=council,
-        )
+        # telephone = request.POST.get('telephone')
+        # main_contact = request.POST.get('main_contact')
+        # email = request.POST.get('email')
+        # another_contact = request.POST.get('another_contact')
+        # funding_route = FundingRoutes.objects.get(id=funding_route_id)
+        # route = Route.objects.create(
+        #     name=name,
+        #     telephone=telephone,
+        #     main_contact=main_contact,
+        #     email=email,
+        #     another_contact=another_contact,
+        #     funding_route=funding_route,
+        # )
+        created_at = datetime.now(pytz.timezone('Europe/London'))
+        agent = User.objects.get(email=request.user)
+        areas_of_operations = request.POST.get('areas_of_operations')
+        route = FundingRoutes.objects.create(name=name,
+                                             areas_of_operations= areas_of_operations,
+                                             created_at = created_at,
+                                             agent = agent
+                                             )
         messages.success(request, 'Funding Route added successfully!')
-        return redirect(f'/council-detail/{council_id}')  
+        return redirect(f'/funding_route')  
     return render(request, 'admin.html')
 
