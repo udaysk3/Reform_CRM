@@ -13,6 +13,7 @@ from user.models import User
 from pytz import timezone
 london_tz = pytz.timezone('Europe/London')
 from datetime import datetime
+from .tasks import getLA
 
 def home(request):
     return render(request, "home/index.html")
@@ -224,25 +225,22 @@ def add_customer(request):
             phone_number = phone_number
         else:
             phone_number = '+44' + phone_number
-        url = "https://api.postcodes.io/postcodes/" + postcode.strip()
+        # url = "https://api.postcodes.io/postcodes/" + postcode.strip()
+        # try:
+        #     response = requests.get(url, headers={'muteHttpExceptions': 'true'})
 
-
-        try:
-            response = requests.get(url, headers={'muteHttpExceptions': 'true'})
-
-            if response.status_code == 200:
-                json_data = response.json()
-                status = json_data.get('status')
-                if status == 200:
-                    district = json_data['result']['admin_district']
-                else:
-                    district = "Invalid postcode or not found"
-            else:
-                district = "Error fetching data"
-        except requests.exceptions.RequestException as e:
-            district = f"Request Error"
-
-
+        #     if response.status_code == 200:
+        #         json_data = response.json()
+        #         status = json_data.get('status')
+        #         if status == 200:
+        #             district = json_data['result']['admin_district']
+        #         else:
+        #             district = "Invalid postcode or not found"
+        #     else:
+        #         district = "Error fetching data"
+        # except requests.exceptions.RequestException as e:
+        #     district = f"Request Error"
+        district = getLA(postcode)
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
