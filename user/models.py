@@ -51,7 +51,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
     dashboard = models.BooleanField(default=True)
     customer = models.BooleanField(default=True)
-    funding_route = models.BooleanField(default=False)
+    council = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     finance = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)

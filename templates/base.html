@@ -62,13 +62,13 @@
               </a>
             </li>
             {% endif %}
-            {% if request.user.funding_route %}
+            {% if request.user.council %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
+              <a class="sidebar-link" href="{% url "app:council" %}" aria-expanded="false">
                 <span>
                   <i class="ti ti-article"></i>
                 </span>
-                <span class="hide-menu">Funding Route</span>
+                <span class="hide-menu">Council</span>
               </a>
             </li>
             {% endif %}

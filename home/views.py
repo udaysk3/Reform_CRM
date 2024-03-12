@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Client, Campaign, FundingRoutes
+from .models import Customers, Client, Campaign, Councils, Route
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 import pandas as pd
@@ -14,6 +14,7 @@ from pytz import timezone
 london_tz = pytz.timezone('Europe/London')
 from datetime import datetime
 from .tasks import getLA
+from .epc import getEPC
 
 def home(request):
     return render(request, "home/index.html")
@@ -88,30 +89,30 @@ def customer_detail(request, customer_id):
     )
 
 @login_required
-def funding_route_detail(request, funding_route_id):
-    all_funding_routes = FundingRoutes.objects.all()
-    funding_route = FundingRoutes.objects.get(pk=funding_route_id)
+def council_detail(request, council_id):
+    all_councils = Councils.objects.all()
+    council = Councils.objects.get(pk=council_id)
 
     prev = None
     next = None
-    if len(all_funding_routes) == 1:
-        prev = funding_route
-        next = funding_route
+    if len(all_councils) == 1:
+        prev = council
+        next = council
     else:
-        for i in range(len(all_funding_routes)):
-            if all_funding_routes[i].id == funding_route_id:
+        for i in range(len(all_councils)):
+            if all_councils[i].id == council_id:
                 if i == 0:
-                    prev = all_funding_routes[len(all_funding_routes) - 1]
-                    next = all_funding_routes[i + 1]
-                elif i == len(all_funding_routes) - 1:
-                    prev = all_funding_routes[i - 1]
-                    next = all_funding_routes[0]
+                    prev = all_councils[len(all_councils) - 1]
+                    next = all_councils[i + 1]
+                elif i == len(all_councils) - 1:
+                    prev = all_councils[i - 1]
+                    next = all_councils[0]
                 else:
-                    prev = all_funding_routes[i - 1]
-                    next = all_funding_routes[i + 1]
+                    prev = all_councils[i - 1]
+                    next = all_councils[i + 1]
 
     history = {}
-    actions = funding_route.get_created_at_funding_route_action_history()
+    actions = council.get_created_at_council_action_history()
     london_tz = timezone('Europe/London')
 
     for i in actions:
@@ -127,9 +128,9 @@ def funding_route_detail(request, funding_route_id):
 
     return render(
         request,
-        "home/funding_route-detail.html",
+        "home/council-detail.html",
         {
-            "funding_route": funding_route,
+            "council": council,
             "history": history,
             "prev": prev,
             "next": next,
@@ -158,23 +159,23 @@ def Customer(request):
 
 
 @login_required
-def funding_route(request):
-    if request.GET.get("page") == "edit_funding_route" and request.GET.get("backto") is None:
-        funding_route_id = request.GET.get("id")
-        funding_route = FundingRoutes.objects.get(pk=funding_route_id)
-        return render(request, "home/funding_route.html", {"funding_route": funding_route})
+def council(request):
+    if request.GET.get("page") == "edit_council" and request.GET.get("backto") is None:
+        council_id = request.GET.get("id")
+        council = Councils.objects.get(pk=council_id)
+        return render(request, "home/council.html", {"council": council})
 
-    # funding_routes = FundingRoutes.objects.annotate(
+    # councils = Councils.objects.annotate(
     #     earliest_action_date=Max("action__date_time")
     # ).order_by("earliest_action_date")
 
-    funding_routes = FundingRoutes.objects.all().order_by('name')
+    councils = Councils.objects.all().order_by('name')
 
     campaigns = Campaign.objects.all()
 
-    for i in funding_routes:
+    for i in councils:
         print(i)
-    return render(request, "home/funding_route.html", {"funding_routes": funding_routes, "campaigns": campaigns})
+    return render(request, "home/council.html", {"councils": councils, "campaigns": campaigns})
 
 
 @login_required
@@ -241,6 +242,7 @@ def add_customer(request):
         # except requests.exceptions.RequestException as e:
         #     district = f"Request Error"
         district = getLA(postcode)
+        energy_rating, energy_certificate_link = getEPC(postcode)
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -253,10 +255,10 @@ def add_customer(request):
             campaign = Campaign.objects.get(id=campaign),
             client = Campaign.objects.get(id=campaign).client,
             created_at = datetime.now(pytz.timezone('Europe/London')),
-            primary_customer= True
+            primary_customer= True,
+            energy_rating=energy_rating,
+            energy_certificate_link=energy_certificate_link
         )
-
-
         messages.success(request, "Customer added successfully!")
         return redirect("app:customer")
 
@@ -300,23 +302,23 @@ def edit_customer(request, customer_id):
 
 
 @login_required
-def edit_funding_route(request, funding_route_id):
-    funding_route = FundingRoutes.objects.get(pk=funding_route_id)
+def edit_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
     if request.method == "POST":
-        funding_route.name = request.POST.get("name")
-        funding_route.phone_number = request.POST.get("phone_number")
-        funding_route.email = request.POST.get("email")
-        funding_route.postcode = request.POST.get("postcode")
-        funding_route.address = request.POST.get("address")
+        council.name = request.POST.get("name")
+        # council.phone_number = request.POST.get("phone_number")
+        # council.email = request.POST.get("email")
+        # council.postcode = request.POST.get("postcode")
+        # council.address = request.POST.get("address")
 
 
-        funding_route.save()
+        council.save()
 
-        messages.success(request, "funding_route updated successfully!")
-        return redirect("app:funding_route")
+        messages.success(request, "Council updated successfully!")
+        return redirect("app:council")
 
-    context = {"funding_route": funding_route}
-    return render(request, "home/funding_route.html", context)
+    context = {"council": council}
+    return render(request, "home/council.html", context)
 
 
 @login_required
@@ -329,12 +331,12 @@ def remove_customer(request, customer_id):
 
 
 @login_required
-def remove_funding_route(request, funding_route_id):
-    funding_route = FundingRoutes.objects.get(pk=funding_route_id)
-    funding_route.delete()
+def remove_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    council.delete()
 
-    messages.success(request, "funding_route deleted successfully!")
-    return redirect("app:funding_route")
+    messages.success(request, "council deleted successfully!")
+    return redirect("app:council")
 
 
 def action_submit(request, customer_id):
@@ -362,9 +364,9 @@ def action_submit(request, customer_id):
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
-def funding_route_action_submit(request, funding_route_id):
+def council_action_submit(request, council_id):
     if request.method == "POST":
-        funding_route = FundingRoutes.objects.get(id=funding_route_id)
+        council = Councils.objects.get(id=council_id)
         date_str = request.POST.get("date_field")
         talked_with = request.POST.get("talked_customer")
         time_str = request.POST.get("time_field")
@@ -373,10 +375,10 @@ def funding_route_action_submit(request, funding_route_id):
         text = request.POST.get("text")
 
         if talked_with == 'nan':
-            messages.error(request, 'funding_route field should be mapped')
-            return redirect(f"/funding_route-detail/{funding_route_id}")
+            messages.error(request, 'council field should be mapped')
+            return redirect(f"/council-detail/{council_id}")
 
-        funding_route.add_funding_route_action(
+        council.add_council_action(
             text,
             User.objects.get(email=request.user),
             date_time,
@@ -385,12 +387,12 @@ def funding_route_action_submit(request, funding_route_id):
             talked_with=talked_with,
         )
         messages.success(request, "Action added successfully!")
-        return HttpResponseRedirect("/funding_route-detail/" + str(funding_route_id))
+        return HttpResponseRedirect("/council-detail/" + str(council_id))
 
 
-def na_funding_route_action_submit(request, funding_route_id):
+def na_council_action_submit(request, council_id):
     if request.method == "POST":
-        funding_route = FundingRoutes.objects.get(id=funding_route_id)
+        council = Councils.objects.get(id=council_id)
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
@@ -399,16 +401,15 @@ def na_funding_route_action_submit(request, funding_route_id):
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "NA"
-        print('hi')
 
-        funding_route.add_funding_route_action(
+        council.add_council_action(
             text,
             User.objects.get(email=request.user),
             date_time,
             created_at=datetime.now(pytz.timezone('Europe/London')),
         )
         messages.success(request, "Action added successfully!")
-        return HttpResponseRedirect("/funding_route-detail/" + str(funding_route_id))
+        return HttpResponseRedirect("/council-detail/" + str(council_id))
 
 def na_action_submit(request, customer_id):
     if request.method == "POST":
@@ -669,28 +670,19 @@ def make_primary(request, parent_customer_id, child_customer_id):
 def add_funding_route(request):
     if request.method == 'POST':
         name = request.POST.get('name')
-        # telephone = request.POST.get('telephone')
-        # main_contact = request.POST.get('main_contact')
-        # email = request.POST.get('email')
-        # another_contact = request.POST.get('another_contact')
-        # funding_route = FundingRoutes.objects.get(id=funding_route_id)
-        # route = Route.objects.create(
-        #     name=name,
-        #     telephone=telephone,
-        #     main_contact=main_contact,
-        #     email=email,
-        #     another_contact=another_contact,
-        #     funding_route=funding_route,
-        # )
-        created_at = datetime.now(pytz.timezone('Europe/London'))
-        agent = User.objects.get(email=request.user)
-        areas_of_operations = request.POST.get('areas_of_operations')
-        route = FundingRoutes.objects.create(name=name,
-                                             areas_of_operations= areas_of_operations,
-                                             created_at = created_at,
-                                             agent = agent
-                                             )
+        telephone = request.POST.get('telephone')
+        main_contact = request.POST.get('main_contact')
+        email = request.POST.get('email')
+        another_contact = request.POST.get('another_contact')
+        council = Councils.objects.get(name=request.POST.get('council'))
+        route = Route.objects.create(
+            name=name,
+            telephone=telephone,
+            main_contact=main_contact,
+            email=email,
+            another_contact=another_contact,
+        )
         messages.success(request, 'Funding Route added successfully!')
-        return redirect(f'/funding_route')  
+        return redirect(f'/councils')  
     return render(request, 'admin.html')
 

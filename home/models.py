@@ -16,6 +16,8 @@ class Customers(models.Model):
     district = models.CharField(max_length=255, blank=True, null=True)
     parent_customer = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
     primary_customer = models.BooleanField(default=False)
+    energy_rating = models.CharField(max_length=2, blank=True, null=True)
+    energy_certificate_link = models.URLField(max_length=999, blank=True, null=True)
 
     def add_action(
         self,
@@ -49,32 +51,35 @@ class Campaign(models.Model):
     def __str__(self):
         return f"{self.client.name} {self.name}"
     
-class FundingRoutes(models.Model):
-    name = models.CharField(max_length=999, blank=True, null=True)
-    areas_of_operations = models.CharField(max_length=999, blank=True, null=True)
+class Route(models.Model):
+    name = models.CharField(max_length=999, blank= True, null=True)
+    main_contact = models.CharField(max_length=999, blank= True, null=True)
+    telephone = models.CharField(max_length=15)
+    email = models.EmailField(max_length=255)
+    another_contact = models.CharField(max_length=999, blank= True, null=True)
+    council = models.ForeignKey('home.Councils', on_delete=models.CASCADE, null=True, blank= True)
+    
+class Councils(models.Model):
+    name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     
-    def set_areas_of_operations(self, areas):
-        self.areas_of_operations = ",".join(areas)
-
-    def get_areas_of_operations(self):
-        return self.areas_of_operations.split(",") if self.areas_of_operations else []
+    def get_created_at_council_action_history(self):
+        return (Action.objects.filter(council=self).order_by("-created_at"))
     
-    def get_created_at_funding_route_action_history(self):
-        return (Action.objects.filter(funding_route=self).order_by("-created_at"))
-    
-    def add_funding_route_action(
+    def add_council_action(
         self,
         text,
-        agent, date_time=None, imported=False, created_at=None, talked_with=None, funding_route=None,
+        agent, date_time=None, imported=False, created_at=None, talked_with=None, council=None,
     ):
-        return Action.objects.create(funding_route=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
+        return Action.objects.create(council=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
 
+    def __str__(self):
+        return f"{self.name}"
     
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE, null=True)
-    funding_route = models.ForeignKey(FundingRoutes, on_delete=models.CASCADE, null=True)
+    council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True)
     date_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)

@@ -322,7 +322,9 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 <h6><b>Local Authority</b>: {{ customer.district }}</h6>
-                <h6><b>Managed by</b>: </h6>
+                <h6><b>Energy Rating</b>: {{ customer.energy_rating }}</h6>
+                {% comment %} {{customer.energy_certificate_link}} {% endcomment %}
+                <h6><b>Certificate Link</b>: <a target="_blank" href="{{ customer.energy_certificate_link }}">click here </a></h6>
               </div>
             </div>
           </div>

@@ -32,7 +32,7 @@
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             
             <div class="mb-3 mb-sm-0">
-             <a href="{% url 'app:funding_route' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Funding Route Management</h5></a>
+             <a href="{% url 'app:council' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Council Management</h5></a>
             </div>
             {% comment %} <div class="">
               <a href="{% url 'app:import_customers' %}" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Add Funding Route</a>
@@ -82,7 +82,7 @@
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <button type="submit" class="btn btn-primary">Submit</button>
+                      <button type="button" class="btn btn-primary">Submit</button>
                     </div>
                   </form>
                   </div>
@@ -93,37 +93,37 @@
         <div>
             
 
-            {% if request.GET.page == 'edit_funding_route' %}
-              <!-- Similar to the user edit form, create a form for editing a funding_route -->
+            {% if request.GET.page == 'edit_council' %}
+              <!-- Similar to the user edit form, create a form for editing a council -->
               <!-- Adjust the form action URL and method accordingly -->
-              {% if funding_route %}
-                <h3>Edit Funding Route</h3>
-                <form onSubmit="doSubmit();" id="editfunding_routeForm" method="post" action="{% url 'app:edit_funding_route' funding_route.id %}">
+              {% if council %}
+                <h3>Edit Council</h3>
+                <form onSubmit="doSubmit();" id="editcouncilForm" method="post" action="{% url 'app:edit_council' council.id %}">
                   {% csrf_token %}
                   <div class="mb-3">
                       <label for="name" class="form-label">Name</label>
-                      <input type="text" class="form-control" name="name" id="name" value="{{ funding_route.name }}" required>
+                      <input type="text" class="form-control" name="name" id="name" value="{{ council.name }}" required>
                   </div>
                   <div class="mb-3">
                     <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{{ funding_route.phone_number }}">
+                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{{ council.phone_number }}">
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email"  value="{{ funding_route.email }}">
+                    <input type="email" class="form-control" id="email" name="email"  value="{{ council.email }}">
                 </div>
                 <div class="mb-3">
                     <label for="postcode" class="form-label">Postcode</label>
-                    <input type="text" class="form-control" id="postcode" name="postcode" value="{{ funding_route.postcode }}">
+                    <input type="text" class="form-control" id="postcode" name="postcode" value="{{ council.postcode }}">
                 </div>
                 <div class="mb-3">
                     <label for="address" class="form-label">Address</label>
-                    <textarea class="form-control" id="address" name="address">{{ funding_route.address }}</textarea>
+                    <textarea class="form-control" id="address" name="address">{{ council.address }}</textarea>
                 </div>
                   <button type="submit" class="btn btn-primary">Update Funding Route</button>
               </form>
               {% else %}
-                <p>funding_route not found.</p>
+                <p>council not found.</p>
               {% endif %}
               
             {% else %}
@@ -140,7 +140,7 @@
       ID <span id="arrow0"></span>
     </th>  {% endcomment %}
     <th onclick="sortTable(0)">
-      Funding Route  <span id="arrow0"></span>
+      Council  <span id="arrow0"></span>
     </th>
     {% comment %} <th onclick="sortTable(1)">
       Stage <span id="arrow1"></span>
@@ -155,18 +155,18 @@
 </thead>
 
 <tbody id="myTable">
-  {% if funding_routes %}
-  {% for funding_route in funding_routes %}
+  {% if councils %}
+  {% for council in councils %}
 
                       <tr>
                         {% comment %} {% if user.is_staff %}
                         <td>
-                          <input type="checkbox" class="select-funding_route" data-funding_route-id="{{ funding_route.id }}">
+                          <input type="checkbox" class="select-council" data-council-id="{{ council.id }}">
                         </td>
                       {% endif %} {% endcomment %}
-                        <td class="text-underlined" style="width: 20%;"><a href="/funding_route-detail/{{funding_route.id}}">{{ funding_route.name }}</a></td>
+                        <td class="text-underlined" style="width: 20%;"><a href="/council-detail/{{council.id}}">{{ council.name }}</a></td>
                         {% comment %} <td style="width: 10%;">stage 1</td> {% endcomment %}
-                        {% comment %} {% with all_actions=funding_route.get_created_at_funding_route_action_history %}
+                        {% comment %} {% with all_actions=council.get_created_at_council_action_history %}
                           {% if all_actions|length >= 1 %}
                             {% with action=all_actions.0 %}
                             {% if action.imported %}
@@ -180,7 +180,7 @@
                           <td style="width: 10%;">-</td>
                           {% endif %}
                         {% endwith %}
-                        {% with all_actions=funding_route.get_created_at_funding_route_action_history %}
+                        {% with all_actions=council.get_created_at_council_action_history %}
                           {% if all_actions|length > 1 %}
                             {% with action=all_actions.1 %}
                             {% if action.imported %}
@@ -231,7 +231,7 @@
 
   function doSubmit(){
     const name = document.getElementById('name');
-    name.value = {{ funding_route.name }}
+    name.value = {{ council.name }}
   }
 
 $(document).ready(function(){
@@ -301,10 +301,10 @@ function sortTable(colIndex) {
 document.addEventListener('DOMContentLoaded', function () {
   // Select/deselect all checkboxes
   const selectAllCheckbox = document.getElementById('selectAll');
-  const funding_routeCheckboxes = document.querySelectorAll('.select-funding_route');
+  const councilCheckboxes = document.querySelectorAll('.select-council');
 
   selectAllCheckbox.addEventListener('change', function () {
-    funding_routeCheckboxes.forEach(checkbox => {
+    councilCheckboxes.forEach(checkbox => {
       checkbox.checked = selectAllCheckbox.checked;
     });
   });
@@ -313,22 +313,22 @@ document.addEventListener('DOMContentLoaded', function () {
   const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
 
   deleteSelectedBtn.addEventListener('click', function () {
-    const selectedfunding_routeIds = Array.from(funding_routeCheckboxes)
+    const selectedcouncilIds = Array.from(councilCheckboxes)
       .filter(checkbox => checkbox.checked)
-      .map(checkbox => checkbox.getAttribute('data-funding_route-id'));
+      .map(checkbox => checkbox.getAttribute('data-council-id'));
 
-    if (selectedfunding_routeIds.length > 0) {
-      const confirmDelete = confirm('Are you sure you want to delete selected funding_route?');
+    if (selectedcouncilIds.length > 0) {
+      const confirmDelete = confirm('Are you sure you want to delete selected council?');
       if (confirmDelete) {
-        window.location.href = `bulk_remove_funding_route/?ids=${selectedfunding_routeIds.join(',')}`;
+        window.location.href = `bulk_remove_council/?ids=${selectedcouncilIds.join(',')}`;
       }
     } else {
-      alert('Please select funding_route to delete.');
+      alert('Please select council to delete.');
     }
   });
 });
 
-const form = document.querySelector('#addfunding_routeForm');
+const form = document.querySelector('#addcouncilForm');
 
 </script>
 
