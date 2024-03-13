@@ -322,9 +322,17 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 <h6><b>Local Authority</b>: {{ customer.district }}</h6>
+                {% if customer.energy_rating %}
                 <h6><b>Energy Rating</b>: {{ customer.energy_rating }}</h6>
+                {% else %}
+                <h6><b>Energy Rating</b>: Not available</h6>
+                {% endif %}
                 {% comment %} {{customer.energy_certificate_link}} {% endcomment %}
+                {% if customer.energy_certificate_link %}
                 <h6><b>Certificate Link</b>: <a target="_blank" href="{{ customer.energy_certificate_link }}">click here </a></h6>
+                {% else %}
+                <h6><b>Certificate Link</b>: Not available</h6>
+                {% endif %}
               </div>
             </div>
           </div>

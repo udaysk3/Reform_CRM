@@ -242,7 +242,12 @@ def add_customer(request):
         # except requests.exceptions.RequestException as e:
         #     district = f"Request Error"
         district = getLA(postcode)
-        energy_rating, energy_certificate_link = getEPC(postcode)
+        obj = getEPC(postcode) 
+        energy_rating = None 
+        energy_certificate_link = None
+        if obj is not None:
+            energy_rating = obj['energy_rating']
+            energy_certificate_link = obj['energy_certificate_link']
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
