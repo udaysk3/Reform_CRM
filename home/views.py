@@ -173,8 +173,8 @@ def council(request):
 
     campaigns = Campaign.objects.all()
 
-    for i in councils:
-        print(i)
+    # for i in councils:
+        # print(i)
     return render(request, "home/council.html", {"councils": councils, "campaigns": campaigns})
 
 
@@ -212,6 +212,10 @@ def add_customer(request):
         email = request.POST.get("email")
         postcode = request.POST.get("postcode")
         address = request.POST.get("address")
+        house_name = request.POST.get("house_name")
+        city = request.POST.get("city")
+        county = request.POST.get("county")
+        country = request.POST.get("country")
         campaign = request.POST.get("campaign")
         agent = User.objects.get(email=request.user)
 
@@ -242,7 +246,9 @@ def add_customer(request):
         # except requests.exceptions.RequestException as e:
         #     district = f"Request Error"
         district = getLA(postcode)
-        obj = getEPC(postcode) 
+        if not Councils.objects.filter(name=district).exists():
+            Councils.objects.create(name=district)
+        obj = getEPC(postcode, house_name) 
         energy_rating = None 
         energy_certificate_link = None
         if obj is not None:
@@ -255,6 +261,10 @@ def add_customer(request):
             email=email,
             postcode=postcode,
             address=address,
+            city=city,
+            house_name=house_name,
+            county=county,
+            country=country,
             agent = agent,
             district=district,
             campaign = Campaign.objects.get(id=campaign),
@@ -266,7 +276,6 @@ def add_customer(request):
         )
         messages.success(request, "Customer added successfully!")
         return redirect("app:customer")
-
     return render(request, "home/customer.html")
 
 
@@ -296,7 +305,10 @@ def edit_customer(request, customer_id):
         customer.email = request.POST.get("email")
         customer.postcode = request.POST.get("postcode")
         customer.address = request.POST.get("address")
-
+        customer.city = request.POST.get("city")
+        customer.house_name = request.POST.get("house_name")
+        customer.county = request.POST.get("county")
+        customer.country = request.POST.get("country")
         customer.save()
 
         messages.success(request, "Customer updated successfully!")
@@ -622,7 +634,11 @@ def add_child_customer(request, customer_id):
             phone_number=phone_number,
             email=email,
             postcode=parent_customer.postcode,
+            house_name=parent_customer.house_name,
             address=parent_customer.address,
+            city=parent_customer.city,
+            county=parent_customer.county,
+            country=parent_customer.country,
             agent = parent_customer.agent,
             district=parent_customer.district,
             campaign = Campaign.objects.get(id=parent_customer.campaign.id),

@@ -63,15 +63,32 @@
                     <label for="email" class="form-label">Email</label>
                     <input type="email" class="form-control" id="email" name="email" required>
                 </div>
+                
                 <div class="mb-3">
-                    <label for="postcode" class="form-label">Postcode</label>
-                    <input type="text" class="form-control" id="postcode" name="postcode">
+                    <label for="house_name" class="form-label">House Name/ Number</label>
+                    <input type="text" class="form-control" id="house_name" name="house_name"></input>
                 </div>
                 <div class="mb-3">
                     <label for="address" class="form-label">Address</label>
-                    <textarea class="form-control" id="address" name="address"></textarea>
+                    <input type="text" class="form-control" id="address" name="address"></input>
                 </div>
-                
+                <div class="mb-3">
+                    <label for="city" class="form-label">City/Town</label>
+                    <input type="text" class="form-control" id="city" name="city"></input>
+                </div>
+                <div class="mb-3">
+                    <label for="county" class="form-label">County</label>
+                    <input type="text" class="form-control" id="county" name="county"></input>
+                </div>
+               
+                <div class="mb-3">
+                  <label for="postcode" class="form-label">Postcode</label>
+                  <input type="text" class="form-control" id="postcode" name="postcode">
+              </div>
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input type="text" class="form-control" id="country" name="country"></input>
+            </div>
 
                 <!-- Button trigger modal -->
                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
@@ -131,13 +148,29 @@
                     <input type="email" class="form-control" id="email" name="email"  value="{{ customer.email }}">
                 </div>
                 <div class="mb-3">
-                    <label for="postcode" class="form-label">Postcode</label>
-                    <input type="text" class="form-control" id="postcode" name="postcode" value="{{ customer.postcode }}">
-                </div>
+                  <label for="house_name" class="form-label">House Name/ Number</label>
+                  <input type="text" class="form-control" id="house_name" name="house_name" value={{ customer.house_name }}>
+              </div>
                 <div class="mb-3">
                     <label for="address" class="form-label">Address</label>
-                    <textarea class="form-control" id="address" name="address">{{ customer.address }}</textarea>
+                    <input type="text" class="form-control" id="address" name="address" value={{ customer.address }}>
                 </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City/Town</label>
+                    <input type="text" class="form-control" id="city" name="city" value={{ customer.city }}>
+                </div>
+                <div class="mb-3">
+                    <label for="county" class="form-label">County</label>
+                    <input type="text" class="form-control" id="county" name="county" value={{ customer.county }}>
+                </div>
+                <div class="mb-3">
+                  <label for="postcode" class="form-label">Postcode</label>
+                  <input type="text" class="form-control" id="postcode" name="postcode" value="{{ customer.postcode }}">
+              </div>
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input type="text" class="form-control" id="country" name="country" value={{ customer.country }}>
+            </div>
                   <button type="submit" class="btn btn-primary">Update Customer</button>
               </form>
               {% else %}

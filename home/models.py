@@ -8,7 +8,11 @@ class Customers(models.Model):
     phone_number = models.CharField(max_length=15)
     email = models.EmailField(max_length=255)
     postcode = models.CharField(max_length=255, blank=True, null=True)
+    house_name = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(max_length=999, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    county = models.CharField(max_length=255, blank=True, null=True)
+    country = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
     campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.SET_NULL, null=True)
@@ -24,7 +28,7 @@ class Customers(models.Model):
         text,
         agent, date_time=None, imported=False, created_at=None, talked_with=None, funding_route=None,
     ):
-        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, funding_route=funding_route)
+        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
 
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
