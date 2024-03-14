@@ -2,7 +2,6 @@ import csv
 import io
 import urllib.request
 from urllib.parse import urlencode
-from fuzzywuzzy import fuzz
 
 def getEPC(postcode, customer_address):
     token = "YnVybHV1ZGF5c2FudG9zaGt1bWFyM0BnbWFpbC5jb206ZjBjZmYxNjIwYWMwZWUyMGNmNzhjYmUwNzQ5MTAzYzE1NTYxYjk5Yw=="
