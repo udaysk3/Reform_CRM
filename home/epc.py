@@ -3,7 +3,8 @@ import io
 import urllib.request
 from urllib.parse import urlencode
 
-def getEPC(postcode, customer_address):
+def getEPC(postcode, house_name, street_name):
+    customer_address = f"{house_name} {street_name}".lower()
     token = "YnVybHV1ZGF5c2FudG9zaGt1bWFyM0BnbWFpbC5jb206ZjBjZmYxNjIwYWMwZWUyMGNmNzhjYmUwNzQ5MTAzYzE1NTYxYjk5Yw=="
 
     headers = {
@@ -28,17 +29,20 @@ def getEPC(postcode, customer_address):
         customer_address_cleaned = customer_address.replace(' ', '').strip(',').lower()
         
         for row in csv_reader:
-            dataset_address_cleaned = row['address'].replace(' ', '').strip(',').lower()
-            address_dataset  = row['address'].split(',')[0].replace(' ', '').lower()
-            print(dataset_address_cleaned, customer_address_cleaned)
             print(row['address'])
-            if address_dataset == customer_address_cleaned:
+            dataset_address_cleaned = row['address'].replace(' ', '').strip(',').lower().replace(',', '')
+            address_dataset  = row['address'].split(',')[0].replace(' ', '').lower()
+            cleaned_house_name = house_name.replace(' ', '').lower()
+            print(dataset_address_cleaned, customer_address_cleaned, address_dataset)
+            print(address_dataset[:len(house_name)], house_name)
+            if address_dataset[:len(cleaned_house_name)]==cleaned_house_name and customer_address_cleaned in dataset_address_cleaned:
                 most_similar_data = row
                 break
 
         if most_similar_data:
             energy_rating = most_similar_data['current-energy-rating']
             certificate_link = f"https://epc.opendatacommunities.org/domestic/certificate/{most_similar_data['lmk-key']}"
-            return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link}
+            print(row)
+            return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link, "county" : row['county'], "local_authority"  : row['local-authority-label'], "constituency" : row['constituency-label'], "town" : row['posttown'], "address" : row['address']}
         else:
-            return {'energy_rating': None, 'energy_certificate_link': None}
+            return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None}

@@ -272,7 +272,6 @@ table {
                 </h6>
                 <h6><b> Telephone : </b> {{customer.phone_number}}</h6>
                 <h6><b> Email: </b> {{customer.email}}</h6>
-                <h6><b>House Name/Number</b> : {{customer.house_name}}</h6>
               </div>
 
 
@@ -300,7 +299,7 @@ table {
                 <h6><b> Name : </b> {{c_customer.first_name}} {{c_customer.last_name}}</h6>
                 <h6><b> Telephone : </b> {{c_customer.phone_number}}</h6>
                 <h6><b> Email: </b> {{c_customer.email}}</h6>
-                <h6><b>House Name/Number</b> : {{c_customer.house_name}}</h6>
+                
               </div>
                 {% endfor %}
 
@@ -312,11 +311,13 @@ table {
           <div class="col-sm-4">
             <div class="card m-0">
               <div class="card-body">
-                
+                <h6><b>House Name/Number</b> : {{customer.house_name}}</h6>
+                <h6><b>Street Name</b> : {{customer.street_name}}</h6>
                 <h6><b>Address</b> : {{customer.address}}</h6>
                 <h6><b>City/Town</b> : {{customer.city}}</h6>
                 <h6><b>County</b> : {{customer.county}}</h6>
                 <h6><b>Postcode</b> : {{customer.postcode}}</h6>
+                <h6><b>Country</b> : {{customer.country}}</h6>
               </div>
             </div>
           </div>
@@ -325,8 +326,9 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 
-                <h6><b>Country</b> : {{customer.country}}</h6>
+                
                 <h6><b>Local Authority</b>: {{ customer.district }}</h6>
+                <h6><b>Constituency</b>: {{ customer.constituency }}</h6>
                 {% if customer.energy_rating %}
                 <h6><b>Energy Rating</b>: {{ customer.energy_rating }}</h6>
                 {% else %}

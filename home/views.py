@@ -211,7 +211,7 @@ def add_customer(request):
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
         postcode = request.POST.get("postcode")
-        address = request.POST.get("address")
+        street_name = request.POST.get("street_name")
         house_name = request.POST.get("house_name")
         city = request.POST.get("city")
         county = request.POST.get("county")
@@ -246,27 +246,36 @@ def add_customer(request):
         # except requests.exceptions.RequestException as e:
         #     district = f"Request Error"
         district = getLA(postcode)
-        if not Councils.objects.filter(name=district).exists():
+        if district and not Councils.objects.filter(name=district).exists():
             Councils.objects.create(name=district)
-        obj = getEPC(postcode, house_name) 
+        obj = getEPC(postcode, house_name, street_name) 
         energy_rating = None 
         energy_certificate_link = None
+        address = house_name + ' ' + street_name
+        constituency = None
         if obj is not None:
             energy_rating = obj['energy_rating']
             energy_certificate_link = obj['energy_certificate_link']
+            county = obj['county'] if obj['county'] else county
+            district = obj['local_authority'] if obj['local_authority'] else district
+            city = obj['town'] if obj['town'] else city
+            constituency = obj['constituency'] if obj['constituency'] else None
+            address = obj['address'] if obj['address'] else house_name + ' ' + street_name
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
             phone_number=phone_number,
             email=email,
             postcode=postcode,
-            address=address,
+            street_name=street_name,
             city=city,
             house_name=house_name,
+            address=address,
             county=county,
             country=country,
             agent = agent,
             district=district,
+            constituency = constituency,
             campaign = Campaign.objects.get(id=campaign),
             client = Campaign.objects.get(id=campaign).client,
             created_at = datetime.now(pytz.timezone('Europe/London')),
@@ -304,7 +313,7 @@ def edit_customer(request, customer_id):
         customer.phone_number = request.POST.get("phone_number")
         customer.email = request.POST.get("email")
         customer.postcode = request.POST.get("postcode")
-        customer.address = request.POST.get("address")
+        customer.street_name = request.POST.get("street_name")
         customer.city = request.POST.get("city")
         customer.house_name = request.POST.get("house_name")
         customer.county = request.POST.get("county")
@@ -326,7 +335,7 @@ def edit_council(request, council_id):
         # council.phone_number = request.POST.get("phone_number")
         # council.email = request.POST.get("email")
         # council.postcode = request.POST.get("postcode")
-        # council.address = request.POST.get("address")
+        # council.street_name = request.POST.get("street_name")
 
 
         council.save()
@@ -635,7 +644,7 @@ def add_child_customer(request, customer_id):
             email=email,
             postcode=parent_customer.postcode,
             house_name=parent_customer.house_name,
-            address=parent_customer.address,
+            street_name=parent_customer.street_name,
             city=parent_customer.city,
             county=parent_customer.county,
             country=parent_customer.country,
