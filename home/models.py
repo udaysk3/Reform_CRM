@@ -1,7 +1,5 @@
 from django.db import models
 from user.models import User
-from django.contrib.postgres.fields import JSONField
-
 
 class Customers(models.Model):
     first_name = models.CharField(max_length=255)
