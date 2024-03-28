@@ -336,9 +336,57 @@ table {
                 {% endif %}
                 {% comment %} {{customer.energy_certificate_link}} {% endcomment %}
                 {% if customer.energy_certificate_link %}
-                <h6><b>Certificate Link</b>: <a target="_blank" href="{{ customer.energy_certificate_link }}">click here </a></h6>
+                <h6><b>Certificate Link</b>: <a target="_blank" href="{{ customer.energy_certificate_link }}">Click Here </a></h6>
                 {% else %}
                 <h6><b>Certificate Link</b>: No EPC</h6>
+                {% endif %}
+
+                {% if customer.recommendations %}
+                <h6><b>Recommendations</b>:  
+                  <a href="#" class="" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  Click Here
+                </a>
+
+                <!-- Modal -->
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Recommendations List</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="mb-3">  
+                          <div>
+                            <table style="border-collapse: collapse;">
+                              <thead">
+                                <tr>
+                                  <th style="padding: 8px;">Improvement</th>
+                                  <th style="padding: 8px;">Indicative Cost</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for recommendation in recommendations_list %}
+                                  <tr style="border: 1px solid black; margin: 4px;">
+                                    <td style="padding: 8px;">{{ recommendation.improvement }}</td>
+                                    <td style="padding: 8px;">£{{ recommendation.indicative_cost }}</td>
+                                  </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                            
+                          </div>
+                      </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+</h6>
+                {% else %}
+                <h6><b>Recommendations</b>: -</h6>
                 {% endif %}
               </div>
             </div>

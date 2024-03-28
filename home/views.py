@@ -73,7 +73,12 @@ def customer_detail(request, customer_id):
 
     # routes = Route.objects.all().filter(customer=customer)
 
-
+    recommendations_list = [item.strip() for item in customer.recommendations.split("<br>")]
+    processed_recommendations = []
+    for recommendation in recommendations_list:
+        improvement, indicative_cost = recommendation.split(", £(")
+        processed_recommendations.append({'improvement': improvement, 'indicative_cost': indicative_cost[:-1]})
+    print(processed_recommendations)
     return render(
         request,
         "home/customer-detail.html",
@@ -84,6 +89,7 @@ def customer_detail(request, customer_id):
             "prev": prev,
             "next": next,
             "child_customers": child_customers,
+            "recommendations_list": processed_recommendations,
             # "routes": routes,
         },
     )
@@ -144,7 +150,7 @@ def Customer(request):
     if request.GET.get("page") == "edit_customer" and request.GET.get("backto") is None:
         customer_id = request.GET.get("id")
         customer = Customers.objects.get(pk=customer_id)
-        return render(request, "home/customer.html", {"customer": customer})
+        return render(request, "home/customer.html", {"customer": customer, 'recommendations_list': processed_recommendations })
     
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     customers = Customers.objects.annotate(
@@ -261,6 +267,7 @@ def add_customer(request):
             city = obj['town'] if obj['town'] else city
             constituency = obj['constituency'] if obj['constituency'] else None
             address = obj['address'] if obj['address'] else house_name + ' ' + street_name
+            recommendations = obj['recommendations'] if obj['recommendations'] else None
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -281,7 +288,8 @@ def add_customer(request):
             created_at = datetime.now(pytz.timezone('Europe/London')),
             primary_customer= True,
             energy_rating=energy_rating,
-            energy_certificate_link=energy_certificate_link
+            energy_certificate_link=energy_certificate_link,
+            recommendations=recommendations,
         )
         messages.success(request, "Customer added successfully!")
         return redirect("app:customer")

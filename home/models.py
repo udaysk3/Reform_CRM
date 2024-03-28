@@ -1,5 +1,6 @@
 from django.db import models
 from user.models import User
+from django.contrib.postgres.fields import JSONField
 
 
 class Customers(models.Model):
@@ -24,7 +25,8 @@ class Customers(models.Model):
     primary_customer = models.BooleanField(default=False)
     energy_rating = models.CharField(max_length=2, blank=True, null=True)
     energy_certificate_link = models.URLField(max_length=999, blank=True, null=True)
-
+    recommendations = models.TextField(max_length=999, blank=True, null=True)
+    
     def add_action(
         self,
         text,
