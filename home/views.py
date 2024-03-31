@@ -72,8 +72,9 @@ def customer_detail(request, customer_id):
         )
 
     # routes = Route.objects.all().filter(customer=customer)
-
-    recommendations_list = [item.strip() for item in customer.recommendations.split("<br>")]
+    recommendations_list = []
+    if customer.recommendations:
+        recommendations_list = [item.strip() for item in customer.recommendations.split("<br>")]
     processed_recommendations = []
     for recommendation in recommendations_list:
         improvement, indicative_cost = recommendation.split(", £(")
