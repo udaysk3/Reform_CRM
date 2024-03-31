@@ -50,6 +50,5 @@ urlpatterns = [
     path('remove_campaign/<int:campaign_id>',views.remove_campaign,name='remove_campaign'),
     path('add_child_customer/<int:customer_id>', views.add_child_customer,name='add_child_customer'),
     path('make_primary/<int:parent_customer_id>/<int:child_customer_id>', views.make_primary, name='make_primary'),
-    # path('add_funding_route/<int:customer_id>', views.add_funding_route,name='add_funding_route'),
-    # path('add_funding_route/<int:funding_route_id>', views.add_funding_route,name='add_funding_route'),
+    path('add_council_funding_route/<int:council_id>', views.add_council_funding_route,name='add_council_funding_route'),
 ]

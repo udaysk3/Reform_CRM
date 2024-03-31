@@ -59,10 +59,10 @@ class Campaign(models.Model):
     
 class Route(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
+    managed_by = models.CharField(max_length=999, blank= True, null=True)
     main_contact = models.CharField(max_length=999, blank= True, null=True)
     telephone = models.CharField(max_length=15)
     email = models.EmailField(max_length=255)
-    another_contact = models.CharField(max_length=999, blank= True, null=True)
     council = models.ForeignKey('home.Councils', on_delete=models.CASCADE, null=True, blank= True)
     
 class Councils(models.Model):

@@ -72,6 +72,7 @@ def customer_detail(request, customer_id):
         )
 
     # routes = Route.objects.all().filter(customer=customer)
+
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [item.strip() for item in customer.recommendations.split("<br>")]
@@ -99,7 +100,7 @@ def customer_detail(request, customer_id):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-
+    routes = Route.objects.all().filter(council=council)
     prev = None
     next = None
     if len(all_councils) == 1:
@@ -141,7 +142,7 @@ def council_detail(request, council_id):
             "history": history,
             "prev": prev,
             "next": next,
-            # "routes": routes,
+            "routes": routes,
         },
     )
 
@@ -179,6 +180,7 @@ def council(request):
     councils = Councils.objects.all().order_by('name')
 
     campaigns = Campaign.objects.all()
+
 
     # for i in councils:
         # print(i)
@@ -723,5 +725,25 @@ def add_funding_route(request):
         )
         messages.success(request, 'Funding Route added successfully!')
         return redirect(f'/councils')  
+    return render(request, 'admin.html')
+
+def add_council_funding_route(request,council_id):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        managed_by = request.POST.get('managed_by')
+        main_contact = request.POST.get('main_contact')
+        email = request.POST.get('email')
+        telephone = request.POST.get('telephone')
+        council = Councils.objects.get(pk=council_id)
+        route = Route.objects.create(
+            name=name,
+            managed_by=managed_by,
+            telephone=telephone,
+            main_contact=main_contact,
+            email=email,
+            council=council,
+        )
+        messages.success(request, 'Funding Route added successfully!')
+        return redirect(f'/council')  
     return render(request, 'admin.html')
 

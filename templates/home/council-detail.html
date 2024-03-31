@@ -382,9 +382,9 @@ table {
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
                   <!-- Button trigger modal -->
-                  {% comment %} <button type="button" class="btn btn-primary position-relative mb-3" style="right:-70%" data-bs-toggle="modal" data-bs-target="#fundingroute">
+                <button type="button" class="btn btn-primary position-relative mb-3" style="right:-70%" data-bs-toggle="modal" data-bs-target="#fundingroute">
                     <i class="bi bi-plus-lg"></i> Funding Route
-                  </button> {% endcomment %}
+                  </button> 
 
                   <!-- Modal -->
                   <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -394,7 +394,7 @@ table {
                           <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Funding Route</h1>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form method='post' action="{% url 'app:add_funding_route'  %}">
+                        <form method='post' action="/add_council_funding_route/{{ council.id }}">
                           {% csrf_token %}
                         <div class="modal-body">
                           <div class="mb-3">
@@ -402,25 +402,25 @@ table {
                             <input type="text" class="form-control" id="name" name='name'>
                           </div>
                           <div class="mb-3">
-                            <label for="maincontact" class="form-label">Main Contact</label>
-                            <input type="text" class="form-control" id="maincontact" name="main_contact">
+                            <label for="managedby" class="form-label">Managed By</label>
+                            <input type="text" class="form-control" id="managedby" name="managed_by">
                           </div>
                           <div class="mb-3">
-                            <label for="telephone" class="form-label">Telephone</label>
-                            <input type="text" class="form-control" id="telephone" name="telephone">
+                            <label for="maincontact" class="form-label">Main Contact</label>
+                            <input type="text" class="form-control" id="maincontact" name="main_contact">
                           </div>
                           <div class="mb-3">
                             <label for="email" class="form-label">email</label>
                             <input type="email" class="form-control" id="email" name="email">
                           </div>
                           <div class="mb-3">
-                            <label for="anothercontact" class="form-label">Another Contact</label>
-                            <input type="text" class="form-control" id="anothercontact" name="another_contact">
+                            <label for="telephone" class="form-label">Telephone</label>
+                            <input type="text" class="form-control" id="telephone" name="telephone">
                           </div>
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="button" class="btn btn-primary">Submit</button>
+                          <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                       </form>
                       </div>

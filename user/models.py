@@ -54,6 +54,7 @@ class User(AbstractUser):
     council = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     finance = models.BooleanField(default=False)
+    funding_route = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)
     
     objects = UserManager()
