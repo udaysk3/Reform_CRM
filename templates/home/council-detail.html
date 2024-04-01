@@ -1,6 +1,11 @@
 {% extends 'base.html' %} {% load static %} {% block css %}
 
 <style>
+
+  .model-btn:hover{
+     cursor: pointer; 
+  }
+
   .cnav-item {
     font-size: 15px;
   }
@@ -418,11 +423,11 @@
                     </div>
                   </div>
                   <div class="card p-0 m-0">
-                    <div class="card-body p-3 m-0" style="height: 390px">
+                    <div class="card-body p-3 m-0" style="height: 390px; overflow-y: auto">
 
                       {% for route in routes %}
 
-                      <div class="col-sm-4 model-btn" style="width: 350px">
+                      <div class="col-sm-4 model-btn mt-3" style="width: 350px">
                         <div class="card m-0">
                           <div class="card-body">
                             <h6><b>Name : </b> {{route.name}}</h6>
@@ -438,17 +443,40 @@
                         <div class="modal-dialog">
                           <div class="modal-content">
                             <div class="modal-header">
-                              <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                              <h1 class="modal-title fs-5" id="staticBackdropLabel">Funding Route</h1>
                               <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
-                              {{route.name}}
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                              <button type="button" class="btn btn-primary">Understood</button>
-                            </div>
+                            <form method='post' action="/edit_council_funding_route/{{ route.id }}">
+                              {% csrf_token %}
+                              <div class="modal-body">
+                                <div class="mb-3">
+                                  <label for="name" class="form-label">Name</label>
+                                  <input type="text" class="form-control" id="name" name='name' value="{{route.name}}">
+                                </div>
+                                <div class="mb-3">
+                                  <label for="managedby" class="form-label">Managed By</label>
+                                  <input type="text" class="form-control" id="managedby" name="managed_by" value="{{ route.managed_by }}">
+                                </div>
+                                <div class="mb-3">
+                                  <label for="maincontact" class="form-label">Main Contact</label>
+                                  <input type="text" class="form-control" id="maincontact" name="main_contact" value="{{ route.main_contact }}">
+                                </div>
+                                <div class="mb-3">
+                                  <label for="email" class="form-label">email</label>
+                                  <input type="email" class="form-control" id="email" name="email" value="{{ route.email }}" >
+                                </div>
+                                <div class="mb-3">
+                                  <label for="telephone" class="form-label">Telephone</label>
+                                  <input type="text" class="form-control" id="telephone" name="telephone" value="{{ route.telephone }}" >
+                                </div>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-plus-lg"></i> Stage</button>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Edit</button>
+                              </div>
+                            </form>
                           </div>
                         </div>
                       </div>

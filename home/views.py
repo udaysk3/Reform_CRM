@@ -747,3 +747,14 @@ def add_council_funding_route(request,council_id):
         return redirect(f'/council')  
     return render(request, 'admin.html')
 
+def edit_council_funding_route(request, route_id):
+    route = Route.objects.get(pk=route_id)
+    if request.method == 'POST':
+        route.name = request.POST.get('name')
+        route.managed_by = request.POST.get('managed_by')
+        route.main_contact = request.POST.get('main_contact')
+        route.email = request.POST.get('email')
+        route.telephone = request.POST.get('telephone')
+        route.save()
+        messages.success(request, 'Route updated successfully!')
+        return redirect('app:council')
