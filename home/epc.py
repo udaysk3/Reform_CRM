@@ -2,6 +2,7 @@ import csv
 import io
 import urllib.request
 from io import StringIO
+import json
 from urllib.parse import urlencode
 
 def parse_recommendations(recommendations_url, headers):
@@ -12,8 +13,16 @@ def parse_recommendations(recommendations_url, headers):
         recommendations_list = []
         for row in csv_reader:
             indicative_cost = row['indicative-cost'].replace('£', '').replace(',', '')
-            recommendation_text = f"{row['improvement-descr-text']}, £({indicative_cost})"
-            print(row['improvement-descr-text'], indicative_cost)
+            text = None
+            if row['improvement-descr-text'] == '':
+                try:
+                    with open('home/unique_records.json', 'r') as json_file:
+                        json_data = json.load(json_file)
+                        text = json_data[row['improvement-id']]['improvement_summary_text']
+                except FileNotFoundError:
+                    text = None
+            recommendation_text = f"{text} , £({indicative_cost})"
+            print(text, indicative_cost)
             print(recommendation_text)
             recommendations_list.append(recommendation_text)
         recommendations_str = '<br>'.join(recommendations_list)

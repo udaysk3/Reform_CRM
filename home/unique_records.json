@@ -1,0 +1,194 @@
+{
+    "IMPROVEMENT_ID": {
+        "improvement_id": "IMPROVEMENT_ID",
+        "improvement_summary_text": "IMPROVEMENT_SUMMARY_TEXT"
+    },
+    "12": {
+        "improvement_id": 12,
+        "improvement_summary_text": "Heating controls (room thermostat and TRVs)"
+    },
+    "20": {
+        "improvement_id": 20,
+        "improvement_summary_text": "Replace boiler with new condensing boiler"
+    },
+    "19": {
+        "improvement_id": 19,
+        "improvement_summary_text": "Solar water heating"
+    },
+    "34": {
+        "improvement_id": 34,
+        "improvement_summary_text": "Solar photovoltaic panels, 2.5 kWp"
+    },
+    "4": {
+        "improvement_id": 4,
+        "improvement_summary_text": "Hot water cylinder thermostat"
+    },
+    "58": {
+        "improvement_id": 58,
+        "improvement_summary_text": "Floor insulation (solid floor)"
+    },
+    "6": {
+        "improvement_id": 6,
+        "improvement_summary_text": "Cavity wall insulation"
+    },
+    "7": {
+        "improvement_id": 7,
+        "improvement_summary_text": "Internal or external wall insulation"
+    },
+    "45": {
+        "improvement_id": 45,
+        "improvement_summary_text": "Flat roof or sloping ceiling insulation"
+    },
+    "5": {
+        "improvement_id": 5,
+        "improvement_summary_text": "Increase loft insulation to 270\u00a0mm"
+    },
+    "2": {
+        "improvement_id": 2,
+        "improvement_summary_text": "Increase hot water cylinder insulation"
+    },
+    "35": {
+        "improvement_id": 35,
+        "improvement_summary_text": "Low energy lighting for all fixed outlets"
+    },
+    "13": {
+        "improvement_id": 13,
+        "improvement_summary_text": "Heating controls (thermostatic radiator valves)"
+    },
+    "56": {
+        "improvement_id": 56,
+        "improvement_summary_text": "Replacement glazing units"
+    },
+    "46": {
+        "improvement_id": 46,
+        "improvement_summary_text": "Room-in-roof insulation"
+    },
+    "14": {
+        "improvement_id": 14,
+        "improvement_summary_text": "Heating controls (room thermostat)"
+    },
+    "63": {
+        "improvement_id": 63,
+        "improvement_summary_text": "Party wall insulation"
+    },
+    "8": {
+        "improvement_id": 8,
+        "improvement_summary_text": "Replace single glazed windows with low-E double glazed windows"
+    },
+    "57": {
+        "improvement_id": 57,
+        "improvement_summary_text": "Floor insulation (suspended floor)"
+    },
+    "3": {
+        "improvement_id": 3,
+        "improvement_summary_text": "Add additional 80\u00a0mm jacket to hot water cylinder"
+    },
+    "10": {
+        "improvement_id": 10,
+        "improvement_summary_text": "Draught proofing"
+    },
+    "59": {
+        "improvement_id": 59,
+        "improvement_summary_text": "High heat retention storage heaters and dual immersion cylinder"
+    },
+    "15": {
+        "improvement_id": 15,
+        "improvement_summary_text": "Heating controls (programmer and TRVs)"
+    },
+    "61": {
+        "improvement_id": 61,
+        "improvement_summary_text": "High heat retention storage heaters and dual immersion cylinder"
+    },
+    "44": {
+        "improvement_id": 44,
+        "improvement_summary_text": "Wind turbine"
+    },
+    "1": {
+        "improvement_id": 1,
+        "improvement_summary_text": "Insulate hot water cylinder with 80\u00a0mm jacket"
+    },
+    "49": {
+        "improvement_id": 49,
+        "improvement_summary_text": "Heat recovery system for mixer showers"
+    },
+    "11": {
+        "improvement_id": 11,
+        "improvement_summary_text": "Heating controls (programmer, room thermostat and TRVs)"
+    },
+    "40": {
+        "improvement_id": 40,
+        "improvement_summary_text": "Change room heaters to condensing boiler"
+    },
+    "48": {
+        "improvement_id": 48,
+        "improvement_summary_text": "High performance external doors"
+    },
+    "62": {
+        "improvement_id": 62,
+        "improvement_summary_text": "High heat retention storage heaters"
+    },
+    "16": {
+        "improvement_id": 16,
+        "improvement_summary_text": "Heating controls (time and temperature zone control)"
+    },
+    "22": {
+        "improvement_id": 22,
+        "improvement_summary_text": "Replace boiler with biomass boiler"
+    },
+    "39": {
+        "improvement_id": 39,
+        "improvement_summary_text": "Wood pellet stove with boiler and radiators"
+    },
+    "18": {
+        "improvement_id": 18,
+        "improvement_summary_text": "Heating controls (room thermostat)"
+    },
+    "60": {
+        "improvement_id": 60,
+        "improvement_summary_text": "High heat retention storage heaters"
+    },
+    "29": {
+        "improvement_id": 29,
+        "improvement_summary_text": "Change heating to gas condensing boiler"
+    },
+    "26": {
+        "improvement_id": 26,
+        "improvement_summary_text": "Replacement warm air unit"
+    },
+    "23": {
+        "improvement_id": 23,
+        "improvement_summary_text": "Wood pellet stove with boiler and radiators"
+    },
+    "17": {
+        "improvement_id": 17,
+        "improvement_summary_text": "Heating controls (programmer and room thermostat)"
+    },
+    "27": {
+        "improvement_id": 27,
+        "improvement_summary_text": "Change heating to gas condensing boiler"
+    },
+    "37": {
+        "improvement_id": 37,
+        "improvement_summary_text": "Condensing boiler (separate from the range cooker)"
+    },
+    "50": {
+        "improvement_id": 50,
+        "improvement_summary_text": "Flue gas heat recovery device in conjunction with boiler"
+    },
+    "28": {
+        "improvement_id": 28,
+        "improvement_summary_text": "Condensing oil boiler with radiators"
+    },
+    "38": {
+        "improvement_id": 38,
+        "improvement_summary_text": "Condensing boiler (separate from the range cooker)"
+    },
+    "9": {
+        "improvement_id": 9,
+        "improvement_summary_text": "Secondary glazing to single glazed windows"
+    },
+    "36": {
+        "improvement_id": 36,
+        "improvement_summary_text": "Replace heating unit with condensing unit"
+    }
+}
