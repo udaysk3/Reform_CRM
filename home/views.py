@@ -833,4 +833,4 @@ def edit_council_funding_route(request, route_id):
 def stages(request, council_id, route_id):
     route = Route.objects.get(pk=route_id)
     stages = Stage.objects.all().filter(route=route)
-    return render(request, "home/stages.html", {"routes": route, "stages": stages})
+    return render(request, "home/stages.html", {"routes": route, "stages": stages, "council_id":council_id})

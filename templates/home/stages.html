@@ -1,9 +1,7 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
 
 <div class="row container-fluid">
-
-  {% if request.GET.page == "add_stage" %}
-  {% for message in messages %}
+  {% if request.GET.page == "add_stage" %} {% for message in messages %}
   <div
     class="alert {{ message.tags }} alert-dismissible fade show"
     role="alert"
@@ -19,26 +17,31 @@
   {% endfor %}
   <div class="card p-0">
     <div class="card-body p-3 m-0">
-      
-      <h1> Add Stages </h1>
-
-      <div class="my-3 row">
-        <label for="name" class="fs-4 col-sm-2 col-form-label">Name</label>
-        <div class="col-sm-4">
-          <input type="text" class="form-control" id="name" name='name'>
+      <h1>Add Stages</h1>
+      <form>
+        <div class="my-3 row">
+          <label for="name" class="fs-4 col-sm-2 col-form-label">Name</label>
+          <div class="col-sm-4">
+            <input type="text" class="form-control" id="name" name="name" />
+          </div>
         </div>
-        <button type="button" class="btn btn-primary col-sm-2 add-field" onclick="addField()">
-          <i class="bi bi-plus-lg"></i> Add Field
-        </button>
-      </div>
-
+        <div>
+          <input type="hidden" name="council" value="{{ council_id }}" />
+          <input type="hidden" name="route" value="{{ route.id }}" />
+          <button
+            type="button"
+            class="btn btn-primary add-field"
+            onclick="addField()"
+          >
+            <i class="bi bi-plus-lg"></i> Add Field
+          </button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
     </div>
   </div>
-  
 
-
-
-{% else %}
+  {% else %}
   <div class="cnav-item fs-6 col-1"></div>
   <div class="cnav-item fs-6 col-9"></div>
   <div class="cnav-item fs-6 col-2">
@@ -46,8 +49,6 @@
       <i class="bi bi-plus-lg"></i> Add Stage
     </a>
   </div>
-
-
 
   <div class="container-fluid pt-4">
     {% for message in messages %}
@@ -67,19 +68,18 @@
 
     <div class="card p-0">
       <div class="card-body p-3 m-0">
-        {% if stages %} {% for stage in stages %} {{ stage.id }} {% endfor %} 
-        {% else %}
+        {% if stages %} {% for stage in stages %} {{ stage.id }} {% endfor %} {%
+        else %}
         <h2 class="text-center">No stages available</h2>
         {% endif %}
       </div>
     </div>
   </div>
-{% endif %}
+  {% endif %}
 </div>
 
-{% endblock %} 
-{% block js %}
+{% endblock %} {% block js %}
 
-  <script src="{% static 'js/addfield.js'%}"></script>
+<script src="{% static 'js/addfield.js'%}"></script>
 
 {% endblock %}
