@@ -427,12 +427,19 @@
 
                       {% for route in routes %}
 
-                      <div class="col-sm-4 model-btn mt-3" style="width: 350px">
-                        <div class="card m-0">
-                          <div class="card-body">
+                      <div class="col-sm-4 model-btn mt-3" style="width: 100%">
+                        <div class="card m-0 ">
+                          <div class="card-body row">
+                            <div class="col-10">
                             <h6><b>Name : </b> {{route.name}}</h6>
                             <h6><b>Email</b> : {{route.email}}</h6>
                             <h6><b>Telephone</b> : {{route.telephone}}</h6>
+                            </div>
+                            <div class="col-1">
+                              <form action="/{{ council.id }}/{{ route.id }}/stages">
+                              <button type="submit" class="btn btn-secondary" data-bs-dismiss="modal"> Stage </button>
+                              </form>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -470,7 +477,6 @@
                                   <label for="telephone" class="form-label">Telephone</label>
                                   <input type="text" class="form-control" id="telephone" name="telephone" value="{{ route.telephone }}" >
                                 </div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-plus-lg"></i> Stage</button>
                               </div>
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -491,6 +497,7 @@
           </div>
         </div>
       </div>
+      
     </div>
   </div>
 

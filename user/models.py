@@ -28,6 +28,7 @@ class UserManager(BaseUserManager):
             "funding_route":True,
             "admin": True,
             "finance": True,
+            "council":True,
             "hr": True,
             "is_staff": True,
             "is_superuser": True,

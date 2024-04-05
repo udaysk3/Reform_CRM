@@ -81,7 +81,7 @@ class Councils(models.Model):
         return Action.objects.create(council=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.id}"
     
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE, null=True)
@@ -93,3 +93,8 @@ class Action(models.Model):
     imported = models.BooleanField(default=False)
     talked_with = models.CharField(max_length=225, blank= True, null=True)
 
+class Stage(models.Model):
+    name = models.CharField(max_length=999, blank= True, null=True)
+    council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
+    route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
+    fields = models.JSONField()

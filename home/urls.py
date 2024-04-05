@@ -52,4 +52,5 @@ urlpatterns = [
     path('make_primary/<int:parent_customer_id>/<int:child_customer_id>', views.make_primary, name='make_primary'),
     path('add_council_funding_route/<int:council_id>', views.add_council_funding_route,name='add_council_funding_route'),
     path('edit_council_funding_route/<int:route_id>', views.edit_council_funding_route, name="edit_council_funding_route"),
+    path('<int:council_id>/<int:route_id>/stages', views.stages, name="stages"),
 ]
