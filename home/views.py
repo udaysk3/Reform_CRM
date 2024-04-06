@@ -11,6 +11,7 @@ from django.db.models import Max
 import pytz
 from user.models import User
 from pytz import timezone
+import json
 
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
@@ -182,7 +183,7 @@ def Customer(request):
         return render(
             request,
             "home/customer.html",
-            {"customer": customer, "recommendations_list": processed_recommendations},
+            {"customer": customer},
         )
 
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
@@ -830,7 +831,52 @@ def edit_council_funding_route(request, route_id):
         return redirect("app:council")
 
 
-def stages(request, council_id, route_id):
+@login_required
+def create_stage(request,council_id, route_id):
     route = Route.objects.get(pk=route_id)
-    stages = Stage.objects.all().filter(route=route)
-    return render(request, "home/stages.html", {"routes": route, "stages": stages, "council_id":council_id})
+    stages=Stage.objects.all().filter(route=route)
+    if request.GET.get("page")== 'edit_page':
+        stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
+        return render(request, 'home/stages.html', {"route": route, "council_id":council_id,"stage":stage, "fields":json.loads(stage.fields)})
+
+    if request.method == "POST":
+        dynamic_types = request.POST.getlist("dynamic_type")
+        dynamic_labels = request.POST.getlist("dynamic_label")
+        dynamic_fields = {}
+        print(dynamic_types,dynamic_labels)
+        for label, field_type in zip(dynamic_labels, dynamic_types):
+            dynamic_fields[label] = field_type
+        fields = json.dumps(dynamic_fields)
+        stage = Stage.objects.create(
+            name=request.POST.get("name"),
+            route=route,
+            council=Councils.objects.get(pk=council_id), 
+            fields=fields,
+        )
+        return redirect(f"/{council_id}/{route_id}/stages") 
+    return render(request, "home/stages.html", {"route": route, "council_id":council_id, "stages": stages}) 
+
+@login_required
+def remove_stage(request, stage_id):
+    stage = Stage.objects.get(pk=stage_id)
+    route_id = stage.route.id
+    council_id = stage.council.id
+    stage.delete()
+    messages.success(request, "Stage deleted successfully!")
+    return redirect(f"/{council_id}/{route_id}/stages")
+
+@login_required
+def edit_stage(request, council_id, route_id, stage_id):
+    stage = Stage.objects.get(pk=stage_id)
+    if request.method == "POST":
+        dynamic_types = request.POST.getlist("dynamic_type")
+        dynamic_labels = request.POST.getlist("dynamic_label")
+        dynamic_fields = {}
+        for label, field_type in zip(dynamic_labels, dynamic_types):
+            dynamic_fields[label] = field_type
+        fields = json.dumps(dynamic_fields)
+        stage.name = request.POST.get("name")
+        stage.fields = fields
+        stage.save()
+        messages.success(request, "Stage edited successfully!")
+        return redirect(f"/{council_id}/{route_id}/stages")

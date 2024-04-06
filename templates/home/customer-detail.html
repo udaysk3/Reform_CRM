@@ -279,6 +279,7 @@ table {
                 <div class="contacts py-2">
                   <div class=" d-flex  justify-content-between mb-2">
                   <form  method="post" action="/make_primary/{{ customer.id }}/{{ c_customer.id }}">
+                    
                     {% csrf_token %}
                     {% if c_customer.primary_customer %}
                     <input type="checkbox" checked class="make_primary"> Primary

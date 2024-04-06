@@ -1,7 +1,5 @@
 from . import views
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path
 
 app_name = "app"
 
@@ -52,5 +50,7 @@ urlpatterns = [
     path('make_primary/<int:parent_customer_id>/<int:child_customer_id>', views.make_primary, name='make_primary'),
     path('add_council_funding_route/<int:council_id>', views.add_council_funding_route,name='add_council_funding_route'),
     path('edit_council_funding_route/<int:route_id>', views.edit_council_funding_route, name="edit_council_funding_route"),
-    path('<int:council_id>/<int:route_id>/stages', views.stages, name="stages"),
+    path('<int:council_id>/<int:route_id>/stages', views.create_stage, name="create_stage"),
+    path("remove_stage/<int:stage_id>", views.remove_stage, name="remove_stage"),
+    path("edit_stage/<int:council_id>/<int:route_id>/<int:stage_id>", views.edit_stage, name="edit_stage"),
 ]
