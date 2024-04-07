@@ -71,24 +71,23 @@
           <input type="text" class=" col-sm-2"  placeholder="Label" name="dynamic_label" value="{{ key }}">
 <div class="col-sm-4">
 <select class="form-select" id="name" name="dynamic_type" vlaue="{{ value }}">
-<option >Open this select menu</option>
-<option value="button" {% if value == "button" %} selected {% endif %}>button</option>
-<option value="checkbox" {% if value == "checkbox" %} selected {% endif %}>checkbox</option>
-<option value="color" {% if value == "color" %} selected {% endif %}>color</option>
+{% comment %} <option value="button" {% if value == "button" %} selected {% endif %}>button</option> {% endcomment %}
+{% comment %} <option value="checkbox" {% if value == "checkbox" %} selected {% endif %}>checkbox</option> {% endcomment %}
+{% comment %} <option value="color" {% if value == "color" %} selected {% endif %}>color</option> {% endcomment %}
+{% comment %} <option value="datetime-local" {% if value == "datetime-local" %} selected {% endif %}>datetime-local</option> {% endcomment %}
+<option value="text" {% if value == "text" %} selected {% endif %}>text</option>
 <option value="date" {% if value == "date" %} selected {% endif %}>date</option>
-<option value="datetime-local" {% if value == "datetime-local" %} selected {% endif %}>datetime-local</option>
 <option value="email" {% if value == "email" %} selected {% endif %}>email</option>
-<option value="file" {% if value == "file" %} selected {% endif %}>file</option>
-<option value="image" {% if value == "image" %} selected {% endif %}>image</option>
-<option value="month" {% if value == "month" %} selected {% endif %}>month</option>
+ <option value="file" {% if value == "file" %} selected {% endif %}>file</option>
+{% comment %} <option value="image" {% if value == "image" %} selected {% endif %}>image</option> {% endcomment %}
+<option value="month" {% if value == "month" %} selected {% endif %}>month</option> 
 <option value="number" {% if value == "number" %} selected {% endif %}>number</option>
 <option value="password" {% if value == "password" %} selected {% endif %}>password</option>
-<option value="radio" {% if value == "radio" %} selected {% endif %}>radio</option>
-<option value="range" {% if value == "range" %} selected {% endif %}>range</option>
-<option value="text" {% if value == "text" %} selected {% endif %}>text</option>
 <option value="time" {% if value == "time" %} selected {% endif %}>time</option>
 <option value="url" {% if value == "url" %} selected {% endif %}>url</option>
-<option value="week" {% if value == "week" %} selected {% endif %}>week</option>
+{% comment %} <option value="radio" {% if value == "radio" %} selected {% endif %}>radio</option> {% endcomment %}
+{% comment %} <option value="range" {% if value == "range" %} selected {% endif %}>range</option> {% endcomment %}
+{% comment %} <option value="week" {% if value == "week" %} selected {% endif %}>week</option> {% endcomment %}
 
 </select>
 </div>
@@ -140,52 +139,76 @@
 
     <div class="card p-0">
       <div class="card-body p-3 m-0">
+
+        <table class="table">
+                  
+          <thead>
+<tr>
+<th>
+Stage
+</th>
+</tr>
+</thead>
+
+
+<tbody id="myTable">
         {% if stages %} {% for stage in stages %}
-        <h4 style="display: inline; font-weight: bold">{{ stage.name }}</h4>
-        <a href="/{{ council_id }}/{{ route.id }}/stages?page=edit_page&stage_id={{ stage.id }}" class="edit-stage-btn" data-stage-id="{{ stage.id }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="text-warning icon icon-tabler icon-tabler-pencil"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-            <path d="M13.5 6.5l4 4" />
-          </svg>
-        </a>
-        <a href="#" class="delete-stage-btn" data-stage-id="{{ stage.id }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="text-danger icon icon-tabler icon-tabler-trash"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M4 7l16 0" />
-            <path d="M10 11l0 6" />
-            <path d="M14 11l0 6" />
-            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-          </svg>
-        </a>
-        <br />
-        {% endfor %} {% else %}
-        <h2 class="text-center">No stages available</h2>
+
+
+            <tr>
+              <td class="text-underlined" style="width: 20%;">{{ stage.name }}</td>
+              <td style="width: 10%;"><a href="/{{ council_id }}/{{ route.id }}/stages?page=edit_page&stage_id={{ stage.id }}" class="edit-stage-btn" data-stage-id="{{ stage.id }}">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="text-warning icon icon-tabler icon-tabler-pencil"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                  <path d="M13.5 6.5l4 4" />
+                </svg>
+              </a></td>
+              <td style="width: 10%;"><a href="#" class="delete-stage-btn" data-stage-id="{{ stage.id }}">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="text-danger icon icon-tabler icon-tabler-trash"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M4 7l16 0" />
+                  <path d="M10 11l0 6" />
+                  <path d="M14 11l0 6" />
+                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                </svg>
+              </a></td>
+              
+              
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr class="text-center display-flex align-items-center justify-content-center">
+            <td colspan="6" class="text-center">No stages available</td>
+          </tr>
         {% endif %}
-      </div>
+        </tbody>
+      </table>
+
+
     </div>
   </div>
   {% endif %}

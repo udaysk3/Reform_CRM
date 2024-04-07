@@ -12,6 +12,7 @@ import pytz
 from user.models import User
 from pytz import timezone
 import json
+import numpy as np
 
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
@@ -87,9 +88,8 @@ def customer_detail(request, customer_id):
                     i.talked_with,
                 ]
             )
-
-    # routes = Route.objects.all().filter(customer=customer)
-
+    council= Councils.objects.get(name=customer.district) 
+    routes = Route.objects.all().filter(council=council)
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [
@@ -101,7 +101,62 @@ def customer_detail(request, customer_id):
         processed_recommendations.append(
             {"improvement": improvement, "indicative_cost": indicative_cost[:-1]}
         )
-    print(processed_recommendations)
+    if customer.route:
+        all_stages = customer.route.stage.all()
+        stages = {}
+        for stage in all_stages:
+            stages[stage.name] = json.loads(stage.fields)
+        if customer.stage_values:
+            stage_values = json.loads(customer.stage_values)
+            values = {}
+            for name,s_fields in stages.items():
+                fields = {}
+                for field in s_fields:
+                    fields[field] = [s_fields[field], '']
+                values[name] = fields
+                
+            for count, key in enumerate(stage_values):
+                fields ={}
+                # print(stage_values[key],values[key])
+                for a,b in values[key].items():
+                    # print(stage_values[key][a],b[0])
+                    fields[a]= [b[0],stage_values[key][a]]
+                    
+                values[key] = fields
+            
+            print(stage_values, values)
+            return render(
+        request,
+        "home/customer-detail.html",
+        {
+            "customer": customer,
+            "history": history,
+            "imported": imported,
+            "prev": prev,
+            "next": next,
+            "child_customers": child_customers,
+            "recommendations_list": processed_recommendations,
+            "routes": routes,
+            "stages": stages,
+            "values": values,
+        },
+    )
+        return render(
+        request,
+        "home/customer-detail.html",
+        {
+            "customer": customer,
+            "history": history,
+            "imported": imported,
+            "prev": prev,
+            "next": next,
+            "child_customers": child_customers,
+            "recommendations_list": processed_recommendations,
+            "routes": routes,
+            "stages": stages,
+        },
+    )
+
     return render(
         request,
         "home/customer-detail.html",
@@ -113,7 +168,7 @@ def customer_detail(request, customer_id):
             "next": next,
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
-            # "routes": routes,
+            "routes": routes,
         },
     )
 
@@ -880,3 +935,34 @@ def edit_stage(request, council_id, route_id, stage_id):
         stage.save()
         messages.success(request, "Stage edited successfully!")
         return redirect(f"/{council_id}/{route_id}/stages")
+
+@login_required
+def set_customer_route(request, customer_id, route_id):
+    customer = Customers.objects.get(pk=customer_id)
+    route = Route.objects.get(pk=route_id)
+    customer.route = route
+    customer.save()
+    messages.success(request, "Route set successfully!")
+    return redirect(f"/customer-detail/{customer_id}")
+
+@login_required
+def set_stage_values(request, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+    if request.method == 'POST':
+        name = request.POST.get("name")
+        dynamic_labels = request.POST.getlist("dynamic_label")
+        dynamic_input = request.POST.getlist("dynamic_input")
+        dynamic_fields = {}
+        for label, field_type in zip(dynamic_labels, dynamic_input):
+            dynamic_fields[label] = field_type
+        values = {}
+        if customer.stage_values:
+            values = json.loads(customer.stage_values)
+            values[name] = dynamic_fields
+        else:
+            values = {name:dynamic_fields}
+        stage_values = json.dumps(values)
+        customer.stage_values = stage_values
+        customer.save()
+        messages.success(request, f"{name} is set successfully!")
+        return redirect(f"/customer-detail/{customer_id}")

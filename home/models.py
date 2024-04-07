@@ -24,7 +24,9 @@ class Customers(models.Model):
     energy_rating = models.CharField(max_length=2, blank=True, null=True)
     energy_certificate_link = models.URLField(max_length=999, blank=True, null=True)
     recommendations = models.TextField(max_length=999, blank=True, null=True)
-    
+    route =  models.ForeignKey('Route', related_name='customers', on_delete=models.SET_NULL, blank=True, null=True)
+    stage_values = models.JSONField(blank= True, null=True)
+
     def add_action(
         self,
         text,
@@ -97,4 +99,4 @@ class Stage(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
-    fields = models.JSONField()
+    fields = models.JSONField(blank= True, null=True)
