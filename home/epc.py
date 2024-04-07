@@ -13,7 +13,7 @@ def parse_recommendations(recommendations_url, headers):
         recommendations_list = []
         for row in csv_reader:
             indicative_cost = row['indicative-cost'].replace('£', '').replace(',', '')
-            text = None
+            text = row['improvement-descr-text']
             if row['improvement-descr-text'] == '':
                 try:
                     with open('home/unique_records.json', 'r') as json_file:
