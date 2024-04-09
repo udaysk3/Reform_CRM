@@ -26,6 +26,7 @@ class Customers(models.Model):
     recommendations = models.TextField(max_length=999, blank=True, null=True)
     route =  models.ForeignKey('Route', related_name='customers', on_delete=models.SET_NULL, blank=True, null=True)
     stage_values = models.JSONField(blank= True, null=True)
+    council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
 
     def add_action(
         self,
@@ -65,7 +66,7 @@ class Route(models.Model):
     main_contact = models.CharField(max_length=999, blank= True, null=True)
     telephone = models.CharField(max_length=15)
     email = models.EmailField(max_length=255)
-    council = models.ForeignKey('home.Councils', on_delete=models.CASCADE, null=True, blank= True)
+    council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
     
 class Councils(models.Model):
     name = models.CharField(max_length=999, unique=True)
@@ -83,7 +84,7 @@ class Councils(models.Model):
         return Action.objects.create(council=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.name}"
     
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE, null=True)

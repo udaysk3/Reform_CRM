@@ -114,17 +114,16 @@ def customer_detail(request, customer_id):
                 for field in s_fields:
                     fields[field] = [s_fields[field], '']
                 values[name] = fields
-                
-            for count, key in enumerate(stage_values):
-                fields ={}
-                # print(stage_values[key],values[key])
-                for a,b in values[key].items():
-                    # print(stage_values[key][a],b[0])
-                    fields[a]= [b[0],stage_values[key][a]]
-                    
-                values[key] = fields
+            print(values,'           ',stage_values)
             
-            print(stage_values, values)
+            for key, fields in values.items():
+                if key in stage_values:
+                    for field in fields:
+                        if field in stage_values[key]:
+                            fields[field][1] = stage_values[key][field]
+
+            
+            # print(stage_values, values)
             return render(
         request,
         "home/customer-detail.html",
@@ -177,7 +176,8 @@ def customer_detail(request, customer_id):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council)
+    routes = Route.objects.all()
+    c_routes = Route.objects.all().filter(council=council)    
     prev = None
     next = None
     if len(all_councils) == 1:
@@ -226,6 +226,7 @@ def council_detail(request, council_id):
             "prev": prev,
             "next": next,
             "routes": routes,
+            "c_routes" : c_routes,
         },
     )
 
@@ -835,45 +836,33 @@ def make_primary(request, parent_customer_id, child_customer_id):
 def add_funding_route(request):
     if request.method == "POST":
         name = request.POST.get("name")
-        telephone = request.POST.get("telephone")
-        main_contact = request.POST.get("main_contact")
-        email = request.POST.get("email")
-        another_contact = request.POST.get("another_contact")
-        council = Councils.objects.get(name=request.POST.get("council"))
-        route = Route.objects.create(
-            name=name,
-            telephone=telephone,
-            main_contact=main_contact,
-            email=email,
-            another_contact=another_contact,
-        )
-        messages.success(request, "Funding Route added successfully!")
-        return redirect(f"/councils")
-    return render(request, "admin.html")
-
-
-def add_council_funding_route(request, council_id):
-    if request.method == "POST":
-        name = request.POST.get("name")
         managed_by = request.POST.get("managed_by")
         main_contact = request.POST.get("main_contact")
         email = request.POST.get("email")
         telephone = request.POST.get("telephone")
-        council = Councils.objects.get(pk=council_id)
         route = Route.objects.create(
             name=name,
             managed_by=managed_by,
             telephone=telephone,
             main_contact=main_contact,
             email=email,
-            council=council,
         )
         messages.success(request, "Funding Route added successfully!")
-        return redirect(f"/council")
+        return redirect(f"/funding_route")
     return render(request, "admin.html")
 
 
-def edit_council_funding_route(request, route_id):
+def add_council_funding_route(request, council_id):
+    if request.method == "POST":
+        council = Councils.objects.get(pk=council_id)
+        route = Route.objects.get(pk=request.POST.get("route"))
+        route.council.add(council)
+        route.save()
+        messages.success(request, "Funding Route added successfully to a Council!")
+        return redirect(f"/council-detail/{council_id}")
+
+
+def edit_funding_route(request, route_id):
     route = Route.objects.get(pk=route_id)
     if request.method == "POST":
         route.name = request.POST.get("name")
@@ -883,16 +872,22 @@ def edit_council_funding_route(request, route_id):
         route.telephone = request.POST.get("telephone")
         route.save()
         messages.success(request, "Route updated successfully!")
-        return redirect("app:council")
+        return redirect("app:funding_route")
+
+def remove_funding_route(request, route_id):
+    route = Route.objects.get(pk=route_id)
+    route.delete()
+    messages.success(request, "Route deleted successfully!")
+    return redirect("app:funding_route")
 
 
 @login_required
-def create_stage(request,council_id, route_id):
+def create_stage(request, route_id):
     route = Route.objects.get(pk=route_id)
     stages=Stage.objects.all().filter(route=route)
     if request.GET.get("page")== 'edit_page':
         stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
-        return render(request, 'home/stages.html', {"route": route, "council_id":council_id,"stage":stage, "fields":json.loads(stage.fields)})
+        return render(request, 'home/stages.html', {"route": route,"stage":stage, "fields":json.loads(stage.fields)})
 
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
@@ -905,23 +900,21 @@ def create_stage(request,council_id, route_id):
         stage = Stage.objects.create(
             name=request.POST.get("name"),
             route=route,
-            council=Councils.objects.get(pk=council_id), 
             fields=fields,
         )
-        return redirect(f"/{council_id}/{route_id}/stages") 
-    return render(request, "home/stages.html", {"route": route, "council_id":council_id, "stages": stages}) 
+        return redirect(f"/{route_id}/stages") 
+    return render(request, "home/stages.html", {"route": route, "stages": stages}) 
 
 @login_required
 def remove_stage(request, stage_id):
     stage = Stage.objects.get(pk=stage_id)
     route_id = stage.route.id
-    council_id = stage.council.id
     stage.delete()
     messages.success(request, "Stage deleted successfully!")
-    return redirect(f"/{council_id}/{route_id}/stages")
+    return redirect(f"/{route_id}/stages")
 
 @login_required
-def edit_stage(request, council_id, route_id, stage_id):
+def edit_stage(request, route_id, stage_id):
     stage = Stage.objects.get(pk=stage_id)
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
@@ -934,7 +927,7 @@ def edit_stage(request, council_id, route_id, stage_id):
         stage.fields = fields
         stage.save()
         messages.success(request, "Stage edited successfully!")
-        return redirect(f"/{council_id}/{route_id}/stages")
+        return redirect(f"/{route_id}/stages")
 
 @login_required
 def set_customer_route(request, customer_id, route_id):
@@ -966,3 +959,15 @@ def set_stage_values(request, customer_id):
         customer.save()
         messages.success(request, f"{name} is set successfully!")
         return redirect(f"/customer-detail/{customer_id}")
+    
+@login_required
+def funding_route(request):
+    routes = Route.objects.all()
+    return render(request, 'home/funding-route.html', {"routes": routes})
+
+def remove_customer_route(request, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+    customer.route = None
+    customer.save()
+    messages.success(request, "Route removed successfully!")
+    return redirect(f"/customer-detail/{customer_id}")

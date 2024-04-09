@@ -39,9 +39,9 @@
             </div> {% endcomment %}
             <div class="mb-3 mb-sm-0">
               <!-- Button trigger modal -->
-              <button type="button" class="btn btn-primary position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+              {% comment %} <button type="button" class="btn btn-primary position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
                 <i class="bi bi-plus-lg"></i> Funding Route
-              </button>
+              </button> {% endcomment %}
 
               <!-- Modal -->
               <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -98,7 +98,7 @@
               <!-- Adjust the form action URL and method accordingly -->
               {% if council %}
                 <h3>Edit Council</h3>
-                <form onSubmit="doSubmit();" id="editcouncilForm" method="post" action="{% url 'app:edit_council' council.id %}">
+                <form id="editcouncilForm" method="post" action="{% url 'app:edit_council' council.id %}">
                   {% csrf_token %}
                   <div class="mb-3">
                       <label for="name" class="form-label">Name</label>
@@ -131,26 +131,9 @@
                   
                   <thead>
   <tr>
-    {% comment %} {% if user.is_staff %}
-      <th>
-        <input type="checkbox" id="selectAll">
-      </th>
-    {% endif %} {% endcomment %}
-   {% comment %} <th onclick="sortTable(0)">
-      ID <span id="arrow0"></span>
-    </th>  {% endcomment %}
-    <th onclick="sortTable(0)">
+    <th >
       Council  <span id="arrow0"></span>
     </th>
-    {% comment %} <th onclick="sortTable(1)">
-      Stage <span id="arrow1"></span>
-    </th>  {% endcomment %}
-    <th >
-      {% comment %} Added on <span id="arrow3"></span>
-    </th>
-    <th >
-      History <span id="arrow4"></span>
-    </th> {% endcomment %}
   </tr>
 </thead>
 
@@ -159,40 +142,7 @@
   {% for council in councils %}
 
                       <tr>
-                        {% comment %} {% if user.is_staff %}
-                        <td>
-                          <input type="checkbox" class="select-council" data-council-id="{{ council.id }}">
-                        </td>
-                      {% endif %} {% endcomment %}
                         <td class="text-underlined" style="width: 20%;"><a href="/council-detail/{{council.id}}">{{ council.name }}</a></td>
-                        {% comment %} <td style="width: 10%;">stage 1</td> {% endcomment %}
-                        {% comment %} {% with all_actions=council.get_created_at_council_action_history %}
-                          {% if all_actions|length >= 1 %}
-                            {% with action=all_actions.0 %}
-                            {% if action.imported %}
-                            <td style="width: 10%;">-</td>
-                            {% else %}
-                            <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
-
-                            {% endif %}
-                            {% endwith %}
-                          {% else %}
-                          <td style="width: 10%;">-</td>
-                          {% endif %}
-                        {% endwith %}
-                        {% with all_actions=council.get_created_at_council_action_history %}
-                          {% if all_actions|length > 1 %}
-                            {% with action=all_actions.1 %}
-                            {% if action.imported %}
-                            <td style="width: 10%;">-</td>
-                            {% else %}
-                            <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
-                            {% endif %}
-                            {% endwith %}
-                          {% else %}
-                          <td style="width: 10%;">-</td>
-                          {% endif %}
-                        {% endwith %} {% endcomment %}
                       </tr>
                     {% endfor %}
                   {% else %}
@@ -201,11 +151,6 @@
                     </tr>
                   {% endif %}
                   </tbody>
-                  {% comment %} {% if user.is_staff %}
-                  <div>
-                    <button type="button" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
-                  </div>
-                {% endif %} {% endcomment %}
                 </table>
             {% endif %}
 
@@ -229,106 +174,17 @@
 
 <script>
 
-  function doSubmit(){
-    const name = document.getElementById('name');
-    name.value = {{ council.name }}
-  }
 
-$(document).ready(function(){
-  $("#myInput").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+  $(document).ready(function(){
+    $("#myInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
     });
   });
-});
-
-
-function sortTable(colIndex) {
-  var table,
-    rows,
-    switching,
-    i,
-    x,
-    y,
-    shouldSwitch,
-    dir,
-    switchcount = 0;
-  table = document.getElementById("myTable");
-  switching = true;
-  dir = "asc"; // Set the sorting direction to ascending by default
-
-  while (switching) {
-    switching = false;
-    rows = table.rows;
-    for (i = 0; i < rows.length - 1; i++) {
-      shouldSwitch = false;
-      x = rows[i].getElementsByTagName("td")[colIndex];
-      y = rows[i + 1].getElementsByTagName("td")[colIndex];
-      if (dir === "asc") {form
-        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          shouldSwitch = true;
-          break;
-        }
-      } else if (dir === "desc") {
-        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          shouldSwitch = true;
-          break;
-        }
-      }
-    }
-    if (shouldSwitch) {
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      switchcount++;
-    } else {
-      if (switchcount === 0 && dir === "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
-  }
-
-  // Remove arrow indicators from all columns
-  for (var j = 0; j < table.rows[0].cells.length; j++) {
-    document.getElementById("arrow" + j).innerHTML = "";
-  }
-
-  // Set arrow indicator for the sorted column
-  document.getElementById("arrow" + colIndex).innerHTML = dir === "asc" ? " &#9650;" : " &#9660;";
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  // Select/deselect all checkboxes
-  const selectAllCheckbox = document.getElementById('selectAll');
-  const councilCheckboxes = document.querySelectorAll('.select-council');
-
-  selectAllCheckbox.addEventListener('change', function () {
-    councilCheckboxes.forEach(checkbox => {
-      checkbox.checked = selectAllCheckbox.checked;
-    });
-  });
-
-  // Bulk delete
-  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-
-  deleteSelectedBtn.addEventListener('click', function () {
-    const selectedcouncilIds = Array.from(councilCheckboxes)
-      .filter(checkbox => checkbox.checked)
-      .map(checkbox => checkbox.getAttribute('data-council-id'));
-
-    if (selectedcouncilIds.length > 0) {
-      const confirmDelete = confirm('Are you sure you want to delete selected council?');
-      if (confirmDelete) {
-        window.location.href = `bulk_remove_council/?ids=${selectedcouncilIds.join(',')}`;
-      }
-    } else {
-      alert('Please select council to delete.');
-    }
-  });
-});
-
-const form = document.querySelector('#addcouncilForm');
+  
+  
 
 </script>
 

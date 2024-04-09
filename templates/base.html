@@ -72,6 +72,16 @@
               </a>
             </li>
             {% endif %}
+            {% if request.user.funding_route %}
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-article"></i>
+                </span>
+                <span class="hide-menu">Funding Route</span>
+              </a>
+            </li>
+            {% endif %}
             {% if request.user.admin %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:admin" %}" aria-expanded="false">
