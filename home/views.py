@@ -840,12 +840,14 @@ def add_funding_route(request):
         main_contact = request.POST.get("main_contact")
         email = request.POST.get("email")
         telephone = request.POST.get("telephone")
+        document = request.FILES.get("document")
         route = Route.objects.create(
             name=name,
             managed_by=managed_by,
             telephone=telephone,
             main_contact=main_contact,
             email=email,
+            document=document,
         )
         messages.success(request, "Funding Route added successfully!")
         return redirect(f"/funding_route")

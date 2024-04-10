@@ -91,6 +91,7 @@
                     <form
                       method="post"
                       action="/add_funding_route"
+                      enctype="multipart/form-data"
                     >
                       {% csrf_token %}
                       <div class="modal-body">
@@ -145,6 +146,11 @@
                             name="telephone"
                           />
                         </div>
+                        
+                        <div class="mb-3">
+                          <label for="formFile" class="form-label">Document</label>
+                          <input class="form-control" type="file" id="formFile" name="document">
+                        </div>
                       </div>
                       <div class="modal-footer">
                         <button
@@ -172,6 +178,8 @@
                   <th onclick="sortTable(0)">
                     Funding Route <span id="arrow0"></span>
                   </th>
+
+                  <th>Documents</th>
                   <th>Stage</th>
                 </tr>
               </thead>
@@ -183,6 +191,7 @@
                   <td class="text-underlined" style="width: 20%">
                     {{ route.name }}
                   </td>
+                  <td style="width: 20%"><a href="{{ route.document.url }}"> {{ route.document.name }}</a></td>
                   <td style="width: 20%">
                     <form action="/{{ route.id }}/stages">
                       <button
@@ -243,6 +252,7 @@
                     <form
                       method="post"
                       action="/edit_funding_route/{{ route.id }}"
+                      enctype="multipart/form-data"
                     >
                       {% csrf_token %}
                       <div class="modal-body">
@@ -301,6 +311,10 @@
                             name="telephone"
                             value="{{ route.telephone }}"
                           />
+                        </div>
+                        <div class="mb-3">
+                          <label for="formFile" class="form-label">Document</label>
+                          <input class="form-control" type="file" id="formFile" name="document" >
                         </div>
                       </div>
                       <div class="modal-footer">

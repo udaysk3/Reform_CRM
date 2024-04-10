@@ -67,6 +67,7 @@ class Route(models.Model):
     telephone = models.CharField(max_length=15)
     email = models.EmailField(max_length=255)
     council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
+    document = models.FileField(upload_to="documents", blank= True, null=True)
     
 class Councils(models.Model):
     name = models.CharField(max_length=999, unique=True)
