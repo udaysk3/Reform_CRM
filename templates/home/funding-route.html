@@ -105,6 +105,12 @@
                           />
                         </div>
                         <div class="mb-3">
+                          <label for="description" class="form-label"
+                            >Description</label
+                          >
+                          <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+                        </div>
+                        {% comment %} <div class="mb-3">
                           <label for="managedby" class="form-label"
                             >Managed By</label
                           >
@@ -145,11 +151,11 @@
                             id="telephone"
                             name="telephone"
                           />
-                        </div>
+                        </div> {% endcomment %}
                         
                         <div class="mb-3">
                           <label for="formFile" class="form-label">Document</label>
-                          <input class="form-control" type="file" id="formFile" name="document">
+                          <input class="form-control" type="file" id="formFile" name="document" accept="application/pdf">
                         </div>
                       </div>
                       <div class="modal-footer">
@@ -179,8 +185,7 @@
                     Funding Route <span id="arrow0"></span>
                   </th>
 
-                  <th>Documents</th>
-                  <th>Stage</th>
+                  <th>Description</th>
                 </tr>
               </thead>
 
@@ -188,23 +193,17 @@
                 {% if routes %} {% for route in routes %}
 
                 <tr>
-                  <td class="text-underlined" style="width: 20%">
+                  <td class="text-underlined" style="width: 20%"><a href="/funding_route_detail/{{ route.id }}">
                     {{ route.name }}
-                  </td>
-                  <td style="width: 20%"><a href="{{ route.document.url }}"> {{ route.document.name }}</a></td>
-                  <td style="width: 20%">
-                    <form action="/{{ route.id }}/stages">
-                      <button
-                        type="submit"
-                        class="position-relative btn btn-secondary"
-                        style="right: 15px"
-                        data-bs-dismiss="modal"
-                      >
-                        Stage
-                      </button>
-                    </form>
-                  </td>
-                  <td style="width: 20%">
+                  </a></td>
+                  <td style="width: 20%">{{ route.description|truncatechars:80 }}</td>
+                  
+
+
+
+
+
+                  {% comment %} <td style="width: 20%">
                     
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -267,6 +266,18 @@
                           />
                         </div>
                         <div class="mb-3">
+                          <label for="description" class="form-label"
+                            >Description</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="description"
+                            name="description"
+                            value="{{ route.description }}"
+                          />
+                        </div>
+                         <div class="mb-3">
                           <label for="managedby" class="form-label"
                             >Managed By</label
                           >
@@ -311,7 +322,7 @@
                             name="telephone"
                             value="{{ route.telephone }}"
                           />
-                        </div>
+                        </div> 
                         <div class="mb-3">
                           <label for="formFile" class="form-label">Document</label>
                           <input class="form-control" type="file" id="formFile" name="document" >
@@ -335,6 +346,11 @@
               </div>
 
                   </td>
+
+
+
+
+
                   <td style="width: 20%">
                     <a
                       href="#"
@@ -363,7 +379,7 @@
                         <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
                       </svg>
                     </a>
-                  </td>
+                  </td> {% endcomment %}
                 </tr>
                 {% endfor %} {% else %}
                 <tr

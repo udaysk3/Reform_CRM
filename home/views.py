@@ -836,17 +836,19 @@ def make_primary(request, parent_customer_id, child_customer_id):
 def add_funding_route(request):
     if request.method == "POST":
         name = request.POST.get("name")
-        managed_by = request.POST.get("managed_by")
-        main_contact = request.POST.get("main_contact")
-        email = request.POST.get("email")
-        telephone = request.POST.get("telephone")
+        # managed_by = request.POST.get("managed_by")
+        # main_contact = request.POST.get("main_contact")
+        # email = request.POST.get("email")
+        # telephone = request.POST.get("telephone")
+        description = request.POST.get("description") 
         document = request.FILES.get("document")
         route = Route.objects.create(
             name=name,
-            managed_by=managed_by,
-            telephone=telephone,
-            main_contact=main_contact,
-            email=email,
+            # managed_by=managed_by,
+            # telephone=telephone,
+            # main_contact=main_contact,
+            # email=email,
+            description=description,
             document=document,
         )
         messages.success(request, "Funding Route added successfully!")
@@ -868,10 +870,12 @@ def edit_funding_route(request, route_id):
     route = Route.objects.get(pk=route_id)
     if request.method == "POST":
         route.name = request.POST.get("name")
-        route.managed_by = request.POST.get("managed_by")
-        route.main_contact = request.POST.get("main_contact")
-        route.email = request.POST.get("email")
-        route.telephone = request.POST.get("telephone")
+        # route.managed_by = request.POST.get("managed_by")
+        # route.main_contact = request.POST.get("main_contact")
+        # route.email = request.POST.get("email")
+        # route.telephone = request.POST.get("telephone")
+        route.description = request.POST.get("description")
+        route.document = request.FILE.get("document")
         route.save()
         messages.success(request, "Route updated successfully!")
         return redirect("app:funding_route")
@@ -973,3 +977,8 @@ def remove_customer_route(request, customer_id):
     customer.save()
     messages.success(request, "Route removed successfully!")
     return redirect(f"/customer-detail/{customer_id}")
+
+@login_required
+def funding_route_detail(request, route_id):
+    route = Route.objects.get(pk=route_id)
+    return render(request, 'home/funding-route_detail.html', {"route": route})

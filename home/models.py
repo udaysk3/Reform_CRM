@@ -64,10 +64,11 @@ class Route(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     managed_by = models.CharField(max_length=999, blank= True, null=True)
     main_contact = models.CharField(max_length=999, blank= True, null=True)
-    telephone = models.CharField(max_length=15)
+    telephone = models.CharField(max_length=15, blank= True, null=True)
     email = models.EmailField(max_length=255)
     council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
     document = models.FileField(upload_to="documents", blank= True, null=True)
+    description = models.CharField(max_length=999, blank= True, null=True)
     
 class Councils(models.Model):
     name = models.CharField(max_length=999, unique=True)
