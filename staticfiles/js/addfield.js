@@ -9,6 +9,7 @@ function addField() {
 <div class="col-sm-4">
 <select class="form-select" id="name" name="dynamic_type">
 <option value="text" >text</option>
+<option value="checkbox" >checkbox</option> 
 <option value="date" >date</option>
 <option value="email" >email</option>
 <option value="file" >file</option>
