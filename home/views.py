@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Client, Campaign, Councils, Route, Stage
+from .models import Customers, Client, Campaign, Councils, Route, Stage, Document
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 import pandas as pd
@@ -841,7 +841,6 @@ def add_funding_route(request):
         # email = request.POST.get("email")
         # telephone = request.POST.get("telephone")
         description = request.POST.get("description") 
-        document = request.FILES.get("document")
         route = Route.objects.create(
             name=name,
             # managed_by=managed_by,
@@ -849,8 +848,12 @@ def add_funding_route(request):
             # main_contact=main_contact,
             # email=email,
             description=description,
-            document=document,
         )
+        documents = request.FILES.getlist("document")
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            route.documents.add(doc)
+        route.save()
         messages.success(request, "Funding Route added successfully!")
         return redirect(f"/funding_route")
     return render(request, "admin.html")
@@ -898,6 +901,7 @@ def create_stage(request, route_id):
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
         dynamic_labels = request.POST.getlist("dynamic_label")
+
         dynamic_fields = {}
         print(dynamic_types,dynamic_labels)
         for label, field_type in zip(dynamic_labels, dynamic_types):
@@ -981,4 +985,9 @@ def remove_customer_route(request, customer_id):
 @login_required
 def funding_route_detail(request, route_id):
     route = Route.objects.get(pk=route_id)
-    return render(request, 'home/funding-route_detail.html', {"route": route})
+    documents = []
+    for doc in route.documents.all():
+        documents.append(doc.document)
+    # print(documents)
+    return render(request, 'home/funding-route_detail.html', {"route": route, "documents": documents})
+

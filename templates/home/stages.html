@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load custom %} {% block content %}
 
 <div class="row container-fluid">
   {% if request.GET.page == "add_stage" %} {% for message in messages %}
@@ -57,7 +57,7 @@
   <div class="card p-0">
     <div class="card-body p-3 m-0">
       <h1>Edit Stage</h1>
-      <form method="post" action="/edit_stage/{{ route.id }}/{{ stage.id }}">
+      <form method="post" action="/edit_stage/{{ route.id }}/{{ stage.id }}" onsubmit="submitForm();">
         {% csrf_token %}
         <div class="my-3 row">
           <label for="name" class="fs-4 col-sm-2 col-form-label">Name</label>
@@ -65,35 +65,97 @@
             <input type="text" class="form-control" id="name" name="name" value="{{ stage.name }}"/>
           </div>
         </div>
+
+        
+        
         {% for key, value in fields.items %}
+        {% if value == "dropdown" %}
+        {% with array=key|split:"," %}
+
+        <div class="my-3 row">
+          <input type="text" class=" col-sm-2"  placeholder="Label" name="dynamic_label" value="{{ array.0 }}">
+            <div class="col-sm-4">
+            <select class="form-select" id="name" name="dynamic_type" value="{{ value }}" onchange="checkSeletcted(this)">
+            {% comment %} <option value="button" {% if value == "button" %} selected {% endif %}>button</option> {% endcomment %}
+            {% comment %} <option value="color" {% if value == "color" %} selected {% endif %}>color</option> {% endcomment %}
+            {% comment %} <option value="datetime-local" {% if value == "datetime-local" %} selected {% endif %}>datetime-local</option> {% endcomment %}
+            <option value="text" {% if value == "text" %} selected {% endif %}>text</option>
+            <option value="checkbox" {% if value == "checkbox" %} selected {% endif %}>checkbox</option> 
+            <option value="date" {% if value == "date" %} selected {% endif %}>date</option>
+            <option value="email" {% if value == "email" %} selected {% endif %}>email</option>
+            <option value="file" {% if value == "file" %} selected {% endif %}>file</option>
+            {% comment %} <option value="image" {% if value == "image" %} selected {% endif %}>image</option> {% endcomment %}
+            <option value="month" {% if value == "month" %} selected {% endif %}>month</option> 
+            <option value="number" {% if value == "number" %} selected {% endif %}>number</option>
+            <option value="password" {% if value == "password" %} selected {% endif %}>password</option>
+            <option value="time" {% if value == "time" %} selected {% endif %}>time</option>
+            <option value="url" {% if value == "url" %} selected {% endif %}>url</option>
+            {% comment %} <option value="radio" {% if value == "radio" %} selected {% endif %}>radio</option> {% endcomment %}
+            {% comment %} <option value="range" {% if value == "range" %} selected {% endif %}>range</option> {% endcomment %}
+            {% comment %} <option value="week" {% if value == "week" %} selected {% endif %}>week</option> {% endcomment %}
+            
+            <option value="dropdown" {% if value == "dropdown" %} selected {% endif %} >dropdown</option>
+          </select>
+        </div>
+            <a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                </a>    
+                {% for option in array %}
+                {% if forloop.counter == 1 %}
+                {% else %}
+                <div class="my-3 row ms-3">
+                  <input type="text" class="col-sm-2"  placeholder="Option" name="dynamic_option" value="{{ option }}">
+      <a href="#" class="option add-option-btn col-sm-2" onclick="addOption(this)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="text-success icon icon-tabler icon-tabler-plus" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+      </a>
+      <a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
+         <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+           </a>    
+         </div>
+                        {% endif %}
+                {% endfor %}
+
+
+            
+
+          </div> 
+
+
+{% endwith %}
+        {% else %}
         <div class="my-3 row">
           <input type="text" class=" col-sm-2"  placeholder="Label" name="dynamic_label" value="{{ key }}">
-<div class="col-sm-4">
-<select class="form-select" id="name" name="dynamic_type" vlaue="{{ value }}">
-{% comment %} <option value="button" {% if value == "button" %} selected {% endif %}>button</option> {% endcomment %}
-{% comment %} <option value="color" {% if value == "color" %} selected {% endif %}>color</option> {% endcomment %}
-{% comment %} <option value="datetime-local" {% if value == "datetime-local" %} selected {% endif %}>datetime-local</option> {% endcomment %}
-<option value="text" {% if value == "text" %} selected {% endif %}>text</option>
-<option value="checkbox" {% if value == "checkbox" %} selected {% endif %}>checkbox</option> 
-<option value="date" {% if value == "date" %} selected {% endif %}>date</option>
-<option value="email" {% if value == "email" %} selected {% endif %}>email</option>
- <option value="file" {% if value == "file" %} selected {% endif %}>file</option>
-{% comment %} <option value="image" {% if value == "image" %} selected {% endif %}>image</option> {% endcomment %}
-<option value="month" {% if value == "month" %} selected {% endif %}>month</option> 
-<option value="number" {% if value == "number" %} selected {% endif %}>number</option>
-<option value="password" {% if value == "password" %} selected {% endif %}>password</option>
-<option value="time" {% if value == "time" %} selected {% endif %}>time</option>
-<option value="url" {% if value == "url" %} selected {% endif %}>url</option>
-{% comment %} <option value="radio" {% if value == "radio" %} selected {% endif %}>radio</option> {% endcomment %}
-{% comment %} <option value="range" {% if value == "range" %} selected {% endif %}>range</option> {% endcomment %}
-{% comment %} <option value="week" {% if value == "week" %} selected {% endif %}>week</option> {% endcomment %}
+            <div class="col-sm-4">
+            <select class="form-select" id="name" name="dynamic_type" value="{{ value }}" onchange="checkSeletcted(this)">
+            {% comment %} <option value="button" {% if value == "button" %} selected {% endif %}>button</option> {% endcomment %}
+            {% comment %} <option value="color" {% if value == "color" %} selected {% endif %}>color</option> {% endcomment %}
+            {% comment %} <option value="datetime-local" {% if value == "datetime-local" %} selected {% endif %}>datetime-local</option> {% endcomment %}
+            <option value="text" {% if value == "text" %} selected {% endif %}>text</option>
+            <option value="checkbox" {% if value == "checkbox" %} selected {% endif %}>checkbox</option> 
+            <option value="date" {% if value == "date" %} selected {% endif %}>date</option>
+            <option value="email" {% if value == "email" %} selected {% endif %}>email</option>
+             <option value="file" {% if value == "file" %} selected {% endif %}>file</option>
+            {% comment %} <option value="image" {% if value == "image" %} selected {% endif %}>image</option> {% endcomment %}
+            <option value="month" {% if value == "month" %} selected {% endif %}>month</option> 
+            <option value="number" {% if value == "number" %} selected {% endif %}>number</option>
+            <option value="password" {% if value == "password" %} selected {% endif %}>password</option>
+            <option value="time" {% if value == "time" %} selected {% endif %}>time</option>
+            <option value="url" {% if value == "url" %} selected {% endif %}>url</option>
+            {% comment %} <option value="radio" {% if value == "radio" %} selected {% endif %}>radio</option> {% endcomment %}
+            {% comment %} <option value="range" {% if value == "range" %} selected {% endif %}>range</option> {% endcomment %}
+            {% comment %} <option value="week" {% if value == "week" %} selected {% endif %}>week</option> {% endcomment %}
+            <option value="dropdown" {% if value == "dropdown" %} selected {% endif %} >dropdown</option>
+            
+          </select>
+        </div>
+            <a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
+               <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                 </a>    
+          </div> 
+          {% endif %}
+        {% endfor %}
 
-</select>
-</div>
-<a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
-   <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-     </a>    </div> 
-          {% endfor %}
+
         <div>
           <input type="hidden" name="route" value="{{ route.id }}" />
           

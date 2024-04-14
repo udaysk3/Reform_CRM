@@ -96,7 +96,7 @@
                       {% csrf_token %}
                       <div class="modal-body">
                         <div class="mb-3">
-                          <label for="name" class="form-label">Name</label>
+                          <label for="name" class="form-label">Name of Financial Route</label>
                           <input
                             type="text"
                             class="form-control"
@@ -154,8 +154,8 @@
                         </div> {% endcomment %}
                         
                         <div class="mb-3">
-                          <label for="formFile" class="form-label">Document</label>
-                          <input class="form-control" type="file" id="formFile" name="document" accept="application/pdf">
+                          <label for="formFile" class="form-label">Financial Route Documentation</label>
+                          <input class="form-control" type="file" id="formFile" name="document" accept="application/pdf" multiple>
                         </div>
                       </div>
                       <div class="modal-footer">

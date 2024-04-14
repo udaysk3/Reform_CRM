@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block css %}
+{% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
 
 <style>
   .accordion-container {
@@ -689,6 +689,25 @@ table {
           {{ key }}
         </label>
       </div>
+{% elif value.0 == 'dropdown' %}
+{% with array=key|split:',' %}
+
+<div class="mb-3">
+  <label class="form-label">{{ array.0 }}</label>
+  <input type="hidden" name="dynamic_label" value="{{ key }}">
+  
+  <select class="form-select" aria-label="Default select example" name="dynamic_input">
+    {% for option in array %}
+    {% if forloop.counter == 1 %}
+    {% else %}
+    <option {% if value.1 == option %} selected {% endif %} value="{{ option }}" >{{ option }}</option>
+    {% endif %}
+    {% endfor %}
+  </select>
+    
+  </div>
+
+{% endwith %}
 {% else %}
        <div class="form-floating my-3">
          <input type="{{ value.0 }}" class="form-control" id="floatingInput1" name="dynamic_input" value="{{ value.1 }}">
@@ -718,11 +737,39 @@ table {
                        {% csrf_token %}
                        <input type="hidden" name="name" value="{{ name }}">
                        {% for key, value in field.items %}
+                        {% if value == 'checkbox' %}
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" name="dynamic_input" id="flexCheckDefault">
+                         <input type="hidden" name="dynamic_label" value="{{ key }}">
+                          <label class="form-check-label" for="flexCheckDefault">
+                            {{ key }}
+                          </label>
+                        </div>
+                        {% elif value == 'dropdown' %}
+                        {% with array=key|split:',' %}
+                        <div class="mb-3">
+                          <label class="form-label">{{ array.0 }}</label>
+                          <input type="hidden" name="dynamic_label" value="{{ key }}">
+                          
+                          <select class="form-select" aria-label="Default select example" name="dynamic_input">
+                            {% for option in array %}
+                            {% if forloop.counter == 1 %}
+                            {% else %}
+                            <option value="{{ option }}" >{{ option }}</option>
+                            {% endif %}
+                            {% endfor %}
+                          </select>
+                            
+                          </div>
+                          {% endwith %}
+                          {% else %}
+
                        <div class="form-floating my-3">
                          <input type="{{ value }}" class="form-control" id="floatingInput1" name="dynamic_input">
                        <input type="hidden" name="dynamic_label" value="{{ key }}">
                          <label for="floatingInput1">{{ key }}</label>
                        </div>
+                       {% endif %}
                        {% endfor %}
                          <button type="submit" class="btn btn-primary mb-3 ">Submit</button>
                      </form>

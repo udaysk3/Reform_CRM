@@ -221,7 +221,7 @@
               <div class="card m-0">
                 <div class="card-body m-0">
                   <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
+                    <label for="name" class="form-label">Name of Financial Route</label>
                     <input type="name" class="form-control" id="name" value="{{ route.name }}" disabled >
                   </div>
                   <div class="mb-3">
@@ -229,7 +229,10 @@
                     <textarea class="form-control" id="description" rows="3" disabled readonly>{{ route.description }}</textarea>
                   </div>
                   <div class="mb-3">
-                    <a href="{{ route.document.url }}" target="_blank" >View Document</a>
+                    <label for="description" class="form-label">Financial Route Documentation({% if route.documents %}{{ route.documents.count }}{% else %}0{% endif %})</label></br>
+                    {% for document in documents %}
+                    <a href="{{ document.url }}" >View Document</a></br>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
