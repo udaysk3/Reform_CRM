@@ -25,7 +25,7 @@
               <a href="?page=add" class="btn btn-primary">Add User</a>
             </div>
           </div>
-          <div>
+          <div style="overflow-x: auto;">
             <!-- User Table -->
             
             {% if request.GET.page == 'add' %}
@@ -56,6 +56,10 @@
                           <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="customer" name="customer" checked>
                             <label class="form-check-label" for="customer">Customer</label>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="council" name="council" checked>
+                            <label class="form-check-label" for="council">Council</label>
                           </div>
                           <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="funding_route" name="funding_route">
@@ -99,6 +103,10 @@
                               <label class="form-check-label"  for="editCustomer">Customer</label>
                             </div>
                             <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.council %}checked{% endif %} class="form-check-input" id="editCustomer" name="council" >
+                              <label class="form-check-label"  for="editCustomer">Council</label>
+                            </div>
+                            <div class="mb-3 form-check">
                               <input type="checkbox" {% if user.funding_route %}checked{% endif %} class="form-check-input" id="editfunding_route" name="funding_route" >
                               <label class="form-check-label"  for="editouncil">funding_route</label>
                             </div>
@@ -121,7 +129,7 @@
                           <p>User not found.</p>
                         {% endif %}
                       {% else %}
-                <table class="table">
+                <table class="table" style="overflow-x: auto;">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -129,6 +137,7 @@
                       <th>Email</th>
                       <th>Dashboard</th>
                       <th>Customer</th>
+                      <th>Council</th>
                       <th>funding_route</th>
                       <th>Admin</th>
                       <th>Finance</th>
@@ -154,6 +163,17 @@
                           {% endif %}
                           
                           {% if user.customer %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          
+                          
+                          {% if user.council %}
                           <td>
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
                           </td>
