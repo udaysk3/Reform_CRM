@@ -224,7 +224,40 @@ table {
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Assigned To</b> - </span>
     {% if customer.assigned_to %}
-     {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }} <a href=""><i class="bi bi-arrow-clockwise"></i></a>
+     {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }}
+     <div class="d-grid gap-2 d-md-block">
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary" style="right:-70%"
+        data-bs-toggle="modal" data-bs-target="#fundingroute">
+        <i class="bi bi-arrow-clockwise"></i></button>
+      <!-- Modal -->
+      <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign to a Agent</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method='post' action="{% url 'app:assign_agent'  %}">
+              {% csrf_token %}
+              <div class="modal-body">
+                <input type"text" hidden value="{{ customer.id }}" name="customer_id">
+                <select class="form-select" aria-label="Default select example" name="agent_id">
+                  {% for agent in agents %}
+                  <option value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     {% else %}
       Unassigned
     {% endif %}

@@ -35,6 +35,7 @@ def customer_detail(request, customer_id):
     all_customers = Customers.objects.all().filter(parent_customer=None)
     customer = Customers.objects.get(pk=customer_id)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
+    agents = User.objects.filter(is_superuser=False)
 
     prev = None
     next = None
@@ -139,6 +140,7 @@ def customer_detail(request, customer_id):
             "routes": routes,
             "stages": stages,
             "values": values,
+            "agents": agents,
         },
     )
         return render(
@@ -154,6 +156,7 @@ def customer_detail(request, customer_id):
             "recommendations_list": processed_recommendations,
             "routes": routes,
             "stages": stages,
+            "agents" : agents
         },
     )
 
@@ -169,6 +172,7 @@ def customer_detail(request, customer_id):
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
             "routes": routes,
+            "agents" : agents
         },
     )
 
@@ -1036,7 +1040,12 @@ def assign_agents(request):
         messages.error(request, "Cannot Assign customers!")
         return redirect("app:customer")
 
-def assign_agent(request, customer_id, agent_id):
-    customer = Customers.objects.get(pk=customer_id).update(assigned_to=agent_id)
+def assign_agent(request):
+    customer_id = request.POST.get("customer_id")
+    agent_id = request.POST.get("agent_id")
+    print(customer_id, agent_id)
+    customer = Customers.objects.get(pk=customer_id)
+    customer.assigned_to =  User.objects.get(pk=agent_id)
+    customer.save()
     messages.success(request, "Customer Assigned successfully!")
     return redirect("app:customer")
