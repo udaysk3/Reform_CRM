@@ -305,7 +305,7 @@
                           {% endif %}
                         {% endwith %}
                         {% if customer.assigned_to %}
-                        <td >{{ customer.assigned_to }}</td>
+                        <td >{{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }}</td>
                         {% else %}
                         <td >-</td>
                         {% endif %}

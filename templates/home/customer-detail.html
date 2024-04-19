@@ -213,10 +213,18 @@ table {
     {% endif %}
   </div>
   <div class="cnav-item fs-6 col-2"><span class="col"> <b>Route</b> - </span> value</div>
-  <div class="cnav-item fs-6 col-4">
+  <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Client</b> - </span>
     {% if customer.client %}
      {{ customer.client.name }}
+    {% else %}
+      Unassigned
+    {% endif %}
+  </div>
+  <div class="cnav-item fs-6 col-2">
+    <span class="col"> <b>Assigned To</b> - </span>
+    {% if customer.assigned_to %}
+     {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }} <a href=""><i class="bi bi-arrow-clockwise"></i></a>
     {% else %}
       Unassigned
     {% endif %}

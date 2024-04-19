@@ -60,4 +60,5 @@ urlpatterns = [
     path("remove_customer_route/<int:customer_id>", views.remove_customer_route, name="remove_customer_route"),
     path("funding_route_detail/<int:route_id>", views.funding_route_detail, name="funding_route_detail"),
     path("assign_agents", views.assign_agents, name="assign_agents"),
+    path("assign_agent", views.assign_agent, name="assign_agent"),
 ]

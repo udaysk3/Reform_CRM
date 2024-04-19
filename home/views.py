@@ -1036,9 +1036,7 @@ def assign_agents(request):
         messages.error(request, "Cannot Assign customers!")
         return redirect("app:customer")
 
-def assign_agent(request):
-    customer_id = request.GET.get("customer_id")
-    agent_id = request.GET.get("agent_id")
+def assign_agent(request, customer_id, agent_id):
     customer = Customers.objects.get(pk=customer_id).update(assigned_to=agent_id)
     messages.success(request, "Customer Assigned successfully!")
     return redirect("app:customer")
