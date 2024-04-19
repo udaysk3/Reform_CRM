@@ -18,6 +18,7 @@ class Customers(models.Model):
     campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey('Client', related_name='customers', on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    assigned_to = models.ForeignKey(User, related_name= 'assigned_to', on_delete=models.DO_NOTHING, null=True)
     district = models.CharField(max_length=255, blank=True, null=True)
     parent_customer = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
     primary_customer = models.BooleanField(default=False)

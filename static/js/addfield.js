@@ -8,17 +8,17 @@ function addField() {
 <input type="text" class=" col-sm-2"  placeholder="Label" name="dynamic_label">
 <div class="col-sm-4">
 <select class="form-select" id="name" name="dynamic_type" onchange="checkSeletcted(this)">
-<option value="text" >text</option>
-<option value="checkbox" >checkbox</option> 
-<option value="date" >date</option>
-<option value="email" >email</option>
-<option value="file" >file</option>
-<option value="month" >month</option>
-<option value="number" >number</option>
-<option value="password" >password</option>
-<option value="time" >time</option>
-<option value="url" >url</option>
-<option value="dropdown" >dropdown</option>
+<option value="text" >Text</option>
+<option value="checkbox" >Checkbox</option> 
+<option value="date" >Date</option>
+<option value="email" >Email</option>
+<option value="file" >File</option>
+<option value="month" >Month</option>
+<option value="number" >Number</option>
+<option value="password" >Password</option>
+<option value="time" >Time</option>
+<option value="url" >URL</option>
+<option value="dropdown" >Dropdown</option>
 
 </select>
 </div>

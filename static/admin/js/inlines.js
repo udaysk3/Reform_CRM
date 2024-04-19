@@ -72,7 +72,7 @@
             row.find("*").each(function() {
                 updateElementIndex(this, options.prefix, totalForms.val());
             });
-            // Insert the new form when it has been fully edited.
+            // Insert the new form when it has been fully updated.
             row.insertBefore($(template));
             // Update number of total forms.
             $(totalForms).val(parseInt(totalForms.val(), 10) + 1);

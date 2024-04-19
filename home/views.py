@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from user.models import User
+from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Customers, Client, Campaign, Councils, Route, Stage, Document
 from datetime import datetime, timedelta
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 import pandas as pd
 import requests
 from django.db.models import Max
@@ -251,9 +252,12 @@ def Customer(request):
     # for customer in customers:
     #     print(customer.get_action_history())
     campaigns = Campaign.objects.all()
-
+    unassigned_customers = Customers.objects.filter(assigned_to=None)
+    agents = User.objects.filter(is_superuser=False)
     return render(
-        request, "home/customer.html", {"customers": customers, "campaigns": campaigns}
+        request, "home/customer.html", {"customers": customers, "campaigns": campaigns,
+                                        "unassigned_customers": serialize('json', unassigned_customers),
+                                        "agents": serialize('json', agents)}
     )
 
 
@@ -936,7 +940,7 @@ def edit_stage(request, route_id, stage_id):
         stage.name = request.POST.get("name")
         stage.fields = fields
         stage.save()
-        messages.success(request, "Stage edited successfully!")
+        messages.success(request, "Stage updated successfully!")
         return redirect(f"/{route_id}/stages")
 
 @login_required
@@ -991,3 +995,50 @@ def funding_route_detail(request, route_id):
     # print(documents)
     return render(request, 'home/funding-route_detail.html', {"route": route, "documents": documents})
 
+from django.http import JsonResponse
+from .models import Customers
+from user.models import User
+
+def assign_agents(request):
+    if request.method == "POST":
+        # Parse customers and agents from the POST request
+        customer_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("customers").split(',')]
+        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
+        
+        # Calculate the number of customers to assign to each agent
+        num_customers = len(customer_ids)
+        num_agents = len(agent_ids)
+        customers_per_agent = num_customers // num_agents
+        extra_customers = num_customers % num_agents
+        
+        # Assign customers to agents
+        agent_index = 0
+        for agent_id in agent_ids:
+            agent = User.objects.get(pk=agent_id)
+            
+            # Determine the number of customers to assign to this agent
+            if extra_customers > 0:
+                num_customers_for_agent = customers_per_agent + 1
+                extra_customers -= 1
+            else:
+                num_customers_for_agent = customers_per_agent
+            
+            # Assign customers to this agent
+            assigned_customers = customer_ids[:num_customers_for_agent]
+            Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
+            customer_ids = customer_ids[num_customers_for_agent:]
+            
+            agent_index += 1
+        
+        messages.success(request, "Customers Assigned successfully!")
+        return redirect("app:customer")
+    else:
+        messages.error(request, "Cannot Assign customers!")
+        return redirect("app:customer")
+
+def assign_agent(request):
+    customer_id = request.GET.get("customer_id")
+    agent_id = request.GET.get("agent_id")
+    customer = Customers.objects.get(pk=customer_id).update(assigned_to=agent_id)
+    messages.success(request, "Customer Assigned successfully!")
+    return redirect("app:customer")
