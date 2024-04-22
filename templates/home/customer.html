@@ -175,7 +175,7 @@
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="submit" class="btn btn-primary">Submit</button>
+                          <button type="submit" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
                         </div>
                       </div>
                     </div>
@@ -528,6 +528,11 @@ const form = document.querySelector('#addCustomerForm');
       selectAll: true,
     });
   });
+  function loadBtn(e){
+    e.disabled = true
+    e.innerHTML = 'Loading...'
+    document.getElementById('addCustomerForm').submit()
+  }
 </script>
 
 

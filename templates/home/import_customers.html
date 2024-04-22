@@ -128,7 +128,7 @@
                       >
                         Close
                       </button>
-                      <button type="submit" class="btn btn-primary">
+                      <button type="submit" onclick="loadBtn(this)" class="btn btn-primary">
                         Import
                       </button>
                     </div>
@@ -275,5 +275,11 @@
         reader.readAsArrayBuffer(file);
       });
   });
+
+  function loadBtn(e){
+    e.disabled = true
+    e.innerHTML = 'Loading...'
+    document.getElementById('importForm').submit()
+  }
 </script>
 {% endblock %}
