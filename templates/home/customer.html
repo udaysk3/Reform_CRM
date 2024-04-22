@@ -68,7 +68,7 @@
                           <input
                                 type="text"
                                 id="customers"
-                                placeholder="Select Unassigned Customers"
+                                placeholder="Select Customers"
                                 autocomplete="off"
                                 name= "customers"
                               />
@@ -477,24 +477,35 @@ const form = document.querySelector('#addCustomerForm');
 <script type="module">
   jQuery(document).ready(function ($) {
     // Get the unassigned customers from the backend
-    let unassignedCustomers = JSON.parse("{{ unassigned_customers | escapejs }}");
+    //let unassignedCustomers = JSON.parse("{{ unassigned_customers | escapejs }}");
 
     // Extract the names of unassigned customers
     
-    let comboSource = unassignedCustomers.map(customer => {
-      return {
-        id: customer.pk,
-        title: customer.fields.first_name + ' ' + customer.fields.last_name + ' - ' + customer.pk,
-      };
-    });
-    
+    //let comboSource = unassignedCustomers.map(customer => {
+     // return {
+     //   id: customer.pk,
+     //   title: customer.fields.first_name + ' ' + customer.fields.last_name + ' - ' + customer.pk,
+    //  };
+    //});
+    const options = [
+      {
+        id:0,
+        title: 'All Unassigned Customers'
+      }
+    ]
+    let agents = JSON.parse("{{ agents | escapejs }}");
+    for (let i = 0; i < agents.length; i++) {
+      options.push({
+        id: i+1,
+        title: "All Customers Assigned to "+agents[i].fields.first_name + ' ' + agents[i].fields.last_name + ' - ' + agents[i].pk
+      });
+    }
     // Create comboTree using unassigned customer names
     comboTree1 = $("#customers").comboTree({
-      source: comboSource,
+      source: options,
       isMultiple: true,
       cascadeSelect: false,
       collapse: true,
-      selectAll: true,
     });
   });
   jQuery(document).ready(function ($) {

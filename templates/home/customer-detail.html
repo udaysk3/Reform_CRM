@@ -225,7 +225,11 @@ table {
     <span class="col"> <b>Assigned To</b> - </span>
     {% if customer.assigned_to %}
      {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }}
-     <div class="d-grid gap-2 d-md-block">
+    
+    {% else %}
+      Unassigned
+    {% endif %}
+    <div class="d-grid gap-2 d-md-block">
       <!-- Button trigger modal -->
       <button type="button" class="btn btn-primary" style="right:-70%"
         data-bs-toggle="modal" data-bs-target="#fundingroute">
@@ -258,9 +262,6 @@ table {
         </div>
       </div>
     </div>
-    {% else %}
-      Unassigned
-    {% endif %}
   </div>
  
   <div class="cnav-item fs-6 col-1">

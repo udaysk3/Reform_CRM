@@ -90,7 +90,10 @@ def customer_detail(request, customer_id):
                     i.talked_with,
                 ]
             )
-    council= Councils.objects.get(name=customer.district) 
+    if customer.district:
+        council= Councils.objects.get_or_create(name=customer.district)[0]
+    else:
+        council = None
     routes = Route.objects.all().filter(council=council)
     recommendations_list = []
     if customer.recommendations:
@@ -260,7 +263,6 @@ def Customer(request):
     agents = User.objects.filter(is_superuser=False)
     return render(
         request, "home/customer.html", {"customers": customers, "campaigns": campaigns,
-                                        "unassigned_customers": serialize('json', unassigned_customers),
                                         "agents": serialize('json', agents)}
     )
 
@@ -1005,11 +1007,18 @@ from user.models import User
 
 def assign_agents(request):
     if request.method == "POST":
+     try:
         # Parse customers and agents from the POST request
-        customer_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("customers").split(',')]
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
-        
-        # Calculate the number of customers to assign to each agent
+        customers = request.POST.get("customers")
+        if customers == "All Unassigned Customers":
+            customer_ids = Customers.objects.filter(assigned_to=None).values_list('id', flat=True)
+        else:
+            # Get the agent ID from the selected customers option
+            agent_id = int(customers.split(' - ')[-1])
+            # Fetch customers assigned to this agent
+            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
+            
         num_customers = len(customer_ids)
         num_agents = len(agent_ids)
         customers_per_agent = num_customers // num_agents
@@ -1036,6 +1045,9 @@ def assign_agents(request):
         
         messages.success(request, "Customers Assigned successfully!")
         return redirect("app:customer")
+     except Exception as e:
+        messages.error(request, f"Error assigning customers: {e}")
+        return redirect("app:customer")
     else:
         messages.error(request, "Cannot Assign customers!")
         return redirect("app:customer")
@@ -1043,9 +1055,12 @@ def assign_agents(request):
 def assign_agent(request):
     customer_id = request.POST.get("customer_id")
     agent_id = request.POST.get("agent_id")
-    print(customer_id, agent_id)
-    customer = Customers.objects.get(pk=customer_id)
-    customer.assigned_to =  User.objects.get(pk=agent_id)
-    customer.save()
-    messages.success(request, "Customer Assigned successfully!")
-    return redirect("app:customer")
+    try:
+        customer = Customers.objects.get(pk=customer_id)
+        customer.assigned_to =  User.objects.get(pk=agent_id)
+        customer.save()
+        messages.success(request, "Agent Assigned successfully!")
+        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+    except Exception as e:
+        messages.error(request, f"Error assigning customer: {e}")
+        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
