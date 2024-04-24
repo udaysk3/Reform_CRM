@@ -27,7 +27,59 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    return render(request, "home/dashboard.html")
+    all_customers = (
+        Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_customer=None)
+        .order_by("earliest_action_date")
+    )
+    user  = User.objects.get(email=request.user)
+    customers = Customers.objects.all().filter(assigned_to=user)
+    
+    history = {}
+    imported = {}
+    london_tz = timezone("Europe/London")
+    for customer in customers:
+
+        actions = customer.get_created_at_action_history()
+        for i in actions:
+            if i.imported:
+                if i.created_at.replace(tzinfo=london_tz).date() not in imported:
+                    imported[customer.id] = {i.created_at.replace(tzinfo=london_tz).date():[]}
+            else:
+                if i.created_at.replace(tzinfo=london_tz).date() not in history:
+                    history[customer.id] = {i.created_at.replace(tzinfo=london_tz).date():[]}
+        for i in actions:
+            if i.imported:
+                imported[customer.id][i.created_at.replace(tzinfo=london_tz).date()].append(
+                    [
+                        i.created_at.replace(tzinfo=london_tz).time(),
+                        i.text,
+                        i.agent.first_name,
+                        i.agent.last_name,
+                        i.imported,
+                        i.talked_with,
+                    ]
+                )
+            else:
+                history[customer.id][i.created_at.replace(tzinfo=london_tz).date()].append(
+                    [
+                        i.created_at.replace(tzinfo=london_tz).time(),
+                        i.text,
+                        i.agent.first_name,
+                        i.agent.last_name,
+                        i.imported,
+                        i.talked_with,
+                    ]
+                )
+
+    print(history)
+    # for customer in customers:
+    #     print(customer.get_action_history())
+    campaigns = Campaign.objects.all()
+    unassigned_customers = Customers.objects.filter(assigned_to=None)
+    agents = User.objects.filter(is_superuser=False)
+    
+    return render(request, "home/dashboard.html", {"customers": customers, "all_customers": all_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "history": history, "imported": imported,"agents": serialize('json', agents)})
 
 
 @login_required
@@ -256,14 +308,17 @@ def Customer(request):
         .filter(parent_customer=None)
         .order_by("earliest_action_date")
     )
+    user  = User.objects.get(email=request.user)
+    
+
+
     # for customer in customers:
     #     print(customer.get_action_history())
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
     return render(
-        request, "home/customer.html", {"customers": customers, "campaigns": campaigns,
-                                        "agents": serialize('json', agents)}
+        request, "home/customer.html", {"customers": customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents)}
     )
 
 
