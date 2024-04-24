@@ -135,15 +135,19 @@
                 </div>
                 <div class="mb-3">
                     <label for="city" class="form-label">City/Town</label>
-                    <input type="text" class="form-control" id="city" name="city"></input>
-                </div>
-                <div class="mb-3">
-                    <label for="county" class="form-label">County</label>
                     <select class="form-select" id="county" name="county" aria-label="Default select example">
                       {% for city in city|cities %}
                       <option value="{{ city }}">{{ city }}</option>
                       {% endfor %}
                     </select>
+                </div>
+                <div class="mb-3">
+                    <label for="county" class="form-label">County</label>
+                    <select class="form-select" id="county" name="county" aria-label="Default select example">
+                      {% for county in county|countys %}
+                      <option value="{{ county }}">{{ county }}</option>
+                      {% endfor %}
+                    </select> 
                 </div>
                
                 <div class="mb-3">
@@ -152,7 +156,11 @@
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <input type="text" class="form-control" id="country" name="country"></input>
+                <select class="form-select" id="country" name="country" aria-label="Default select example">
+                  {% for country in country|countries %}
+                  <option value="{{ country }}">{{ country }}</option>
+                  {% endfor %}
+                </select>
             </div>
 
                 <!-- Button trigger modal -->
