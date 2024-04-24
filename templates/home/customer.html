@@ -135,7 +135,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="city" class="form-label">City/Town</label>
-                    <select class="form-select" id="county" name="county" aria-label="Default select example">
+                    <select class="form-select" id="city" name="city" aria-label="Default select example">
                       {% for city in city|cities %}
                       <option value="{{ city }}">{{ city }}</option>
                       {% endfor %}
@@ -188,7 +188,7 @@
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="submit" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
+                          <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
                         </div>
                       </div>
                     </div>
@@ -229,20 +229,32 @@
                     <input type="text" class="form-control" id="street_name" name="street_name" value={{ customer.street_name }}>
                 </div>
                 <div class="mb-3">
-                    <label for="city" class="form-label">City/Town</label>
-                    <input type="text" class="form-control" id="city" name="city" value={{ customer.city }}>
-                </div>
-                <div class="mb-3">
-                    <label for="county" class="form-label">County</label>
-                    <input type="text" class="form-control" id="county" name="county" value={{ customer.county }}>
-                </div>
+                  <label for="city" class="form-label">City/Town</label>
+                  <select class="form-select" id="city" name="city" aria-label="Default select example" value="{{ customer.city }}">
+                    {% for city in city|cities %}
+                    <option {% if customer.city == city %} selected {% endif %} value="{{ city }}">{{ city }}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label for="county" class="form-label">County</label>
+                  <select class="form-select" id="county" name="county" aria-label="Default select example" value="{{ customer.county }}">
+                    {% for county in county|countys %}
+                    <option {% if customer.county == county %} selected {% endif %}  value="{{ county }}">{{ county }}</option>
+                    {% endfor %}
+                  </select> 
+              </div>
                 <div class="mb-3">
                   <label for="postcode" class="form-label">Postcode</label>
                   <input type="text" class="form-control" id="postcode" name="postcode" value="{{ customer.postcode }}">
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <input type="text" class="form-control" id="country" name="country" value={{ customer.country }}>
+                <select class="form-select" id="country" name="country" aria-label="Default select example" value="{{ customer.country }}">
+                  {% for country in country|countries %}
+                  <option {% if customer.country == country %} selected {% endif %}  value="{{ country }}">{{ country }}</option>
+                  {% endfor %}
+                </select>
             </div>
                   <button type="submit" class="btn btn-primary">Update Customer</button>
               </form>
