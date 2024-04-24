@@ -1,6 +1,7 @@
 
 {% extends "base.html" %}
 {% load static %}
+{% load custom %}
 {% block search %}
 
 <input
@@ -138,7 +139,11 @@
                 </div>
                 <div class="mb-3">
                     <label for="county" class="form-label">County</label>
-                    <input type="text" class="form-control" id="county" name="county"></input>
+                    <select class="form-select" id="county" name="county" aria-label="Default select example">
+                      {% for city in city|cities %}
+                      <option value="{{ city }}">{{ city }}</option>
+                      {% endfor %}
+                    </select>
                 </div>
                
                 <div class="mb-3">
