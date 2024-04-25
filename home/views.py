@@ -44,13 +44,13 @@ def dashboard(request):
         for i in actions:
             if i.imported:
                 if i.created_at.replace(tzinfo=london_tz).date() not in imported:
-                    imported[customer.id] = {i.created_at.replace(tzinfo=london_tz).date():[]}
+                    imported[i.created_at.replace(tzinfo=london_tz).date()] = []
             else:
                 if i.created_at.replace(tzinfo=london_tz).date() not in history:
-                    history[customer.id] = {i.created_at.replace(tzinfo=london_tz).date():[]}
+                    history[i.created_at.replace(tzinfo=london_tz).date()] = []
         for i in actions:
             if i.imported:
-                imported[customer.id][i.created_at.replace(tzinfo=london_tz).date()].append(
+                imported[i.created_at.replace(tzinfo=london_tz).date()].append(
                     [
                         i.created_at.replace(tzinfo=london_tz).time(),
                         i.text,
@@ -61,7 +61,7 @@ def dashboard(request):
                     ]
                 )
             else:
-                history[customer.id][i.created_at.replace(tzinfo=london_tz).date()].append(
+                history[i.created_at.replace(tzinfo=london_tz).date()].append(
                     [
                         i.created_at.replace(tzinfo=london_tz).time(),
                         i.text,
