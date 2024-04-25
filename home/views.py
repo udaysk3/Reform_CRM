@@ -488,6 +488,33 @@ def edit_customer(request, customer_id):
         customer.house_name = request.POST.get("house_name")
         customer.county = request.POST.get("county")
         customer.country = request.POST.get("country")
+        
+        district = getLA(customer.postcode)
+        if district and not Councils.objects.filter(name=district).exists():
+            Councils.objects.create(name=district)
+        obj = getEPC(customer.postcode, customer.house_name, customer.street_name)
+        energy_rating = None
+        energy_certificate_link = None
+        address = customer.house_name + " " + customer.street_name
+        constituency = None
+        if obj is not None:
+            energy_rating = obj["energy_rating"]
+            energy_certificate_link = obj["energy_certificate_link"]
+            county = obj["county"] if obj["county"] else customer.county
+            district = obj["local_authority"] if obj["local_authority"] else customer.district
+            city = obj["town"] if obj["town"] else customer.city
+            constituency = obj["constituency"] if obj["constituency"] else None
+            address = (
+                obj["address"] if obj["address"] else customer.house_name + " " + customer.street_name
+            )
+            recommendations = obj["recommendations"] if obj["recommendations"] else None
+        customer.energy_rating = energy_rating
+        customer.energy_certificate_link = energy_certificate_link
+        customer.address = address
+        customer.constituency = constituency
+        customer.recommendations = recommendations
+        if district:
+            customer.district = district
         customer.save()
 
         messages.success(request, "Customer updated successfully!")
@@ -915,6 +942,7 @@ def add_funding_route(request):
             description=description,
         )
         documents = request.FILES.getlist("document")
+        print(documents)
         for document in documents:
             doc = Document.objects.create(document=document)
             route.documents.add(doc)

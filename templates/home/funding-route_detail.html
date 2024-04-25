@@ -231,7 +231,7 @@
                   <div class="mb-3">
                     <label for="description" class="form-label">Financial Route Documentation({% if route.documents %}{{ route.documents.count }}{% else %}0{% endif %})</label></br>
                     {% for document in documents %}
-                    <a href="{{ document.url }}" >View Document</a></br>
+                    <a target="_blank" href="{{ document.url }}" >View Document</a></br>
                     {% endfor %}
                   </div>
                 </div>
