@@ -41,73 +41,10 @@
             <div class="mb-3 mb-sm-0">
              <a href="{% url 'app:customer' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Dashboard</h5></a>
             </div>
-            <div>
-              <a href="?page=add_customer" class="btn btn-primary">Add Customer</a>
-            </div>
-            <div>
-
-                <button type="button" class="btn btn-primary position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
-                  <i class="bi bi-arrow-bar-right"></i> Assign to Agent
-                </button>
-  
-                <!-- Modal -->
-                <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign to Agent</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <form method='post' action="{% url 'app:assign_agents'  %}">
-                        {% csrf_token %}
-                      <div class="modal-body">
-                        {% comment %} <div class="mb-3">
-                          <label for="maincontact" class="form-label">Main Contact</label>
-                          <input type="text" class="form-control" id="maincontact" name="main_contact">
-                        </div>
-                        <div class="mb-3">
-                          <label for="telephone" class="form-label">Telephone</label>
-                          <input type="text" class="form-control" id="telephone" name="telephone">
-                        </div>
-                        <div class="mb-3">
-                          <label for="email" class="form-label">email</label>
-                          <input type="email" class="form-control" id="email" name="email">
-                        </div> {% endcomment %}
-                        <div class="mb-3">
-                          <input
-                                type="text"
-                                id="customers"
-                                placeholder="Select Customers"
-                                autocomplete="off"
-                                name= "customers"
-                              />
-                           </div>
-                        <div class="mb-3">
-                          <input
-                                type="text"
-                                id="agents"
-                                placeholder="Select Agents"
-                                autocomplete="off"
-                                name= "agents"
-                              />
-                           </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                      </div>
-                    </form>
-                    </div>
-                  </div>
-                </div>
-                
-            </div>
+            
             
             
 
-            <div class="">
-              <a href="{% url 'app:import_customers' %}" class="btn btn-primary">Import Customers</a>
-            </div>
           </div>
           <div>
             

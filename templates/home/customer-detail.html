@@ -187,6 +187,17 @@ table {
   scroll-snap-align:start;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.tabs {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 </style>
 
 {% endblock %} {% block content %}
@@ -290,13 +301,13 @@ table {
       <div class="card-body p-3 m-0">
         <div class="row">
           <div class="col-sm-4 mb-sm-0">
-            <div class="card m-0">
-              <div class="card-body py-0 contacts-container">
-                <div class="btn-group me-2 mb-2 position-relative" style="right:30px" role="group" aria-label="Second group">
-                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="btn {% if customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}">1</a>
+            <div class="card pb-3">
+              <div class="card-body py-0 contacts-container" style="overflow:hidden; height:170px;">
+                <div class="btn-group me-2 mb-2 position-relative tabs" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
+                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="btn {% if customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}">{{ customer.first_name }}</a>
                   {% for c_customer in child_customers %}
                   <a href="{% url 'app:customer_detail' customer.id c_customer.id %}" type="button" class="btn  {% if c_customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}">
-                    {{ forloop.counter|add:1 }} 
+                    {{ c_customer.first_name }} 
                   </a>
                   {% endfor %}
 
@@ -317,30 +328,6 @@ table {
                 <h6><b> Telephone : </b> {{show_customer.phone_number}}</h6>
                 <h6><b> Email: </b> {{show_customer.email}}</h6>
               </div>
-
-
-                {% comment %} {% for c_customer in child_customers %}
-                <div class="contacts py-2">
-                  <div class=" d-flex  justify-content-between mb-2">
-                  <form  method="post" action="/make_primary/{{ customer.id }}/{{ c_customer.id }}">
-                    {% csrf_token %}
-                    {% if c_customer.primary_customer %}
-                    <input type="checkbox" checked class="make_primary"> Primary
-                    {% else %}
-                    <input type="checkbox" class="make_primary"> Primary
-                    {% endif %} 
-                  </form>
-
-                  
-                </div>
-                <h6><b> Name : </b> {{c_customer.first_name}} {{c_customer.last_name}}</h6>
-                <h6><b> Telephone : </b> {{c_customer.phone_number}}</h6>
-                <h6><b> Email: </b> {{c_customer.email}}</h6>
-                
-              </div>
-                {% endfor %} {% endcomment %}
-
-
             </div>
           </div>
 
