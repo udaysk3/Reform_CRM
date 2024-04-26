@@ -273,6 +273,14 @@ table {
           </svg></a
         >
 </div>
+<div>
+<a href="#" class="edit-user-btn" data-user-id="{{ show_customer.id }}">
+  <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+</a>
+<a href="#" class="delete-user-btn" data-user-id="{{ show_customer.id }}">
+  <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+</a>
+</div>
 
 
 
@@ -283,80 +291,35 @@ table {
         <div class="row">
           <div class="col-sm-4 mb-sm-0">
             <div class="card m-0">
-              <div class="card-body py-3 contacts-container">
-                <div class="contacts py-2">
+              <div class="card-body py-0 contacts-container">
+                <div class="btn-group me-2 mb-2 position-relative" style="right:30px" role="group" aria-label="Second group">
+                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="btn {% if customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}">1</a>
+                  {% for c_customer in child_customers %}
+                  <a href="{% url 'app:customer_detail' customer.id c_customer.id %}" type="button" class="btn  {% if c_customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}">
+                    {{ forloop.counter|add:1 }} 
+                  </a>
+                  {% endfor %}
+
+                </div>
                 <div class=" d-flex  justify-content-between mb-2">
-                  <form  method="post" action="/make_primary/{{ customer.id }}/{{ customer.id }}">
+                  <form  method="post" action="/make_primary/{{ customer.id }}/{{ show_customer.id }}">
                     {% csrf_token %}
-                    {% if customer.primary_customer %}
+                    {% if show_customer.primary_customer %}
                     <input type="checkbox" checked class="make_primary"> Primary
                     {% else %}
                     <input type="checkbox" class="make_primary"> Primary
                     {% endif %} 
                   </form>
-
-                  <div>
-                    <a href="#" class="edit-user-btn" data-user-id="{{ customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-                    </a>
-                    <a href="#" class="delete-user-btn" data-user-id="{{ customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                    </a>
-                       
-<span data-bs-toggle="modal" data-bs-target="#add_child_customer">
-<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-</svg>
-</span>
-
-<!-- Modal -->
-<div class="modal fade" id="add_child_customer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Customer</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-  <form method="post" action="{% url 'app:add_child_customer' customer.id %}">
-          {% csrf_token %}
-<div class="mb-3">
-<label for="first_name" class="form-label">First Name</label>
-<input type="text" class="form-control" id="first_name" name="first_name" required>
-</div>
-<div class="mb-3">
-<label for="last_name" class="form-label">Last Name</label>
-<input type="text" class="form-control" id="last_name" name="last_name" required>
-</div>
-<div class="mb-3">
-<label for="phone_number" class="form-label">Phone Number</label>
-<input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ customer.phone_number }}" required>
-</div>
-<div class="mb-3">
-<label for="email" class="form-label">Email</label>
-<input type="email" class="form-control" id="email" name="email" value="{{ customer.email }}" required>
-</div>
-</div>
-<div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-<button type="submit" class="btn btn-primary">Submit</button>
-</div>
-</div>
-</div>
-</div>
-      </form>
-                  </div>
                 </div>
                 <h6>
-                  <b> Name : </b> {{customer.first_name}} {{customer.last_name}}
+                  <b> Name : </b> {{show_customer.first_name}} {{show_customer.last_name}}
                 </h6>
-                <h6><b> Telephone : </b> {{customer.phone_number}}</h6>
-                <h6><b> Email: </b> {{customer.email}}</h6>
+                <h6><b> Telephone : </b> {{show_customer.phone_number}}</h6>
+                <h6><b> Email: </b> {{show_customer.email}}</h6>
               </div>
 
 
-                {% for c_customer in child_customers %}
+                {% comment %} {% for c_customer in child_customers %}
                 <div class="contacts py-2">
                   <div class=" d-flex  justify-content-between mb-2">
                   <form  method="post" action="/make_primary/{{ customer.id }}/{{ c_customer.id }}">
@@ -368,24 +331,16 @@ table {
                     {% endif %} 
                   </form>
 
-                  <div>
-                    <a href="#" class="edit-user-btn" data-user-id="{{ c_customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-                    </a>
-                    <a href="#" class="delete-user-btn" data-user-id="{{ c_customer.id }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                    </a>
-                  </div>
+                  
                 </div>
                 <h6><b> Name : </b> {{c_customer.first_name}} {{c_customer.last_name}}</h6>
                 <h6><b> Telephone : </b> {{c_customer.phone_number}}</h6>
                 <h6><b> Email: </b> {{c_customer.email}}</h6>
                 
               </div>
-                {% endfor %}
+                {% endfor %} {% endcomment %}
 
 
-              </div>
             </div>
           </div>
 

@@ -1,4 +1,6 @@
 from django import template
+import os
+import pandas as pd
 from datetime import datetime
 register = template.Library()
 
@@ -13,92 +15,13 @@ def date(value):
 
 @register.filter(name='cities')
 def cities(value):
-    return [
-  "Aberdeen",
-  "Armagh",
-  "Bangor",
-  "Bangor",
-  "Bath",
-  "Belfast",
-  "Birmingham",
-  "Bradford",
-  "Brighton & Hove",
-  "Bristol",
-  "Cambridge",
-  "Canterbury",
-  "Cardiff",
-  "Carlisle",
-  "Chelmsford",
-  "Chester",
-  "Chichester",
-  "City of Gibraltar",
-  "Colchester",
-  "Coventry",
-  "Derby",
-  "Doncaster",
-  "Douglas",
-  "Dundee",
-  "Dunfermline",
-  "Durham",
-  "Ely",
-  "Edinburgh",
-  "Exeter",
-  "Glasgow",
-  "Gloucester",
-  "Hamilton",
-  "Hereford",
-  "Inverness",
-  "Jamestown",
-  "Kingston-upon-Hull",
-  "Lancaster",
-  "Leeds",
-  "Leicester",
-  "Lichfield",
-  "Lincoln",
-  "Lisburn",
-  "Londonderry",
-  "London",
-  "Manchester",
-  "Milton Keynes",
-  "Newcastle-upon-Tyne",
-  "Newport",
-  "Newry",
-  "Norwich",
-  "Nottingham",
-  "Oxford",
-  "Perth",
-  "Peterborough",
-  "Plymouth",
-  "Portsmouth",
-  "Preston",
-  "Ripon",
-  "Salford",
-  "Salisbury",
-  "Sheffield",
-  "Southampton",
-  "Southend-on-Sea",
-  "St Albans",
-  "St Asaph",
-  "St Davids",
-  "Stanley",
-  "Stirling",
-  "Stoke on Trent",
-  "Sunderland",
-  "Swansea",
-  "Truro",
-  "Wakefield",
-  "Wells",
-  "Westminster",
-  "Wolverhampton",
-  "Worcester",
-  "Wrexham",
-  "York"
-]
+    csv_filename = os.path.join(os.path.dirname(__file__), '../cities.csv')
+    data = pd.read_csv(csv_filename)
+    return data['City/Town/Village'].tolist()
 
 @register.filter(name='countries')
 def countries(value):
     return [
-        'United Kingdom',
 
 'England',
 

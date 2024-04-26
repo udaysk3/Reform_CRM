@@ -8,12 +8,14 @@ from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
 import pandas as pd
 import requests
+import csv
 from django.db.models import Max
 import pytz
 from user.models import User
 from pytz import timezone
 import json
 import numpy as np
+import os
 
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
@@ -83,11 +85,14 @@ def dashboard(request):
 
 
 @login_required
-def customer_detail(request, customer_id):
+def customer_detail(request, customer_id, s_customer_id=None):
     all_customers = Customers.objects.all().filter(parent_customer=None)
     customer = Customers.objects.get(pk=customer_id)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
+    show_customer = customer
+    if s_customer_id:
+        show_customer = Customers.objects.get(pk=s_customer_id)
 
     prev = None
     next = None
@@ -196,6 +201,7 @@ def customer_detail(request, customer_id):
             "stages": stages,
             "values": values,
             "agents": agents,
+            "show_customer": show_customer,
         },
     )
         return render(
@@ -211,7 +217,8 @@ def customer_detail(request, customer_id):
             "recommendations_list": processed_recommendations,
             "routes": routes,
             "stages": stages,
-            "agents" : agents
+            "agents" : agents,
+            "show_customer": show_customer,
         },
     )
 
@@ -227,7 +234,8 @@ def customer_detail(request, customer_id):
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
             "routes": routes,
-            "agents" : agents
+            "agents" : agents,
+            "show_customer": show_customer,
         },
     )
 
@@ -301,6 +309,7 @@ def Customer(request):
             "home/customer.html",
             {"customer": customer},
         )
+    
 
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     customers = (
@@ -385,9 +394,9 @@ def add_customer(request):
         campaign = request.POST.get("campaign")
         agent = User.objects.get(email=request.user)
 
-        if campaign == "nan":
-            messages.error(request, "Select a Campaign")
-            return redirect("app:customer")
+        if campaign == "nan" or city == "nan" or county == "nan" or country == "nan":
+            messages.error(request, "Select all dropdown fields")
+            return redirect("/customer?page=add_customer")
 
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
@@ -518,7 +527,10 @@ def edit_customer(request, customer_id):
         customer.save()
 
         messages.success(request, "Customer updated successfully!")
-        return redirect("app:customer")
+        if customer.parent_customer:
+            return redirect(f"/customer-detail/{customer.parent_customer.id}")
+
+        return redirect(f"/customer-detail/{customer_id}")
 
     context = {"customer": customer}
     return render(request, "home/customer.html", context)

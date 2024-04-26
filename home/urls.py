@@ -33,6 +33,11 @@ urlpatterns = [
         name="remove_council",
     ),
     path(
+        "customer-detail/<int:customer_id>/<int:s_customer_id>",
+        views.customer_detail,
+        name="customer_detail",
+    ),
+    path(
         "customer-detail/<int:customer_id>",
         views.customer_detail,
         name="customer_detail",
