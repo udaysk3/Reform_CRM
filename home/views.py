@@ -35,7 +35,7 @@ def dashboard(request):
         .order_by("earliest_action_date")
     )
     user  = User.objects.get(email=request.user)
-    customers = Customers.objects.all().filter(assigned_to=user)
+    customers = Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time")).filter(parent_customer=None).order_by("earliest_action_date")
     
     history = {}
     imported = {}
@@ -134,6 +134,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.agent.last_name,
                     i.imported,
                     i.talked_with,
+                    i.postcode,
+                    i.house_name,
                 ]
             )
         else:
@@ -145,6 +147,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.agent.last_name,
                     i.imported,
                     i.talked_with,
+                    i.customer.postcode,
+                    i.customer.house_name,
                 ]
             )
     if customer.district:

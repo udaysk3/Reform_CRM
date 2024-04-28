@@ -559,11 +559,11 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li><b>{{ v.0 }}</b> - <b>{{ v.2 }} {{ v.3 }}</b>
+                        <li><b>{{ v.0 }}</b> - {{ v.6 }} - {{ v.7 }} <b>{{ v.2 }} {{ v.3 }}</b>
                           {% if v.5 %}
                            spoke to <b> {{ v.5}}</b> - {{ v.1 }} </li>
                           {% else %}
-                          - {{ v.1 }}
+                          - {{ v.1 }} </li>
                           {% endif %}
                          {% endfor %}
                       </ul>
