@@ -35,7 +35,7 @@ def dashboard(request):
         .order_by("earliest_action_date")
     )
     user  = User.objects.get(email=request.user)
-    customers = Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time")).filter(parent_customer=None).order_by("earliest_action_date")
+    customers = Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time")).filter(parent_customer=None).order_by("-earliest_action_date")
     
     history = {}
     imported = {}
@@ -60,6 +60,8 @@ def dashboard(request):
                         i.agent.last_name,
                         i.imported,
                         i.talked_with,
+                        i.customer.postcode,
+                        i.customer.house_name,
                     ]
                 )
             else:
@@ -71,10 +73,11 @@ def dashboard(request):
                         i.agent.last_name,
                         i.imported,
                         i.talked_with,
+                        i.customer.postcode,
+                        i.customer.house_name,
                     ]
                 )
 
-    print(history)
     # for customer in customers:
     #     print(customer.get_action_history())
     campaigns = Campaign.objects.all()
@@ -136,6 +139,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.talked_with,
                     i.postcode,
                     i.house_name,
+                    i.customer.postcode,
+                    i.customer.house_name,
                 ]
             )
         else:
@@ -285,6 +290,8 @@ def council_detail(request, council_id):
                 i.agent.last_name,
                 i.imported,
                 i.talked_with,
+                i.customer.postcode,
+                i.customer.house_name,
             ]
         )
     # routes = Route.objects.all().filter(funding_route=funding_route)
