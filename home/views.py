@@ -3,7 +3,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Client, Campaign, Councils, Route, Stage, Document
+from .models import Customers, Client, Campaign, Councils, Route, Stage, Document, Action
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
 import pandas as pd
@@ -36,6 +36,20 @@ def dashboard(request):
     )
     user  = User.objects.get(email=request.user)
     customers = Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time")).filter(parent_customer=None).order_by("-earliest_action_date")
+    # customers = list(customers)
+
+    # for customer in customers:
+    #     actions = Action.objects.all().filter(customer=customer)
+    #     flag = False
+    #     for action in actions:
+    #         if action.imported:
+    #             flag=False
+    #         else:
+    #             flag=True
+    #             break
+    #     if flag:
+    #         print(customers.index(customer))
+        
     
     history = {}
     imported = {}
@@ -137,8 +151,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.agent.last_name,
                     i.imported,
                     i.talked_with,
-                    i.postcode,
-                    i.house_name,
                     i.customer.postcode,
                     i.customer.house_name,
                 ]
@@ -326,7 +338,7 @@ def Customer(request):
     customers = (
         Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
-        .order_by("earliest_action_date")
+        .order_by("-earliest_action_date")
     )
     user  = User.objects.get(email=request.user)
     
