@@ -1,6 +1,5 @@
 from hmac import new
 from django.contrib.auth.decorators import login_required
-from regex import F
 from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
