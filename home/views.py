@@ -1,4 +1,6 @@
+from hmac import new
 from django.contrib.auth.decorators import login_required
+from regex import F
 from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
@@ -9,7 +11,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 import pandas as pd
 import requests
 import csv
-from django.db.models import Max
+from django.db.models import Max, BooleanField, Case, When
 import pytz
 from user.models import User
 from pytz import timezone
@@ -30,12 +32,36 @@ def home(request):
 @login_required
 def dashboard(request):
     all_customers = (
-        Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
+        Customers.objects.annotate(earliest_action_date=Max("action__created_at"))
         .filter(parent_customer=None)
         .order_by("earliest_action_date")
     )
     user  = User.objects.get(email=request.user)
-    customers = Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time")).filter(parent_customer=None).order_by("-earliest_action_date")
+    customers = (
+        Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_customer=None)
+        .order_by("earliest_action_date")
+    )
+
+    customers = list(customers)
+    new_customers = []
+    for customer in customers:
+        actions = customer.get_created_at_action_history()
+        flag = False
+        for action in actions:
+            if action.imported == False:
+                new_customers.append(customer)
+                break
+            
+    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+
+
+    result = [x for x in customers if x not in new_customers] 
+
+
+    # for customer in customers:
+    #     print(customer.get_action_history())
+    customers= new_customers + result
     # customers = list(customers)
 
     # for customer in customers:
@@ -335,17 +361,33 @@ def Customer(request):
     
 
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
+    current_time = datetime.now(london_tz)
+    user  = User.objects.get(email=request.user)
     customers = (
         Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
-        .order_by("-earliest_action_date")
+        .order_by("earliest_action_date")
     )
-    user  = User.objects.get(email=request.user)
-    
+
+    customers = list(customers)
+    new_customers = []
+    for customer in customers:
+        actions = customer.get_created_at_action_history()
+        flag = False
+        for action in actions:
+            if action.imported == False:
+                new_customers.append(customer)
+                break
+            
+    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+
+
+    result = [x for x in customers if x not in new_customers] 
 
 
     # for customer in customers:
     #     print(customer.get_action_history())
+    customers= new_customers + result
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
@@ -520,6 +562,10 @@ def edit_customer(request, customer_id):
         customer.house_name = request.POST.get("house_name")
         customer.county = request.POST.get("county")
         customer.country = request.POST.get("country")
+
+        if customer.campaign == "nan" or customer.city == "nan" or customer.county == "nan" or customer.country == "nan":
+            messages.error(request, "Select all dropdown fields")
+            return redirect(f"/customer?page=edit_customer&id={customer_id}")
         
         district = getLA(customer.postcode)
         if district and not Councils.objects.filter(name=district).exists():
@@ -654,7 +700,7 @@ def na_council_action_submit(request, council_id):
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
-        time_obj += timedelta(minutes=20)
+        time_obj += timedelta(minutes=60)
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")

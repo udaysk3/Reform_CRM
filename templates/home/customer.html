@@ -27,7 +27,8 @@
                   {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-          {% endfor %}
+          {% endfor %}         
+          
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             
             <div class="mb-3 mb-sm-0">
@@ -190,7 +191,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="city" class="form-label">City/Town</label>
-                    <select class="form-select" id="city" name="city" aria-label="Default select example">
+                    <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example">
 
                       <option value="nan">Select a City</option>
                       {% for city in city|cities %}
@@ -200,7 +201,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="county" class="form-label">County</label>
-                    <select class="form-select" id="county" name="county" aria-label="Default select example">
+                    <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example">
                       <option value="nan">Select a County</option>
                       {% for county in county|countys %}
                       <option value="{{ county }}">{{ county }}</option>
@@ -214,7 +215,7 @@
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <select class="form-select" id="country" name="country" aria-label="Default select example">
+                <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example">
                   <option value="nan">Select a Country</option>
                   {% for country in country|countries %}
                   <option value="{{ country }}">{{ country }}</option>
@@ -261,7 +262,7 @@
               <!-- Adjust the form action URL and method accordingly -->
               {% if customer %}
                 <h3>Edit Customer</h3>
-                <form id="editCustomerForm" method="post" action="{% url 'app:edit_customer' customer.id %}">
+                <form name="editCustomerForm" id="editCustomerForm" method="post" action="{% url 'app:edit_customer' customer.id %}" onsubmit="return validateForm()">
                   {% csrf_token %}
                   <div class="mb-3">
                       <label for="edit_first_name" class="form-label">First Name</label>
@@ -281,7 +282,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="house_name" class="form-label">House Name/ Number</label>
-                  <input type="text" class="form-control" id="house_name" name="house_name" value="{% if customer.house_name != 'None' %}{{ customer.house_name }}{% endif %}" required>
+                  <input type="text" class="form-control" id="house_name" name = "house_name" value="{% if customer.house_name != 'None' %}{{ customer.house_name }}{% endif %}" required>
               </div>
                 <div class="mb-3">
                     <label for="street_name" class="form-label">Street Name</label>
@@ -289,7 +290,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="city" class="form-label">City/Town</label>
-                  <select class="form-select" id="city" name="city" aria-label="Default select example" value="{{ customer.city }}">
+                  <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example" value="{{ customer.city }}">
                     <option value="nan">Select a City</option>
                     {% for city in city|cities %}
                     <option {% if customer.city == city %} selected {% endif %} value="{{ city }}">{{ city }}</option>
@@ -298,7 +299,7 @@
               </div>
               <div class="mb-3">
                   <label for="county" class="form-label">County</label>
-                  <select class="form-select" id="county" name="county" aria-label="Default select example" value="{{ customer.county }}">
+                  <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example" value="{{ customer.county }}">
                     <option value="nan">Select a County</option>
                     {% for county in county|countys %}
                     <option {% if customer.county == county %} selected {% endif %}  value="{{ county }}">{{ county }}</option>
@@ -311,14 +312,14 @@
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <select class="form-select" id="country" name="country" aria-label="Default select example" value="{{ customer.country }}">
+                <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example" value="{{ customer.country }}">
                   <option value="nan">Select a Country</option>
                   {% for country in country|countries %}
                   <option {% if customer.country == country %} selected {% endif %}  value="{{ country }}">{{ country }}</option>
                   {% endfor %}
                 </select>
             </div>
-                  <button type="submit" class="btn btn-primary">Update Customer</button>
+                  <button  class="btn btn-primary">Update Customer</button>
               </form>
               {% else %}
                 <p>Customer not found.</p>
@@ -529,11 +530,16 @@ const form = document.querySelector('#addCustomerForm');
 
 
 
-</script>
 
+  $(document).ready(function(){
+    $("#myInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
+  });
 
-
-<script>
 
 
   $(document).ready(function(){
@@ -545,24 +551,41 @@ const form = document.querySelector('#addCustomerForm');
     });
   });
   
-
-</script>
-
-
-
+  function validateForm() {
+    // Get the form data.
+    const formData = new FormData(document.querySelector('form'));
+    // Validate the form data.
+    if (document.forms["editCustomerForm"]["street_name"].value == 'None' || document.forms["editCustomerForm"]["street_name"].value == ' None' || document.forms["editCustomerForm"]["street_name"].value == '') {
+      alert('The street_name field is required.');
+      return false;
+    }
+    if (document.forms["editCustomerForm"]["first_name"].value == 'None' || document.forms["editCustomerForm"]["first_name"].value == ' None' || document.forms["editCustomerForm"]["first_name"].value == '') {
+      alert('The first_name field is required.');
+      return false;
+    }
+    if (document.forms["editCustomerForm"]["last_name"].value == 'None' || document.forms["editCustomerForm"]["last_name"].value == ' None' || document.forms["editCustomerForm"]["last_name"].value == '') {
+      alert('The last_name field is required.');
+      return false;
+    }
+    if (document.forms["editCustomerForm"]["phone_number"].value == 'None' || document.forms["editCustomerForm"]["phone_number"].value == ' None' || document.forms["editCustomerForm"]["phone_number"].value == '') {
+      alert('The phone_number field is required.');
+      return false;
+    }
+    if (document.forms["editCustomerForm"]["email"].value == 'None' || document.forms["editCustomerForm"]["email"].value == ' None' || document.forms["editCustomerForm"]["email"].value == '') {
+      alert('The email field is required.');
+      return false;
+    }
+    if (document.forms["editCustomerForm"]["house_name"].value == 'None' || document.forms["editCustomerForm"]["house_name"].value == ' None' || document.forms["editCustomerForm"]["house_name"].value == '') {
+      alert('The house_name field is required.');
+      return false;
+    }
+    if (document.forms["editCustomerForm"]["postcode"].value == 'None' || document.forms["editCustomerForm"]["postcode"].value == ' None' || document.forms["editCustomerForm"]["postcode"].value == '') {
+      alert('The postcode field is required.');
+      return false;
+    }
   
-<script>
-
-
-  $(document).ready(function(){
-    $("#myInput").on("keyup", function() {
-      var value = $(this).val().toLowerCase();
-      $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
-    });
-  });
-  
+    return true;
+  }  
   
 
 </script>
@@ -621,6 +644,11 @@ const form = document.querySelector('#addCustomerForm');
       selectAll: true,
     });
   });
+
+  $('#city').dropdown();
+  $('#county').dropdown();
+  $('#country').dropdown();
+
   
 </script>
 
