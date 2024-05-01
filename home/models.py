@@ -32,7 +32,7 @@ class Customers(models.Model):
     def add_action(
         self,
         text,
-        agent, date_time=None, imported=False, created_at=None, talked_with=None, funding_route=None,
+        agent, imported=False, created_at=None, talked_with=None, date_time=None, funding_route=None,
     ):
         return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
 

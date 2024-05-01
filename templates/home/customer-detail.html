@@ -445,7 +445,11 @@ table {
                   <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
                 </h6>
-                <div class="d-grid gap-2 d-md-block mt-3">
+
+
+
+                <div class="row">
+                <div class="d-grid gap-2 d-md-block mt-3 col">
                   <form
                     method="post"
                     class="col"
@@ -456,24 +460,67 @@ table {
                     <button class="btn btn-primary" type="submit">NA</button>
                   </form>
                 </div>
+
+
+
+
+                <div class="d-grid gap-2 d-md-block mt-3 col">
+                  <form
+                    method="post"
+                    class="col"
+                    action="{% url 'app:lm_action_submit' customer.id %}"
+                    
+                  >
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">LM</button>
+                  </form>
+                </div>
+
+
+
+
+                <div class="d-grid gap-2 d-md-block mt-3 col">
+                  <form
+                    method="post"
+                    class="col"
+                    action="{% url 'app:na_action_submit' customer.id %}"
+                    
+                  >
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="button">Email</button>
+                  </form>
+                </div>
+
+
+
+
+                <div class="d-grid gap-2 d-md-block mt-3 col">
+                  <form
+                    method="post"
+                    class="col"
+                    action="{% url 'app:na_action_submit' customer.id %}"
+                    
+                  >
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="button">SMS</button>
+                  </form>
+                </div>
+
+
+
+
+
+
                 <form
                   id="action_submit_form"
                   method="post"
                   name="action_submit_form"
                   onSubmit="DoSubmit();"
                   action="{% url 'app:action_submit' customer.id %}"
+                  class="col"
                 >
                   {% csrf_token %}
-                  <div class="form-floating">
-                    <textarea
-                      class="form-control mt-3"
-                      placeholder="Leave a comment here"
-                      id="floatingTextarea2"
-                      style="height: 100px"
-                      name="text"
-                    ></textarea>
-                    <label for="floatingTextarea2">Comments</label>
-                  </div>
+                  
 
                   <!-- Button trigger modal -->
 
@@ -483,7 +530,7 @@ table {
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdrop1"
                   >
-                    Submit
+                    CB
                   </button>
 
                   <!-- Modal -->
@@ -498,6 +545,10 @@ table {
                   >
                     <div class="modal-dialog">
                       <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Call Back</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
                         <div class="modal-body row">
                           <div class="col">
                           <div class="form-floating">
@@ -534,6 +585,31 @@ table {
                               {% endfor %}
                             </select>
                           </div>
+                          <div class="row">
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 minutes" type="button">Minutes</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 hour" type="button">Hour</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 day" type="button">Day</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 week" type="button">Week</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 month" type="button">Month</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 year" type="button">Year</button>
+                          </div>  
+                          </div>
+                          <div class="form-floating">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
+                            name="text"></textarea>
+                            <label for="floatingTextarea">Comments</label>
+                          </div>
                         </div>
                         <div class="modal-footer">
                           <button
@@ -551,6 +627,105 @@ table {
                     </div>
                   </div>
                 </form>
+
+
+
+
+
+
+                <form
+                  id="action_submit_form"
+                  method="post"
+                  name="action_submit_form"
+                  onSubmit="DoSubmit();"
+                  action="{% url 'app:close_action_submit' customer.id %}"
+                  class="col"
+                >
+                  {% csrf_token %}
+                  
+
+                  <!-- Button trigger modal -->
+
+                  <button
+                    type="button"
+                    class="btn btn-primary my-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop2"
+                  >
+                    Close
+                  </button>
+
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="staticBackdrop2"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    tabindex="-1"
+                    aria-labelledby="staticBackdropLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Close</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row">
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Reason</label>
+                            <select id="select" class="form-select"  name="reason">
+                              
+                              <option value="Reason1"> Reason1 </option>
+                              <option value="Reason2"> Reason2 </option>
+                              <option value="Reason3"> Reason3 </option>
+                              <option value="Reason4"> Reason4 </option>
+                            </select>
+
+                          
+
+                          </div>
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
+                            <select id="select" class="form-select"  name="talked_customer">
+                              <option
+                              {% if customer.primary_customer %}
+                              selected
+                              {% endif %}
+                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
+                              {% for i in child_customers %}
+                              <option
+                              {% if i.primary_customer %}
+                              selected
+                              {% endif %}
+                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                            
+                          
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                          <button class="btn btn-primary" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+
+
+
                 <h6>History</h6>
                 <div class="card p-0 m-0">
                   <div
@@ -951,6 +1126,57 @@ var formattedTime = londonDate.split(", ")[1].split(":");
   time.forEach((time) => {
     time.value = `${formattedTime[0]}:${formattedTime[1]}`;
   });
+
+  const minutes = document.querySelector('.minutes');
+  const time_field = document.querySelector('.time');
+  const date_field = document.querySelector('.date');
+  const time_field_value = time_field.value.split(':');
+  const date_field_value = date_field.value.split('-');
+  minutes.addEventListener('click',()=>{
+    time_field_value[1] = parseInt(time_field_value[1]) + 10;
+    if(time_field_value[1] >= 60){
+      time_field_value[1] = time_field_value[1] - 60;
+      time_field_value[0] = parseInt(time_field_value[0]) + 1;
+    } 
+    if(time_field_value[1] < 10){
+      time_field_value[1] = `0${time_field_value[1]}`;
+    }
+    if(time_field_value[0] < 10){
+      time_field_value[0] = `${time_field_value[0]}`;
+    }
+    if (time_field_value[0] >= 24){
+      time_field_value[0] = '0';
+    }
+    time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
+  });
+
+  const hour = document.querySelector('.hour');
+  hour.addEventListener('click',()=>{
+    time_field_value[0] = parseInt(time_field_value[0]) + 1;
+    if(time_field_value[0] >= 24){
+      time_field_value[0] = time_field_value[0] - 24;
+    }
+    if(time_field_value[0] < 10){
+      time_field_value[0] = `${time_field_value[0]}`;
+    }
+    time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
+  });
+
+  //const day = document.querySelector('.day');
+  //day.addEventListener('click',()=>{
+  //  date_field_value[0] = parseInt(date_field_value[0]) + 1;
+  //  if(date_field_value[0] < 10){
+  //    date_field_value[0] = `0${date_field_value[0]}`;
+  //  }
+  //  if(date_field_value[1] < 10){
+  //    date_field_value[1] = `0${date_field_value[1]}`;
+  //  }
+  //  
+  //
+  //
+  //  date_field.value = `${date_field_value[0]}-${date_field_value[1]}-$         {date_field_value[2]}`;
+  //
+  //});
 </script>
 
 

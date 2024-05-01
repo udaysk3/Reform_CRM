@@ -1,5 +1,6 @@
 from hmac import new
 from django.contrib.auth.decorators import login_required
+from regex import F
 from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
@@ -666,6 +667,26 @@ def action_submit(request, customer_id):
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
+def close_action_submit(request, customer_id):
+    if request.method == "POST":
+        customer = Customers.objects.get(id=customer_id)
+        talked_with = request.POST.get("talked_customer")
+        text = request.POST.get("reason")
+
+        if talked_with == "nan":
+            messages.error(request, "Customer field should be mapped")
+            return redirect(f"/customer-detail/{customer_id}")
+
+        customer.add_action(
+            text,
+            User.objects.get(email=request.user),
+            False,
+            datetime.now(pytz.timezone("Europe/London")),
+            talked_with=talked_with,
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
 
 def council_action_submit(request, council_id):
     if request.method == "POST":
@@ -726,6 +747,27 @@ def na_action_submit(request, customer_id):
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
         text = "NA"
+
+        customer.add_action(
+            text,
+            User.objects.get(email=request.user),
+            date_time,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
+def lm_action_submit(request, customer_id):
+    if request.method == "POST":
+        customer = Customers.objects.get(id=customer_id)
+        date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
+        time_str = datetime.now(london_tz).strftime("%H:%M")
+        time_obj = datetime.strptime(time_str, "%H:%M")
+        time_obj += timedelta(minutes=20)
+        time_str_updated = time_obj.strftime("%H:%M")
+        date_time_str = f"{date_str} {time_str_updated}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = "LM"
 
         customer.add_action(
             text,
