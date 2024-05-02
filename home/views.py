@@ -33,12 +33,14 @@ def dashboard(request):
     all_customers = (
         Customers.objects.annotate(earliest_action_date=Max("action__created_at"))
         .filter(parent_customer=None)
+        .filter(closed=False)
         .order_by("earliest_action_date")
     )
     user  = User.objects.get(email=request.user)
     customers = (
         Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
+        .filter(closed=False)
         .order_by("earliest_action_date")
     )
 
@@ -80,8 +82,9 @@ def dashboard(request):
     imported = {}
     london_tz = timezone("Europe/London")
     for customer in customers:
-
+        user = User.objects.get(email=request.user)
         actions = customer.get_created_at_action_history()
+        actions.filter(agent=user)
         for i in actions:
             if i.imported:
                 if i.created_at.replace(tzinfo=london_tz).date() not in imported:
@@ -365,6 +368,7 @@ def Customer(request):
     customers = (
         Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
+        .filter(closed=False)
         .order_by("earliest_action_date")
     )
 
@@ -656,12 +660,13 @@ def action_submit(request, customer_id):
             return redirect(f"/customer-detail/{customer_id}")
 
         customer.add_action(
-            text,
-            User.objects.get(email=request.user),
-            date_time,
-            False,
-            datetime.now(pytz.timezone("Europe/London")),
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
+            date_time=date_time,
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -677,10 +682,11 @@ def close_action_submit(request, customer_id):
             return redirect(f"/customer-detail/{customer_id}")
 
         customer.add_action(
-            text,
-            User.objects.get(email=request.user),
-            False,
-            datetime.now(pytz.timezone("Europe/London")),
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=True,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
         )
         messages.success(request, "Action added successfully!")
@@ -702,11 +708,11 @@ def council_action_submit(request, council_id):
             return redirect(f"/council-detail/{council_id}")
 
         council.add_council_action(
-            text,
-            User.objects.get(email=request.user),
-            date_time,
-            False,
-            datetime.now(pytz.timezone("Europe/London")),
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=True,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
         )
         messages.success(request, "Action added successfully!")
@@ -726,9 +732,11 @@ def na_council_action_submit(request, council_id):
         text = "NA"
 
         council.add_council_action(
-            text,
-            User.objects.get(email=request.user),
-            date_time,
+            date_time=date_time,
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=True,
+            imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
         )
         messages.success(request, "Action added successfully!")
@@ -748,9 +756,11 @@ def na_action_submit(request, customer_id):
         text = "NA"
 
         customer.add_action(
-            text,
-            User.objects.get(email=request.user),
-            date_time,
+            date_time=date_time,
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=True,
+            imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
         )
         messages.success(request, "Action added successfully!")
@@ -769,9 +779,11 @@ def lm_action_submit(request, customer_id):
         text = "LM"
 
         customer.add_action(
-            text,
-            User.objects.get(email=request.user),
-            date_time,
+            date_time=date_time,
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=True,
+            imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
         )
         messages.success(request, "Action added successfully!")
@@ -862,8 +874,9 @@ def import_customers_view(request):
             customer.save()
             for i in history:
                 customer.add_action(
-                    f"{i} : {history[i]}",
-                    User.objects.get(email=request.user),
+                    text=f"{i} : {history[i]}",
+                    agent=User.objects.get(email=request.user),
+                    closed=False,
                     imported=True,
                     created_at=datetime.now(pytz.timezone("Europe/London")),
                 )

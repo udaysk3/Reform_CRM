@@ -28,16 +28,22 @@ class Customers(models.Model):
     route =  models.ForeignKey('Route', related_name='customers', on_delete=models.SET_NULL, blank=True, null=True)
     stage_values = models.JSONField(blank= True, null=True)
     council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
+    closed = models.BooleanField(default=False)
+
 
     def add_action(
         self,
-        text,
-        agent, imported=False, created_at=None, talked_with=None, date_time=None, funding_route=None,
+        text=None,
+        agent=None, closed=None, imported=False, created_at=None, talked_with=None, date_time=None,
     ):
-        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
+        customer = self
+        customer.closed = closed
+        customer.save()
+        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, )
 
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
+
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

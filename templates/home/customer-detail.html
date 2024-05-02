@@ -441,7 +441,7 @@ table {
           <div class="col-sm-6 mb-3 mb-sm-0">
             <div class="card m-0">
               <div class="card-body m-0">
-                <h6>
+                <h6 class="fs-6">
                   <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
                 </h6>
@@ -1014,6 +1014,7 @@ table {
   }
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.js" integrity="sha512-3CuraBvy05nIgcoXjVN33mACRyI89ydVHg7y/HMN9wcTVbHeur0SeBzweSd/rxySapO7Tmfu68+JlKkLTnDFNg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script >
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -1053,10 +1054,7 @@ table {
     })
   });
 
-  function DoSubmit(){
-    document.action_submit_form.date_field.value = document.action_submit_form.date_field.value.split("-").reverse().join("-");
-    return confirm(date);
-  }
+  
 
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -1129,9 +1127,7 @@ var formattedTime = londonDate.split(", ")[1].split(":");
 
   const minutes = document.querySelector('.minutes');
   const time_field = document.querySelector('.time');
-  const date_field = document.querySelector('.date');
   const time_field_value = time_field.value.split(':');
-  const date_field_value = date_field.value.split('-');
   minutes.addEventListener('click',()=>{
     time_field_value[1] = parseInt(time_field_value[1]) + 10;
     if(time_field_value[1] >= 60){
@@ -1162,21 +1158,50 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
   });
 
-  //const day = document.querySelector('.day');
-  //day.addEventListener('click',()=>{
-  //  date_field_value[0] = parseInt(date_field_value[0]) + 1;
-  //  if(date_field_value[0] < 10){
-  //    date_field_value[0] = `0${date_field_value[0]}`;
-  //  }
-  //  if(date_field_value[1] < 10){
-  //    date_field_value[1] = `0${date_field_value[1]}`;
-  //  }
-  //  
-  //
-  //
-  //  date_field.value = `${date_field_value[0]}-${date_field_value[1]}-$         {date_field_value[2]}`;
-  //
-  //});
+  const day = document.querySelector('.day');
+  day.addEventListener('click',()=>{
+    var date_field = document.querySelector('.date');
+    var date_field_value = date_field.value.split('-');
+    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+    var tomorrow = moment(today).add(1, 'days').format("L");
+    var formattedDate = tomorrow.split('/');
+    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+  });
+
+  const week = document.querySelector('.week');
+  week.addEventListener('click',()=>{
+    var date_field = document.querySelector('.date');
+    var date_field_value = date_field.value.split('-');
+    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+    var tomorrow = moment(today).add(7, 'days').format("L");
+    var formattedDate = tomorrow.split('/');
+    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+  });
+
+  const month = document.querySelector('.month');
+  month.addEventListener('click',()=>{
+    var date_field = document.querySelector('.date');
+    var date_field_value = date_field.value.split('-');
+    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+    var tomorrow = moment(today).add(1, 'months').format("L");
+    var formattedDate = tomorrow.split('/');
+    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+  });
+
+  const year = document.querySelector('.year');
+  year.addEventListener('click',()=>{
+    var date_field = document.querySelector('.date');
+    var date_field_value = date_field.value.split('-');
+    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+    var tomorrow = moment(today).add(1, 'years').format("L");
+    var formattedDate = tomorrow.split('/');
+    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+  });
+
+  function DoSubmit(){
+    document.querySelector('.date').value = document.querySelector('.date').value.split("-").reverse().join("-");
+    return confirm(date);
+  }
 </script>
 
 

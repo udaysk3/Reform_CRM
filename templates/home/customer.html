@@ -613,7 +613,7 @@ const form = document.querySelector('#addCustomerForm');
     for (let i = 0; i < agents.length; i++) {
       options.push({
         id: i+1,
-        title: "All Customers Assigned to "+agents[i].fields.first_name + ' ' + agents[i].fields.last_name + ' - ' + agents[i].pk
+        title: "All Customers Assigned to "+agents[i].fields.first_name + ' ' + agents[i].fields.last_name 
       });
     }
     // Create comboTree using unassigned customer names
@@ -632,7 +632,7 @@ const form = document.querySelector('#addCustomerForm');
     let comboSource2 = agents.map(agent => {
       return {
         id: agent.pk,
-        title: agent.fields.first_name + ' ' + agent.fields.last_name + ' - ' + agent.pk
+        title: agent.fields.first_name + ' ' + agent.fields.last_name
       };  
     });
     // Create comboTree using unassigned customer names
