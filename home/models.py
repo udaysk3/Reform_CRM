@@ -34,12 +34,12 @@ class Customers(models.Model):
     def add_action(
         self,
         text=None,
-        agent=None, closed=None, imported=False, created_at=None, talked_with=None, date_time=None,
+        agent=None, closed=False, imported=False, created_at=None, talked_with=None, date_time=None, action_type=None, keyevents=False
     ):
         customer = self
         customer.closed = closed
         customer.save()
-        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, )
+        return Action.objects.create(customer=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, action_type=action_type, keyevents=keyevents)
 
     def get_created_at_action_history(self):
         return (Action.objects.filter(customer=self).order_by("-created_at"))
@@ -108,6 +108,8 @@ class Action(models.Model):
     text = models.TextField(max_length=999, blank= True, null=True)
     imported = models.BooleanField(default=False)
     talked_with = models.CharField(max_length=225, blank= True, null=True)
+    action_type = models.CharField(max_length=225, blank= True, null=True)
+    keyevents = models.BooleanField(default=False)
 
 class Stage(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)

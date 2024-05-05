@@ -105,6 +105,18 @@
             </div>
             {% elif request.GET.page == 'edit_customer' %}
 
+            <div>
+              <button class="btn btn-primary edit-user-btn" data-user-id="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </button>
+            </div>
+
+            {% for c_customer in customers %}
+              <div>
+                <button class="btn btn-primary edit-user-btn" data-user-id="{{ c_customer.id }}"> {{ c_customer.first_name }} {{ c_customer.last_name }} </button>
+              </div>
+            {% endfor %}
+
+            
+            
          
   <div>
     <button data-bs-toggle="modal" data-bs-target="#add_child_customer" class="btn btn-primary">Add Customer</button>
@@ -146,14 +158,6 @@
 </div>
 </div>
       </form> 
-
-
-
-
-
-
-
-
             {% endif %}
           </div>
           
@@ -262,60 +266,60 @@
               <!-- Adjust the form action URL and method accordingly -->
               {% if customer %}
                 <h3>Edit Customer</h3>
-                <form name="editCustomerForm" id="editCustomerForm" method="post" action="{% url 'app:edit_customer' customer.id %}" onsubmit="return validateForm()">
+                <form name="editCustomerForm" id="editCustomerForm" method="post" action="{% url 'app:edit_customer' edit_customer.id %}" onsubmit="return validateForm()">
                   {% csrf_token %}
                   <div class="mb-3">
                       <label for="edit_first_name" class="form-label">First Name</label>
-                      <input type="text" class="form-control" id="edit_first_name" name="first_name" value="{% if customer.first_name != 'None' %}{{ customer.first_name }}{% endif %}" required>
+                      <input type="text" class="form-control" id="edit_first_name" name="first_name" value="{% if edit_customer.first_name != 'None' %}{{ edit_customer.first_name }}{% endif %}" required>
                   </div>
                   <div class="mb-3">
                       <label for="edit_last_name" class="form-label">Last Name</label>
-                      <input type="text" class="form-control" id="edit_last_name" name="last_name" value="{% if customer.last_name != 'None' %}{{ customer.last_name }}{% endif %}" required>
+                      <input type="text" class="form-control" id="edit_last_name" name="last_name" value="{% if edit_customer.last_name != 'None' %}{{ edit_customer.last_name }}{% endif %}" required>
                   </div>
                   <div class="mb-3">
                     <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{% if customer.phone_number != 'None' %}{{ customer.phone_number }}{% endif %}" required>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{% if edit_customer.phone_number != 'None' %}{{ edit_customer.phone_number }}{% endif %}" required>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email"  value="{% if customer.email != 'None' %}{{ customer.email }}{% endif %}" required>
+                    <input type="email" class="form-control" id="email" name="email"  value="{% if edit_customer.email != 'None' %}{{ edit_customer.email }}{% endif %}" required>
                 </div>
                 <div class="mb-3">
                   <label for="house_name" class="form-label">House Name/ Number</label>
-                  <input type="text" class="form-control" id="house_name" name = "house_name" value="{% if customer.house_name != 'None' %}{{ customer.house_name }}{% endif %}" required>
+                  <input type="text" class="form-control" id="house_name" name = "house_name" value="{% if edit_customer.house_name != 'None' %}{{ edit_customer.house_name }}{% endif %}" required>
               </div>
                 <div class="mb-3">
                     <label for="street_name" class="form-label">Street Name</label>
-                    <input type="text" class="form-control" id="street_name" name="street_name" value="{% if customer.street_name != 'None' %}{{ customer.street_name }}{% endif %}" required>
+                    <input type="text" class="form-control" id="street_name" name="street_name" value="{% if edit_customer.street_name != 'None' %}{{ edit_customer.street_name }}{% endif %}" required>
                 </div>
                 <div class="mb-3">
                   <label for="city" class="form-label">City/Town</label>
-                  <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example" value="{{ customer.city }}">
+                  <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example" value="{{ edit_customer.city }}">
                     <option value="nan">Select a City</option>
                     {% for city in city|cities %}
-                    <option {% if customer.city == city %} selected {% endif %} value="{{ city }}">{{ city }}</option>
+                    <option {% if edit_customer.city == city %} selected {% endif %} value="{{ city }}">{{ city }}</option>
                     {% endfor %}
                   </select>
               </div>
               <div class="mb-3">
                   <label for="county" class="form-label">County</label>
-                  <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example" value="{{ customer.county }}">
+                  <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example" value="{{ edit_customer.county }}">
                     <option value="nan">Select a County</option>
                     {% for county in county|countys %}
-                    <option {% if customer.county == county %} selected {% endif %}  value="{{ county }}">{{ county }}</option>
+                    <option {% if edit_customer.county == county %} selected {% endif %}  value="{{ county }}">{{ county }}</option>
                     {% endfor %}
                   </select> 
               </div>
                 <div class="mb-3">
                   <label for="postcode" class="form-label">Postcode</label>
-                  <input type="text" class="form-control" id="postcode" name="postcode" value="{% if customer.postcode != 'None' %}{{ customer.postcode }}{% endif %}" required>
+                  <input type="text" class="form-control" id="postcode" name="postcode" value="{% if edit_customer.postcode != 'None' %}{{ edit_customer.postcode }}{% endif %}" required>
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example" value="{{ customer.country }}">
+                <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example" value="{{ edit_customer.country }}">
                   <option value="nan">Select a Country</option>
                   {% for country in country|countries %}
-                  <option {% if customer.country == country %} selected {% endif %}  value="{{ country }}">{{ country }}</option>
+                  <option {% if edit_customer.country == country %} selected {% endif %}  value="{{ country }}">{{ country }}</option>
                   {% endfor %}
                 </select>
             </div>
@@ -613,7 +617,7 @@ const form = document.querySelector('#addCustomerForm');
     for (let i = 0; i < agents.length; i++) {
       options.push({
         id: i+1,
-        title: "All Customers Assigned to "+agents[i].fields.first_name + ' ' + agents[i].fields.last_name 
+        title: "All Customers Assigned to "+agents[i].fields.first_name + ' ' + agents[i].fields.last_name + ' - ' + agents[i].pk
       });
     }
     // Create comboTree using unassigned customer names
@@ -632,7 +636,7 @@ const form = document.querySelector('#addCustomerForm');
     let comboSource2 = agents.map(agent => {
       return {
         id: agent.pk,
-        title: agent.fields.first_name + ' ' + agent.fields.last_name
+        title: agent.fields.first_name + ' ' + agent.fields.last_name + ' - ' + agent.pk
       };  
     });
     // Create comboTree using unassigned customer names
@@ -648,6 +652,18 @@ const form = document.querySelector('#addCustomerForm');
   $('#city').dropdown();
   $('#county').dropdown();
   $('#country').dropdown();
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const ceditButtons = document.querySelectorAll('.edit-user-btn');
+    ceditButtons.forEach(cbutton => {
+      cbutton.addEventListener('click', function (event) {
+        event.preventDefault();
+        const userId = cbutton.getAttribute('data-user-id');
+        window.location.href = `/customer?page=edit_customer&id=${userId}`;
+      });
+    });
+  });
 
   
 </script>

@@ -5,6 +5,7 @@ from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Customers, Client, Campaign, Councils, Route, Stage, Document, Action
+import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
 import pandas as pd
@@ -17,6 +18,8 @@ from pytz import timezone
 import json
 import numpy as np
 import os
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
 
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
@@ -110,13 +113,14 @@ def dashboard(request):
                 history[i.created_at.replace(tzinfo=london_tz).date()].append(
                     [
                         i.created_at.replace(tzinfo=london_tz).time(),
-                        i.text,
-                        i.agent.first_name,
-                        i.agent.last_name,
-                        i.imported,
-                        i.talked_with,
                         i.customer.postcode,
                         i.customer.house_name,
+                        i.agent.first_name,
+                        i.agent.last_name,
+                        i.action_type,
+                        i.date_time,
+                        i.talked_with,
+                        i.text
                     ]
                 )
 
@@ -161,6 +165,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
     actions = customer.get_created_at_action_history()
     imported = {}
     london_tz = timezone("Europe/London")
+    keyevents = customer.get_created_at_action_history().filter(keyevents=True)
+    events = {}
 
     for i in actions:
         if i.imported:
@@ -187,15 +193,36 @@ def customer_detail(request, customer_id, s_customer_id=None):
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
                     i.created_at.replace(tzinfo=london_tz).time(),
-                    i.text,
-                    i.agent.first_name,
-                    i.agent.last_name,
-                    i.imported,
-                    i.talked_with,
                     i.customer.postcode,
                     i.customer.house_name,
+                    i.agent.first_name,
+                    i.agent.last_name,
+                    i.action_type,
+                    i.date_time,
+                    i.talked_with,
+                    i.text
                 ]
             )
+
+    for i in keyevents:
+        if i.created_at.replace(tzinfo=london_tz).date() not in events:
+            events[i.created_at.replace(tzinfo=london_tz).date()] = []
+    for i in keyevents:
+        events[i.created_at.replace(tzinfo=london_tz).date()].append(
+                [
+                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.customer.postcode,
+                    i.customer.house_name,
+                    i.agent.first_name,
+                    i.agent.last_name,
+                    i.action_type,
+                    i.date_time,
+                    i.talked_with,
+                    i.text
+                ]
+            )
+
+
     if customer.district:
         council= Councils.objects.get_or_create(name=customer.district)[0]
     else:
@@ -251,6 +278,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "values": values,
             "agents": agents,
             "show_customer": show_customer,
+            "events": events,
         },
     )
         return render(
@@ -268,6 +296,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "stages": stages,
             "agents" : agents,
             "show_customer": show_customer,
+            "events": events,
         },
     )
 
@@ -285,6 +314,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "routes": routes,
             "agents" : agents,
             "show_customer": show_customer,
+            "events": events,
         },
     )
 
@@ -355,10 +385,29 @@ def Customer(request):
     if request.GET.get("page") == "edit_customer" and request.GET.get("backto") is None:
         customer_id = request.GET.get("id")
         customer = Customers.objects.get(pk=customer_id)
+        if customer.parent_customer:
+            edit_customer = customer
+            customer = Customers.objects.get(pk=customer.parent_customer.id)
+            customers = Customers.objects.all().filter(parent_customer=customer)
+            return render(
+                request,
+                "home/customer.html",
+                {
+                    "edit_customer": edit_customer,
+                    "customer": customer,
+                    "customers": customers,
+                },
+            )
+        edit_customer = customer
+        customers = Customers.objects.all().filter(parent_customer=customer)
         return render(
             request,
             "home/customer.html",
-            {"customer": customer},
+            {
+                "edit_customer": edit_customer,
+                "customer": customer,
+                "customers": customers,
+            },
         )
     
 
@@ -473,21 +522,7 @@ def add_customer(request):
             phone_number = phone_number
         else:
             phone_number = "+44" + phone_number
-        # url = "https://api.postcodes.io/postcodes/" + postcode.strip()
-        # try:
-        #     response = requests.get(url, headers={'muteHttpExceptions': 'true'})
-
-        #     if response.status_code == 200:
-        #         json_data = response.json()
-        #         status = json_data.get('status')
-        #         if status == 200:
-        #             district = json_data['result']['admin_district']
-        #         else:
-        #             district = "Invalid postcode or not found"
-        #     else:
-        #         district = "Error fetching data"
-        # except requests.exceptions.RequestException as e:
-        #     district = f"Request Error"
+        postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
         if district and not Councils.objects.filter(name=district).exists():
             Councils.objects.create(name=district)
@@ -597,9 +632,20 @@ def edit_customer(request, customer_id):
         if district:
             customer.district = district
         customer.save()
-
+        customer.add_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Update Customer",
+            keyevents=True,
+        )
         messages.success(request, "Customer updated successfully!")
         if customer.parent_customer:
+            customer.parent_customer.add_action(
+                agent=User.objects.get(email=request.user),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Update Customer",
+                keyevents=True,
+            )
             return redirect(f"/customer-detail/{customer.parent_customer.id}")
 
         return redirect(f"/customer-detail/{customer_id}")
@@ -667,6 +713,7 @@ def action_submit(request, customer_id):
             created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
             date_time=date_time,
+            action_type="CB",
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -675,7 +722,8 @@ def close_action_submit(request, customer_id):
     if request.method == "POST":
         customer = Customers.objects.get(id=customer_id)
         talked_with = request.POST.get("talked_customer")
-        text = request.POST.get("reason")
+        reason = request.POST.get("reason")
+        text = request.POST.get("text")
 
         if talked_with == "nan":
             messages.error(request, "Customer field should be mapped")
@@ -688,6 +736,7 @@ def close_action_submit(request, customer_id):
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
+            action_type=f"Closed - {reason}",
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -710,7 +759,6 @@ def council_action_submit(request, council_id):
         council.add_council_action(
             text=text,
             agent=User.objects.get(email=request.user),
-            closed=True,
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
@@ -735,7 +783,6 @@ def na_council_action_submit(request, council_id):
             date_time=date_time,
             text=text,
             agent=User.objects.get(email=request.user),
-            closed=True,
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
         )
@@ -749,19 +796,16 @@ def na_action_submit(request, customer_id):
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
-        time_obj += timedelta(minutes=20)
+        time_obj += timedelta(minutes=60)
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "NA"
 
         customer.add_action(
             date_time=date_time,
-            text=text,
             agent=User.objects.get(email=request.user),
-            closed=True,
-            imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="NA",
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -772,19 +816,16 @@ def lm_action_submit(request, customer_id):
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
-        time_obj += timedelta(minutes=20)
+        time_obj += timedelta(minutes=60)
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-        text = "LM"
 
         customer.add_action(
             date_time=date_time,
-            text=text,
             agent=User.objects.get(email=request.user),
-            closed=True,
-            imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="LM",
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -840,6 +881,8 @@ def import_customers_view(request):
                     customer_data[column_mappings[i]] = phone_number
                 elif column_mappings[i] == "postcode":
                     postcode = str(row[i])
+                    postcode = re.sub(r'\s+', ' ', postcode)
+
                     url = "https://api.postcodes.io/postcodes/" + postcode.strip()
                     try:
                         response = requests.get(
@@ -1016,6 +1059,12 @@ def add_child_customer(request, customer_id):
             parent_customer=parent_customer,
             primary_customer=True,
         )
+        parent_customer.add_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Add a Customer",
+            keyevents=True
+        )
         messages.success(request, "Customer added successfully!")
         return redirect(f"/customer-detail/{customer_id}")
 
@@ -1034,6 +1083,11 @@ def make_primary(request, parent_customer_id, child_customer_id):
                 i.save()
     child_customer.primary_customer = True
     child_customer.save()
+    parent_customer.add_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Made Primary",
+        )    
     messages.success(request, "Customer made primary successfully!")
     return redirect(f"/customer-detail/{parent_customer_id}")
 
@@ -1259,6 +1313,8 @@ def assign_agents(request):
             customer_ids = customer_ids[num_customers_for_agent:]
             
             agent_index += 1
+
+
         
         messages.success(request, "Customers Assigned successfully!")
         return redirect("app:customer")
@@ -1276,8 +1332,56 @@ def assign_agent(request):
         customer = Customers.objects.get(pk=customer_id)
         customer.assigned_to =  User.objects.get(pk=agent_id)
         customer.save()
+        customer.add_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Assigned to Agent",
+        )
         messages.success(request, "Agent Assigned successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
     except Exception as e:
         messages.error(request, f"Error assigning customer: {e}")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+    
+
+def send_email(request, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+
+    body = f"""Dear {customer.first_name} {customer.last_name},
+
+We hope this email finds you well. We are delighted to inform you that your account has been successfully migrated to Reform CRM, our newly rebranded and enhanced CRM platform.
+
+With Reform CRM, you can expect a streamlined and intuitive user experience, along with a host of new features designed to help you better manage your customer relationships and drive business growth.
+
+As part of this transition, your data has been securely transferred to Reform CRM, ensuring continuity and reliability in your CRM operations.
+
+We invite you to log in to your Reform CRM account today to explore the new features and functionalities. Should you have any questions or require assistance, our support team is readily available to help you.
+
+Thank you for choosing Reform CRM. We are excited to embark on this journey with you and look forward to supporting your business success.
+
+Best Regards,
+
+The Reform CRM Team"""
+
+    email = EmailMessage(
+        subject="Welcome to Reform CRM - Your Enhanced CRM Experience!",
+        body=body,
+        from_email='support@reform-group.uk',
+        to=['puvvulasaigowtham@gmail.com'],
+    )
+    with open('home/reform_logo.jpg', 'rb') as f:
+        email.attach('reform_logo.jpg', f.read(), 'image/jpg')
+
+
+    email.send()
+
+    customer.add_action(
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Email Sent",
+        )
+
+    messages.success(request, "Email sent successfully!")
+    return HttpResponseRedirect("/customer-detail/" + str(customer_id))

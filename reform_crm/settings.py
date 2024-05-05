@@ -157,3 +157,11 @@ MESSAGE_TAGS = {
         messages.WARNING: 'alert-warning',
         messages.ERROR: 'alert-danger',
  }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'   # Here I am using gmail smtp server 
+EMAIL_PORT = 587       # gmail smtp server port
+EMAIL_HOST_USER = 'support@reform-group.uk'  # Use your email account
+EMAIL_HOST_PASSWORD = 'nrhethtofrfhryjo' # For gmail use app password
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False

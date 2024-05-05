@@ -68,4 +68,5 @@ urlpatterns = [
     path("funding_route_detail/<int:route_id>", views.funding_route_detail, name="funding_route_detail"),
     path("assign_agents", views.assign_agents, name="assign_agents"),
     path("assign_agent", views.assign_agent, name="assign_agent"),
+    path("send_email/<int:customer_id>", views.send_email, name="send_email"),
 ]
