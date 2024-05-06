@@ -209,7 +209,7 @@ table {
 <div class="row container-fluid">
   <div class="cnav-item fs-6 col-1">
     <a
-          class="btn btn-primary fs-6 "
+          class="btn btn-link fs-6 "
           href="/customer-detail/{{prev.id}}"
           ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
@@ -283,7 +283,7 @@ table {
  
   <div class="cnav-item fs-6 col-1 ">
     <a
-          class="btn btn-primary fs-6"
+          class="btn btn-link fs-6"
           href="/customer-detail/{{next.id}}"
           ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
@@ -310,9 +310,9 @@ table {
             <div class="card pb-3">
               <div class="card-body py-0 contacts-container" style="overflow:hidden; height: 185px;">
                 <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
-                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="btn {% if customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {% endif %} </a>
+                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="btn {% if customer.primary_customer %} btn-primary {% else %} btn-outline-secondary {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {% endif %} </a>
                   {% for c_customer in child_customers %}
-                  <a href="{% url 'app:customer_detail' customer.id c_customer.id %}" type="button" class="btn  {% if c_customer.primary_customer %} btn-primary {% else %} btn-secondary {% endif %}" style="margin-left:-3px">
+                  <a href="{% url 'app:customer_detail' customer.id c_customer.id %}" type="button" class="btn  {% if c_customer.primary_customer %} btn-primary {% else %} btn-outline-secondary {% endif %}" style="margin-left:-3px">
                     {% if c_customer == show_customer %}{{ c_customer.first_name }} {% else %} {{ c_customer.first_name|truncatechars:5 }} {% endif %}
                   </a>
                   {% endfor %}
@@ -413,10 +413,17 @@ table {
                     </div>
                   </div>
                 </div>
-</h6>
+                  </h6>
                 {% else %}
                 <h6><b>Recommendations</b>: -</h6>
                 {% endif %}
+
+                <h6><b>Google Maps Link</b>: <a target="_blank" href=
+                  "
+                    https://www.google.com/maps?q={% if customer.house_name %}{{ customer.house_name }}{% endif %}+{% if customer.street_name %}{{ customer.street_name }}{% endif %}+{% if customer.postcode %}{{ customer.postcode }}{% endif %}
+                  "
+                  >Click Here </a></h6>
+
               </div>
             </div>
           </div>
@@ -460,7 +467,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-primary" type="submit">NA</button>
+                    <button class="btn btn-outline-primary" type="submit">NA</button>
                   </form>
                 </div>
 
@@ -475,7 +482,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-primary" type="submit">LM</button>
+                    <button class="btn btn-outline-primary" type="submit">LM</button>
                   </form>
                 </div>
 
@@ -490,7 +497,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-primary" type="submit">Email</button>
+                    <button class="btn btn-outline-primary" type="submit">Email</button>
                   </form>
                 </div>
 
@@ -505,7 +512,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-primary" type="button">SMS</button>
+                    <button class="btn btn-outline-primary" type="button">SMS</button>
                   </form>
                 </div>
 
@@ -529,7 +536,7 @@ table {
 
                   <button
                     type="button"
-                    class="btn btn-primary my-3"
+                    class="btn btn-outline-primary my-3"
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdrop1"
                   >
@@ -651,7 +658,7 @@ table {
 
                   <button
                     type="button"
-                    class="btn btn-primary my-3"
+                    class="btn btn-outline-primary my-3"
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdrop2"
                   >
@@ -691,6 +698,7 @@ table {
                           <div class="col">
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
                             <select id="select" class="form-select"  name="talked_customer">
+                              <option value="None">None</option>
                               <option
                               {% if customer.primary_customer %}
                               selected

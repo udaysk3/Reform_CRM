@@ -643,7 +643,7 @@ def edit_customer(request, customer_id):
             customer.parent_customer.add_action(
                 agent=User.objects.get(email=request.user),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type="Update Customer",
+                action_type=f"Update {customer.firt_name} {customer.last_name}",
                 keyevents=True,
             )
             return redirect(f"/customer-detail/{customer.parent_customer.id}")
@@ -1062,7 +1062,7 @@ def add_child_customer(request, customer_id):
         parent_customer.add_action(
             agent=User.objects.get(email=request.user),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type="Add a Customer",
+            action_type=f"Add {child_customer.first_name} {child_customer.last_name}",
             keyevents=True
         )
         messages.success(request, "Customer added successfully!")
@@ -1086,7 +1086,7 @@ def make_primary(request, parent_customer_id, child_customer_id):
     parent_customer.add_action(
             agent=User.objects.get(email=request.user),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type="Made Primary",
+            action_type=f"Made {child_customer.first_name} {child_customer.last_name} as Primary Contact",
         )    
     messages.success(request, "Customer made primary successfully!")
     return redirect(f"/customer-detail/{parent_customer_id}")

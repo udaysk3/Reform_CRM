@@ -166,7 +166,7 @@
             {% if request.GET.page == 'add_customer' %}
               <h3>Add Customer</h3>
               
-              <form id="addCustomerForm" method="post" action="{% url 'app:add_customer' %}">
+              <form name="addCustomerForm" id="addCustomerForm" method="post" action="{% url 'app:add_customer' %}" onsubmit="return validateAddForm()">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="first_name" class="form-label">First Name</label>
@@ -187,12 +187,22 @@
                 
                 <div class="mb-3">
                     <label for="house_name" class="form-label">House Name/ Number</label>
-                    <input type="text" class="form-control" id="house_name" name="house_name"></input>
+                    <input type="text" class="form-control" id="house_name" name="house_name"  required></input>
                 </div>
                 <div class="mb-3">
                     <label for="street_name" class="form-label">Street Name</label>
-                    <input type="text" class="form-control" id="street_name" name="street_name"></input>
+                    <input type="text" class="form-control" id="street_name" name="street_name"  required></input>
                 </div>
+                <div class="mb-3 row">
+                  <div class="col-6">
+                    <label for="postcode" class="form-label">Postcode</label>
+                    <input type="text" class="form-control" id="postcode" name="postcode"  required>
+                  </div>
+                  <div class="col-6 d-flex align-items-end">
+                    <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                  </div>
+                </div>
+
                 <div class="mb-3">
                     <label for="city" class="form-label">City/Town</label>
                     <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example">
@@ -213,10 +223,6 @@
                     </select> 
                 </div>
                
-                <div class="mb-3">
-                  <label for="postcode" class="form-label">Postcode</label>
-                  <input type="text" class="form-control" id="postcode" name="postcode">
-              </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
                 <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example">
@@ -292,6 +298,15 @@
                     <label for="street_name" class="form-label">Street Name</label>
                     <input type="text" class="form-control" id="street_name" name="street_name" value="{% if edit_customer.street_name != 'None' %}{{ edit_customer.street_name }}{% endif %}" required>
                 </div>
+                <div class="mb-3 row">
+                  <div class="col-6">
+                  <label for="postcode" class="form-label">Postcode</label>
+                  <input type="text" class="form-control" id="postcode" name="postcode" value="{% if edit_customer.postcode != 'None' %}{{ edit_customer.postcode }}{% endif %}" required>
+                  </div>
+                  <div class="col-6 d-flex align-items-end">
+                    <button class="btn btn-primary editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                  </div>
+              </div>
                 <div class="mb-3">
                   <label for="city" class="form-label">City/Town</label>
                   <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example" value="{{ edit_customer.city }}">
@@ -309,10 +324,6 @@
                     <option {% if edit_customer.county == county %} selected {% endif %}  value="{{ county }}">{{ county }}</option>
                     {% endfor %}
                   </select> 
-              </div>
-                <div class="mb-3">
-                  <label for="postcode" class="form-label">Postcode</label>
-                  <input type="text" class="form-control" id="postcode" name="postcode" value="{% if edit_customer.postcode != 'None' %}{{ edit_customer.postcode }}{% endif %}" required>
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
@@ -437,9 +448,86 @@
 
 {% block js %}
 <script>
+
+  const editAddressBtn = document.querySelector('.editAddressBtn');
+  editAddressBtn.addEventListener('click', function () {
+    const postcode = document.forms["editCustomerForm"]["postcode"].value;
+    editAddressBtn.disabled = true;
+    if (postcode) {
+      fetch(`https://api.postcodes.io/postcodes/${postcode}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data) {
+            const { admin_district, pfa, country } = data.result;
+            document.forms["editCustomerForm"]["city"].value = admin_district;
+            document.forms["editCustomerForm"]["county"].value = pfa;
+            document.forms["editCustomerForm"]["country"].value = country;
+
+            document.forms["editCustomerForm"]["city"].nextSibling.nextSibling.nextSibling.innerHTML = admin_district;
+            document.forms["editCustomerForm"]["county"].nextSibling.nextSibling.nextSibling.innerHTML = pfa;
+            document.forms["editCustomerForm"]["country"].nextSibling.nextSibling.nextSibling.innerHTML = country;
+          }
+        });
+    } else {
+      alert('Please enter a postcode.');
+    }
+    editAddressBtn.disabled = false;
+  });
+
+  $('#city').dropdown();
+  $('#county').dropdown();
+  $('#country').dropdown();
   function loadBtn(e){
     e.disabled = true
-    e.innerHTML = 'Loading...'
+    e.innerHTML = 'Loading...';
+    
+    if (document.forms["addCustomerForm"]["first_name"].value == 'None' || document.forms["addCustomerForm"]["first_name"].value == ' None' || document.forms["addCustomerForm"]["first_name"].value == '') {
+      alert('The first_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["last_name"].value == 'None' || document.forms["addCustomerForm"]["last_name"].value == ' None' || document.forms["addCustomerForm"]["last_name"].value == '') {
+      alert('The last_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addCustomerForm"]["phone_number"].value == 'None' || document.forms["addCustomerForm"]["phone_number"].value == ' None' || document.forms["addCustomerForm"]["phone_number"].value == '') {
+      alert('The phone_number field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addCustomerForm"]["email"].value == 'None' || document.forms["addCustomerForm"]["email"].value == ' None' || document.forms["addCustomerForm"]["email"].value == '') {
+      alert('The email field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addCustomerForm"]["house_name"].value == 'None' || document.forms["addCustomerForm"]["house_name"].value == ' None' || document.forms["addCustomerForm"]["house_name"].value == '') {
+      alert('The house_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addCustomerForm"]["street_name"].value == 'None' || document.forms["addCustomerForm"]["street_name"].value == ' None' || document.forms["addCustomerForm"]["street_name"].value == '') {
+      alert('The street_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addCustomerForm"]["postcode"].value == 'None' || document.forms["addCustomerForm"]["postcode"].value == ' None' || document.forms["addCustomerForm"]["postcode"].value == '') {
+      alert('The postcode field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+    }
     document.getElementById('addCustomerForm').submit()
   }
 
@@ -591,6 +679,44 @@ const form = document.querySelector('#addCustomerForm');
     return true;
   }  
   
+  function validateAddForm() {
+    // Get the form data.
+    const formData = new FormData(document.querySelector('form'));
+    // Validate the form data.
+    if (document.forms["addCustomerForm"]["street_name"].value == 'None' || document.forms["addCustomerForm"]["street_name"].value == ' None' || document.forms["addCustomerForm"]["street_name"].value == '') {
+      alert('The street_name field is required.');
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["first_name"].value == 'None' || document.forms["addCustomerForm"]["first_name"].value == ' None' || document.forms["addCustomerForm"]["first_name"].value == '') {
+      alert('The first_name field is required.');
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["last_name"].value == 'None' || document.forms["addCustomerForm"]["last_name"].value == ' None' || document.forms["addCustomerForm"]["last_name"].value == '') {
+      alert('The last_name field is required.');
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["phone_number"].value == 'None' || document.forms["addCustomerForm"]["phone_number"].value == ' None' || document.forms["addCustomerForm"]["phone_number"].value == '') {
+      alert('The phone_number field is required.');
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["email"].value == 'None' || document.forms["addCustomerForm"]["email"].value == ' None' || document.forms["addCustomerForm"]["email"].value == '') {
+      alert('The email field is required.');
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["house_name"].value == 'None' || document.forms["addCustomerForm"]["house_name"].value == ' None' || document.forms["addCustomerForm"]["house_name"].value == '') {
+      alert('The house_name field is required.');
+      return false;
+    }
+    if (document.forms["addCustomerForm"]["postcode"].value == 'None' || document.forms["addCustomerForm"]["postcode"].value == ' None' || document.forms["addCustomerForm"]["postcode"].value == '') {
+      alert('The postcode field is required.');
+      return false;
+    }
+  
+    return true;
+  }  
+
+  
+  
 
 </script>
 
@@ -649,9 +775,7 @@ const form = document.querySelector('#addCustomerForm');
     });
   });
 
-  $('#city').dropdown();
-  $('#county').dropdown();
-  $('#country').dropdown();
+  
 
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -668,6 +792,33 @@ const form = document.querySelector('#addCustomerForm');
   
 </script>
 
+<script>
+  const findAddressBtn = document.querySelector('.find-address');
+  findAddressBtn.addEventListener('click', function () {
+    const postcode = document.forms["addCustomerForm"]["postcode"].value;
+    if (postcode) {
+      fetch(`https://api.postcodes.io/postcodes/${postcode}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data) {
+            const { admin_district, pfa, country } = data.result;
+            document.forms["addCustomerForm"]["city"].value = admin_district;
+            document.forms["addCustomerForm"]["county"].value = pfa;
+            document.forms["addCustomerForm"]["country"].value = country;
+
+            document.forms["addCustomerForm"]["city"].nextSibling.nextSibling.nextSibling.innerHTML = admin_district;
+            document.forms["addCustomerForm"]["county"].nextSibling.nextSibling.nextSibling.innerHTML = pfa;
+            document.forms["addCustomerForm"]["country"].nextSibling.nextSibling.nextSibling.innerHTML = country;
+          }
+        });
+    } else {
+      alert('Please enter a postcode.');
+    }
+  });
+
+
+
+</script>
 
   
 
