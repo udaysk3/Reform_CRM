@@ -634,16 +634,18 @@ def edit_customer(request, customer_id):
         customer.save()
         customer.add_action(
             agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type="Update Customer",
+            action_type=f"Update {customer.firt_name} {customer.last_name}",
             keyevents=True,
         )
         messages.success(request, "Customer updated successfully!")
         if customer.parent_customer:
             customer.parent_customer.add_action(
                 agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Update {customer.firt_name} {customer.last_name}",
+                action_type=f"Update {customer.parent_customer.firt_name} {customer.parent_customer.last_name}",
                 keyevents=True,
             )
             return redirect(f"/customer-detail/{customer.parent_customer.id}")
@@ -732,6 +734,7 @@ def close_action_submit(request, customer_id):
         customer.add_action(
             text=text,
             agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
             closed=True,
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -918,6 +921,7 @@ def import_customers_view(request):
             for i in history:
                 customer.add_action(
                     text=f"{i} : {history[i]}",
+                    date_time=datetime.now(pytz.timezone("Europe/London")),
                     agent=User.objects.get(email=request.user),
                     closed=False,
                     imported=True,
@@ -1061,6 +1065,7 @@ def add_child_customer(request, customer_id):
         )
         parent_customer.add_action(
             agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
             action_type=f"Add {child_customer.first_name} {child_customer.last_name}",
             keyevents=True
@@ -1085,6 +1090,7 @@ def make_primary(request, parent_customer_id, child_customer_id):
     child_customer.save()
     parent_customer.add_action(
             agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
             action_type=f"Made {child_customer.first_name} {child_customer.last_name} as Primary Contact",
         )    
@@ -1334,6 +1340,7 @@ def assign_agent(request):
         customer.save()
         customer.add_action(
             agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
             action_type="Assigned to Agent",
         )
@@ -1381,6 +1388,7 @@ The Reform CRM Team"""
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
             action_type="Email Sent",
+            date_time=datetime.now(pytz.timezone("Europe/London")),
         )
 
     messages.success(request, "Email sent successfully!")
