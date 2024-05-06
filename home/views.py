@@ -1374,7 +1374,7 @@ The Reform CRM Team"""
         subject="Welcome to Reform CRM - Your Enhanced CRM Experience!",
         body=body,
         from_email='support@reform-group.uk',
-        to=['puvvulasaigowtham@gmail.com'],
+        to=[customer.email],
     )
     with open('home/reform_logo.jpg', 'rb') as f:
         email.attach('reform_logo.jpg', f.read(), 'image/jpg')
