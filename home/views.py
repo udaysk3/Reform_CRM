@@ -565,6 +565,13 @@ def add_customer(request):
             energy_certificate_link=energy_certificate_link,
             recommendations=recommendations,
         )
+        customer.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type=f"Added {customer.parent_customer.firt_name} {customer.parent_customer.last_name}  {customer.house_name } {customer.phone_number} {customer.email} {customer.house_name} {customer.street_name} {customer.city} {customer.county} {customer.country}",
+                keyevents=True,
+        )
         messages.success(request, "Customer added successfully!")
         return redirect("app:customer")
     return render(request, "home/customer.html")
@@ -590,11 +597,29 @@ def add_customer(request):
 def edit_customer(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     if request.method == "POST":
+        changed = ''
+        if customer.phone_number != request.POST.get("phone_number"):
+            changed += f'{request.POST.get("phone_number")}'
+        if customer.email != request.POST.get('email'):
+            changed += f'{request.POST.get("email")}'
+        if customer.postcode != request.POST.get("postcode"):
+            changed += f'{request.POST.get("postcode")}'
+        if customer.street_name != request.POST.get("street_name"):
+            changed += f'{request.POST.get("street_name")}'
+        if customer.city != request.POST.get("city"):
+            changed += f'{request.POST.get("city")}'
+        if customer.house_name != request.POST.get("house_name"):
+            changed += f'{request.POST.get("house_name")}'
+        if customer.county != request.POST.get("county"):
+            changed += f'{request.POST.get("county")}'
+        if customer.country != request.POST.get("country"):
+            changed += f'{request.POST.get("country")}'
+
         customer.first_name = request.POST.get("first_name")
         customer.last_name = request.POST.get("last_name").upper()
         customer.phone_number = request.POST.get("phone_number")
         customer.email = request.POST.get("email")
-        customer.postcode = request.POST.get("postcode")
+        customer.postcode = re.sub(r'\s+', ' ', request.POST.get("postcode"))
         customer.street_name = request.POST.get("street_name")
         customer.city = request.POST.get("city")
         customer.house_name = request.POST.get("house_name")
@@ -636,7 +661,7 @@ def edit_customer(request, customer_id):
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Update {customer.firt_name} {customer.last_name}",
+            action_type=f"Updated {customer.first_name} {customer.last_name} - " + changed,
             keyevents=True,
         )
         messages.success(request, "Customer updated successfully!")
@@ -645,7 +670,7 @@ def edit_customer(request, customer_id):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Update {customer.parent_customer.firt_name} {customer.parent_customer.last_name}",
+                action_type=f"Updated {customer.parent_customer.firt_name} {customer.parent_customer.last_name} - " + changed,
                 keyevents=True,
             )
             return redirect(f"/customer-detail/{customer.parent_customer.id}")
@@ -735,7 +760,6 @@ def close_action_submit(request, customer_id):
             text=text,
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
-            closed=True,
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
@@ -884,7 +908,7 @@ def import_customers_view(request):
                     customer_data[column_mappings[i]] = phone_number
                 elif column_mappings[i] == "postcode":
                     postcode = str(row[i])
-                    postcode = re.sub(r'\s+', ' ', postcode)
+
 
                     url = "https://api.postcodes.io/postcodes/" + postcode.strip()
                     try:
@@ -903,7 +927,7 @@ def import_customers_view(request):
                             district = "Error fetching data"
                     except requests.exceptions.RequestException as e:
                         district = f"Request Error"
-                    customer_data[column_mappings[i]] = postcode
+                    customer_data[column_mappings[i]] = re.sub(r'\s+', ' ', postcode)
                 else:
                     customer_data[column_mappings[i]] = str(row[i])
 
@@ -1067,7 +1091,7 @@ def add_child_customer(request, customer_id):
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Add {child_customer.first_name} {child_customer.last_name}",
+            action_type=f"Added {child_customer.first_name} {child_customer.last_name} { child_customer.house_name } {child_customer.phone_number} {child_customer.email} {child_customer.house_name} {child_customer.street_name} {child_customer.city} {child_customer.county} {child_customer.country}",
             keyevents=True
         )
         messages.success(request, "Customer added successfully!")
@@ -1096,27 +1120,6 @@ def make_primary(request, parent_customer_id, child_customer_id):
         )    
     messages.success(request, "Customer made primary successfully!")
     return redirect(f"/customer-detail/{parent_customer_id}")
-
-
-# def add_funding_route(request,customer_id):
-#     if request.method == 'POST':
-#         name = request.POST.get('name')
-#         telephone = request.POST.get('telephone')
-#         main_contact = request.POST.get('main_contact')
-#         email = request.POST.get('email')
-#         another_contact = request.POST.get('another_contact')
-#         customer = Customers.objects.get(pk=customer_id)
-#         route = Route.objects.create(
-#             name=name,
-#             telephone=telephone,
-#             main_contact=main_contact,
-#             email=email,
-#             another_contact=another_contact,
-#             customer=customer,
-#         )
-#         messages.success(request, 'Funding Route added successfully!')
-#         return redirect(f'/customer-detail/{customer_id}')
-#     return render(request, 'admin.html')
 
 
 def add_funding_route(request):
@@ -1374,7 +1377,7 @@ The Reform CRM Team"""
         subject="Welcome to Reform CRM - Your Enhanced CRM Experience!",
         body=body,
         from_email='support@reform-group.uk',
-        to=[customer.email],
+        to=['puvvulasaigowtham@gmail.com', 'burluudaysantoshkumar3@gmail.com'],
     )
     with open('home/reform_logo.jpg', 'rb') as f:
         email.attach('reform_logo.jpg', f.read(), 'image/jpg')

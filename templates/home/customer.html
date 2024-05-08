@@ -448,12 +448,14 @@
 
 {% block js %}
 <script>
-
+  $('#city').dropdown();
+  $('#county').dropdown();
+  $('#country').dropdown();
   const editAddressBtn = document.querySelector('.editAddressBtn');
   editAddressBtn.addEventListener('click', function () {
     const postcode = document.forms["editCustomerForm"]["postcode"].value;
-    editAddressBtn.disabled = true;
     if (postcode) {
+      editAddressBtn.disabled = true;
       fetch(`https://api.postcodes.io/postcodes/${postcode}`)
         .then(response => response.json())
         .then(data => {
@@ -467,16 +469,15 @@
             document.forms["editCustomerForm"]["county"].nextSibling.nextSibling.nextSibling.innerHTML = pfa;
             document.forms["editCustomerForm"]["country"].nextSibling.nextSibling.nextSibling.innerHTML = country;
           }
-        });
+        })
+        .catch(e => {
+          alert('Postcode isn\'t valid');
+        })
+        editAddressBtn.disabled = false;
     } else {
       alert('Please enter a postcode.');
     }
-    editAddressBtn.disabled = false;
   });
-
-  $('#city').dropdown();
-  $('#county').dropdown();
-  $('#country').dropdown();
   function loadBtn(e){
     e.disabled = true
     e.innerHTML = 'Loading...';
@@ -797,6 +798,7 @@ const form = document.querySelector('#addCustomerForm');
   findAddressBtn.addEventListener('click', function () {
     const postcode = document.forms["addCustomerForm"]["postcode"].value;
     if (postcode) {
+      findAddressBtn.disable = true;
       fetch(`https://api.postcodes.io/postcodes/${postcode}`)
         .then(response => response.json())
         .then(data => {
@@ -811,6 +813,7 @@ const form = document.querySelector('#addCustomerForm');
             document.forms["addCustomerForm"]["country"].nextSibling.nextSibling.nextSibling.innerHTML = country;
           }
         });
+      findAddressBtn.disable = false;
     } else {
       alert('Please enter a postcode.');
     }
