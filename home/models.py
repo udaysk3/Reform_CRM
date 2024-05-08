@@ -86,6 +86,15 @@ class Councils(models.Model):
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     
+    def __str__(self):
+        return f"{self.name}"
+
+    
+class Cities(models.Model):
+    name = models.CharField(max_length=999, unique=True)
+    created_at = models.DateTimeField(blank= True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    
     def get_created_at_council_action_history(self):
         return (Action.objects.filter(council=self).order_by("-created_at"))
     

@@ -69,4 +69,5 @@ urlpatterns = [
     path("assign_agents", views.assign_agents, name="assign_agents"),
     path("assign_agent", views.assign_agent, name="assign_agent"),
     path("send_email/<int:customer_id>", views.send_email, name="send_email"),
+    path("query/cities/<str:q>", views.query, name="query"),
 ]

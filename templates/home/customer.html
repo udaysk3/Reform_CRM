@@ -203,15 +203,12 @@
                   </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="city" class="form-label">City/Town</label>
-                    <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example">
 
-                      <option value="nan">Select a City</option>
-                      {% for city in city|cities %}
-                      <option value="{{ city }}">{{ city }}</option>
-                      {% endfor %}
-                    </select>
+                <div class="mb-3 input-row">
+                    <label for="city" class="form-label">City/Town</label>
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.city}}" data-list="places_from" autocomplete="off" value="{{customer.city}}">  <!--list="places_from"-->
+                  <div id="places_from" class="places_box">
+                  </div>
                 </div>
                 <div class="mb-3">
                     <label for="county" class="form-label">County</label>
@@ -307,15 +304,12 @@
                     <button class="btn btn-primary editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
                   </div>
               </div>
-                <div class="mb-3">
-                  <label for="city" class="form-label">City/Town</label>
-                  <select class="form-select ui search selection dropdown" id="city" name="city" aria-label="Default select example" value="{{ edit_customer.city }}">
-                    <option value="nan">Select a City</option>
-                    {% for city in city|cities %}
-                    <option {% if edit_customer.city == city %} selected {% endif %} value="{{ city }}">{{ city }}</option>
-                    {% endfor %}
-                  </select>
-              </div>
+                  <div class="mb-3 input-row">
+                    <label for="city" class="form-label">City/Town</label>
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_customer.city}}" data-list="places_from" autocomplete="off" value="{{edit_customer.city}}">  <!--list="places_from"-->
+                  <div id="places_from" class="places_box">
+                  </div>
+                </div>
               <div class="mb-3">
                   <label for="county" class="form-label">County</label>
                   <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example" value="{{ edit_customer.county }}">
@@ -447,10 +441,12 @@
 
 
 {% block js %}
+<script src="{% static 'js/dropdown.js' %}"></script>
 <script>
   $('#city').dropdown();
   $('#county').dropdown();
   $('#country').dropdown();
+  {% if request.GET.page == 'edit_customer' %}
   const editAddressBtn = document.querySelector('.editAddressBtn');
   editAddressBtn.addEventListener('click', function () {
     const postcode = document.forms["editCustomerForm"]["postcode"].value;
@@ -478,6 +474,7 @@
       alert('Please enter a postcode.');
     }
   });
+  {% endif %}
   function loadBtn(e){
     e.disabled = true
     e.innerHTML = 'Loading...';

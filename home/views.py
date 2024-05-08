@@ -4,7 +4,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Customers, Client, Campaign, Councils, Route, Stage, Document, Action
+from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities
 import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
@@ -569,7 +569,7 @@ def add_customer(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.parent_customer.firt_name} {customer.parent_customer.last_name}  {customer.house_name } {customer.phone_number} {customer.email} {customer.house_name} {customer.street_name} {customer.city} {customer.county} {customer.country}",
+                action_type=f"Added {customer.first_name} {customer.last_name}  {customer.house_name } {customer.phone_number} {customer.email} {customer.house_name} {customer.street_name} {customer.city} {customer.county} {customer.country}",
                 keyevents=True,
         )
         messages.success(request, "Customer added successfully!")
@@ -1396,3 +1396,12 @@ The Reform CRM Team"""
 
     messages.success(request, "Email sent successfully!")
     return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
+def query(request, q):
+    cities = Cities.objects.all()
+    filters = []
+    q = q.lower()
+    for city in cities:
+        if (q in city.name.lower()):
+            filters.append(city)
+    return JsonResponse([{'city':city.name} for city in filters], safe=False)
