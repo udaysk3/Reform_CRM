@@ -1288,6 +1288,7 @@ def assign_agents(request):
     if request.method == "POST":
      try:
         # Parse customers and agents from the POST request
+
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
         customers = request.POST.get("customers")
         if customers == "All Unassigned Customers":
