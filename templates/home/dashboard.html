@@ -218,18 +218,20 @@
                   <li class="ps-3"><b>{{ key }}</b></li>
                   <ul class="ps-5">
                     {% for v in value %}
-                    <li><b>{{ v.0 }}</b> - {{ v.1 }} - {{ v.2 }} <b>{{ v.3 }} {{ v.4 }}</b> - <b> {{ v.5 }} </b>
-                      {% if v.5 == 'CB' %}
-                      {{ v.6 }}
-                      {% endif %}
-                      {% if v.7 %}
-                       spoke to <b> {{ v.7 }}</b> 
-                      {% endif %}
-                      {% if v.8 %}
-                      - {{ v.8 }} 
-                      {% endif %}
-                    </li>
-                     {% endfor %}
+                        <li><b>{{ v.0 }}</b> - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
+                          {% if v.7 %}
+                           spoke to <b> {{ v.7 }}</b> 
+                          {% endif %}
+                           - <b> {{ v.5 }} </b> 
+                          {% if v.5 == 'CB' %}
+                          - {{ v.6 }}
+                          {% endif %}
+                          
+                          {% if v.8 %}
+                          - {{ v.8 }} 
+                          {% endif %}
+                        </li>
+                          {% endfor %}
                   </ul>
                   {% endfor %}
 

@@ -86,8 +86,7 @@ def dashboard(request):
     london_tz = timezone("Europe/London")
     for customer in customers:
         user = User.objects.get(email=request.user)
-        actions = customer.get_created_at_action_history()
-        actions.filter(agent=user)
+        actions = customer.get_created_at_action_history().filter(agent=user)
         for i in actions:
             if i.imported:
                 if i.created_at.replace(tzinfo=london_tz).date() not in imported:
