@@ -4,7 +4,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities
+from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, Email, Reason
 import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
@@ -36,20 +36,27 @@ def dashboard(request):
     all_customers = (
         Customers.objects.annotate(earliest_action_date=Max("action__created_at"))
         .filter(parent_customer=None)
-        .filter(closed=False)
         .order_by("earliest_action_date")
     )
     user  = User.objects.get(email=request.user)
-    customers = (
-        Customers.objects.all().filter(assigned_to=user).annotate(earliest_action_date=Max("action__date_time"))
+    a_customers = (
+        Customers.objects.all()
+        .annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
-        .filter(closed=False)
+        .order_by("earliest_action_date")
+    )
+    
+    customers = (
+        Customers.objects.all()
+        .filter(assigned_to=user)
+        .annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_customer=None)
         .order_by("earliest_action_date")
     )
 
     customers = list(customers)
     new_customers = []
-    for customer in customers:
+    for customer in a_customers:
         actions = customer.get_created_at_action_history()
         flag = False
         for action in actions:
@@ -58,33 +65,12 @@ def dashboard(request):
                 break
             
     new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
-
-
     result = [x for x in customers if x not in new_customers] 
-
-
-    # for customer in customers:
-    #     print(customer.get_action_history())
     customers= new_customers + result
-    # customers = list(customers)
-
-    # for customer in customers:
-    #     actions = Action.objects.all().filter(customer=customer)
-    #     flag = False
-    #     for action in actions:
-    #         if action.imported:
-    #             flag=False
-    #         else:
-    #             flag=True
-    #             break
-    #     if flag:
-    #         print(customers.index(customer))
-        
-    
     history = {}
     imported = {}
     london_tz = timezone("Europe/London")
-    for customer in customers:
+    for customer in a_customers:
         user = User.objects.get(email=request.user)
         actions = customer.get_created_at_action_history().filter(agent=user)
         for i in actions:
@@ -106,6 +92,7 @@ def dashboard(request):
                         i.talked_with,
                         i.customer.postcode,
                         i.customer.house_name,
+                        i.id
                     ]
                 )
             else:
@@ -119,12 +106,11 @@ def dashboard(request):
                         i.action_type,
                         i.date_time,
                         i.talked_with,
-                        i.text
+                        i.text,
+                        i.id
                     ]
                 )
 
-    # for customer in customers:
-    #     print(customer.get_action_history())
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
@@ -139,6 +125,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
     show_customer = customer
+    reasons = Reason.objects.all()
+    templates = Email.objects.all()
     if s_customer_id:
         show_customer = Customers.objects.get(pk=s_customer_id)
 
@@ -278,6 +266,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "agents": agents,
             "show_customer": show_customer,
             "events": events,
+            "reasons": reasons,
+            "templates": templates,
         },
     )
         return render(
@@ -296,6 +286,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "agents" : agents,
             "show_customer": show_customer,
             "events": events,
+            "reasons": reasons,
+            "templates": templates,
         },
     )
 
@@ -314,6 +306,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "agents" : agents,
             "show_customer": show_customer,
             "events": events,
+            "reasons": reasons,
+            "templates": templates,
         },
     )
 
@@ -446,6 +440,42 @@ def Customer(request):
         request, "home/customer.html", {"customers": customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents)}
     )
 
+@login_required
+def archive(request):
+    customers = (
+        Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_customer=None)
+        .filter(closed=True)
+        .order_by("earliest_action_date")
+    )
+
+    customers = list(customers)
+    new_customers = []
+    for customer in customers:
+        actions = customer.get_created_at_action_history()
+        flag = False
+        for action in actions:
+            if action.imported == False:
+                new_customers.append(customer)
+                break
+            
+    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+
+
+    result = [x for x in customers if x not in new_customers] 
+
+
+    # for customer in customers:
+    #     print(customer.get_action_history())
+    customers= new_customers + result
+    campaigns = Campaign.objects.all()
+    unassigned_customers = Customers.objects.filter(assigned_to=None)
+    agents = User.objects.filter(is_superuser=False)
+    return render(
+        request, "home/archive.html", {"customers": customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents)}
+    )
+
+
 
 @login_required
 def council(request):
@@ -479,9 +509,19 @@ def Admin(request):
         client_id = request.GET.get("id")
         client = Client.objects.get(pk=client_id)
         return render(request, "home/admin.html", {"client": client})
+    if request.GET.get("page") == "edit_template":
+        email_id = request.GET.get("id")
+        email = Email.objects.get(pk=email_id)
+        return render(request, "home/admin.html", {"email": email})
+    if request.GET.get("page") == "edit_reason":
+        reason_id = request.GET.get("id")
+        reason = Reason.objects.get(pk=reason_id)
+        return render(request, "home/admin.html", {"reason": reason})
     users = User.objects.filter(is_superuser=False).values()
     clients = Client.objects.filter()
-    return render(request, "home/admin.html", {"users": users, "clients": clients})
+    emails = Email.objects.all()
+    reasons = Reason.objects.all()
+    return render(request, "home/admin.html", {"users": users, "clients": clients, "emails": emails, "reasons": reasons})
 
 
 @login_required
@@ -574,22 +614,6 @@ def add_customer(request):
         messages.success(request, "Customer added successfully!")
         return redirect("app:customer")
     return render(request, "home/customer.html")
-
-
-# def add_funding_route(request):
-#     try:
-#         response = requests.get("https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-united-kingdom-local-authority-district/records?select=lad_name&limit=-1")
-#         if response.status_code == 200:
-#             json_data = response.json()
-#             for data in json_data['results']:
-#                 name = data['lad_name'][0]
-#                 funding_route = FundingRoutes.objects.create(name=name)
-#         else:
-#             district = "Error fetching data"
-#     except requests.exceptions.RequestException as e:
-#         district = f"Request Error"
-#     messages.success(request, "funding_routes added successfully!")
-#     return redirect("app:funding_route")
 
 
 @login_required
@@ -750,19 +774,36 @@ def close_action_submit(request, customer_id):
         talked_with = request.POST.get("talked_customer")
         reason = request.POST.get("reason")
         text = request.POST.get("text")
+        action_type = ''
+        c_text = ''
+        closed = False
+
+        if reason != 'nan':
+            c_text = reason
+        else:
+            c_text = text
+
+        if customer.closed:
+            action_type = f"Reopened"
+            closed = False
+        else:
+            action_type = f"Closed"
+            closed = True
 
         if talked_with == "nan":
             messages.error(request, "Customer field should be mapped")
             return redirect(f"/customer-detail/{customer_id}")
 
         customer.add_action(
-            text=text,
+            text=c_text,
+            closed=closed,
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             imported=False,
             created_at=datetime.now(pytz.timezone("Europe/London")),
             talked_with=talked_with,
-            action_type=f"Closed - {reason}",
+            action_type=action_type,
+            keyevents=True,
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -1288,7 +1329,7 @@ def assign_agents(request):
     if request.method == "POST":
      try:
         # Parse customers and agents from the POST request
-
+        print(request.POST.get("agents"))
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
         customers = request.POST.get("customers")
         if customers == "All Unassigned Customers":
@@ -1356,43 +1397,58 @@ def assign_agent(request):
 
 def send_email(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
-
-    body = f"""Dear {customer.first_name} {customer.last_name},
-
-We hope this email finds you well. We are delighted to inform you that your account has been successfully migrated to Reform CRM, our newly rebranded and enhanced CRM platform.
-
-With Reform CRM, you can expect a streamlined and intuitive user experience, along with a host of new features designed to help you better manage your customer relationships and drive business growth.
-
-As part of this transition, your data has been securely transferred to Reform CRM, ensuring continuity and reliability in your CRM operations.
-
-We invite you to log in to your Reform CRM account today to explore the new features and functionalities. Should you have any questions or require assistance, our support team is readily available to help you.
-
-Thank you for choosing Reform CRM. We are excited to embark on this journey with you and look forward to supporting your business success.
-
-Best Regards,
-
-The Reform CRM Team"""
+    email_id = request.POST.get("template")
+    body = ''
+    subject = ''
+    text = ''
+    if email_id != 'nan':
+        email  = Email.objects.get(pk=email_id)
+        body = email.body
+        body = body.replace("{{first_name}}", customer.first_name)
+        body = body.replace("{{last_name}}", customer.last_name)
+        body = body.replace("{{phone_number}}", customer.phone_number)
+        body = body.replace("{{email}}", customer.email)
+        body = body.replace("{{house_name}}", customer.house_name)
+        body = body.replace("{{street_name}}", customer.street_name)
+        body = body.replace("{{city}}", customer.city)
+        body = body.replace("{{county}}", customer.county)
+        body = body.replace("{{country}}", customer.country)
+        body = body.replace("{{postcode}}", customer.postcode)
+        subject = email.subject
+    else:
+        body = request.POST.get("text")
+        text = request.POST.get("text")
 
     email = EmailMessage(
-        subject="Welcome to Reform CRM - Your Enhanced CRM Experience!",
+        subject=subject,
         body=body,
         from_email='support@reform-group.uk',
-        to=['puvvulasaigowtham@gmail.com', 'burluudaysantoshkumar3@gmail.com'],
+        to=['puvvulasaigowtham@gmail.com', 'burluudaysantoshkumar3@gmail.com', customer.email],
     )
-    with open('home/reform_logo.jpg', 'rb') as f:
-        email.attach('reform_logo.jpg', f.read(), 'image/jpg')
+    # with open('home/reform_logo.jpg', 'rb') as f:
+    #     email.attach('reform_logo.jpg', f.read(), 'image/jpg')
 
 
     email.send()
-
-    customer.add_action(
-            agent=User.objects.get(email=request.user),
-            closed=False,
-            imported=False,
-            created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type="Email Sent",
-            date_time=datetime.now(pytz.timezone("Europe/London")),
-        )
+    if text == '':
+        customer.add_action(
+                agent=User.objects.get(email=request.user),
+                closed=False,
+                imported=False,
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email Sent",
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+            )
+    else:
+        customer.add_action(
+                agent=User.objects.get(email=request.user),
+                closed=False,
+                imported=False,
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email Sent",
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                text= text,
+            )
 
     messages.success(request, "Email sent successfully!")
     return HttpResponseRedirect("/customer-detail/" + str(customer_id))
@@ -1405,3 +1461,63 @@ def query(request, q):
         if (q in city.name.lower()):
             filters.append(city)
     return JsonResponse([{'city':city.name} for city in filters], safe=False)
+
+def add_template(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        subject = request.POST.get("subject")
+        body = request.POST.get("body")
+        template = Email.objects.create(
+            name=name,
+            subject=subject,
+            body=body,
+        )
+        messages.success(request, "Template added successfully!")
+        return redirect("app:admin")
+    return render(request, "home/admin.html")
+
+def edit_template(request, template_id):
+    template = Email.objects.get(pk=template_id)
+    if request.method == "POST":
+        template.name = request.POST.get("name")
+        template.subject = request.POST.get("subject")
+        template.body = request.POST.get("body")
+        template.save()
+        messages.success(request, "Template updated successfully!")
+        return redirect("app:admin")
+    return redirect("app:admin")
+
+def remove_template(request, template_id):
+    template = Email.objects.get(pk=template_id)
+    template.delete()
+    messages.success(request, "Template deleted successfully!")
+    return redirect("app:admin")
+
+def add_reason(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        reason = request.POST.get("reason")
+        template = Reason.objects.create(
+            name=name,
+            reason=reason,
+        )
+        messages.success(request, "Reason added successfully!")
+        return redirect("app:admin")
+    return render(request, "home/admin.html")
+
+def edit_reason(request, reason_id):
+    reason = Reason.objects.get(pk=reason_id)
+    if request.method == "POST":
+        reason.name = request.POST.get("name")
+        reason.reason = request.POST.get("reason")
+        reason.save()
+        messages.success(request, "Reason updated successfully!")
+        return redirect("app:admin")
+    return redirect("app:admin")
+
+def remove_reason(request, reason_id):
+    reason = Reason.objects.get(pk=reason_id)
+    reason.delete()
+    messages.success(request, "Reason deleted successfully!")
+    return redirect("app:admin")
+

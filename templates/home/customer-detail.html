@@ -418,11 +418,7 @@ table {
                 <h6><b>Recommendations</b>: -</h6>
                 {% endif %}
 
-                <h6><b>Google Maps Link</b>: <a target="_blank" href=
-                  "
-                    https://www.google.com/maps?q={% if customer.house_name %}{{ customer.house_name }}{% endif %}+{% if customer.street_name %}{{ customer.street_name }}{% endif %}+{% if customer.postcode %}{{ customer.postcode }}{% endif %}
-                  "
-                  >Click Here </a></h6>
+                <h6><b>Google Maps Link</b>: <a target="_blank" class="googlemap">Click Here </a></h6>
 
               </div>
             </div>
@@ -489,16 +485,98 @@ table {
 
 
 
-                <div class="d-grid gap-2 d-md-block mt-3 col">
+                <div class="d-grid gap-2 d-md-block col">
                   <form
-                    method="post"
-                    class="col"
-                    action="{% url 'app:send_email' customer.id %}"
-                    
+                  id="action_submit_form"
+                  method="post"
+                  action="{% url 'app:send_email' customer.id %}"
+                  class="col"
+                >
+                  {% csrf_token %}
+                  
+
+                  <!-- Button trigger modal -->
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary my-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#Email"
                   >
-                    {% csrf_token %}
-                    <button class="btn btn-outline-primary" type="submit">Email</button>
-                  </form>
+                    Email
+                  </button>
+
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="Email"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    tabindex="-1"
+                    aria-labelledby="staticBackdropLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Email</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row">
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Template</label>
+                            <select id="select" class="form-select"  name="template">
+                              
+                              <option value="nan"> Select a template </option>
+                              {% for email in templates %}
+                              <option value="{{ email.id }}">{{ email.name }}</option>
+                              {% endfor %}
+                            </select>
+
+                          
+
+                          </div>
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
+                            <select id="select" class="form-select"  name="talked_customer">
+                              <option value="None">None</option>
+                              <option
+                              {% if customer.primary_customer %}
+                              selected
+                              {% endif %}
+                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
+                              {% for i in child_customers %}
+                              <option
+                              {% if i.primary_customer %}
+                              selected
+                              {% endif %}
+                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                            
+                          <div class="form-floating mt-3">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
+                            name="text"></textarea>
+                            <label for="floatingTextarea">Comments</label>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                          <button class="btn btn-primary" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
                 </div>
 
 
@@ -662,7 +740,11 @@ table {
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdrop2"
                   >
+                  {% if customer.closed %}
+                    Reopen
+                  {% else %}
                     Close
+                  {% endif %}
                   </button>
 
                   <!-- Modal -->
@@ -686,10 +768,10 @@ table {
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Reason</label>
                             <select id="select" class="form-select"  name="reason">
                               
-                              <option value="Reason1"> Reason1 </option>
-                              <option value="Reason2"> Reason2 </option>
-                              <option value="Reason3"> Reason3 </option>
-                              <option value="Reason4"> Reason4 </option>
+                              <option value="nan"> Select a reason </option>
+                              {% for reason in reasons %}
+                              <option value="{{ reason.reason }}">{{ reason.name }}</option>
+                              {% endfor %}
                             </select>
 
                           
@@ -1017,6 +1099,31 @@ table {
 
 {% endblock %} {% block js %}
 
+<script>
+
+  window.addEventListener('DOMContentLoaded', function () {
+    const postcode = '{{ customer.postcode }}';
+    if (postcode) {
+      fetch(`https://api.postcodes.io/postcodes/${postcode}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data) {
+            const googlemap = document.querySelector('.googlemap');
+            const { longitude, latitude } = data.result;
+            googlemap.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            
+          }
+        });
+      findAddressBtn.disable = false;
+    } else {
+      alert('Please enter a postcode.');
+    }
+  });
+
+
+
+</script>
+
 <script scr="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
@@ -1159,7 +1266,6 @@ var formattedTime = londonDate.split(", ")[1].split(":");
 
   dates.forEach((date) => {
     date.value = formattedDate;
-    console.log(date.value);
   });
 
   time.forEach((time) => {

@@ -210,15 +210,10 @@
                     <ul>
                   <li><b>Action</b></li>
                   {% for key,value in history.items %}
-                  
-
-                  
-                 
-
                   <li class="ps-3"><b>{{ key }}</b></li>
                   <ul class="ps-5">
                     {% for v in value %}
-                        <li><b>{{ v.0 }}</b> - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
+                        <li><a class="link-dark link-underline" href="{% url 'app:customer_detail' v.9 %}"><b>{{ v.0 }}</b> - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
                           {% if v.7 %}
                            spoke to <b> {{ v.7 }}</b> 
                           {% endif %}
@@ -230,7 +225,7 @@
                           {% if v.8 %}
                           - {{ v.8 }} 
                           {% endif %}
-                        </li>
+                        </a></li>
                           {% endfor %}
                   </ul>
                   {% endfor %}
@@ -242,13 +237,12 @@
                         <li><b>{{ value.0.0 }}</b> - {{ v.6 }} - {{ v.7 }} <b>{{ value.0.2 }} {{ value.0.3 }}</b> - </li>
                         <ul class="ps-3">
                           {% for v in value %}
-                          <li>{{ v.1 }}</li>
+                          <li><a class="link-dark link-underline" href="{% url 'app:customer_detail' v.8 %}">{{ v.1 }}</a></li>
                           {% endfor %}
                         </ul>
                       </ul>
                       {% endfor %}
                   {% endfor %}
-                 
                 </ul>
 
 
@@ -258,7 +252,7 @@
             </div>
             {% endif %}
 
-<h5 style="color:#5D87FF;text-decoration:underline"> Customers Assigned to you</h5>
+<h5 style="color:#5d87ff;text-decoration:underline"> Customers Assigned to you</h5>
                 <table class="table">
                   
                   <thead>
@@ -268,9 +262,6 @@
         <input type="checkbox" id="selectAll">
       </th>
     {% endif %}
-   {% comment %} <th onclick="sortTable(0)">
-      ID <span id="arrow0"></span>
-    </th>  {% endcomment %}
     <th>
       Date Recieved
     </th>
@@ -296,7 +287,7 @@
                     {% if customers %}
                     {% for customer in customers %}
 
-                      <tr>
+                      <tr {% with all_actions=customer.get_created_at_action_history %} {% if all_actions|length >= 1 %} {% with action=all_actions.0 %} {% if action.action_type == 'CB' %} class=" text-white" style="background: #FA5959" {% elif action.action_type == 'Email Sent' %} class=" text-white" style="background: #75E980" {% endif %} {% endwith %} {% endif %} {% endwith %} >
                         {% if user.is_staff %}
                         <td>
                           <input type="checkbox" class="select-customer" data-customer-id="{{ customer.id }}">

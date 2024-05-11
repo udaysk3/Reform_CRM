@@ -58,6 +58,10 @@
                             <label class="form-check-label" for="customer">Customer</label>
                           </div>
                           <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="archive" name="archive" checked>
+                            <label class="form-check-label" for="archive">Archive</label>
+                          </div>
+                          <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="council" name="council" checked>
                             <label class="form-check-label" for="council">Council</label>
                           </div>
@@ -103,6 +107,10 @@
                               <label class="form-check-label"  for="editCustomer">Customer</label>
                             </div>
                             <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.archive %}checked{% endif %} class="form-check-input" id="editArchive" name="archive" >
+                              <label class="form-check-label"  for="editArchive">Archive</label>
+                            </div>
+                            <div class="mb-3 form-check">
                               <input type="checkbox" {% if user.council %}checked{% endif %} class="form-check-input" id="editCustomer" name="council" >
                               <label class="form-check-label"  for="editCustomer">Council</label>
                             </div>
@@ -137,6 +145,7 @@
                       <th>Email</th>
                       <th>Dashboard</th>
                       <th>Customer</th>
+                      <th>Archive</th>
                       <th>Council</th>
                       <th>funding_route</th>
                       <th>Admin</th>
@@ -163,6 +172,17 @@
                           {% endif %}
                           
                           {% if user.customer %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          
+                          
+                          {% if user.archive %}
                           <td>
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
                           </td>
@@ -391,6 +411,220 @@
                 {% else %}
                   <tr class="text-center display-flex align-items-center justify-content-center">
                     <td colspan="9" class="text-center">No Clients</td>
+                  </tr>
+                {% endif %}
+              
+              </tbody>
+            </table>
+              {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech">
+      <div class="card w-100">
+        <div class="card-body">
+          
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            
+            <div class="mb-3 mb-sm-0">
+             <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Email Management</h5></a>
+            </div>
+            <div>
+              <a href="?page=add_template" class="btn btn-primary">Add Template</a>
+            </div>
+          </div>
+          <div>
+            <!-- User Table -->
+            
+            {% if request.GET.page == 'add_template' %}
+              <h3>Add Template</h3>
+                        <!-- User Addition Form -->
+                        <form id="addTemplateForm" method="post" action="{% url "app:add_template" %}">
+                          {% csrf_token %}
+                          <div class="mb-3">
+                            <label for="name" class="form-label">Template</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="body" class="form-label">Body</label>
+                            <textarea class="form-control" id="body" rows="3" name="body" required></textarea>
+                          </div>
+                          <button type="submit" class="btn btn-primary">Add Template</button>
+                        </form>
+                        <!-- End User Addition Form -->
+                        {% elif request.GET.page == 'edit_template' %}
+                        {% if email %}
+                          <button  class="mb-3 btn-outline-info btn">{{email.name}}</button>
+                          <form id="editTemplateForm" method="post" action="{% url 'app:edit_template' email.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                              <label for="editName" class="form-label">Template</label>
+                              <input type="text" value="{{ email.name }}" class="form-control" id="editName" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="subject" class="form-label">Subject</label>
+                              <input type="text" class="form-control" id="subject" value="{{email.subject}}" name="subject" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="body" class="form-label">Body</label>
+                              <textarea class="form-control" id="body" rows="3" name="body" required>{{email.body}}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Template</button>
+                          </form>
+                      <!-- End User Edit Form -->
+                      {% else %}
+                          <p>Template not found.</p>
+                        {% endif %}
+                      {% else %}
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Subject</th>
+                      <th>Body</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if emails %}
+                      {% for email in emails %}
+                        <tr>
+                          <td>{{ email.id }}</td>
+                          <td>{{ email.name }}</td>
+                          <td>
+                            {{ email.subject }}
+                          </td>
+                          <td>
+                            {{ email.body|truncatechars:50 }}
+                          </td>
+                          <td>
+                            <a href="?page=edit_template&id={{ email.id }}" class="edit-template-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+                            </a>
+                            <a href="{% url 'app:remove_template' email.id %}" class="delete-template-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                            </a>
+                          </td>
+                        </tr>
+          
+
+                      {% endfor %}
+                {% else %}
+                  <tr class="text-center display-flex align-items-center justify-content-center">
+                    <td colspan="9" class="text-center">No Templates</td>
+                  </tr>
+                {% endif %}
+              
+              </tbody>
+            </table>
+              {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech">
+      <div class="card w-100">
+        <div class="card-body">
+          
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            
+            <div class="mb-3 mb-sm-0">
+             <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Reason Management</h5></a>
+            </div>
+            <div>
+              <a href="?page=add_reason" class="btn btn-primary">Add Reason</a>
+            </div>
+          </div>
+          <div>
+            <!-- User Table -->
+            
+            {% if request.GET.page == 'add_reason' %}
+              <h3>Add Reason</h3>
+                        <!-- User Addition Form -->
+                        <form id="addReasonForm" method="post" action="{% url "app:add_reason" %}">
+                          {% csrf_token %}
+                          <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="reason" rows="3" name="reason" required></textarea>
+                          </div>
+                          <button type="submit" class="btn btn-primary">Add Reason</button>
+                        </form>
+                        <!-- End User Addition Form -->
+                        {% elif request.GET.page == 'edit_reason' %}
+                        {% if reason %}
+                          <button  class="mb-3 btn-outline-info btn">{{reason.name}}</button>
+                          <form id="editReasonForm" method="post" action="{% url 'app:edit_reason' reason.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                              <label for="editName" class="form-label">Name</label>
+                              <input type="text" value="{{ reason.name }}" class="form-control" id="editName" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="reason" class="form-label">Reason</label>
+                              <textarea class="form-control" id="reason" rows="3" name="reason" required>{{reason.reason}}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Reason</button>
+                          </form>
+                      <!-- End User Edit Form -->
+                      {% else %}
+                          <p>Reason not found.</p>
+                        {% endif %}
+                      {% else %}
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Reason</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if reasons %}
+                      {% for reason in reasons %}
+                        <tr>
+                          <td>{{ reason.id }}</td>
+                          <td>{{ reason.name }}</td>
+                          <td>
+                            {{ reason.reason|truncatechars:50 }}
+                          </td>
+                          <td>
+                            <a href="?page=edit_reason&id={{ reason.id }}" class="edit-reason-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+                            </a>
+                            <a href="{% url 'app:remove_reason' reason.id %}" class="delete-reason-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                            </a>
+                          </td>
+                        </tr>
+          
+
+                      {% endfor %}
+                {% else %}
+                  <tr class="text-center display-flex align-items-center justify-content-center">
+                    <td colspan="9" class="text-center">No Reason</td>
                   </tr>
                 {% endif %}
               

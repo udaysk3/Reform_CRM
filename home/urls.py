@@ -8,6 +8,7 @@ urlpatterns = [
     path("dashboard", views.dashboard),
     path("customer", views.Customer, name="customer"),
     path("council", views.council, name="council"),
+    path("archive", views.archive, name="archive"),
     path("finance", views.Finance, name="finance"),
     path("adminview", views.Admin, name="admin"),
     path("funding_route", views.funding_route, name="funding_route"),
@@ -70,4 +71,10 @@ urlpatterns = [
     path("assign_agent", views.assign_agent, name="assign_agent"),
     path("send_email/<int:customer_id>", views.send_email, name="send_email"),
     path("query/cities/<str:q>", views.query, name="query"),
+    path("add_template", views.add_template, name="add_template"),
+    path("edit_template/<int:template_id>", views.edit_template, name="edit_template"),
+    path("remove_template/<int:template_id>", views.remove_template, name="remove_template"),
+    path("add_reason", views.add_reason, name="add_reason"),
+    path("edit_reason/<int:reason_id>", views.edit_reason, name="edit_reason"),
+    path("remove_reason/<int:reason_id>", views.remove_reason, name="remove_reason"),
 ]
