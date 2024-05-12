@@ -523,39 +523,17 @@ table {
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body row">
-                          <div class="col">
+                          
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Template</label>
                             <select id="select" class="form-select"  name="template">
                               
-                              <option value="nan"> Select a template </option>
+                              <option value="nan"> Create a email </option>
                               {% for email in templates %}
                               <option value="{{ email.id }}">{{ email.name }}</option>
                               {% endfor %}
                             </select>
 
-                          
-
-                          </div>
-                          <div class="col">
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
-                            <select id="select" class="form-select"  name="talked_customer">
-                              <option value="None">None</option>
-                              <option
-                              {% if customer.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
-                              {% for i in child_customers %}
-                              <option
-                              {% if i.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                            
-                          <div class="form-floating mt-3">
+                            <div class="form-floating mt-3">
                             <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
                             name="text"></textarea>
                             <label for="floatingTextarea">Comments</label>
@@ -900,12 +878,6 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
-                  
-                  <!-- Button trigger modal -->
-                    {% comment %} <button type="button" class="btn btn-primary position-relative mb-3" style="right:-70%" data-bs-toggle="modal" data-bs-target="#fundingroute">
-                      <i class="bi bi-plus-lg"></i> Funding Route
-                    </button> {% endcomment %}
-
                     <!-- Modal -->
                     <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                       <div class="modal-dialog">

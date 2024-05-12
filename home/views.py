@@ -56,7 +56,7 @@ def dashboard(request):
 
     customers = list(customers)
     new_customers = []
-    for customer in a_customers:
+    for customer in customers:
         actions = customer.get_created_at_action_history()
         flag = False
         for action in actions:
@@ -92,7 +92,7 @@ def dashboard(request):
                         i.talked_with,
                         i.customer.postcode,
                         i.customer.house_name,
-                        i.id
+                        i.customer.id
                     ]
                 )
             else:
@@ -107,7 +107,7 @@ def dashboard(request):
                         i.date_time,
                         i.talked_with,
                         i.text,
-                        i.id
+                        i.customer.id,
                     ]
                 )
 
@@ -1403,17 +1403,28 @@ def send_email(request, customer_id):
     text = ''
     if email_id != 'nan':
         email  = Email.objects.get(pk=email_id)
+        text = email.name
         body = email.body
-        body = body.replace("{{first_name}}", customer.first_name)
-        body = body.replace("{{last_name}}", customer.last_name)
-        body = body.replace("{{phone_number}}", customer.phone_number)
-        body = body.replace("{{email}}", customer.email)
-        body = body.replace("{{house_name}}", customer.house_name)
-        body = body.replace("{{street_name}}", customer.street_name)
-        body = body.replace("{{city}}", customer.city)
-        body = body.replace("{{county}}", customer.county)
-        body = body.replace("{{country}}", customer.country)
-        body = body.replace("{{postcode}}", customer.postcode)
+        if customer.first_name:
+            body = body.replace("{{first_name}}", customer.first_name)
+        if customer.last_name:    
+            body = body.replace("{{last_name}}", customer.last_name)
+        if customer.phone_number:
+            body = body.replace("{{phone_number}}", customer.phone_number)
+        if customer.email:
+            body = body.replace("{{email}}", customer.email)
+        if customer.house_name:    
+            body = body.replace("{{house_name}}", customer.house_name)
+        if customer.street_name:
+            body = body.replace("{{street_name}}", customer.street_name)
+        if customer.city:
+            body = body.replace("{{city}}", customer.city)
+        if customer.county:
+            body = body.replace("{{county}}", customer.county)
+        if customer.country:
+            body = body.replace("{{country}}", customer.country)
+        if customer.postcode:
+            body = body.replace("{{postcode}}", customer.postcode)
         subject = email.subject
     else:
         body = request.POST.get("text")
