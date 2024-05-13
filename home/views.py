@@ -20,7 +20,7 @@ import numpy as np
 import os
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
-
+from django.views.decorators.csrf import csrf_exempt
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
 from .tasks import getLA
@@ -1600,6 +1600,7 @@ def get_mails(request):
         
     return redirect('app:customer')
 
+@csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
         
