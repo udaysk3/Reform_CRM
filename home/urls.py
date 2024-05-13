@@ -77,4 +77,6 @@ urlpatterns = [
     path("add_reason", views.add_reason, name="add_reason"),
     path("edit_reason/<int:reason_id>", views.edit_reason, name="edit_reason"),
     path("remove_reason/<int:reason_id>", views.remove_reason, name="remove_reason"),
+    path('get_mails', views.get_mails, name='get_mails'),
+    path('get_notifications', views.get_notifications, name='get_notifications'),
 ]

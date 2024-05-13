@@ -25,6 +25,8 @@ london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
 from .tasks import getLA
 from .epc import getEPC
+from simplegmail import Gmail
+from simplegmail.query import construct_query
 
 
 def home(request):
@@ -1532,3 +1534,72 @@ def remove_reason(request, reason_id):
     messages.success(request, "Reason deleted successfully!")
     return redirect("app:admin")
 
+def get_mails(request):
+    
+
+    gmail = Gmail()
+
+    query_params = {
+    }
+    # Unread messages in your inbox
+    messages = gmail.get_unread_inbox()
+
+    for message in messages:
+        if '<' in message.recipient:
+            message.recipient = message.recipient.split('<')[1].split('>')[0]
+        if '<' in message.sender:
+            message.sender = message.sender.split('<')[1].split('>')[0]
+        print("To: " + message.recipient)
+        print("From: " + message.sender)
+        print("Subject: " + message.subject)
+        print("Date: " + message.date)
+        print("Preview: " + message.snippet)
+        print('')
+        print('')
+        print('')
+        print('')
+        print('')
+        print('')
+        print('')
+        
+        customers = Customers.objects.all()
+        customer = None
+        for c_customer in customers:
+            if c_customer.email == message.sender:
+                customer = c_customer
+        print(customer)
+        if customer:
+            customer.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email Received",
+                text=message.snippet,
+            )
+        else:
+            customer = Customers.objects.create(
+                email=message.sender,
+            )
+            customer.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type=f"Added {customer.email}",
+                keyevents=True,
+            )
+            customer.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email Received",
+                text=message.snippet,
+            )
+            
+            
+        
+        
+    return redirect('app:customer')
+
+def get_notifications(request):
+    if request.method == "POST":
+        return HttpResponse('Success')
