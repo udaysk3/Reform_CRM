@@ -1612,7 +1612,7 @@ def get_notifications(request):
         sample_string_bytes = base64.b64decode(base64_bytes) 
         sample_string = sample_string_bytes.decode("ascii")
         history = json.loads(sample_string)
-        history = history["historyId"]
+        # history = history["historyId"]
         userId = history["emailAddress"]
         url = f'https://gmail.googleapis.com/gmail/v1/users/{userId}/history'
         response = requests.get(url)
