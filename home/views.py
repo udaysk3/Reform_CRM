@@ -28,6 +28,7 @@ from .epc import getEPC
 from simplegmail import Gmail
 from simplegmail.query import construct_query
 import base64 
+import requests
 
 def home(request):
     return render(request, "home/index.html")
@@ -1610,8 +1611,12 @@ def get_notifications(request):
 
         sample_string_bytes = base64.b64decode(base64_bytes) 
         sample_string = sample_string_bytes.decode("ascii")
-        data = json.loads(sample_string)
-        data = data["historyId"] 
+        history = json.loads(sample_string)
+        history = history["historyId"]
+        userId = history["emailAddress"]
+        url = f'https://gmail.googleapis.com/gmail/v1/users/{userId}/history'
+        response = requests.get(url)
+        data = response.json()
         
 
         print(f"Success: {data}") 
