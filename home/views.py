@@ -1603,5 +1603,6 @@ def get_mails(request):
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        print('success', json.loads(request.POST))
+        print('success', json.loads(request.body))
         return HttpResponse('Success')
+    
