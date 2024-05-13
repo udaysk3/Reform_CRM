@@ -1634,7 +1634,7 @@ def get_notifications(request):
                 )
                 # Modify the redirect URI to your hosted domain
                 redirect_uri = 'https://web-production-e2474.up.railway.app'
-                creds = flow.run_local_server(port=0 )
+                creds = flow.run_local_server(port=3000 )
                 
             with open("token.json", "w") as token:
                 token.write(creds.to_json())
