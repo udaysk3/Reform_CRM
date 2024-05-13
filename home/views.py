@@ -1602,4 +1602,5 @@ def get_mails(request):
 
 def get_notifications(request):
     if request.method == "POST":
+        
         return HttpResponse('Success')

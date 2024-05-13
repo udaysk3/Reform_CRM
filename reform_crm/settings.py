@@ -165,3 +165,5 @@ EMAIL_HOST_USER = 'support@reform-group.uk'  # Use your email account
 EMAIL_HOST_PASSWORD = 'nrhethtofrfhryjo' # For gmail use app password
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False
