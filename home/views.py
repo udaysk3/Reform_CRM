@@ -29,6 +29,14 @@ from simplegmail import Gmail
 from simplegmail.query import construct_query
 import base64 
 import requests
+import os.path
+import googleapiclient.discovery
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.errors import HttpError
+
+SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 def home(request):
     return render(request, "home/index.html")
@@ -1605,20 +1613,55 @@ def get_mails(request):
 def get_notifications(request):
     if request.method == "POST":
         # print('success', json.loads(request.body)["message"]["data"])
-        
         base64_string =json.loads(request.body)["message"]["data"]
         base64_bytes = base64_string.encode("ascii") 
-
         sample_string_bytes = base64.b64decode(base64_bytes) 
         sample_string = sample_string_bytes.decode("ascii")
-        history = json.loads(sample_string)
-        # history = history["historyId"]
-        userId = history["emailAddress"]
-        url = f'https://gmail.googleapis.com/gmail/v1/users/{userId}/history'
-        response = requests.get(url)
-        data = response.json()
+        history_data = json.loads(sample_string)
+        historyId = history_data["historyId"]
+        userId = history_data["emailAddress"]
         
+        creds = None
+        if os.path.exists("token.json"):
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+            
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    "client_secret.json", SCOPES
+                )
+                # Modify the redirect URI to your hosted domain
+                redirect_uri = 'https://web-production-e2474.up.railway.app'
+                creds = flow.run_local_server(port=3000, host='0.0.0.0', redirect_uri=redirect_uri)
+                
+            with open("token.json", "w") as token:
+                token.write(creds.to_json())
+    
+        try:
+            # Create the Gmail API client
+            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
+            response = gmail.users().history().list(userId='me',startHistoryId=historyId).execute()
+            history = response.get('history', [])
+            if history:
+                print("History:")
+                for item in history:
+                    print(item)
+            else:
+                print("No history found.")
+            
+            
 
-        print(f"Success: {data}") 
+
+            print(f"Success: {data}")
+
+    
+    
+        except HttpError as error:
+            # TODO(developer) - Handle errors from Gmail API.
+            print(f"An error occurred: {error}")
+    
+ 
         return HttpResponse('Success')
     
