@@ -1610,7 +1610,7 @@ def get_notifications(request):
 
         sample_string_bytes = base64.b64decode(base64_bytes) 
         sample_string = sample_string_bytes.decode("ascii")
-        data = sample_string[historyId] 
+        data = sample_string['historyId'] 
 
         print(f"Success: {data}") 
         return HttpResponse('Success')
