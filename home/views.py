@@ -27,7 +27,7 @@ from .tasks import getLA
 from .epc import getEPC
 from simplegmail import Gmail
 from simplegmail.query import construct_query
-
+import base64 
 
 def home(request):
     return render(request, "home/index.html")
@@ -1603,6 +1603,14 @@ def get_mails(request):
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        print('success', json.loads(request.body)["message"]["data"])
+        # print('success', json.loads(request.body)["message"]["data"])
+        
+        base64_string =json.loads(request.body)["message"]["data"]
+        base64_bytes = base64_string.encode("ascii") 
+
+        sample_string_bytes = base64.b64decode(base64_bytes) 
+        sample_string = sample_string_bytes.decode("ascii") 
+
+        print(f"Success: {sample_string}") 
         return HttpResponse('Success')
     
