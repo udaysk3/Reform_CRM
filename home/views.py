@@ -1569,11 +1569,6 @@ def get_notifications(request):
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
 
-        # Check if the received historyId matches any in the database
-        if HistoryId.objects.filter(history_id=historyId).exists():
-            print("Received historyId already exists in the database. Exiting to prevent duplicate processing.")
-            return redirect('app:customer')
-
         creds = None
         if os.path.exists("static/token.json"):
             creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
@@ -1687,6 +1682,9 @@ def get_notifications(request):
 
             # Save the new history ID to the database
             HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+            if latest_history:
+                latest_history.delete()
+            
 
         except HttpError as error:
             print(f"An error occurred: {error}")
