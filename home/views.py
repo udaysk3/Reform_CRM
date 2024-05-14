@@ -1619,7 +1619,6 @@ def get_notifications(request):
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
-        print('success', historyId)
         
 
         if os.path.exists("static/token.json"):
@@ -1636,9 +1635,12 @@ def get_notifications(request):
             token.write(creds.to_json())
 
         try:
+            
             historys = HistoryId.objects.all()
             if historys.exists():
                 historyId1 = historys[0].history_id
+                print('historyId', historyId)
+                print('historyId1', historyId1)
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
                 msg = gmail.users().messages().get(userId='me', id=response['historyId']).execute()
