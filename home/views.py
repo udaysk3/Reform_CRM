@@ -1645,12 +1645,12 @@ def get_notifications(request):
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes=["messageAdded"], labelId=["INBOX"]).execute()
                 print(response)
-                if response['history']:
-                    for history in response['history']:
-                        for message in history['messages']:
-                            messageids['ids'].append(message['id'])
-                            messageids['threadids'].append(message['threadId'])
-                print(messageids)
+                # if response['history']:
+                #     for history in response['history']:
+                #         for message in history['messages']:
+                #             messageids['ids'].append(message['id'])
+                #             messageids['threadids'].append(message['threadId'])
+                # print(messageids)
                     
                 
             else:
