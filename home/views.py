@@ -1592,6 +1592,7 @@ def get_notifications(request):
             historys = HistoryId.objects.all().order_by('-created_at')
             if historys.exists():
                 historyId1 = historys[0].history_id
+                print(historyId1)
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes="messageAdded", labelId="INBOX").execute()
 
@@ -1636,9 +1637,9 @@ def get_notifications(request):
 
                     print("From:", from_header)
                     print("To:", to_header)
-                    print("Date:", date_header)
-                    print("Subject:", subject_header)
-                    print("Body:", body)
+                    # print("Date:", date_header)
+                    # print("Subject:", subject_header)
+                    # print("Body:", body)
 
                     if '<' in to_header:
                         to_header = to_header.split('<')[1].split('>')[0]
