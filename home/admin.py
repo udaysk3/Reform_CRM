@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Action, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities
+from .models import Action, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, HistoryId
 
 admin.site.register(Action)
 admin.site.register(Customers)
@@ -10,3 +10,4 @@ admin.site.register(Route)
 admin.site.register(Stage)
 admin.site.register(Document)
 admin.site.register(Cities)
+admin.site.register(HistoryId)

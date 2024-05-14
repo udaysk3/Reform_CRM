@@ -4,7 +4,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, Email, Reason
+from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, Email, Reason, HistoryId
 import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
@@ -1612,7 +1612,6 @@ def get_mails(request):
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        print('success', json.loads(request.body)["message"]["data"])
         base64_string =json.loads(request.body)["message"]["data"]
         base64_bytes = base64_string.encode("ascii") 
         sample_string_bytes = base64.b64decode(base64_bytes) 
@@ -1620,6 +1619,7 @@ def get_notifications(request):
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
+        print('success', historyId)
         
 
         if os.path.exists("static/token.json"):
@@ -1632,22 +1632,22 @@ def get_notifications(request):
                 "../credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=3000)
-            print(creds)
           with open("static/token.json", "w") as token:
             token.write(creds.to_json())
 
         try:
-            PROJECT_ID = 'sample-420901'
-            TOPIC_NAME = 'projects/sample-420901/topics/MyTopic'
-            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-            response = gmail.users().history().list(userId='me', startHistoryId=historyId,historyTypes="messageAdded", labelId="INBOX").execute()
-            # response1 = gmail.users().messages().list(userId='me').execute()
-            # messages = response1.get('messages', [])        
-            # for message in messages:
-            msg = gmail.users().messages().get(userId='me', id=response['historyId']).execute()
-            print(msg)
-            print(msg['payload']['headers'])
-            print(msg['payload']['parts'])
+            history = History.objects.all()[0]
+            if history:
+                historyId1 = history.historyId
+                gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
+                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
+                msg = gmail.users().messages().get(userId='me', id=response['historyId']).execute()
+                print(msg)
+                print(msg['payload']['headers'])
+                print(msg['payload']['parts'])
+                history = History.objects.create(historyId=historyId)
+            else:
+                history = History.objects.create(historyId=historyId)
                 
                 
 

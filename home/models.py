@@ -140,3 +140,11 @@ class Reason(models.Model):
     
     def __str__(self):
         return f"{self.name}"
+    
+class HistoryId(models.Model):
+    history_id = models.CharField(max_length=255)
+    created_at = models.DateTimeField(blank= True, null=True)
+    
+    def __str__(self):
+        return f"{self.history_id}"
+    
