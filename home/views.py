@@ -1635,20 +1635,24 @@ def get_notifications(request):
             token.write(creds.to_json())
 
         try:
-            
+            messageids = {
+                "ids": [],
+                "threadids": [],
+            }
             historys = HistoryId.objects.all()
             if historys.exists():
                 historyId1 = historys[0].history_id
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
-                print('historyId', historyId)
-                print('historyId1', historyId1)
+                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes=["messageAdded"], labelId=["INBOX"]).execute()
                 print(response)
-                msg = gmail.users().messages().get(userId='me', id=response['historyId']).execute()
-                print(msg)
-                print(msg['payload']['headers'])
-                print(msg['payload']['parts'])
-                history = HistoryId.objects.create(history_id=historyId)
+                if response['history']:
+                    for history in response['history']:
+                        for message in history['messages']:
+                            messageids['ids'].append(message['id'])
+                            messageids['threadids'].append(message['threadId'])
+                print(messageids)
+                    
+                
             else:
                 history = HistoryId.objects.create(history_id=historyId)
                 
