@@ -1561,131 +1561,131 @@ def get_body(payload):
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        base64_string = json.loads(request.body)["message"]["data"]
-        base64_bytes = base64_string.encode("ascii")
-        sample_string_bytes = base64.b64decode(base64_bytes)
-        sample_string = sample_string_bytes.decode("ascii")
-        history_data = json.loads(sample_string)
-        historyId = history_data["historyId"]
+        # base64_string = json.loads(request.body)["message"]["data"]
+        # base64_bytes = base64_string.encode("ascii")
+        # sample_string_bytes = base64.b64decode(base64_bytes)
+        # sample_string = sample_string_bytes.decode("ascii")
+        # history_data = json.loads(sample_string)
+        # historyId = history_data["historyId"]
 
-        creds = None
-        if os.path.exists("static/token.json"):
-            creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
+        # creds = None
+        # if os.path.exists("static/token.json"):
+        #     creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
         
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    "../credentials.json", SCOPES
-                )
-                creds = flow.run_local_server(port=3000)
-            with open("static/token.json", "w") as token:
-                token.write(creds.to_json())
+        # if not creds or not creds.valid:
+        #     if creds and creds.expired and creds.refresh_token:
+        #         creds.refresh(Request())
+        #     else:
+        #         flow = InstalledAppFlow.from_client_secrets_file(
+        #             "../credentials.json", SCOPES
+        #         )
+        #         creds = flow.run_local_server(port=3000)
+        #     with open("static/token.json", "w") as token:
+        #         token.write(creds.to_json())
 
-        try:
-            messageids = {
-                "ids": [],
-                "threadids": [],
-            }
+        # try:
+        #     messageids = {
+        #         "ids": [],
+        #         "threadids": [],
+        #     }
 
-            # Get the latest history ID if it exists
-            latest_history = HistoryId.objects.order_by('-created_at').first()
-            historyId1 = latest_history.history_id if latest_history else None
-            if latest_history:
-                print(f"Latest history ID: {latest_history.history_id}")
-                print(f"history ID: {historyId}")
-            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
+        #     # Get the latest history ID if it exists
+        #     latest_history = HistoryId.objects.order_by('-created_at').first()
+        #     historyId1 = latest_history.history_id if latest_history else None
+        #     if latest_history:
+        #         print(f"Latest history ID: {latest_history.history_id}")
+        #         print(f"history ID: {historyId}")
+        #     gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
 
-            if historyId1:
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes=["messageAdded"], labelId="INBOX").execute()
+        #     if historyId1:
+        #         response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes=["messageAdded"], labelId="INBOX").execute()
 
-                if 'history' in response:
-                    for history in response['history']:
-                        if 'messages' in history:
-                            for message in history['messages']:
-                                messageids['ids'].append(message['id'])
-                                messageids['threadids'].append(message['threadId'])
+        #         if 'history' in response:
+        #             for history in response['history']:
+        #                 if 'messages' in history:
+        #                     for message in history['messages']:
+        #                         messageids['ids'].append(message['id'])
+        #                         messageids['threadids'].append(message['threadId'])
 
-                # Remove duplicates
-                messageids['ids'] = list(dict.fromkeys(messageids['ids']))
-                messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
+        #         # Remove duplicates
+        #         messageids['ids'] = list(dict.fromkeys(messageids['ids']))
+        #         messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
 
-                for messageid in messageids['ids']:
-                    response = gmail.users().messages().get(userId='me', id=messageid).execute()
+        #         for messageid in messageids['ids']:
+        #             response = gmail.users().messages().get(userId='me', id=messageid).execute()
 
-                    from_header = ""
-                    to_header = ""
-                    date_header = ""
-                    subject_header = ""
+        #             from_header = ""
+        #             to_header = ""
+        #             date_header = ""
+        #             subject_header = ""
 
-                    if 'payload' in response and 'headers' in response['payload']:
-                        for header in response['payload']['headers']:
-                            if header['name'] == 'From':
-                                from_header = header['value']
-                            elif header['name'] == 'To':
-                                to_header = header['value']
-                            elif header['name'] == 'Date':
-                                date_header = header['value']
-                            elif header['name'] == 'Subject':
-                                subject_header = header['value']
+        #             if 'payload' in response and 'headers' in response['payload']:
+        #                 for header in response['payload']['headers']:
+        #                     if header['name'] == 'From':
+        #                         from_header = header['value']
+        #                     elif header['name'] == 'To':
+        #                         to_header = header['value']
+        #                     elif header['name'] == 'Date':
+        #                         date_header = header['value']
+        #                     elif header['name'] == 'Subject':
+        #                         subject_header = header['value']
 
-                    raw_body = get_body(response['payload']) if 'payload' in response else None
-                    if raw_body:
-                        try:
-                            body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
-                        except Exception as e:
-                            body = f"Error decoding body: {e}"
-                    else:
-                        body = "No body found"
+        #             raw_body = get_body(response['payload']) if 'payload' in response else None
+        #             if raw_body:
+        #                 try:
+        #                     body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+        #                 except Exception as e:
+        #                     body = f"Error decoding body: {e}"
+        #             else:
+        #                 body = "No body found"
 
-                    print("From:", from_header)
-                    print("To:", to_header)
-                    # print("Date:", date_header)
-                    # print("Subject:", subject_header)
-                    # print("Body:", body)
+        #             print("From:", from_header)
+        #             print("To:", to_header)
+        #             # print("Date:", date_header)
+        #             # print("Subject:", subject_header)
+        #             # print("Body:", body)
 
-                    if '<' in to_header:
-                        to_header = to_header.split('<')[1].split('>')[0]
-                    if '<' in from_header:
-                        from_header = from_header.split('<')[1].split('>')[0]
+        #             if '<' in to_header:
+        #                 to_header = to_header.split('<')[1].split('>')[0]
+        #             if '<' in from_header:
+        #                 from_header = from_header.split('<')[1].split('>')[0]
 
-                    customers = Customers.objects.all()
-                    customer = None
-                    for c_customer in customers:
-                        if c_customer.email == from_header:
-                            customer = c_customer
-                            break
+        #             customers = Customers.objects.all()
+        #             customer = None
+        #             for c_customer in customers:
+        #                 if c_customer.email == from_header:
+        #                     customer = c_customer
+        #                     break
 
-                    if customer:
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type="Email Received",
-                            text=f'Subject: {subject_header} \n Body: {body}',
-                        )
-                    else:
-                        customer = Customers.objects.create(
-                            email=from_header,
-                        )
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type=f"Added {customer.email}",
-                            keyevents=True,
-                        )
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type="Email Received",
-                            text=f'Subject: {subject_header} \n Body: {body}',
-                        )
+        #             if customer:
+        #                 customer.add_action(
+        #                     date_time=datetime.now(pytz.timezone("Europe/London")),
+        #                     created_at=datetime.now(pytz.timezone("Europe/London")),
+        #                     action_type="Email Received",
+        #                     text=f'Subject: {subject_header} \n Body: {body}',
+        #                 )
+        #             else:
+        #                 customer = Customers.objects.create(
+        #                     email=from_header,
+        #                 )
+        #                 customer.add_action(
+        #                     date_time=datetime.now(pytz.timezone("Europe/London")),
+        #                     created_at=datetime.now(pytz.timezone("Europe/London")),
+        #                     action_type=f"Added {customer.email}",
+        #                     keyevents=True,
+        #                 )
+        #                 customer.add_action(
+        #                     date_time=datetime.now(pytz.timezone("Europe/London")),
+        #                     created_at=datetime.now(pytz.timezone("Europe/London")),
+        #                     action_type="Email Received",
+        #                     text=f'Subject: {subject_header} \n Body: {body}',
+        #                 )
 
-            HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+        #     HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             
 
-        except HttpError as error:
-            print(f"An error occurred: {error}")
+        # except HttpError as error:
+        #     print(f"An error occurred: {error}")
 
         return redirect('app:customer')
 
