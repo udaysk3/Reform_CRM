@@ -1578,7 +1578,8 @@ def get_notifications(request):
         if latest_history and latest_history.history_id == historyId:
             print("Received historyId matches the latest one in the database. Exiting to prevent duplicate processing.")
             return redirect('app:customer')
-        if not HistoryId.objects.filter(history_id=historyId).exists():
+        
+        if HistoryId.objects.filter(history_id=historyId).exists():
             return redirect('app:customer')
 
         creds = None
