@@ -1544,72 +1544,6 @@ def remove_reason(request, reason_id):
     messages.success(request, "Reason deleted successfully!")
     return redirect("app:admin")
 
-def get_mails(request):
-    
-
-    gmail = Gmail()
-
-    query_params = {
-    }
-    # Unread messages in your inbox
-    messages = gmail.get_unread_inbox()
-
-    for message in messages:
-        if '<' in message.recipient:
-            message.recipient = message.recipient.split('<')[1].split('>')[0]
-        if '<' in message.sender:
-            message.sender = message.sender.split('<')[1].split('>')[0]
-        print("To: " + message.recipient)
-        print("From: " + message.sender)
-        print("Subject: " + message.subject)
-        print("Date: " + message.date)
-        print("Preview: " + message.snippet)
-        print('')
-        print('')
-        print('')
-        print('')
-        print('')
-        print('')
-        print('')
-        
-        customers = Customers.objects.all()
-        customer = None
-        for c_customer in customers:
-            if c_customer.email == message.sender:
-                customer = c_customer
-        print(customer)
-        if customer:
-            customer.add_action(
-                agent=User.objects.get(email=request.user),
-                date_time=datetime.now(pytz.timezone("Europe/London")),
-                created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type="Email Received",
-                text=message.snippet,
-            )
-        else:
-            customer = Customers.objects.create(
-                email=message.sender,
-            )
-            customer.add_action(
-                agent=User.objects.get(email=request.user),
-                date_time=datetime.now(pytz.timezone("Europe/London")),
-                created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.email}",
-                keyevents=True,
-            )
-            customer.add_action(
-                agent=User.objects.get(email=request.user),
-                date_time=datetime.now(pytz.timezone("Europe/London")),
-                created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type="Email Received",
-                text=message.snippet,
-            )
-            
-            
-        
-        
-    return redirect('app:customer')
-
 def get_body(payload):
     if 'parts' in payload:
         for part in payload['parts']:
@@ -1662,7 +1596,7 @@ def get_notifications(request):
                 print('response', response)
                 # Initialize the messageids dictionary
                 messageids = {'ids': [], 'threadids': []}
-                
+
                 # Assuming 'response' is a variable holding the history response
                 if 'history' in response:
                     for history in response['history']:
@@ -1670,21 +1604,21 @@ def get_notifications(request):
                             for message in history['messages']:
                                 messageids['ids'].append(message['id'])
                                 messageids['threadids'].append(message['threadId'])
-                
+
                 # Remove duplicates
                 messageids['ids'] = list(dict.fromkeys(messageids['ids']))
                 messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
-                
+
                 # Process each message
                 for messageid in messageids['ids']:
                     response = gmail.users().messages().get(userId='me', id=messageid).execute()
-                
+
                     # Initialize header variables
                     from_header = ""
                     to_header = ""
                     date_header = ""
                     subject_header = ""
-                
+
                     # Extract headers
                     if 'payload' in response and 'headers' in response['payload']:
                         for header in response['payload']['headers']:
@@ -1696,14 +1630,7 @@ def get_notifications(request):
                                 date_header = header['value']
                             elif header['name'] == 'Subject':
                                 subject_header = header['value']
-                
-                    # Print headers
-                    print("From:", from_header)
-                    print("To:", to_header)
-                    print("Date:", date_header)
-                    print("Subject:", subject_header)
-                
-                    # Extract and decode the body
+
                     raw_body = get_body(response['payload']) if 'payload' in response else None
                     if raw_body:
                         try:
@@ -1712,9 +1639,51 @@ def get_notifications(request):
                             body = f"Error decoding body: {e}"
                     else:
                         body = "No body found"
-                
-                    # Print body
+
+                    print("From:", from_header)
+                    print("To:", to_header)
+                    print("Date:", date_header)
+                    print("Subject:", subject_header)
                     print("Body:", body)
+                    if '<' in to_header:
+                        to_header = to_header.split('<')[1].split('>')[0]
+                    if '<' in from_header:
+                        from_header = from_header.split('<')[1].split('>')[0]
+                    
+                    
+                    customers = Customers.objects.all()
+                    customer = None
+                    for c_customer in customers:
+                        if c_customer.email == from_header:
+                            customer = c_customer
+                    if customer:
+                        customer.add_action(
+                            agent=User.objects.get(email=request.user),
+                            date_time=datetime.now(pytz.timezone("Europe/London")),
+                            created_at=datetime.now(pytz.timezone("Europe/London")),
+                            action_type="Email Received",
+                            text=f''' Subject: {subject_header} \n Body: {body}''',
+                        )
+                    else:
+                        customer = Customers.objects.create(
+                            email=from_header,
+                        )
+                        customer.add_action(
+                            agent=User.objects.get(email=request.user),
+                            date_time=datetime.now(pytz.timezone("Europe/London")),
+                            created_at=datetime.now(pytz.timezone("Europe/London")),
+                            action_type=f"Added {customer.email}",
+                            keyevents=True,
+                        )
+                        customer.add_action(
+                            agent=User.objects.get(email=request.user),
+                            date_time=datetime.now(pytz.timezone("Europe/London")),
+                            created_at=datetime.now(pytz.timezone("Europe/London")),
+                            action_type="Email Received",
+                            text=f''' Subject: {subject_header} \n Body: {body}''',
+                        )
+                    
+                    
                     
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             else:
@@ -1725,5 +1694,5 @@ def get_notifications(request):
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
             print(f"An error occurred: {error}")
-        return HttpResponse('Success')
+        return redirect('app:customer')
     
