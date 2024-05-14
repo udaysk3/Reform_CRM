@@ -1621,7 +1621,34 @@ def get_notifications(request):
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
         
-        response = requests.get(f"https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded") 
+        # response = requests.get(f"https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded") 
+    
+    
+    
+        with open('token.json', 'r') as token_file:
+            token_data = json.load(token_file)
+        
+        access_token = token_data['access_token']
+
+        url = f'https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded'
+
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            print(response.json())
+        else:
+            print(f"Error: {response.status_code} - {response.reason}")
+
+
+        
+    
+    
+    
     
         print(response.json())
     
