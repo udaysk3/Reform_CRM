@@ -1558,30 +1558,24 @@ def get_body(payload):
             return payload['body']['data']
     return None
 
-@csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        base64_string =json.loads(request.body)["message"]["data"]
-        base64_bytes = base64_string.encode("ascii") 
-        sample_string_bytes = base64.b64decode(base64_bytes) 
-        sample_string = sample_string_bytes.decode("ascii")
-        history_data = json.loads(sample_string)
-        historyId = history_data["historyId"]
-        userId = history_data["emailAddress"]
         
 
+        creds = None
         if os.path.exists("static/token.json"):
             creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
+        
         if not creds or not creds.valid:
-          if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-          else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "../credentials.json", SCOPES
-            )
-            creds = flow.run_local_server(port=3000)
-          with open("static/token.json", "w") as token:
-            token.write(creds.to_json())
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    "../credentials.json", SCOPES
+                )
+                creds = flow.run_local_server(port=3000)
+            with open("static/token.json", "w") as token:
+                token.write(creds.to_json())
 
         try:
             messageids = {
@@ -1592,12 +1586,9 @@ def get_notifications(request):
             if historys.exists():
                 historyId1 = historys[0].history_id
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
+                response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes="messageAdded", labelId="INBOX").execute()
                 print('response', response)
-                # Initialize the messageids dictionary
-                messageids = {'ids': [], 'threadids': []}
 
-                # Assuming 'response' is a variable holding the history response
                 if 'history' in response:
                     for history in response['history']:
                         if 'messages' in history:
@@ -1609,17 +1600,14 @@ def get_notifications(request):
                 messageids['ids'] = list(dict.fromkeys(messageids['ids']))
                 messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
 
-                # Process each message
                 for messageid in messageids['ids']:
                     response = gmail.users().messages().get(userId='me', id=messageid).execute()
 
-                    # Initialize header variables
                     from_header = ""
                     to_header = ""
                     date_header = ""
                     subject_header = ""
 
-                    # Extract headers
                     if 'payload' in response and 'headers' in response['payload']:
                         for header in response['payload']['headers']:
                             if header['name'] == 'From':
@@ -1645,54 +1633,53 @@ def get_notifications(request):
                     print("Date:", date_header)
                     print("Subject:", subject_header)
                     print("Body:", body)
+
                     if '<' in to_header:
                         to_header = to_header.split('<')[1].split('>')[0]
                     if '<' in from_header:
                         from_header = from_header.split('<')[1].split('>')[0]
-                    
-                    
+
                     customers = Customers.objects.all()
                     customer = None
                     for c_customer in customers:
                         if c_customer.email == from_header:
                             customer = c_customer
+                            break
+
                     if customer:
                         customer.add_action(
-                            agent=User.objects.get(email=request.user),
+                            agent=User.objects.get(email=request.user.email),
                             date_time=datetime.now(pytz.timezone("Europe/London")),
                             created_at=datetime.now(pytz.timezone("Europe/London")),
                             action_type="Email Received",
-                            text=f''' Subject: {subject_header} \n Body: {body}''',
+                            text=f'Subject: {subject_header} \n Body: {body}',
                         )
                     else:
                         customer = Customers.objects.create(
                             email=from_header,
                         )
                         customer.add_action(
-                            agent=User.objects.get(email=request.user),
+                            agent=User.objects.get(email=request.user.email),
                             date_time=datetime.now(pytz.timezone("Europe/London")),
                             created_at=datetime.now(pytz.timezone("Europe/London")),
                             action_type=f"Added {customer.email}",
                             keyevents=True,
                         )
                         customer.add_action(
-                            agent=User.objects.get(email=request.user),
+                            agent=User.objects.get(email=request.user.email),
                             date_time=datetime.now(pytz.timezone("Europe/London")),
                             created_at=datetime.now(pytz.timezone("Europe/London")),
                             action_type="Email Received",
-                            text=f''' Subject: {subject_header} \n Body: {body}''',
+                            text=f'Subject: {subject_header} \n Body: {body}',
                         )
-                    
-                    
-                    
+
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             else:
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
-                
-                
 
         except HttpError as error:
-            # TODO(developer) - Handle errors from gmail API.
             print(f"An error occurred: {error}")
+        
         return redirect('app:customer')
-    
+
+    return redirect('app:customer')
