@@ -1570,13 +1570,15 @@ def get_notifications(request):
         userId = history_data["emailAddress"]
 
         # Check if the received historyId matches the latest one in the database
-        latest_history = HistoryId.objects.order_by('created_at').first()
+        latest_history = HistoryId.objects.order_by('-created_at').first()  # Note the change to '-created_at'
         if latest_history:
-            print('latest_history',latest_history.history_id)
-            print('historyId',historyId)
+            print('latest_history', latest_history.history_id)
+            print('historyId', historyId)
         
         if latest_history and latest_history.history_id == historyId:
             print("Received historyId matches the latest one in the database. Exiting to prevent duplicate processing.")
+            return redirect('app:customer')
+        if not HistoryId.objects.filter(history_id=historyId).exists():
             return redirect('app:customer')
 
         creds = None
@@ -1613,19 +1615,19 @@ def get_notifications(request):
                             for message in history['messages']:
                                 messageids['ids'].append(message['id'])
                                 messageids['threadids'].append(message['threadId'])
-    
+
                 # Remove duplicates
                 messageids['ids'] = list(dict.fromkeys(messageids['ids']))
                 messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
-    
+
                 for messageid in messageids['ids']:
                     response = gmail.users().messages().get(userId='me', id=messageid).execute()
-    
+
                     from_header = ""
                     to_header = ""
                     date_header = ""
                     subject_header = ""
-    
+
                     if 'payload' in response and 'headers' in response['payload']:
                         for header in response['payload']['headers']:
                             if header['name'] == 'From':
@@ -1636,7 +1638,7 @@ def get_notifications(request):
                                 date_header = header['value']
                             elif header['name'] == 'Subject':
                                 subject_header = header['value']
-    
+
                     raw_body = get_body(response['payload']) if 'payload' in response else None
                     if raw_body:
                         try:
@@ -1645,25 +1647,25 @@ def get_notifications(request):
                             body = f"Error decoding body: {e}"
                     else:
                         body = "No body found"
-    
+
                     print("From:", from_header)
                     print("To:", to_header)
                     # print("Date:", date_header)
                     # print("Subject:", subject_header)
                     # print("Body:", body)
-    
+
                     if '<' in to_header:
                         to_header = to_header.split('<')[1].split('>')[0]
                     if '<' in from_header:
                         from_header = from_header.split('<')[1].split('>')[0]
-    
+
                     customers = Customers.objects.all()
                     customer = None
                     for c_customer in customers:
                         if c_customer.email == from_header:
                             customer = c_customer
                             break
-                        
+
                     if customer:
                         customer.add_action(
                             date_time=datetime.now(pytz.timezone("Europe/London")),
@@ -1687,10 +1689,11 @@ def get_notifications(request):
                             action_type="Email Received",
                             text=f'Subject: {subject_header} \n Body: {body}',
                         )
-    
-                latest_history.delete()
+
+            # Save the new history ID if it's not already in the database
+            if not HistoryId.objects.filter(history_id=historyId).exists():
                 HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
-    
+
         except HttpError as error:
             print(f"An error occurred: {error}")
 
