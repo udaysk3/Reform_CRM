@@ -1625,7 +1625,7 @@ def get_notifications(request):
     
     
     
-        with open('../token.json', 'r') as token_file:
+        with open('token.json', 'r') as token_file:
             token_data = json.load(token_file)
         
         access_token = token_data['access_token']
