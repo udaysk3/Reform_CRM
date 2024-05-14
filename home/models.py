@@ -143,7 +143,7 @@ class Reason(models.Model):
     
 
 class HistoryId(models.Model):
-    history_id = models.CharField(max_length=255, unique=True)
+    history_id = models.CharField(max_length=255)
     created_at = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):

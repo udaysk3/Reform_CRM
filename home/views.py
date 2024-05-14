@@ -1681,9 +1681,9 @@ def get_notifications(request):
                         )
 
             # Save the new history ID to the database
-            HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             if latest_history:
                 latest_history.delete()
+            HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             
 
         except HttpError as error:
