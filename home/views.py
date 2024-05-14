@@ -28,6 +28,7 @@ from .epc import getEPC
 from simplegmail import Gmail
 from simplegmail.query import construct_query
 import base64 
+import quopri
 import requests
 import os.path
 import googleapiclient.discovery
@@ -1609,6 +1610,20 @@ def get_mails(request):
         
     return redirect('app:customer')
 
+def get_body(payload):
+    if 'parts' in payload:
+        for part in payload['parts']:
+            if part['mimeType'] == 'text/plain':
+                return part['body']['data']
+            elif part['mimeType'] == 'multipart/alternative':
+                for subpart in part['parts']:
+                    if subpart['mimeType'] == 'text/plain':
+                        return subpart['body']['data']
+    else:
+        if payload['mimeType'] == 'text/plain':
+            return payload['body']['data']
+    return None
+
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
@@ -1654,10 +1669,34 @@ def get_notifications(request):
                 messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
                 for messageid in messageids['ids']:
                     response = gmail.users().messages().get(userId='me', id=messageid).execute()
-                    for i in response['payload']['headers']:
-                        print("headers",i)
-                    for i in response['payload']['parts']:
-                        print("parts",i)
+                    from_header = ""
+                    to_header = ""
+                    date_header = ""
+                    subject_header = ""
+
+                    # Extract headers
+                    for header in response['payload']['headers']:
+                        if header['name'] == 'From':
+                            from_header = header['value']
+                        elif header['name'] == 'To':
+                            to_header = header['value']
+                        elif header['name'] == 'Date':
+                            date_header = header['value']
+                        elif header['name'] == 'Subject':
+                            subject_header = header['value']
+                    print("From:", from_header)
+                    print("To:", to_header)
+                    print("Date:", date_header)
+                    print("Subject:", subject_header)
+                    raw_body = get_body(response['payload'])
+                    if raw_body:
+                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                    else:
+                        body = ""
+                    
+                    # Print body
+                    print("Body:", body)
+                    
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             else:
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
