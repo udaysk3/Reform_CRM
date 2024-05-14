@@ -1640,10 +1640,14 @@ def get_notifications(request):
             PROJECT_ID = 'sample-420901'
             TOPIC_NAME = 'projects/sample-420901/topics/MyTopic'
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-            response = gmail.users().history().list(userId='me', startHistoryId=historyId).execute()
+            response = gmail.users().history().list(userId='me', startHistoryId=historyId,historyTypes="messageAdded").execute()
             print(response)
             response1 = gmail.users().messages().list(userId='me').execute()
-            print(response1)
+            messages = response1.get('messages', [])
+            for message in messages:
+                msg = gmail.users().messages().get(userId='me', id=message['id']).execute()
+                print(msg)
+                print(msg['snippet'])
                 
                 
 
