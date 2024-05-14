@@ -1592,9 +1592,9 @@ def get_notifications(request):
             historys = HistoryId.objects.all().order_by('-created_at')
             if historys.exists():
                 historyId1 = historys[0].history_id
-                print(historyId1)
+                print("Previous historyId:", historyId1)
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes="messageAdded", labelId="INBOX").execute()
+                response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes=["messageAdded"], labelId="INBOX").execute()
 
                 if 'history' in response:
                     for history in response['history']:
@@ -1637,9 +1637,9 @@ def get_notifications(request):
 
                     print("From:", from_header)
                     print("To:", to_header)
-                    # print("Date:", date_header)
-                    # print("Subject:", subject_header)
-                    # print("Body:", body)
+                    print("Date:", date_header)
+                    print("Subject:", subject_header)
+                    print("Body:", body)
 
                     if '<' in to_header:
                         to_header = to_header.split('<')[1].split('>')[0]
@@ -1677,9 +1677,12 @@ def get_notifications(request):
                             text=f'Subject: {subject_header} \n Body: {body}',
                         )
 
-                history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+                # Save the new history ID only if it doesn't already exist
+                if not HistoryId.objects.filter(history_id=historyId).exists():
+                    HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             else:
-                history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+                # Save the new history ID for the first time
+                HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
 
         except HttpError as error:
             print(f"An error occurred: {error}")
