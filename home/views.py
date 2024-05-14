@@ -1643,7 +1643,7 @@ def get_notifications(request):
             if historys.exists():
                 historyId1 = historys[0].history_id
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes=["messageAdded"], labelId=["INBOX"]).execute()
+                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
                 print(response)
                 # if response['history']:
                 #     for history in response['history']:
