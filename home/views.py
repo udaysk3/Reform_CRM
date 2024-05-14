@@ -1571,6 +1571,9 @@ def get_notifications(request):
 
         # Check if the received historyId matches the latest one in the database
         latest_history = HistoryId.objects.order_by('-created_at').first()
+        print('latest_history',latest_history.history_id)
+        print('historyId',historyId)
+        
         if latest_history and latest_history.history_id == historyId:
             print("Received historyId matches the latest one in the database. Exiting to prevent duplicate processing.")
             return redirect('app:customer')
@@ -1646,9 +1649,9 @@ def get_notifications(request):
 
                 print("From:", from_header)
                 print("To:", to_header)
-                print("Date:", date_header)
-                print("Subject:", subject_header)
-                print("Body:", body)
+                # print("Date:", date_header)
+                # print("Subject:", subject_header)
+                # print("Body:", body)
 
                 if '<' in to_header:
                     to_header = to_header.split('<')[1].split('>')[0]
