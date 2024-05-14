@@ -1623,26 +1623,60 @@ def get_notifications(request):
         
         # response = requests.get(f"https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded") 
     
+
+        if os.path.exists("static/token.json"):
+            creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+          if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+          else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                "../credentials.json", SCOPES
+            )
+            creds = flow.run_local_server(port=3000)
+            print(creds)
+          # Save the credentials for the next run
+          with open("static/token.json", "w") as token:
+            token.write(creds.to_json())
+
+        try:
+            PROJECT_ID = 'sample-420901'
+            TOPIC_NAME = 'projects/sample-420901/topics/MyTopic'
+
+            # Create the Gmail API client
+            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
+
+            
+
+            # Execute the watch request
+            response = gmail.users().history.list(userId='me', startHistoryId=historyId).execute()
+
+            # Print a success message
+            print(response)
+
+        except HttpError as error:
+            # TODO(developer) - Handle errors from gmail API.
+            print(f"An error occurred: {error}")
     
-    
-        with open('static/token.json', 'r') as token_file:
-            token_data = json.load(token_file)
+        # with open('static/token.json', 'r') as token_file:
+        #     token_data = json.load(token_file)
         
-        access_token = token_data['access_token']
+        # access_token = token_data['access_token']
 
-        url = f'https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded'
+        # url = f'https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded'
 
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json'
-        }
+        # headers = {
+        #     'Authorization': f'Bearer {access_token}',
+        #     'Content-Type': 'application/json'
+        # }
 
-        response = requests.get(url, headers=headers)
+        # response = requests.get(url, headers=headers)
 
-        if response.status_code == 200:
-            print(response.json())
-        else:
-            print(f"Error: {response.status_code} - {response.reason}")
+        # if response.status_code == 200:
+        #     print(response.json())
+        # else:
+        #     print(f"Error: {response.status_code} - {response.reason}")
 
 
         
@@ -1650,11 +1684,11 @@ def get_notifications(request):
     
     
     
-        print(response.json())
+        # print(response.json())
     
-        if response.status_code == 200:
-            json_data = response.json()
-            print(json_data)
+        # if response.status_code == 200:
+        #     json_data = response.json()
+        #     print(json_data)
             # messages = json_data["history"]
             # for message in messages:
             #     for m in message["messages"]:
