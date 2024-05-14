@@ -1641,55 +1641,51 @@ def get_notifications(request):
                                 subject_header = header['value']
 
                     raw_body = get_body(response['payload']) if 'payload' in response else None
-                    if raw_body:
-                        try:
-                            body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
-                        except Exception as e:
-                            body = f"Error decoding body: {e}"
-                    else:
-                        body = "No body found"
-
-                    print("From:", from_header)
-                    print("To:", to_header)
-                    # print("Date:", date_header)
-                    # print("Subject:", subject_header)
-                    # print("Body:", body)
-
-                    if '<' in to_header:
-                        to_header = to_header.split('<')[1].split('>')[0]
-                    if '<' in from_header:
-                        from_header = from_header.split('<')[1].split('>')[0]
-
-                    customers = Customers.objects.all()
-                    customer = None
-                    for c_customer in customers:
-                        if c_customer.email == from_header:
-                            customer = c_customer
-                            break
-
-                    if customer:
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type="Email Received",
-                            text=f'Subject: {subject_header} \n Body: {body}',
-                        )
-                    else:
-                        customer = Customers.objects.create(
-                            email=from_header,
-                        )
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type=f"Added {customer.email}",
-                            keyevents=True,
-                        )
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type="Email Received",
-                            text=f'Subject: {subject_header} \n Body: {body}',
-                        )
+                if raw_body:
+                    try:
+                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                    except Exception as e:
+                        body = f"Error decoding body: {e}"
+                else:
+                    body = "No body found"
+                print("From:", from_header)
+                print("To:", to_header)
+                # print("Date:", date_header)
+                # print("Subject:", subject_header)
+                # print("Body:", body)
+                if '<' in to_header:
+                    to_header = to_header.split('<')[1].split('>')[0]
+                if '<' in from_header:
+                    from_header = from_header.split('<')[1].split('>')[0]
+                customers = Customers.objects.all()
+                customer = None
+                for c_customer in customers:
+                    if c_customer.email == from_header:
+                        customer = c_customer
+                        break
+                if customer:
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
+                else:
+                    customer = Customers.objects.create(
+                        email=from_header,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type=f"Added {customer.email}",
+                        keyevents=True,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
 
             # Save the new history ID if it's not already in the database
             if not HistoryId.objects.filter(history_id=historyId).exists():
