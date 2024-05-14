@@ -1567,7 +1567,6 @@ def get_notifications(request):
         sample_string = sample_string_bytes.decode("ascii")
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
-        userId = history_data["emailAddress"]
 
         creds = None
         if os.path.exists("static/token.json"):
@@ -1680,9 +1679,6 @@ def get_notifications(request):
                             text=f'Subject: {subject_header} \n Body: {body}',
                         )
 
-            # Save the new history ID to the database
-            if latest_history:
-                latest_history.delete()
             HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             
 
