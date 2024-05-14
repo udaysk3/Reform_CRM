@@ -1623,6 +1623,8 @@ def get_notifications(request):
         
         response = requests.get(f"https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded") 
     
+        print(response)
+    
         if response.status_code == 200:
             json_data = response.json()
             print(json_data)
