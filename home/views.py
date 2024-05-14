@@ -1570,7 +1570,7 @@ def get_notifications(request):
         userId = history_data["emailAddress"]
 
         # Check if the received historyId matches the latest one in the database
-        latest_history = HistoryId.objects.order_by('-created_at').first()
+        latest_history = HistoryId.objects.order_by('created_at').first()
         if latest_history:
             print('latest_history',latest_history.history_id)
             print('historyId',historyId)
@@ -1606,8 +1606,6 @@ def get_notifications(request):
 
             if historyId1:
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes=["messageAdded"], labelId="INBOX").execute()
-            else:
-                response = gmail.users().messages().list(userId='me', labelIds=["INBOX"]).execute()
 
             if 'history' in response:
                 for history in response['history']:
