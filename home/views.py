@@ -1571,8 +1571,9 @@ def get_notifications(request):
 
         # Check if the received historyId matches the latest one in the database
         latest_history = HistoryId.objects.order_by('-created_at').first()
-        print('latest_history',latest_history.history_id)
-        print('historyId',historyId)
+        if latest_history:
+            print('latest_history',latest_history.history_id)
+            print('historyId',historyId)
         
         if latest_history and latest_history.history_id == historyId:
             print("Received historyId matches the latest one in the database. Exiting to prevent duplicate processing.")
