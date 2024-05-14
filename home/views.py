@@ -1660,21 +1660,6 @@ def get_notifications(request):
                         print("parts",i)
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             else:
-                gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
-                print('response', response)
-                if response['history']:
-                    for history in response['history']:
-                        for message in history['messages']:
-                            messageids['ids'].append(message['id'])
-                            messageids['threadids'].append(message['threadId'])
-                messageids['ids'] = list(dict.fromkeys(messageids['ids']))
-                messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
-                for messageid in messageids['ids']:
-                    response = gmail.users().messages().get(userId='me', id=messageid).execute()
-                    print(response)
-                    print(response['payload']['headers'])
-                    print(response['payload']['parts'])
                 history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
                 
                 
