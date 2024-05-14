@@ -1557,7 +1557,7 @@ def get_body(payload):
         if payload['mimeType'] == 'text/plain':
             return payload['body']['data']
     return None
-
+@csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
         
