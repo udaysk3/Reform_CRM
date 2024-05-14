@@ -1639,7 +1639,7 @@ def get_notifications(request):
                 "ids": [],
                 "threadids": [],
             }
-            historys = HistoryId.objects.all()
+            historys = HistoryId.objects.all().order_by('-created_at')
             if historys.exists():
                 historyId1 = historys[0].history_id
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
