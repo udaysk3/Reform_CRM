@@ -1638,16 +1638,16 @@ def get_notifications(request):
         try:
             historys = HistoryId.objects.all()
             if historys.exists():
-                historyId1 = historys[0].historyId
+                historyId1 = historys[0].history_id
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
                 msg = gmail.users().messages().get(userId='me', id=response['historyId']).execute()
                 print(msg)
                 print(msg['payload']['headers'])
                 print(msg['payload']['parts'])
-                history = HistoryId.objects.create(historyId=historyId)
+                history = HistoryId.objects.create(history_id=historyId)
             else:
-                history = HistoryId.objects.create(historyId=historyId)
+                history = HistoryId.objects.create(history_id=historyId)
                 
                 
 
