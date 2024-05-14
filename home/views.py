@@ -1646,11 +1646,12 @@ def get_notifications(request):
             for message in messages:
                 msg = gmail.users().messages().get(userId='me', id=message['id']).execute()
                 print(msg)
-                print(msg['headers'])
+                print(msg['payload']['headers'])
                 print('')
                 print('')
                 print('')
                 print('')
+                print(msg['payload']['parts'])
                 print('')
                 print('')
                 print('')
