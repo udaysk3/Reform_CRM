@@ -1660,40 +1660,59 @@ def get_notifications(request):
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
                 print('response', response)
-                if response['history']:
+                # Initialize the messageids dictionary
+                messageids = {'ids': [], 'threadids': []}
+                
+                # Assuming 'response' is a variable holding the history response
+                if 'history' in response:
                     for history in response['history']:
-                        for message in history['messages']:
-                            messageids['ids'].append(message['id'])
-                            messageids['threadids'].append(message['threadId'])
+                        if 'messages' in history:
+                            for message in history['messages']:
+                                messageids['ids'].append(message['id'])
+                                messageids['threadids'].append(message['threadId'])
+                
+                # Remove duplicates
                 messageids['ids'] = list(dict.fromkeys(messageids['ids']))
                 messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
+                
+                # Process each message
                 for messageid in messageids['ids']:
                     response = gmail.users().messages().get(userId='me', id=messageid).execute()
+                
+                    # Initialize header variables
                     from_header = ""
                     to_header = ""
                     date_header = ""
                     subject_header = ""
-
+                
                     # Extract headers
-                    for header in response['payload']['headers']:
-                        if header['name'] == 'From':
-                            from_header = header['value']
-                        elif header['name'] == 'To':
-                            to_header = header['value']
-                        elif header['name'] == 'Date':
-                            date_header = header['value']
-                        elif header['name'] == 'Subject':
-                            subject_header = header['value']
+                    if 'payload' in response and 'headers' in response['payload']:
+                        for header in response['payload']['headers']:
+                            if header['name'] == 'From':
+                                from_header = header['value']
+                            elif header['name'] == 'To':
+                                to_header = header['value']
+                            elif header['name'] == 'Date':
+                                date_header = header['value']
+                            elif header['name'] == 'Subject':
+                                subject_header = header['value']
+                
+                    # Print headers
                     print("From:", from_header)
                     print("To:", to_header)
                     print("Date:", date_header)
                     print("Subject:", subject_header)
-                    raw_body = get_body(response['payload'])
+                
+                    # Extract and decode the body
+                    raw_body = get_body(response['payload']) if 'payload' in response else None
                     if raw_body:
-                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                        try:
+                            body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                        except Exception as e:
+                            body = f"Error decoding body: {e}"
                     else:
-                        body = ""
-                    
+                        body = "No body found"
+                
                     # Print body
                     print("Body:", body)
                     
