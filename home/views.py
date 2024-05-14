@@ -1557,6 +1557,7 @@ def get_body(payload):
         if payload['mimeType'] == 'text/plain':
             return payload['body']['data']
     return None
+
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
@@ -1587,7 +1588,6 @@ def get_notifications(request):
                 historyId1 = historys[0].history_id
                 gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes="messageAdded", labelId="INBOX").execute()
-                print('response', response)
 
                 if 'history' in response:
                     for history in response['history']:
