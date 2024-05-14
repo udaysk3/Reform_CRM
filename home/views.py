@@ -1650,7 +1650,9 @@ def get_notifications(request):
             
 
             # Execute the watch request
-            response = gmail.users().history.list(userId='me', startHistoryId=historyId).execute()
+            
+            response = gmail.users().history().list(userId='me', startHistoryId=historyId).execute()
+
 
             # Print a success message
             print(response)
