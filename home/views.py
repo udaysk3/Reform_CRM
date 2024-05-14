@@ -1621,47 +1621,61 @@ def get_notifications(request):
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
         
-        creds = None
-        if os.path.exists("token.json"):
-            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-            
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    "client_secret.json", SCOPES
-                )
-                # Modify the redirect URI to your hosted domain
-                redirect_uri = 'https://web-production-e2474.up.railway.app'
-                creds = flow.run_local_server(port=3000, host='0.0.0.0', redirect_uri=redirect_uri)
-                
-            with open("token.json", "w") as token:
-                token.write(creds.to_json())
+        response = requests.get(f"https://gmail.googleapis.com/gmail/v1/users/{userId}/history?startHistoryId={historyId}&labelIds=INBOX&historyTypes=messageAdded") 
     
-        try:
-            # Create the Gmail API client
-            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-            response = gmail.users().history().list(userId='me',startHistoryId=historyId).execute()
-            history = response.get('history', [])
-            if history:
-                print("History:")
-                for item in history:
-                    print(item)
-            else:
-                print("No history found.")
-            
-            
-
-
-            print(f"Success: {data}")
-
-    
-    
-        except HttpError as error:
-            # TODO(developer) - Handle errors from Gmail API.
-            print(f"An error occurred: {error}")
-    
- 
+        if response.status_code == 200:
+            json_data = response.json()
+            print(json_data)
+            # messages = json_data["history"]
+            # for message in messages:
+            #     for m in message["messages"]:
+            #         message_id = m["id"]
+            #         response = requests.get(f"https://gmail.googleapis.com/gmail/v1/users/{userId}/messages/{message_id}")
+            #         if response.status_code == 200:
+            #             json_data = response.json()
+            #             message = json_data["payload"]["headers"]
+            #             sender = None
+            #             recipient = None
+            #             subject = None
+            #             for m in message:
+            #                 if m["name"] == "From":
+            #                     sender = m["value"]
+            #                 if m["name"] == "To":
+            #                     recipient = m["value"]
+            #                 if m["name"] == "Subject":
+            #                     subject = m["value"]
+            #             print(sender, recipient, subject)
+            #             customers = Customers.objects.all()
+            #             customer = None
+            #             for c_customer in customers:
+            #                 if c_customer.email == sender:
+            #                     customer = c_customer
+            #             print(customer)
+            #             if customer:
+            #                 customer.add_action(
+            #                     agent=User.objects.get(email=request.user),
+            #                     date_time=datetime.now(pytz.timezone("Europe/London")),
+            #                     created_at=datetime.now(pytz.timezone("Europe/London")),
+            #                     action_type="Email Received",
+            #                     text=subject,
+            #                 )
+            #             else:
+            #                 customer = Customers.objects.create(
+            #                     email=sender,
+            #                 )
+            #                 customer.add_action(
+            #                     agent=User.objects.get(email=request.user),
+            #                     date_time=datetime.now(pytz.timezone("Europe/London")),
+            #                     created_at=datetime.now(pytz.timezone("Europe/London")),
+            #                     action_type=f"Added {customer.email}",
+            #                     keyevents=True,
+            #                 )
+            #                 customer.add_action(
+            #                     agent=User.objects.get(email=request.user),
+            #                     date_time=datetime.now(pytz.timezone("Europe/London")),
+            #                     created_at=datetime.now(pytz.timezone("Europe/London")),
+            #                     action_type="Email Received",
+            #                     text=subject,
+            #                 )
         return HttpResponse('Success')
     
