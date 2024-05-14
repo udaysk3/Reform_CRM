@@ -1612,7 +1612,7 @@ def get_mails(request):
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        # print('success', json.loads(request.body)["message"]["data"])
+        print('success', json.loads(request.body)["message"]["data"])
         base64_string =json.loads(request.body)["message"]["data"]
         base64_bytes = base64_string.encode("ascii") 
         sample_string_bytes = base64.b64decode(base64_bytes) 
