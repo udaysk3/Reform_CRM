@@ -1654,7 +1654,6 @@ def get_notifications(request):
 
                     if customer:
                         customer.add_action(
-                            agent=User.objects.get(email=request.user),
                             date_time=datetime.now(pytz.timezone("Europe/London")),
                             created_at=datetime.now(pytz.timezone("Europe/London")),
                             action_type="Email Received",
@@ -1665,14 +1664,12 @@ def get_notifications(request):
                             email=from_header,
                         )
                         customer.add_action(
-                            agent=User.objects.get(email=request.user),
                             date_time=datetime.now(pytz.timezone("Europe/London")),
                             created_at=datetime.now(pytz.timezone("Europe/London")),
                             action_type=f"Added {customer.email}",
                             keyevents=True,
                         )
                         customer.add_action(
-                            agent=User.objects.get(email=request.user),
                             date_time=datetime.now(pytz.timezone("Europe/London")),
                             created_at=datetime.now(pytz.timezone("Europe/London")),
                             action_type="Email Received",
