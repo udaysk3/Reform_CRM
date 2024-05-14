@@ -1561,7 +1561,13 @@ def get_body(payload):
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
-        
+        base64_string = json.loads(request.body)["message"]["data"]
+        base64_bytes = base64_string.encode("ascii")
+        sample_string_bytes = base64.b64decode(base64_bytes)
+        sample_string = sample_string_bytes.decode("ascii")
+        history_data = json.loads(sample_string)
+        historyId = history_data["historyId"]
+        userId = history_data["emailAddress"]
 
         creds = None
         if os.path.exists("static/token.json"):
