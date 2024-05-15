@@ -1599,12 +1599,12 @@ def get_notifications(request):
                 print(response)
                 if 'history' in response:
                     for history in response['history']:
-                        if 'messageAdded' in history:
+                        if 'messagesAdded' in history:
                             for message in history['messageAdded']:
                                 if 'message' in message:
                                     messageids['ids'].append(message['message']['id'])
                                     messageids['threadids'].append(message['message']['threadId'])
-                        if 'labelAdded' in history:
+                        if 'labelsAdded' in history:
                             for message in history['labelAdded']:
                                 if 'message' in message:
                                     messageids['ids'].append(message['message']['id'])
