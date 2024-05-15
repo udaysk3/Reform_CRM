@@ -1336,6 +1336,7 @@ def funding_route_detail(request, route_id):
 from django.http import JsonResponse
 from .models import Customers
 from user.models import User
+from googleapiclient.discovery import build
 
 def assign_agents(request):
     if request.method == "POST":
@@ -1592,6 +1593,8 @@ def get_notifications(request):
                 "ids": [],
                 "threadids": [],
             }
+            # Define the gmail variable
+            gmail = build('gmail', 'v1', credentials=creds)
 
             latest_history = HistoryId.objects.all().order_by('-created_at')
             if latest_history:
@@ -1603,6 +1606,7 @@ def get_notifications(request):
                     labelId="UNREAD",
                 ).execute()
                 print(response)
+
             
             HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
 
