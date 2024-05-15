@@ -1578,7 +1578,6 @@ def get_message(historyId):
         try:
             messageids = {
                 "ids": [],
-                "threadids": [],
             }
             historyId1 = historys[0].history_id
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
@@ -1587,16 +1586,9 @@ def get_message(historyId):
             if 'history' in response:
                 for history in response['history']:
                     if 'messagesAdded' in history:
-                        for message in history['messagesAdded']:
-                            messageids["ids"].append(message['message']['id'])
-                            messageids["threadids"].append(message['message']['threadId'])
-                    if 'lablesAdded' in history:
-                        for label in history['lablesAdded']:
-                            messageids["ids"].append(label['message']['id'])
-                            messageids["threadids"].append(label['message']['threadId'])
+                        messageids["ids"] = history['messagesAdded'][0]['message']['id']
             
             messageids["ids"] = list(set(messageids["ids"]))
-            messageids["threadids"] = list(set(messageids["threadids"]))
             for messageid in messageids["ids"]:
                 message = gmail.users().messages().get(userId='me', id=messageid).execute()
                 payload = message['payload']
