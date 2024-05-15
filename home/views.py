@@ -1610,9 +1610,7 @@ def get_notifications(request):
                                     messageids['ids'].append(message['message']['id'])
                                     messageids['threadids'].append(message['message']['threadId'])
 
-                # Remove duplicates
-                messageids['ids'] = list(dict.fromkeys(messageids['ids']))
-                messageids['threadids'] = list(dict.fromkeys(messageids['threadids']))
+                messageids['ids'] = list(set(messageids['ids']))
 
                 for messageid in messageids['ids']:
                     response = gmail.users().messages().get(userId='me', id=messageid).execute()
