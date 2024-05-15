@@ -1560,9 +1560,8 @@ def get_body(payload):
     return None
 
 def get_message(historyId):
-    latest_history = HistoryId.objects.all()
-    if latest_history:
-        latest_history = latest_history[0]
+    historys = HistoryId.objects.all()
+    if historys:
         if os.path.exists("static/token.json"):
             creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
         if not creds or not creds.valid:
@@ -1654,7 +1653,7 @@ def get_message(historyId):
         return HttpResponse(200)
     
     else:
-        latest_history = HistoryId.objects.create(historyId=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+        historys = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
     return HttpResponse(200)
         
 @csrf_exempt
