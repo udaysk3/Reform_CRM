@@ -1593,8 +1593,9 @@ def get_notifications(request):
                 "threadids": [],
             }
 
-            latest_history = HistoryId.objects.all().order_by('-created_at')[0]
+            latest_history = HistoryId.objects.all().order_by('-created_at')
             if latest_history:
+                latest_history = latest_history[0]
                 response = gmail.users().history().list(
                     userId='me', 
                     startHistoryId=latest_history.history_id, 
