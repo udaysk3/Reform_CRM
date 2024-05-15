@@ -1631,6 +1631,7 @@ def get_message(historyId):
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
                         action_type="Email Received",
+                        agent=User.objects.get(email='admin@gmail.com'),
                         text=f'Subject: {subject_header} \n Body: {body}',
                     )
                 else:
@@ -1642,12 +1643,14 @@ def get_message(historyId):
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
                         action_type=f"Added {customer.email}",
+                        agent=User.objects.get(email='admin@gmail.com'),
                         keyevents=True,
                     )
                     customer.add_action(
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
                         action_type="Email Received",
+                        agent=User.objects.get(email='admin@gmail.com'),
                         text=f'Subject: {subject_header} \n Body: {body}',
                     )
             
