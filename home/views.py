@@ -1587,7 +1587,7 @@ def get_message(historyId):
                 for history in response['history']:
                     if 'messagesAdded' in history:
                         messageids["ids"].append(history['messagesAdded'][0]['message']['id'])
-            print('messageids', messageids)         
+            
             message = gmail.users().messages().get(userId='me', id=messageids["ids"][0]).execute()
             payload = message['payload']
             headers = payload['headers']
@@ -1643,8 +1643,8 @@ def get_message(historyId):
                     agent=User.objects.get(email='admin@gmail.com'),
                     text=f'Subject: {subject_header} \n Body: {body}',
                 )
-            
-            
+        
+        
             history = HistoryId.objects.create(history_id=response["history"], created_at=datetime.now(pytz.timezone("Europe/London")))
             
         except HttpError as error:

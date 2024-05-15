@@ -1076,12 +1076,13 @@ table {
   window.addEventListener('DOMContentLoaded', function () {
     const postcode = '{{ customer.postcode }}';
     if (postcode) {
-      fetch(`https://api.postcodes.io/postcodes/${postcode}`)
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
         .then(response => response.json())
         .then(data => {
           if (data) {
             const googlemap = document.querySelector('.googlemap');
-            const { longitude, latitude } = data.result;
+            const longitude = data.results[0].geometry.location.lng;
+            const latitude = data.results[0].geometry.location.lat;
             googlemap.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
             
           }

@@ -458,7 +458,11 @@
         .then(response => response.json())
         .then(data => {
           if (data) {
-            const { admin_district, pfa, country } = data.result;
+
+            console.log(data)
+            const admin_district = data.results[0].address_components[2].long_name;
+            const pfa = data.results[0].address_components[3].long_name;
+            const country = data.results[0].address_components[4].long_name;
             document.forms["editCustomerForm"]["city"].value = admin_district;
             document.forms["editCustomerForm"]["county"].value = pfa;
             document.forms["editCustomerForm"]["country"].value = country;
@@ -802,7 +806,10 @@ const form = document.querySelector('#addCustomerForm');
         .then(response => response.json())
         .then(data => {
           if (data) {
-            const { admin_district, pfa, country } = data.result;
+            console.log(data)
+            const admin_district = data.results[0].address_components[2].long_name;
+            const pfa = data.results[0].address_components[3].long_name;
+            const country = data.results[0].address_components[4].long_name;
             document.forms["addCustomerForm"]["city"].value = admin_district;
             document.forms["addCustomerForm"]["county"].value = pfa;
             document.forms["addCustomerForm"]["country"].value = country;
