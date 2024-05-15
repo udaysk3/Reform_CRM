@@ -1589,7 +1589,7 @@ def get_message(historyId):
                         messageids["ids"].append(history['messagesAdded'][0]['message']['id'])
             
             messageids["ids"] = list(set(messageids["ids"]))
-            print(messageids["ids"])
+            print(messageids["ids"][0])
             for messageid in messageids["ids"]:
                 
                 message = gmail.users().messages().get(userId='me', id=messageid).execute()
