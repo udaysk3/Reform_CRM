@@ -454,7 +454,7 @@
     const postcode = document.forms["editCustomerForm"]["postcode"].value;
     if (postcode) {
       editAddressBtn.disabled = true;
-      fetch(`https://api.postcodes.io/postcodes/${postcode}`)
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
         .then(response => response.json())
         .then(data => {
           if (data) {
@@ -798,7 +798,7 @@ const form = document.querySelector('#addCustomerForm');
     const postcode = document.forms["addCustomerForm"]["postcode"].value;
     if (postcode) {
       findAddressBtn.disable = true;
-      fetch(`https://api.postcodes.io/postcodes/${postcode}`)
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
         .then(response => response.json())
         .then(data => {
           if (data) {
