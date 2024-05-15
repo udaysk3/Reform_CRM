@@ -1592,14 +1592,11 @@ def get_notifications(request):
             # Get the latest history ID if it exists
             latest_history = HistoryId.objects.order_by('-created_at').first()
             historyId1 = latest_history.history_id if latest_history else None
-            if latest_history:
-                print(f"Latest history ID: {latest_history.history_id}")
-                print(f"history ID: {historyId}")
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
 
             if historyId1:
                 response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes=["messageAdded", "labelAdded"], labelId="UNREAD").execute()
-
+                print(response)
                 if 'history' in response:
                     for history in response['history']:
                         if 'messageAdded' in history:
