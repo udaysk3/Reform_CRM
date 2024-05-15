@@ -1559,6 +1559,43 @@ def get_body(payload):
             return payload['body']['data']
     return None
 
+def get_message(historyId):
+    latest_history = HistoryId.objects.all()
+    if latest_history:
+        latest_history = latest_history[0]
+        if os.path.exists("static/token.json"):
+            creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
+        if not creds or not creds.valid:
+          if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+          else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                "../credentials.json", SCOPES
+            )
+            creds = flow.run_local_server(port=3000)
+          with open("static/token.json", "w") as token:
+            token.write(creds.to_json())
+
+        try:
+            messageids = {
+                "ids": [],
+                "threadids": [],
+            }
+            historyId1 = historys[0].history_id
+            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
+            response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
+            print('response', response)
+            history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+            
+        except HttpError as error:
+            # TODO(developer) - Handle errors from gmail API.
+            print(f"An error occurred: {error}")
+        return HttpResponse(200)
+    
+    else:
+        latest_history = HistoryId.objects.create(historyId=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+    return HttpResponse(200)
+        
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
@@ -1569,40 +1606,6 @@ def get_notifications(request):
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
-        print(request.body, historyId)
-    return HttpResponse('Success')
-        # if os.path.exists("static/token.json"):
-        #     creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
-        # if not creds or not creds.valid:
-        #   if creds and creds.expired and creds.refresh_token:
-        #     creds.refresh(Request())
-        #   else:
-        #     flow = InstalledAppFlow.from_client_secrets_file(
-        #         "../credentials.json", SCOPES
-        #     )
-        #     creds = flow.run_local_server(port=3000)
-        #   with open("static/token.json", "w") as token:
-        #     token.write(creds.to_json())
-
-        # try:
-        #     messageids = {
-        #         "ids": [],
-        #         "threadids": [],
-        #     }
-        #     historys = HistoryId.objects.all().order_by('-created_at')
-        #     if historys.exists():
-        #         historyId1 = historys[0].history_id
-        #         gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-        #         response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
-        #         # print('response', response)
-        #         history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
-        #     else:
-        #         history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
-                
-                
-
-        # except HttpError as error:
-        #     # TODO(developer) - Handle errors from gmail API.
-        #     print(f"An error occurred: {error}")
-        # return HttpResponse('Success')
-    
+        # print(request.body, historyId)
+        get_message(historyId)
+    return HttpResponse(200)
