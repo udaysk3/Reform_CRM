@@ -1584,7 +1584,7 @@ def get_message(historyId):
             historyId1 = historys[0].history_id
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
             response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
-            # print('response', response)
+            print('response', response)
             if 'history' in response:
                 for history in response['history']:
                     if 'messagesAdded' in history:
