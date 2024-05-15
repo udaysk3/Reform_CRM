@@ -1647,7 +1647,7 @@ def get_message(historyId):
                     )
             
             
-            history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
+            history = HistoryId.objects.create(history_id=response["historyId"], created_at=datetime.now(pytz.timezone("Europe/London")))
             
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
