@@ -1568,7 +1568,7 @@ def get_notifications(request):
         historyId = history_data["historyId"]
 
         # Check if the received historyId matches any in the database
-        if HistoryId.objects.filter(history_id=historyId).exists():
+        if HistoryId.objects.all().filter(history_id=historyId).exists():
             print("Received historyId already exists in the database. Exiting to prevent duplicate processing.")
             return redirect('app:customer')
 
@@ -1593,111 +1593,16 @@ def get_notifications(request):
                 "threadids": [],
             }
 
-            # Get the latest history ID if it exists
-            latest_history = HistoryId.objects.order_by('-created_at').first()
-            historyId1 = latest_history.history_id if latest_history else None
-            gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-
-            page_token = None
-            while True:
+            latest_history = HistoryId.objects.all().order_by('-created_at')[0]
+            if latest_history:
                 response = gmail.users().history().list(
                     userId='me', 
-                    startHistoryId=historyId1, 
+                    startHistoryId=latest_history.history_id, 
                     historyTypes=["messageAdded", "labelAdded"], 
                     labelId="UNREAD",
-                    pageToken=page_token
                 ).execute()
-
-                if 'history' in response:
-                    for history in response['history']:
-                        if 'messagesAdded' in history:
-                            for message in history['messagesAdded']:
-                                if 'message' in message:
-                                    messageids['ids'].append(message['message']['id'])
-                                    messageids['threadids'].append(message['message']['threadId'])
-                        if 'labelsAdded' in history:
-                            for message in history['labelsAdded']:
-                                if 'message' in message:
-                                    messageids['ids'].append(message['message']['id'])
-                                    messageids['threadids'].append(message['message']['threadId'])
-
-                page_token = response.get('nextPageToken')
-                if not page_token:
-                    break
-
-            messageids['ids'] = list(set(messageids['ids']))
-
-            for messageid in messageids['ids']:
-                response = gmail.users().messages().get(userId='me', id=messageid).execute()
-
-                from_header = ""
-                to_header = ""
-                date_header = ""
-                subject_header = ""
-
-                if 'payload' in response and 'headers' in response['payload']:
-                    for header in response['payload']['headers']:
-                        if header['name'] == 'From':
-                            from_header = header['value']
-                        elif header['name'] == 'To':
-                            to_header = header['value']
-                        elif header['name'] == 'Date':
-                            date_header = header['value']
-                        elif header['name'] == 'Subject':
-                            subject_header = header['value']
-
-                raw_body = get_body(response['payload']) if 'payload' in response else None
-                if raw_body:
-                    try:
-                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
-                    except Exception as e:
-                        body = f"Error decoding body: {e}"
-                else:
-                    body = "No body found"
-
-                print("From:", from_header)
-                print("To:", to_header)
-                # print("Date:", date_header)
-                # print("Subject:", subject_header)
-                # print("Body:", body)
-
-                if '<' in to_header:
-                    to_header = to_header.split('<')[1].split('>')[0]
-                if '<' in from_header:
-                    from_header = from_header.split('<')[1].split('>')[0]
-
-                customers = Customers.objects.all()
-                customer = None
-                for c_customer in customers:
-                    if c_customer.email == from_header:
-                        customer = c_customer
-                        break
-
-                if customer:
-                    customer.add_action(
-                        date_time=datetime.now(pytz.timezone("Europe/London")),
-                        created_at=datetime.now(pytz.timezone("Europe/London")),
-                        action_type="Email Received",
-                        text=f'Subject: {subject_header} \n Body: {body}',
-                    )
-                else:
-                    customer = Customers.objects.create(
-                        email=from_header,
-                    )
-                    customer.add_action(
-                        date_time=datetime.now(pytz.timezone("Europe/London")),
-                        created_at=datetime.now(pytz.timezone("Europe/London")),
-                        action_type=f"Added {customer.email}",
-                        keyevents=True,
-                    )
-                    customer.add_action(
-                        date_time=datetime.now(pytz.timezone("Europe/London")),
-                        created_at=datetime.now(pytz.timezone("Europe/London")),
-                        action_type="Email Received",
-                        text=f'Subject: {subject_header} \n Body: {body}',
-                    )
-
-            # Save the new history ID to the database
+                print(response)
+            
             HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
 
         except HttpError as error:
