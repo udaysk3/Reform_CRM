@@ -1629,7 +1629,7 @@ def get_message(historyId):
                     )
                 else:
                     customer = Customers.objects.create(
-                        first_name=from_header.split('@')[0]
+                        first_name=from_header.split('@')[0],
                         email=from_header,
                     )
                     customer.add_action(
