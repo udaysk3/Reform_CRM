@@ -1586,7 +1586,7 @@ def get_message(historyId):
             if 'history' in response:
                 for history in response['history']:
                     if 'messagesAdded' in history:
-                        messageids["ids"] = history['messagesAdded'][0]['message']['id']
+                        messageids["ids"].append(history['messagesAdded'][0]['message']['id'])
             
             messageids["ids"] = list(set(messageids["ids"]))
             for messageid in messageids["ids"]:
