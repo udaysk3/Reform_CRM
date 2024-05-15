@@ -1619,7 +1619,7 @@ def get_message(historyId):
                 for c_customer in customers:
                     if c_customer.email == from_header:
                         customer = c_customer
-                        break
+                        continue
                 if customer:
                     actions = customer.get_created_at_action_history()
                     for action in actions:
