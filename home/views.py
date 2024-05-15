@@ -1569,7 +1569,7 @@ def get_notifications(request):
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
-        print(request.body, historyId, userId)
+        print(request.body, historyId)
     return HttpResponse('Success')
         # if os.path.exists("static/token.json"):
         #     creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
