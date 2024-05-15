@@ -69,7 +69,7 @@ def main():
     request = {
         'labelIds': ['UNREAD'],
         'topicName': TOPIC_NAME,
-        'labelFilterBehavior': 'INCLUDE'
+        'labelFilterAction': 'INCLUDE'
     }
 
     # Execute the watch request

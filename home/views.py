@@ -1568,11 +1568,6 @@ def get_notifications(request):
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
 
-        # Check if the received historyId matches any in the database
-        if HistoryId.objects.all().filter(history_id=historyId).exists():
-            print("Received historyId already exists in the database. Exiting to prevent duplicate processing.")
-            return redirect('app:customer')
-
         creds = None
         if os.path.exists("static/token.json"):
             creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
