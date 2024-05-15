@@ -1621,6 +1621,10 @@ def get_message(historyId):
                         customer = c_customer
                         break
                 if customer:
+                    actions = customer.get_created_at_action_history()
+                    for action in actions:
+                        if action.text == f'Subject: {subject_header} \n Body: {body}':
+                            return HttpResponse(200)
                     customer.add_action(
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
