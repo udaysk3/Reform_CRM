@@ -1609,7 +1609,7 @@ def get_message(historyId):
                         from_header = header['value']
                     if header['name'] == 'Subject':
                         subject_header = header['value']
-                raw_body = get_body(response['payload']) if 'payload' in response else None
+                raw_body = get_body(message['payload']) if 'payload' in message else None
                 if raw_body:
                     try:
                         body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
