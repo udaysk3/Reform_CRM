@@ -1609,7 +1609,14 @@ def get_message(historyId):
                         from_header = header['value']
                     if header['name'] == 'Subject':
                         subject_header = header['value']
-                body = get_body(payload)
+                raw_body = get_body(response['payload']) if 'payload' in response else None
+                if raw_body:
+                    try:
+                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                    except Exception as e:
+                        body = f"Error decoding body: {e}"
+                else:
+                    body = "No body found"
                 print(from_header, subject_header, body)
                 if '<' in from_header:
                     from_header = from_header.split('<')[1].split('>')[0]
