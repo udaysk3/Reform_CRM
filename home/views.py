@@ -1557,7 +1557,6 @@ def get_body(payload):
         if payload['mimeType'] == 'text/plain':
             return payload['body']['data']
     return None
-
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":
@@ -1567,6 +1566,11 @@ def get_notifications(request):
         sample_string = sample_string_bytes.decode("ascii")
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
+
+        # Check if the received historyId matches any in the database
+        if HistoryId.objects.filter(history_id=historyId).exists():
+            print("Received historyId already exists in the database. Exiting to prevent duplicate processing.")
+            return redirect('app:customer')
 
         creds = None
         if os.path.exists("static/token.json"):
@@ -1594,9 +1598,16 @@ def get_notifications(request):
             historyId1 = latest_history.history_id if latest_history else None
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
 
-            if historyId1:
-                response = gmail.users().history().list(userId='me', startHistoryId=historyId1, historyTypes=["messageAdded", "labelAdded"], labelId="UNREAD").execute()
-                print(response)
+            page_token = None
+            while True:
+                response = gmail.users().history().list(
+                    userId='me', 
+                    startHistoryId=historyId1, 
+                    historyTypes=["messageAdded", "labelAdded"], 
+                    labelId="UNREAD",
+                    pageToken=page_token
+                ).execute()
+
                 if 'history' in response:
                     for history in response['history']:
                         if 'messagesAdded' in history:
@@ -1610,80 +1621,84 @@ def get_notifications(request):
                                     messageids['ids'].append(message['message']['id'])
                                     messageids['threadids'].append(message['message']['threadId'])
 
-                messageids['ids'] = list(set(messageids['ids']))
+                page_token = response.get('nextPageToken')
+                if not page_token:
+                    break
 
-                for messageid in messageids['ids']:
-                    response = gmail.users().messages().get(userId='me', id=messageid).execute()
+            messageids['ids'] = list(set(messageids['ids']))
 
-                    from_header = ""
-                    to_header = ""
-                    date_header = ""
-                    subject_header = ""
+            for messageid in messageids['ids']:
+                response = gmail.users().messages().get(userId='me', id=messageid).execute()
 
-                    if 'payload' in response and 'headers' in response['payload']:
-                        for header in response['payload']['headers']:
-                            if header['name'] == 'From':
-                                from_header = header['value']
-                            elif header['name'] == 'To':
-                                to_header = header['value']
-                            elif header['name'] == 'Date':
-                                date_header = header['value']
-                            elif header['name'] == 'Subject':
-                                subject_header = header['value']
+                from_header = ""
+                to_header = ""
+                date_header = ""
+                subject_header = ""
 
-                    raw_body = get_body(response['payload']) if 'payload' in response else None
-                    if raw_body:
-                        try:
-                            body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
-                        except Exception as e:
-                            body = f"Error decoding body: {e}"
-                    else:
-                        body = "No body found"
+                if 'payload' in response and 'headers' in response['payload']:
+                    for header in response['payload']['headers']:
+                        if header['name'] == 'From':
+                            from_header = header['value']
+                        elif header['name'] == 'To':
+                            to_header = header['value']
+                        elif header['name'] == 'Date':
+                            date_header = header['value']
+                        elif header['name'] == 'Subject':
+                            subject_header = header['value']
 
-                    print("From:", from_header)
-                    print("To:", to_header)
-                    # print("Date:", date_header)
-                    # print("Subject:", subject_header)
-                    # print("Body:", body)
+                raw_body = get_body(response['payload']) if 'payload' in response else None
+                if raw_body:
+                    try:
+                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                    except Exception as e:
+                        body = f"Error decoding body: {e}"
+                else:
+                    body = "No body found"
 
-                    if '<' in to_header:
-                        to_header = to_header.split('<')[1].split('>')[0]
-                    if '<' in from_header:
-                        from_header = from_header.split('<')[1].split('>')[0]
+                print("From:", from_header)
+                print("To:", to_header)
+                # print("Date:", date_header)
+                # print("Subject:", subject_header)
+                # print("Body:", body)
 
-                    customers = Customers.objects.all()
-                    customer = None
-                    for c_customer in customers:
-                        if c_customer.email == from_header:
-                            customer = c_customer
-                            break
+                if '<' in to_header:
+                    to_header = to_header.split('<')[1].split('>')[0]
+                if '<' in from_header:
+                    from_header = from_header.split('<')[1].split('>')[0]
 
-                    if customer:
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type="Email Received",
-                            text=f'Subject: {subject_header} \n Body: {body}',
-                        )
-                    else:
-                        customer = Customers.objects.create(
-                            email=from_header,
-                        )
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type=f"Added {customer.email}",
-                            keyevents=True,
-                        )
-                        customer.add_action(
-                            date_time=datetime.now(pytz.timezone("Europe/London")),
-                            created_at=datetime.now(pytz.timezone("Europe/London")),
-                            action_type="Email Received",
-                            text=f'Subject: {subject_header} \n Body: {body}',
-                        )
+                customers = Customers.objects.all()
+                customer = None
+                for c_customer in customers:
+                    if c_customer.email == from_header:
+                        customer = c_customer
+                        break
 
+                if customer:
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
+                else:
+                    customer = Customers.objects.create(
+                        email=from_header,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type=f"Added {customer.email}",
+                        keyevents=True,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
+
+            # Save the new history ID to the database
             HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
-            
 
         except HttpError as error:
             print(f"An error occurred: {error}")
