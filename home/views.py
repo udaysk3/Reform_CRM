@@ -1585,6 +1585,32 @@ def get_message(historyId):
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
             response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="INBOX").execute()
             print('response', response)
+            if 'history' in response:
+                for history in response['history']:
+                    if 'messagesAdded' in history:
+                        for message in history['messagesAdded']:
+                            messageids["ids"].append(message['message']['id'])
+                            messageids["threadids"].append(message['message']['threadId'])
+                    if 'lablesAdded' in history:
+                        for label in history['lablesAdded']:
+                            messageids["ids"].append(label['message']['id'])
+                            messageids["threadids"].append(label['message']['threadId'])
+            
+            messageids["ids"] = list(set(messageids["ids"]))
+            messageids["threadids"] = list(set(messageids["threadids"]))
+            for messageid in messageids["ids"]:
+                message = gmail.users().messages().get(userId='me', id=messageid).execute()
+                payload = message['payload']
+                headers = payload['headers']
+                for header in headers:
+                    if header['name'] == 'From':
+                        sender = header['value']
+                    if header['name'] == 'Subject':
+                        subject = header['value']
+                body = get_body(payload)
+                print(sender, subject, body)
+            
+            
             history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
             
         except HttpError as error:
