@@ -1602,13 +1602,48 @@ def get_message(historyId):
                 message = gmail.users().messages().get(userId='me', id=messageid).execute()
                 payload = message['payload']
                 headers = payload['headers']
+                from_header=''
+                subject_header=''
+                body=''
                 for header in headers:
                     if header['name'] == 'From':
-                        sender = header['value']
+                        from_header = header['value']
                     if header['name'] == 'Subject':
-                        subject = header['value']
+                        subject_header = header['value']
                 body = get_body(payload)
-                print(sender, subject, body)
+                print(from_header, subject_header, body)
+                if '<' in from_header:
+                    from_header = from_header.split('<')[1].split('>')[0]
+                customers = Customers.objects.all()
+                customer = None
+                for c_customer in customers:
+                    if c_customer.email == from_header:
+                        customer = c_customer
+                        break
+                if customer:
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
+                else:
+                    customer = Customers.objects.create(
+                        first_name=from_header.split('@')[0]
+                        email=from_header,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type=f"Added {customer.email}",
+                        keyevents=True,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
             
             
             history = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
