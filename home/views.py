@@ -1604,12 +1604,14 @@ def get_notifications(request):
                     for history in response['history']:
                         if 'messageAdded' in history:
                             for message in history['messageAdded']:
-                                messageids['ids'].append(message['id'])
-                                messageids['threadids'].append(message['threadId'])
+                                if 'message' in message:
+                                    messageids['ids'].append(message['message']['id'])
+                                    messageids['threadids'].append(message['message']['threadId'])
                         if 'labelAdded' in history:
                             for message in history['labelAdded']:
-                                messageids['ids'].append(message['id'])
-                                messageids['threadids'].append(message['threadId'])
+                                if 'message' in message:
+                                    messageids['ids'].append(message['message']['id'])
+                                    messageids['threadids'].append(message['message']['threadId'])
 
                 # Remove duplicates
                 messageids['ids'] = list(dict.fromkeys(messageids['ids']))
