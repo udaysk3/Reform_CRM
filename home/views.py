@@ -1588,63 +1588,65 @@ def get_message(historyId):
                     if 'messagesAdded' in history:
                         messageids["ids"].append(history['messagesAdded'][0]['message']['id'])
             
-            message = gmail.users().messages().get(userId='me', id=messageids["ids"][0]).execute()
-            payload = message['payload']
-            headers = payload['headers']
-            from_header=''
-            subject_header=''
-            body=''
-            for header in headers:
-                if header['name'] == 'From':
-                    from_header = header['value']
-                if header['name'] == 'Subject':
-                    subject_header = header['value']
-            raw_body = get_body(message['payload']) if 'payload' in message else None
-            if raw_body:
-                try:
-                    body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
-                except Exception as e:
-                    body = f"Error decoding body: {e}"
-            else:
-                body = "No body found"
-            print(from_header, subject_header, body)
-            if '<' in from_header:
-                from_header = from_header.split('<')[1].split('>')[0]
-            customers = Customers.objects.all()
-            customer = None
-            for c_customer in customers:
-                if c_customer.email == from_header:
-                    customer = c_customer
-                    break
-            if customer:
-                customer.add_action(
-                    date_time=datetime.now(pytz.timezone("Europe/London")),
-                    created_at=datetime.now(pytz.timezone("Europe/London")),
-                    action_type="Email Received",
-                    agent=User.objects.get(email='admin@gmail.com'),
-                    text=f'Subject: {subject_header} \n Body: {body}',
-                )
-            else:
-                customer = Customers.objects.create(
-                    first_name=from_header.split('@')[0],
-                    email=from_header,
-                )
-                customer.add_action(
-                    date_time=datetime.now(pytz.timezone("Europe/London")),
-                    created_at=datetime.now(pytz.timezone("Europe/London")),
-                    action_type=f"Added {customer.email}",
-                    agent=User.objects.get(email='admin@gmail.com'),
-                    keyevents=True,
-                )
-                customer.add_action(
-                    date_time=datetime.now(pytz.timezone("Europe/London")),
-                    created_at=datetime.now(pytz.timezone("Europe/London")),
-                    action_type="Email Received",
-                    agent=User.objects.get(email='admin@gmail.com'),
-                    text=f'Subject: {subject_header} \n Body: {body}',
-                )
-        
-        
+            messageids["ids"] = list(set(messageids["ids"]))
+            for messageid in messageids["ids"]:
+                message = gmail.users().messages().get(userId='me', id=messageid).execute()
+                payload = message['payload']
+                headers = payload['headers']
+                from_header=''
+                subject_header=''
+                body=''
+                for header in headers:
+                    if header['name'] == 'From':
+                        from_header = header['value']
+                    if header['name'] == 'Subject':
+                        subject_header = header['value']
+                raw_body = get_body(message['payload']) if 'payload' in message else None
+                if raw_body:
+                    try:
+                        body = base64.urlsafe_b64decode(raw_body).decode('utf-8')
+                    except Exception as e:
+                        body = f"Error decoding body: {e}"
+                else:
+                    body = "No body found"
+                print(from_header, subject_header, body)
+                if '<' in from_header:
+                    from_header = from_header.split('<')[1].split('>')[0]
+                customers = Customers.objects.all()
+                customer = None
+                for c_customer in customers:
+                    if c_customer.email == from_header:
+                        customer = c_customer
+                        break
+                if customer:
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        agent=User.objects.get(email='admin@gmail.com'),
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
+                else:
+                    customer = Customers.objects.create(
+                        first_name=from_header.split('@')[0],
+                        email=from_header,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type=f"Added {customer.email}",
+                        agent=User.objects.get(email='admin@gmail.com'),
+                        keyevents=True,
+                    )
+                    customer.add_action(
+                        date_time=datetime.now(pytz.timezone("Europe/London")),
+                        created_at=datetime.now(pytz.timezone("Europe/London")),
+                        action_type="Email Received",
+                        agent=User.objects.get(email='admin@gmail.com'),
+                        text=f'Subject: {subject_header} \n Body: {body}',
+                    )
+            
+            
             history = HistoryId.objects.create(history_id=response["history"], created_at=datetime.now(pytz.timezone("Europe/London")))
             
         except HttpError as error:
