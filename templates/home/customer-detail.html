@@ -709,10 +709,8 @@ table {
                   id="action_submit_form"
                   method="post"
                   name="action_submit_form"
-                  onSubmit="DoSubmit();"
                   action="{% url 'app:close_action_submit' customer.id %}"
-                  class="col"
-                  onsubmit-"SubmitClose();"
+                  class="col close_form"
                 >
                   {% csrf_token %}
                   
@@ -807,7 +805,7 @@ table {
                           >
                             Close
                           </button>
-                          <button class="btn btn-primary" type="submit">
+                          <button class="btn btn-primary" onclick="SubmitClose(this);" type="button">
                             Submit
                           </button>
                         </div>
@@ -1131,8 +1129,8 @@ table {
 <script>
 
   function SubmitClose(e){
-    const reason = document.getElementById('c_reason').value;
-    const talked_customer = document.getElementById('c_talked_customer').value;
+    const reason = document.querySelector('.c_reason').value;
+    const talked_customer = document.querySelector('.c_talked_customer').value;
     if (reason == 'nan') {
       alert('The reason field is required.');
       return false;
@@ -1141,6 +1139,7 @@ table {
       alert('The talked customer field is required.');
       return false;
     }
+    document.querySelector('.close_form').submit();
   }
 
 
