@@ -216,7 +216,13 @@ table {
           </svg></a>
   </div>
   <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Stage</b> - </span> <div class="mt-1">Stage1</div>
+    <span class="col"> <b>Stage</b> - </span> <div class="mt-1">
+      {% if customer.closed %}
+      Closed
+      {% else %}
+      Stage1
+      {% endif %}
+    </div>
   </div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Campaign</b> - </span>
@@ -738,18 +744,35 @@ table {
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Close</h1>
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                            {% if customer.closed %}
+                            Reopen Customer
+                            {% else %}
+                            Close Customer
+                            {% endif %}
+                          </h1>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body row">
                           <div class="col">
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Reason</label>
-                            <select id="select" class="form-select"  name="reason">
-                              
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">
+                              {% if customer.closed %}
+                              Assign to
+                              {% else %}
+                              Reason
+                              {% endif %}
+                            </label>
+                            <select id="select" class="c_reason form-select"  name="reason">
+                              {% if customer.closed %}
+                              {% for agent in agents %}
+                              <option value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
+                              {% endfor %}
+                              {% else %}
                               <option value="nan"> Select a reason </option>
                               {% for reason in reasons %}
                               <option value="{{ reason.reason }}">{{ reason.name }}</option>
                               {% endfor %}
+                              {% endif %}
                             </select>
 
                           
@@ -757,7 +780,8 @@ table {
                           </div>
                           <div class="col">
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
-                            <select id="select" class="form-select"  name="talked_customer">
+                            <select id="select" class="c_talked_customer form-select"  name="talked_customer">
+                              <option value="nan">Select a Customer</option>
                               <option value="None">None</option>
                               <option
                               {% if customer.primary_customer %}
@@ -867,6 +891,9 @@ table {
                           {% endfor %}
                       </ul>
                       {% endfor %}
+                      {% if customer.imported %}
+                        <li> <b>{{ customer.created_at }}</b> - {{ customer.house_name }} - {{ customer.postcode }} - Imported/Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }} </li>
+                      {% endif %}
                     </ul>
                   </div>
                 </div>
@@ -1107,6 +1134,19 @@ table {
       crossorigin="anonymous"
     ></script>
 <script>
+
+  function SubmitClose(){
+    const reason = document.getElementById('c_reason').value;
+    const talked_customer = document.getElementById('c_talked_customer').value;
+    if (reason == 'nan') {
+      alert('The reason field is required.');
+      return false;
+    }
+    if (talked_customer == 'nan') {
+      alert('The talked customer field is required.');
+      return false;
+    }
+  }
 
 
   document.getElementById('assigned_to').addEventListener('click',()=>{

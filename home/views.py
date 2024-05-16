@@ -54,6 +54,7 @@ def dashboard(request):
     a_customers = (
         Customers.objects.all()
         .annotate(earliest_action_date=Max("action__date_time"))
+        .filter(closed=False)
         .filter(parent_customer=None)
         .order_by("earliest_action_date")
     )
@@ -63,6 +64,7 @@ def dashboard(request):
         .filter(assigned_to=user)
         .annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
+        .filter(closed=False)
         .order_by("earliest_action_date")
     )
 
@@ -789,15 +791,35 @@ def close_action_submit(request, customer_id):
         action_type = ''
         c_text = ''
         closed = False
+        
+        c_text = f'{reason} - {text}'
 
-        if reason != 'nan':
-            c_text = reason
-        else:
+        if reason == 'nan':
             c_text = text
+        
+        if text.trim() == '':
+            c_text = reason
+            
+        if customer.closed:
+            c_text = text
+        
 
         if customer.closed:
             action_type = f"Reopened"
             closed = False
+            try:
+                customer = Customers.objects.get(pk=customer_id)
+                customer.assigned_to =  User.objects.get(pk=reason)
+                customer.save()
+                customer.add_action(
+                    agent=User.objects.get(email=request.user),
+                    date_time=datetime.now(pytz.timezone("Europe/London")),
+                    created_at=datetime.now(pytz.timezone("Europe/London")),
+                    action_type="Assigned to Agent",
+                )
+            except Exception as e:
+                messages.error(request, f"Error assigning customer: {e}")
+                return HttpResponseRedirect("/customer-detail/" + str(customer_id))
         else:
             action_type = f"Closed"
             closed = True
@@ -944,6 +966,7 @@ def import_customers_view(request):
             district = None
             customer_data = {}
             for i, column in enumerate(excel_columns):
+                history[excel_columns[i]] = str(row[i])
                 if column_mappings[i] == "history":
                     history[excel_columns[i]] = str(row[i])
                 elif column_mappings[i] == "last_name":
@@ -990,6 +1013,7 @@ def import_customers_view(request):
                 client=Campaign.objects.get(id=campaign).client,
                 agent=User.objects.get(email=request.user),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
+                imported=True,
             )
             customer.primary_customer = True
 

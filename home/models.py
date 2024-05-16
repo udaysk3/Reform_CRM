@@ -29,6 +29,7 @@ class Customers(models.Model):
     stage_values = models.JSONField(blank= True, null=True)
     council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
     closed = models.BooleanField(default=False)
+    imported = models.BooleanField(default=False)
 
 
     def add_action(
