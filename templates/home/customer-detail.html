@@ -712,6 +712,7 @@ table {
                   onSubmit="DoSubmit();"
                   action="{% url 'app:close_action_submit' customer.id %}"
                   class="col"
+                  onsubmit-"SubmitClose();"
                 >
                   {% csrf_token %}
                   
@@ -1129,7 +1130,7 @@ table {
     ></script>
 <script>
 
-  function SubmitClose(){
+  function SubmitClose(e){
     const reason = document.getElementById('c_reason').value;
     const talked_customer = document.getElementById('c_talked_customer').value;
     if (reason == 'nan') {
