@@ -797,7 +797,7 @@ def close_action_submit(request, customer_id):
         if reason == 'nan':
             c_text = text
         
-        if text.trim() == '':
+        if text == '':
             c_text = reason
             
         if customer.closed:
