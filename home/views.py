@@ -1366,40 +1366,73 @@ def assign_agents(request):
     if request.method == "POST":
      try:
         # Parse customers and agents from the POST request
-        print(request.POST.get("agents"))
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
         customers = request.POST.get("customers")
-        if customers == "All Unassigned Customers":
+        customers = list(customers.split(','))
+        if "All Unassigned Customers" in customers or " All Unassigned Customers" in customers:
+            print(customers)
+            if "All Unassigned Customers" in customers:
+                customers.remove("All Unassigned Customers")
+            else:
+                customers.remove(" All Unassigned Customers")
             customer_ids = Customers.objects.filter(assigned_to=None).values_list('id', flat=True)
-        else:
             # Get the agent ID from the selected customers option
             agent_id = int(customers.split(' - ')[-1])
             # Fetch customers assigned to this agent
             customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
             
-        num_customers = len(customer_ids)
-        num_agents = len(agent_ids)
-        customers_per_agent = num_customers // num_agents
-        extra_customers = num_customers % num_agents
-        
-        # Assign customers to agents
-        agent_index = 0
-        for agent_id in agent_ids:
-            agent = User.objects.get(pk=agent_id)
+            num_customers = len(customer_ids)
+            num_agents = len(agent_ids)
+            customers_per_agent = num_customers // num_agents
+            extra_customers = num_customers % num_agents
             
-            # Determine the number of customers to assign to this agent
-            if extra_customers > 0:
-                num_customers_for_agent = customers_per_agent + 1
-                extra_customers -= 1
-            else:
-                num_customers_for_agent = customers_per_agent
+            # Assign customers to agents
+            agent_index = 0
+            for agent_id in agent_ids:
+                agent = User.objects.get(pk=agent_id)
+                
+                # Determine the number of customers to assign to this agent
+                if extra_customers > 0:
+                    num_customers_for_agent = customers_per_agent + 1
+                    extra_customers -= 1
+                else:
+                    num_customers_for_agent = customers_per_agent
+                
+                # Assign customers to this agent
+                assigned_customers = customer_ids[:num_customers_for_agent]
+                Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
+                customer_ids = customer_ids[num_customers_for_agent:]
+                
+                agent_index += 1
+        if customers != []:
+            # Get the agent ID from the selected customers option
+            agent_id = int(customers.split(' - ')[-1])
+            # Fetch customers assigned to this agent
+            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
             
-            # Assign customers to this agent
-            assigned_customers = customer_ids[:num_customers_for_agent]
-            Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
-            customer_ids = customer_ids[num_customers_for_agent:]
-            
-            agent_index += 1
+            num_customers = len(customer_ids)
+            num_agents = len(agent_ids)
+            customers_per_agent = num_customers // num_agents
+            extra_customers = num_customers % num_agents
+
+            # Assign customers to agents
+            agent_index = 0
+            for agent_id in agent_ids:
+                agent = User.objects.get(pk=agent_id)
+
+                # Determine the number of customers to assign to this agent
+                if extra_customers > 0:
+                    num_customers_for_agent = customers_per_agent + 1
+                    extra_customers -= 1
+                else:
+                    num_customers_for_agent = customers_per_agent
+
+                # Assign customers to this agent
+                assigned_customers = customer_ids[:num_customers_for_agent]
+                Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
+                customer_ids = customer_ids[num_customers_for_agent:]
+
+                agent_index += 1
 
 
         
@@ -1583,7 +1616,7 @@ def get_body(payload):
             return payload['body']['data']
     return None
 
-def get_message(historyId):
+def get_message(historyId,userId):
     historys = HistoryId.objects.all()
     if historys:
         if os.path.exists("static/token.json"):
@@ -1616,7 +1649,7 @@ def get_message(historyId):
             print(messageids["ids"][0])
             for messageid in messageids["ids"]:
                 
-                message = gmail.users().messages().get(userId='me', id=messageid).execute()
+                message = gmail.users().messages().get(userId=userId, id=messageid).execute()
                 payload = message['payload']
                 headers = payload['headers']
                 from_header=''
@@ -1699,5 +1732,5 @@ def get_notifications(request):
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
         # print(request.body, historyId)
-        get_message(historyId)
+        get_message(historyId, userId)
     return HttpResponse(200)
