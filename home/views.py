@@ -1376,10 +1376,6 @@ def assign_agents(request):
             else:
                 customers.remove(" All Unassigned Customers")
             customer_ids = Customers.objects.filter(assigned_to=None).values_list('id', flat=True)
-            # Get the agent ID from the selected customers option
-            agent_id = int(customers.split(' - ')[-1])
-            # Fetch customers assigned to this agent
-            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
             
             num_customers = len(customer_ids)
             num_agents = len(agent_ids)
@@ -1404,12 +1400,13 @@ def assign_agents(request):
                 customer_ids = customer_ids[num_customers_for_agent:]
                 
                 agent_index += 1
-        if customers != []:
-            # Get the agent ID from the selected customers option
-            agent_id = int(customers.split(' - ')[-1])
-            # Fetch customers assigned to this agent
-            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
-            
+        if customers:
+            c_agent_ids = []
+            for agent_id in customers:
+                c_agent_ids.append(int(agent_id.split(' - ')[-1]))
+            customer_ids = []
+            for agent_id in c_agent_ids:
+                customer_ids.extend(list(Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)))
             num_customers = len(customer_ids)
             num_agents = len(agent_ids)
             customers_per_agent = num_customers // num_agents
