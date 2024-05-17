@@ -1649,7 +1649,7 @@ def get_message(historyId,userId):
             print(messageids["ids"][0])
             for messageid in messageids["ids"]:
                 
-                message = gmail.users().messages().get(userId=userId, id=messageid).execute()
+                message = gmail.users().messages().get(userId='me', id=messageid).execute()
                 payload = message['payload']
                 headers = payload['headers']
                 from_header=''
