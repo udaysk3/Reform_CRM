@@ -1614,7 +1614,7 @@ def get_body(payload):
     return None
 
 def get_message(historyId,userId):
-    historys = HistoryId.objects.all()
+    historys = HistoryId.objects.all().order_by('-created_at')
     if historys:
         if os.path.exists("static/token.json"):
             creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
