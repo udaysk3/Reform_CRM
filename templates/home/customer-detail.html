@@ -247,7 +247,7 @@ table {
   </div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Assigned To</b> - </span>
-    <div class="mt-1" id="assigned_to">
+    <div class="mt-1 link-primary" id="assigned_to">
     {% if customer.assigned_to %}
      {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }}
     
@@ -829,18 +829,19 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li><b>{{ v.0 }}</b> - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
+                        <li><b>{{ v.0 }} - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
                           {% if v.7 %}
                            spoke to <b> {{ v.7 }}</b> 
                           {% endif %}
                            - <b> {{ v.5 }} </b> 
-                          {% if v.5 == 'CB' %}
+                          {% if v.5 == 'CB' or v.5 == 'NA' or v.5 == 'LM' %}
                           - {{ v.6 }}
                           {% endif %}
                           
                           {% if v.8 %}
                           - {{ v.8 }} 
                           {% endif %}
+                        </b>
                         </li>
                           {% endfor %}
                       </ul>
