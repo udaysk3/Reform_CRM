@@ -884,12 +884,12 @@ table {
                         </b>
                           {% if v.8 %}
                           {% if v.5 == 'Email Received' %}
-                          - <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#Email_data">
+                          - <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#Email_data{{forloop.counter}}">
                             View Email
 </button>
 
 <!-- Modal -->
-<div class="modal fade" id="Email_data" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
