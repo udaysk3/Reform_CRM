@@ -1736,7 +1736,7 @@ def get_message(historyId,userId):
             creds.refresh(Request())
           else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "../credentials.json", SCOPES
+                "static/credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=3000)
           with open("static/token.json", "w") as token:

@@ -1,6 +1,9 @@
 from django.apps import AppConfig
 
 
-class HomeConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
+class MainConfig(AppConfig):
     name = 'home'
+
+    def ready(self):
+        from . import updaters
+        updaters.start()
