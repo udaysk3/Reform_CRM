@@ -4,7 +4,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, Email, Reason, HistoryId
+from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, Email, Reason, HistoryId, Countys, Countries
 import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
@@ -54,8 +54,8 @@ def dashboard(request):
     user  = User.objects.get(email=request.user)
     a_customers = (
         Customers.objects.all()
+        .filter(assigned_to=user)
         .annotate(earliest_action_date=Max("action__date_time"))
-        .filter(closed=False)
         .filter(parent_customer=None)
         .order_by("earliest_action_date")
     )
@@ -82,6 +82,11 @@ def dashboard(request):
     new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
     result = [x for x in customers if x not in new_customers] 
     customers= new_customers + result
+    na=[]
+    lm=[]
+    cb=[]
+    sms=[]
+    email=[]
     history = {}
     imported = {}
     london_tz = timezone("Europe/London")
@@ -89,6 +94,19 @@ def dashboard(request):
         user = User.objects.get(email=request.user)
         actions = customer.get_created_at_action_history().filter(agent=user)
         for i in actions:
+            if i.action_type == 'NA':
+                print(i.action_type == 'NA')
+                na.append(i)
+            elif i.action_type == 'LM':
+                lm.append(i)
+            elif i.action_type == 'CB':
+                cb.append(i)
+            elif i.action_type == 'SMS':
+                sms.append(i)
+            elif i.action_type == 'EMAIL':
+                email.append(i)
+            
+            
             if i.imported:
                 if i.created_at.replace(tzinfo=london_tz).date() not in imported:
                     imported[i.created_at.replace(tzinfo=london_tz).date()] = []
@@ -130,12 +148,91 @@ def dashboard(request):
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
     
-    return render(request, "home/dashboard.html", {"customers": customers, "all_customers": all_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "history": history, "imported": imported,"agents": serialize('json', agents)})
+    p_customers = Paginator(customers, 50)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = p_customers.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = p_customers.page(1)
+    except EmptyPage:
+        page_obj = p_customers.page(p_customers.num_pages)
+        
+    
+    return render(request, "home/dashboard.html", {"customers": customers, "all_customers": all_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "history": history, "imported": imported,"agents": serialize('json', agents),'na':len(na), 'lm':len(lm), 'cb':len(cb), 'sms':len(sms), 'email':len(email), 'page_obj':page_obj})
 
 
 @login_required
 def customer_detail(request, customer_id, s_customer_id=None):
-    all_customers = Customers.objects.all().filter(parent_customer=None)
+    all_customers = []
+    prev = None
+    next = None
+    if request.GET.get('previous') == 'dashboard':
+        all_customers = Customers.objects.all().filter(parent_customer=None).filter(assigned_to= User.objects.get(email=request.user))
+        if len(all_customers) == 1:
+            prev = customer
+            next = customer
+        else:
+            for i in range(len(all_customers)):
+                if all_customers[i].id == customer_id:
+                    if i == 0:
+                        prev = all_customers[len(all_customers) - 1]
+                        next = all_customers[i + 1]
+                    elif i == len(all_customers) - 1:
+                        prev = all_customers[i - 1]
+                        next = all_customers[0]
+                    else:
+                        prev = all_customers[i - 1]
+                        next = all_customers[i + 1]
+        prev = str(prev.id) + '?previous=dashboard'
+        next = str(next.id) + '?previous=dashboard'
+    else:
+        customers = (
+            Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
+            .filter(parent_customer=None)
+            .filter(closed=False)
+            .order_by("earliest_action_date")
+        )
+
+        customers = list(customers)
+        new_customers = []
+        for customer in customers:
+            actions = customer.get_created_at_action_history()
+            flag = False
+            for action in actions:
+                if action.imported == False:
+                    new_customers.append(customer)
+                    break
+                
+        new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+
+
+        result = [x for x in customers if x not in new_customers] 
+
+        customers= new_customers + result
+        if len(customers) == 1:
+            prev = customer
+            next = customer
+        else:
+            for i in range(len(customers)):
+                if customers[i].id == customer_id:
+                    if i == 0:
+                        prev = customers[i]
+                        next = customers[i + 1]
+                    elif i == len(customers) - 1:
+                        prev = customers[i - 1]
+                        next = customers[i]
+                    else:
+                        prev = customers[i - 1]
+                        next = customers[i + 1]
+        if prev:
+            prev = str(prev.id)
+        else:
+            prev = str(customer_id)   
+        if next:     
+            next = str(next.id)
+        else:
+            next = str(customer_id)
+    print(type(prev), next)
     customer = Customers.objects.get(pk=customer_id)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
@@ -144,24 +241,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
     templates = Email.objects.all()
     if s_customer_id:
         show_customer = Customers.objects.get(pk=s_customer_id)
-
-    prev = None
-    next = None
-    if len(all_customers) == 1:
-        prev = customer
-        next = customer
-    else:
-        for i in range(len(all_customers)):
-            if all_customers[i].id == customer_id:
-                if i == 0:
-                    prev = all_customers[len(all_customers) - 1]
-                    next = all_customers[i + 1]
-                elif i == len(all_customers) - 1:
-                    prev = all_customers[i - 1]
-                    next = all_customers[0]
-                else:
-                    prev = all_customers[i - 1]
-                    next = all_customers[i + 1]
 
     history = {}
     actions = customer.get_created_at_action_history()
@@ -254,7 +333,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 for field in s_fields:
                     fields[field] = [s_fields[field], '']
                 values[name] = fields
-            print(values,'           ',stage_values)
             
             for key, fields in values.items():
                 if key in stage_values:
@@ -445,6 +523,8 @@ def Customer(request):
     result = [x for x in customers if x not in new_customers] 
 
     customers= new_customers + result
+    print(type(customers))
+    customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
@@ -669,7 +749,7 @@ def edit_customer(request, customer_id):
         customer.house_name = request.POST.get("house_name")
         customer.county = request.POST.get("county")
         customer.country = request.POST.get("country")
-
+        print(request.POST.get("county"),request.POST.get("country"))
         if customer.campaign == "nan" or customer.city == "nan" or customer.county == "nan" or customer.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
@@ -765,8 +845,8 @@ def remove_council(request, council_id):
 def action_submit(request, customer_id):
     if request.method == "POST":
         customer = Customers.objects.get(id=customer_id)
-        date_str = request.POST.get("date_field")
         talked_with = request.POST.get("talked_customer")
+        date_str = request.POST.get("date_field")
         time_str = request.POST.get("time_field")
         date_time_str = f"{date_str} {time_str}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
@@ -1202,6 +1282,9 @@ def make_primary(request, parent_customer_id, child_customer_id):
                 i.save()
     child_customer.primary_customer = True
     child_customer.save()
+    if parent_customer == child_customer:
+        parent_customer.primary_customer = True
+        parent_customer.save() 
     parent_customer.add_action(
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
@@ -1229,7 +1312,6 @@ def add_funding_route(request):
             description=description,
         )
         documents = request.FILES.getlist("document")
-        print(documents)
         for document in documents:
             doc = Document.objects.create(document=document)
             route.documents.add(doc)
@@ -1283,7 +1365,6 @@ def create_stage(request, route_id):
         dynamic_labels = request.POST.getlist("dynamic_label")
 
         dynamic_fields = {}
-        print(dynamic_types,dynamic_labels)
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
         fields = json.dumps(dynamic_fields)
@@ -1384,7 +1465,6 @@ def assign_agents(request):
         customers = request.POST.get("customers")
         customers = list(customers.split(','))
         if "All Unassigned Customers" in customers or " All Unassigned Customers" in customers:
-            print(customers)
             if "All Unassigned Customers" in customers:
                 customers.remove("All Unassigned Customers")
             else:
@@ -1479,6 +1559,10 @@ def assign_agent(request):
 def send_email(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     email_id = request.POST.get("template")
+    date_str = request.POST.get("date_field")
+    time_str = request.POST.get("time_field")
+    date_time_str = f"{date_str} {time_str}"
+    date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
     body = ''
     subject = ''
     text = ''
@@ -1515,11 +1599,8 @@ def send_email(request, customer_id):
         subject=subject,
         body=body,
         from_email='support@reform-group.uk',
-        to=['puvvulasaigowtham@gmail.com', 'burluudaysantoshkumar3@gmail.com', customer.email],
+        to=[customer.email],
     )
-    # with open('home/reform_logo.jpg', 'rb') as f:
-    #     email.attach('reform_logo.jpg', f.read(), 'image/jpg')
-
 
     email.send()
     if text == '':
@@ -1538,14 +1619,14 @@ def send_email(request, customer_id):
                 imported=False,
                 created_at=datetime.now(pytz.timezone("Europe/London")),
                 action_type="Email Sent",
-                date_time=datetime.now(pytz.timezone("Europe/London")),
+                date_time=date_time,
                 text= text,
             )
 
     messages.success(request, "Email sent successfully!")
     return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
-def query(request, q):
+def query_city(request, q):
     cities = Cities.objects.all()
     filters = []
     q = q.lower()
@@ -1553,6 +1634,24 @@ def query(request, q):
         if (q in city.name.lower()):
             filters.append(city)
     return JsonResponse([{'city':city.name} for city in filters], safe=False)
+
+def query_county(request, q):
+    countys = Countys.objects.all()
+    filters = []
+    q = q.lower()
+    for county in countys:
+        if (q in county.name.lower()):
+            filters.append(county)
+    return JsonResponse([{'county':county.name} for county in filters], safe=False)
+
+def query_country(request, q):
+    countries = Countries.objects.all()
+    filters = []
+    q = q.lower()
+    for country in countries:
+        if (q in country.name.lower()):
+            filters.append(country)
+    return JsonResponse([{'country':country.name} for country in filters], safe=False)
 
 def add_template(request):
     if request.method == "POST":

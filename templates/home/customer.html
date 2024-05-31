@@ -50,7 +50,7 @@
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign to Agent</h1>
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Customers to the Agents</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <form method='post' action="{% url 'app:assign_agents'  %}">
@@ -72,7 +72,7 @@
                           <input
                                 type="text"
                                 id="customers"
-                                placeholder="Select Customers"
+                                placeholder="Select the Customers you wish to assign to the agents"
                                 autocomplete="off"
                                 name= "customers"
                               />
@@ -81,7 +81,7 @@
                           <input
                                 type="text"
                                 id="agents"
-                                placeholder="Select Agents"
+                                placeholder="Select the Agents you wish to assign to the customers"
                                 autocomplete="off"
                                 name= "agents"
                               />
@@ -206,28 +206,22 @@
 
                 <div class="mb-3 input-row">
                     <label for="city" class="form-label">City/Town</label>
-                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.city}}" data-list="places_from" autocomplete="off" value="{{customer.city}}">  <!--list="places_from"-->
-                  <div id="places_from" class="places_box">
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.city}}" data-list="city_from" autocomplete="off" value="{{customer.city}}">  <!--list="city_from"-->
+                  <div id="city_from" class="places_box">
                   </div>
                 </div>
                 <div class="mb-3">
                     <label for="county" class="form-label">County</label>
-                    <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example">
-                      <option value="nan">Select a County</option>
-                      {% for county in county|countys %}
-                      <option value="{{ county }}">{{ county }}</option>
-                      {% endfor %}
-                    </select> 
+                    <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.county}}" data-list="county_from" autocomplete="off" value="{{customer.county}}">  <!--list="county_from"-->
+                  <div id="county_from" class="places_box">
+                  </div>
                 </div>
                
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example">
-                  <option value="nan">Select a Country</option>
-                  {% for country in country|countries %}
-                  <option value="{{ country }}">{{ country }}</option>
-                  {% endfor %}
-                </select>
+                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.country}}" data-list="country_from" autocomplete="off" value="{{customer.country}}">  <!--list="country_from"-->
+                  <div id="country_from" class="places_box">
+                  </div>
             </div>
 
                 <!-- Button trigger modal -->
@@ -306,27 +300,24 @@
               </div>
                   <div class="mb-3 input-row">
                     <label for="city" class="form-label">City/Town</label>
-                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_customer.city}}" data-list="places_from" autocomplete="off" value="{{edit_customer.city}}">  <!--list="places_from"-->
-                  <div id="places_from" class="places_box">
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_customer.city}}" data-list="city_from" autocomplete="off" value="{{edit_customer.city}}">  <!--list="city_from"-->
+                  <div id="city_from" class="places_box">
                   </div>
                 </div>
               <div class="mb-3">
                   <label for="county" class="form-label">County</label>
-                  <select class="form-select ui search selection dropdown" id="county" name="county" aria-label="Default select example" value="{{ edit_customer.county }}">
-                    <option value="nan">Select a County</option>
-                    {% for county in county|countys %}
-                    <option {% if edit_customer.county == county %} selected {% endif %}  value="{{ county }}">{{ county }}</option>
-                    {% endfor %}
-                  </select> 
+
+                  <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_customer.county}}" data-list="county_from" autocomplete="off" value="{{edit_customer.county}}">  <!--list="county_from"-->
+                  <div id="county_from" class="places_box">
+                  </div>
+
               </div>
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <select class="form-select ui search selection dropdown" id="country" name="country" aria-label="Default select example" value="{{ edit_customer.country }}">
-                  <option value="nan">Select a Country</option>
-                  {% for country in country|countries %}
-                  <option {% if edit_customer.country == country %} selected {% endif %}  value="{{ country }}">{{ country }}</option>
-                  {% endfor %}
-                </select>
+
+                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_customer.country}}" data-list="country_from" autocomplete="off" value="{{edit_customer.country}}">  <!--list="country_from"-->
+                  <div id="country_from" class="places_box">
+                  </div>
             </div>
                   <button  class="btn btn-primary">Update Customer</button>
               </form>
@@ -432,7 +423,7 @@
   </div>
 </div>
 
-
+{% if request.GET.page != 'add_customer' and request.GET.page != 'edit_customer' %}
 <nav aria-label="Page navigation example" class="position-relative" style="top:-25px;">
   <ul class="pagination pagination-lg justify-content-center">
     {%if page_obj.has_previous %}
@@ -445,7 +436,7 @@
 
   </ul>
 </nav>
-
+{% endif %}
 
 
 {% endblock content %}
@@ -477,10 +468,6 @@
             document.forms["editCustomerForm"]["city"].value = admin_district;
             document.forms["editCustomerForm"]["county"].value = pfa;
             document.forms["editCustomerForm"]["country"].value = country;
-
-            document.forms["editCustomerForm"]["city"].nextSibling.nextSibling.nextSibling.innerHTML = admin_district;
-            document.forms["editCustomerForm"]["county"].nextSibling.nextSibling.nextSibling.innerHTML = pfa;
-            document.forms["editCustomerForm"]["country"].nextSibling.nextSibling.nextSibling.innerHTML = country;
           }
         })
         .catch(e => {
@@ -602,36 +589,6 @@ function sortTable(colIndex) {
 
   
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-  // Select/deselect all checkboxes
-  const selectAllCheckbox = document.getElementById('selectAll');
-  const customerCheckboxes = document.querySelectorAll('.select-customer');
-
-  selectAllCheckbox.addEventListener('change', function () {
-    customerCheckboxes.forEach(checkbox => {
-      checkbox.checked = selectAllCheckbox.checked;
-    });
-  });
-
-  // Bulk delete
-  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-
-  deleteSelectedBtn.addEventListener('click', function () {
-    const selectedCustomerIds = Array.from(customerCheckboxes)
-      .filter(checkbox => checkbox.checked)
-      .map(checkbox => checkbox.getAttribute('data-customer-id'));
-
-    if (selectedCustomerIds.length > 0) {
-      const confirmDelete = confirm('Are you sure you want to delete selected customers?');
-      if (confirmDelete) {
-        window.location.href = `bulk_remove_customers/?ids=${selectedCustomerIds.join(',')}`;
-      }
-    } else {
-      alert('Please select customers to delete.');
-    }
-  });
-});
 
 const form = document.querySelector('#addCustomerForm');
 
@@ -824,10 +781,6 @@ const form = document.querySelector('#addCustomerForm');
             document.forms["addCustomerForm"]["city"].value = admin_district;
             document.forms["addCustomerForm"]["county"].value = pfa;
             document.forms["addCustomerForm"]["country"].value = country;
-
-            document.forms["addCustomerForm"]["city"].nextSibling.nextSibling.nextSibling.innerHTML = admin_district;
-            document.forms["addCustomerForm"]["county"].nextSibling.nextSibling.nextSibling.innerHTML = pfa;
-            document.forms["addCustomerForm"]["country"].nextSibling.nextSibling.nextSibling.innerHTML = country;
           }
         });
       findAddressBtn.disable = false;
@@ -835,6 +788,46 @@ const form = document.querySelector('#addCustomerForm');
       alert('Please enter a postcode.');
     }
   });
+
+
+
+
+</script>
+
+{% endif %}
+
+
+{% if request.GET.page != 'add_customer' and request.GET.page != 'edit_customer' %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Select/deselect all checkboxes
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const customerCheckboxes = document.querySelectorAll('.select-customer');
+
+  selectAllCheckbox.addEventListener('change', function () {
+    customerCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+  });
+
+  // Bulk delete
+  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+  deleteSelectedBtn.addEventListener('click', function () {
+    const selectedCustomerIds = Array.from(customerCheckboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.getAttribute('data-customer-id'));
+
+    if (selectedCustomerIds.length > 0) {
+      const confirmDelete = confirm('Are you sure you want to delete selected customers?');
+      if (confirmDelete) {
+        window.location.href = `bulk_remove_customers/?ids=${selectedCustomerIds.join(',')}`;
+      }
+    } else {
+      alert('Please select customers to delete.');
+    }
+  });
+});
 
 
 

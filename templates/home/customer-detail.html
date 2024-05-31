@@ -205,18 +205,18 @@ table {
 
 {% endblock %} {% block content %}
 
-
 <div class="row container-fluid">
   <div class="cnav-item fs-6 col-1">
     <a
           class="btn btn-link fs-6 "
-          href="/customer-detail/{{prev.id}}"
+          href="/customer-detail/{{prev}}"
           ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
           </svg></a>
   </div>
   <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Stage</b> - </span> <div class="mt-1">
+{{prev.id}}
+    <span class="col"> <b>Stage </b> - </span> <div class="mt-1">
       {% if customer.closed %}
       Closed
       {% else %}
@@ -290,7 +290,7 @@ table {
   <div class="cnav-item fs-6 col-1 ">
     <a
           class="btn btn-link fs-6"
-          href="/customer-detail/{{next.id}}"
+          href="/customer-detail/{{next}}"
           ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
           </svg></a
@@ -300,10 +300,12 @@ table {
 <a href="#" class="edit-user-btn" data-user-id="{{ customer.id }}">
   <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
 </a>
+{% comment %} {% if user.admin %}
 <a href="#" class="delete-user-btn" data-user-id="{{ show_customer.id }}">
   <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
 </a>
 </div>
+{% endif %} {% endcomment %}
 
 
 
@@ -491,103 +493,11 @@ table {
 
 
 
-                <div class="d-grid gap-2 d-md-block col">
-                  <form
-                  id="action_submit_form"
-                  method="post"
-                  action="{% url 'app:send_email' customer.id %}"
-                  class="col"
-                >
-                  {% csrf_token %}
-                  
-
-                  <!-- Button trigger modal -->
-
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary my-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#Email"
-                  >
-                    Email
-                  </button>
-
-                  <!-- Modal -->
-                  <div
-                    class="modal fade"
-                    id="Email"
-                    data-bs-backdrop="static"
-                    data-bs-keyboard="false"
-                    tabindex="-1"
-                    aria-labelledby="staticBackdropLabel"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Email</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body row">
-                          
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Template</label>
-                            <select id="select" class="form-select"  name="template">
-                              
-                              <option value="nan"> Create a email </option>
-                              {% for email in templates %}
-                              <option value="{{ email.id }}">{{ email.name }}</option>
-                              {% endfor %}
-                            </select>
-
-                            <div class="form-floating mt-3">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
-                            name="text"></textarea>
-                            <label for="floatingTextarea">Comments</label>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                          >
-                            Close
-                          </button>
-                          <button class="btn btn-primary" type="submit">
-                            Submit
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-                </div>
-
-
-
-
-                <div class="d-grid gap-2 d-md-block mt-3 col">
-                  <form
-                    method="post"
-                    class="col"
-                    action="{% url 'app:na_action_submit' customer.id %}"
-                    
-                  >
-                    {% csrf_token %}
-                    <button class="btn btn-outline-primary" type="button">SMS</button>
-                  </form>
-                </div>
-
-
-
-
-
-
                 <form
                   id="action_submit_form"
                   method="post"
                   name="action_submit_form"
-                  onSubmit="DoSubmit();"
+                  onSubmit="DoSubmit(this);"
                   action="{% url 'app:action_submit' customer.id %}"
                   class="col"
                 >
@@ -703,6 +613,141 @@ table {
 
 
 
+                <div class="d-grid gap-2 d-md-block col">
+                  <form
+                  id="action_submit_form"
+                  method="post"
+                  action="{% url 'app:send_email' customer.id %}"
+                  class="col"
+                  onSubmit="DoSubmit(this);"
+                >
+                  {% csrf_token %}
+                  
+
+                  <!-- Button trigger modal -->
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary my-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#Email"
+                  >
+                    Email
+                  </button>
+
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="Email"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    tabindex="-1"
+                    aria-labelledby="staticBackdropLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Email</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row">
+                          
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Template</label>
+                            <select id="select" class="form-select"  name="template">
+                              
+                              <option value="nan"> Create a email </option>
+                              {% for email in templates %}
+                              <option value="{{ email.id }}">{{ email.name }}</option>
+                              {% endfor %}
+                            </select>
+
+                            <div class="col">
+                          <div class="form-floating">
+                            <div class="wrapper">
+                              <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
+                              <label class="label" for="date_field">
+                                <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
+                              </label>	
+                            </div>
+                          </div>
+
+                          
+
+                          </div>
+                          <div class="col">
+                            <div class="mb-0">
+                            <div class="wrapper">
+                            <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
+                            <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
+                          </div>
+
+                          </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 minutes" type="button">Minutes</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 hour" type="button">Hour</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 day" type="button">Day</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 week" type="button">Week</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 month" type="button">Month</button>
+                            </div>
+                            <div class="col-4">
+                            <button class="btn btn-primary my-3 year" type="button">Year</button>
+                          </div>  
+                          </div>
+
+                            <div class="form-floating mt-3">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
+                            name="text"></textarea>
+                            <label for="floatingTextarea">Comments</label>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                          <button class="btn btn-primary" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                </div>
+
+
+
+
+                <div class="d-grid gap-2 d-md-block mt-3 col">
+                  <form
+                    method="post"
+                    class="col"
+                    action="{% url 'app:na_action_submit' customer.id %}"
+                    
+                  >
+                    {% csrf_token %}
+                    <button class="btn btn-outline-primary" type="button">SMS</button>
+                  </form>
+                </div>
+
+
+
+
+
 
 
                 <form
@@ -778,10 +823,10 @@ table {
 
                           </div>
                           <div class="col">
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Spoke To</label>
                             <select id="select" class="c_talked_customer form-select"  name="talked_customer">
                               <option value="nan">Select a Customer</option>
-                              <option value="None">None</option>
+                              <option value="Nobody">Nobody</option>
                               <option
                                value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
                               {% for i in child_customers %}
@@ -829,19 +874,42 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li><b>{{ v.0 }} - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
+                        <li class="mb-2"><b>{{ v.0 }} - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
                           {% if v.7 %}
                            spoke to <b> {{ v.7 }}</b> 
                           {% endif %}
-                           - <b> {{ v.5 }} </b> 
-                          {% if v.5 == 'CB' or v.5 == 'NA' or v.5 == 'LM' %}
-                          - {{ v.6 }}
-                          {% endif %}
+                           - <b> {{ v.5 }} </b>
+                          - Next Action: {{ v.6 }}
                           
+                        </b>
                           {% if v.8 %}
+                          {% if v.5 == 'Email Received' %}
+                          - <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#Email_data">
+                            View Email
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="Email_data" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Email</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {{ v.8 }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+      </div>
+    </div>
+  </div>
+</div>
+                          {% else %}
                           - {{ v.8 }} 
                           {% endif %}
-                        </b>
+                          {% endif %}
                         </li>
                           {% endfor %}
                       </ul>
@@ -849,7 +917,7 @@ table {
                       {% for key,value in imported.items %}
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
-                        <li><b>{{ value.0.0 }}</b> - {{ v.6 }} - {{ v.7 }} <b>{{ value.0.2 }} {{ value.0.3 }}</b> - </li>
+                        <li class="mb-2"><b>{{ value.0.0 }}</b> - {{ v.6 }} - {{ v.7 }} <b>{{ value.0.2 }} {{ value.0.3 }}</b> - </li>
                         <ul class="ps-3">
                           {% for v in value %}
                           <li>{{ v.1 }}</li>
@@ -1280,81 +1348,114 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     time.value = `${formattedTime[0]}:${formattedTime[1]}`;
   });
 
-  const minutes = document.querySelector('.minutes');
-  const time_field = document.querySelector('.time');
-  const time_field_value = time_field.value.split(':');
-  minutes.addEventListener('click',()=>{
-    time_field_value[1] = parseInt(time_field_value[1]) + 10;
-    if(time_field_value[1] >= 60){
-      time_field_value[1] = time_field_value[1] - 60;
+  const minutess = document.querySelectorAll('.minutes');
+  const time_fields = document.querySelectorAll('.time');
+  time_fields.forEach(time_field=>{
+    const time_field_value = time_field.value.split(':');
+    minutess.forEach(minutes => {
+      minutes.addEventListener('click',()=>{
+        time_field_value[1] = parseInt(time_field_value[1]) + 5;
+        if(time_field_value[1] >= 60){
+          time_field_value[1] = time_field_value[1] - 60;
+          time_field_value[0] = parseInt(time_field_value[0]) + 1;
+        } 
+        if(time_field_value[1] < 10){
+          time_field_value[1] = `0${time_field_value[1]}`;
+        }
+        if(time_field_value[0] < 10){
+          time_field_value[0] = `${time_field_value[0]}`;
+        }
+        if (time_field_value[0] >= 24){
+          time_field_value[0] = '0';
+        }
+        time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
+      });
+    })
+  })
+
+  const hours = document.querySelectorAll('.hour');
+  hours.forEach(hour => {
+    hour.addEventListener('click',()=>{
+     const time_fields = document.querySelectorAll('.time');
+  time_fields.forEach(time_field=>{
+    const time_field_value = time_field.value.split(':');
+
       time_field_value[0] = parseInt(time_field_value[0]) + 1;
-    } 
-    if(time_field_value[1] < 10){
-      time_field_value[1] = `0${time_field_value[1]}`;
-    }
-    if(time_field_value[0] < 10){
-      time_field_value[0] = `${time_field_value[0]}`;
-    }
-    if (time_field_value[0] >= 24){
-      time_field_value[0] = '0';
-    }
-    time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
+      if(time_field_value[0] >= 24){
+        time_field_value[0] = time_field_value[0] - 24;
+      }
+      if(time_field_value[0] < 10){
+        time_field_value[0] = `${time_field_value[0]}`;
+      }
+      time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
+    });
   });
+  })
 
-  const hour = document.querySelector('.hour');
-  hour.addEventListener('click',()=>{
-    time_field_value[0] = parseInt(time_field_value[0]) + 1;
-    if(time_field_value[0] >= 24){
-      time_field_value[0] = time_field_value[0] - 24;
-    }
-    if(time_field_value[0] < 10){
-      time_field_value[0] = `${time_field_value[0]}`;
-    }
-    time_field.value = `${time_field_value[0]}:${time_field_value[1]}`;
-  });
+  const days = document.querySelectorAll('.day');
+    days.forEach(day => {
+    
+      day.addEventListener('click',()=>{
+        var date_fields = document.querySelectorAll('.date');
+        date_fields.forEach(date_field => {
+        var date_field_value = date_field.value.split('-');
+        var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+        var tomorrow = moment(today).add(1, 'days').format("L");
+        var formattedDate = tomorrow.split('/');
+        date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+        });
+      });
+  })
 
-  const day = document.querySelector('.day');
-  day.addEventListener('click',()=>{
-    var date_field = document.querySelector('.date');
-    var date_field_value = date_field.value.split('-');
-    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
-    var tomorrow = moment(today).add(1, 'days').format("L");
-    var formattedDate = tomorrow.split('/');
-    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
-  });
+  const weeks = document.querySelectorAll('.week');
+    weeks.forEach(week => {
+    
+      week.addEventListener('click',()=>{
+        var date_fields = document.querySelectorAll('.date');
+        date_fields.forEach(date_field => {
+        var date_field_value = date_field.value.split('-');
+        var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+        var tomorrow = moment(today).add(7, 'days').format("L");
+        var formattedDate = tomorrow.split('/');
+        date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+        });
+      });
+  })
 
-  const week = document.querySelector('.week');
-  week.addEventListener('click',()=>{
-    var date_field = document.querySelector('.date');
-    var date_field_value = date_field.value.split('-');
-    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
-    var tomorrow = moment(today).add(7, 'days').format("L");
-    var formattedDate = tomorrow.split('/');
-    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
-  });
+  const months = document.querySelectorAll('.month');
+    months.forEach(month => {
+    
+      month.addEventListener('click',()=>{
+        var date_fields = document.querySelectorAll('.date');
+        date_fields.forEach(date_field => {
+        var date_field_value = date_field.value.split('-');
+        var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+        var tomorrow = moment(today).add(1, 'months').format("L");
+        var formattedDate = tomorrow.split('/');
+        date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`; 
+        }); 
+      });
+  })
 
-  const month = document.querySelector('.month');
-  month.addEventListener('click',()=>{
-    var date_field = document.querySelector('.date');
-    var date_field_value = date_field.value.split('-');
-    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
-    var tomorrow = moment(today).add(1, 'months').format("L");
-    var formattedDate = tomorrow.split('/');
-    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
-  });
+  const years = document.querySelectorAll('.year');
+  console.log(years)
+    years.forEach(year => {
+    
+      year.addEventListener('click',()=>{
+        console.log(1)
+        var date_fields = document.querySelectorAll('.date');
+        date_fields.forEach(date_field => {
+        var date_field_value = date_field.value.split('-');
+        var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
+        var tomorrow = moment(today).add(1, 'years').format("L");
+        var formattedDate = tomorrow.split('/');
+        date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
+      })
+      });
+  })
 
-  const year = document.querySelector('.year');
-  year.addEventListener('click',()=>{
-    var date_field = document.querySelector('.date');
-    var date_field_value = date_field.value.split('-');
-    var today = moment(`${date_field_value[1]}-${date_field_value[0]}-${date_field_value[2]}`);                       
-    var tomorrow = moment(today).add(1, 'years').format("L");
-    var formattedDate = tomorrow.split('/');
-    date_field.value = `${formattedDate[1]}-${formattedDate[0]}-${formattedDate[2]}`;  
-  });
-
-  function DoSubmit(){
-    document.querySelector('.date').value = document.querySelector('.date').value.split("-").reverse().join("-");
+  function DoSubmit(e){
+    e.querySelector('.date').value = e.querySelector('.date').value.split("-").reverse().join("-");
     return confirm(date);
   }
 </script>

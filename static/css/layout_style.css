@@ -19,7 +19,7 @@
 
 
 
-#places_from, #places_to{
+#city_from, #county_from, #country_form{
     display: none;
     position: absolute;
     left: 0;
@@ -33,14 +33,16 @@
     overflow: auto;
     cursor: pointer;
 }
-.each_places_from_list, .each_places_to_list{
+.each_city_from_list, .each_county_from_list, .each_country_from_list{
     padding: 10px 15px;
     transition-duration: .2s;
 }
-.each_places_from_list:hover, .each_places_to_list:hover{
+.each_city_from_list:hover, .each_county_from_list:hover,
+.each_country_from_list:hover{
     background-color: #f2f2f2;
 }
-.each_places_from_list:active, .each_places_to_list:active{
+.each_city_from_list:active, .each_county_from_list:active,
+.each_country_from_list:active{
     background-color: #e5e5e5;
 }
 .places_box{

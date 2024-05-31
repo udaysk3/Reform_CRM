@@ -96,16 +96,22 @@ class Cities(models.Model):
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     
-    def get_created_at_council_action_history(self):
-        return (Action.objects.filter(council=self).order_by("-created_at"))
+    def __str__(self):
+        return f"{self.name}"
     
-    def add_council_action(
-        self,
-        text,
-        agent, date_time=None, imported=False, created_at=None, talked_with=None, council=None,
-    ):
-        return Action.objects.create(council=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with)
-
+class Countys(models.Model):
+    name = models.CharField(max_length=999, unique=True)
+    created_at = models.DateTimeField(blank= True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    
+    def __str__(self):
+        return f"{self.name}"
+    
+class Countries(models.Model):
+    name = models.CharField(max_length=999, unique=True)
+    created_at = models.DateTimeField(blank= True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    
     def __str__(self):
         return f"{self.name}"
     
