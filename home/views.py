@@ -167,7 +167,29 @@ def customer_detail(request, customer_id, s_customer_id=None):
     prev = None
     next = None
     if request.GET.get('previous') == 'dashboard':
-        all_customers = Customers.objects.all().filter(parent_customer=None).filter(assigned_to= User.objects.get(email=request.user))
+        user  = User.objects.get(email=request.user)
+        customers = (
+        Customers.objects.all()
+        .filter(assigned_to=user)
+        .annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_customer=None)
+        .filter(closed=False)
+        .order_by("earliest_action_date")
+    )
+        customers = list(customers)
+        new_customers = []
+        for customer in customers:
+            actions = customer.get_created_at_action_history()
+            flag = False
+            for action in actions:
+                if action.imported == False:
+                    new_customers.append(customer)
+                    break
+                
+        new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+        result = [x for x in customers if x not in new_customers] 
+        all_customers= new_customers + result
+        all_customers = all_customers[::-1]
         if len(all_customers) == 1:
             prev = customer
             next = customer
@@ -194,6 +216,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         )
 
         customers = list(customers)
+        
         new_customers = []
         for customer in customers:
             actions = customer.get_created_at_action_history()
@@ -209,6 +232,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         result = [x for x in customers if x not in new_customers] 
 
         customers= new_customers + result
+        customers = customers[::-1]
         if len(customers) == 1:
             prev = customer
             next = customer
