@@ -197,16 +197,22 @@ def customer_detail(request, customer_id, s_customer_id=None):
             for i in range(len(all_customers)):
                 if all_customers[i].id == customer_id:
                     if i == 0:
-                        prev = all_customers[len(all_customers) - 1]
+                        prev = all_customers[i]
                         next = all_customers[i + 1]
                     elif i == len(all_customers) - 1:
                         prev = all_customers[i - 1]
-                        next = all_customers[0]
+                        next = all_customers[i]
                     else:
                         prev = all_customers[i - 1]
                         next = all_customers[i + 1]
-        prev = str(prev.id) + '?previous=dashboard'
-        next = str(next.id) + '?previous=dashboard'
+        if prev:
+            prev = str(prev.id) + '?previous=dashboard'
+        else:
+            prev = str(customer_id) + '?previous=dashboard'   
+        if next:     
+            next = str(next.id) + '?previous=dashboard'
+        else:
+            next = str(customer_id) + '?previous=dashboard'
     else:
         customers = (
             Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
