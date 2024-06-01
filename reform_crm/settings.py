@@ -44,12 +44,8 @@ INSTALLED_APPS = [
     'user',
      'tempus_dominus',
      'bootstrap_datepicker_plus',
-     'django_crontab',
 ]
 
-CRONJOBS = [
-    ('0 0 * * *', 'home.quickstart'),
-]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
