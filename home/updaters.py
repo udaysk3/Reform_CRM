@@ -4,5 +4,5 @@ from .quickstart import main
 
 def start():
 	scheduler = BackgroundScheduler()
-	scheduler.add_job(main, 'interval', days=1)
+	scheduler.add_job(main, 'interval', seconds=1)
 	scheduler.start()
