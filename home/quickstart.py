@@ -57,7 +57,7 @@ def main():
 
         # Replace these values with your own
         PROJECT_ID = "sample-420901"
-        TOPIC_NAME = "projects/reform-crm-1715524659999/topics/sample"
+        TOPIC_NAME = "projects/reform-crm-1715524659999/topics/ReformCRM"
 
         # Create the Gmail API client
         gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
