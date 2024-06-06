@@ -1759,17 +1759,17 @@ def get_body(payload):
 def get_message(historyId,userId):
     historys = HistoryId.objects.all().order_by('-created_at')
     if historys:
-        if os.path.exists("static/token.json"):
-            creds = Credentials.from_authorized_user_file("static/token.json", SCOPES)
+        if os.path.exists("/static/token.json"):
+            creds = Credentials.from_authorized_user_file("/static/token.json", SCOPES)
         if not creds or not creds.valid:
           if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
           else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "static/credentials.json", SCOPES
+                "/static/credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=3000)
-          with open("static/token.json", "w") as token:
+          with open("/static/token.json", "w") as token:
             token.write(creds.to_json())
 
         try:
