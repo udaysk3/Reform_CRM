@@ -56,8 +56,7 @@ def main():
         # gmail.users().watch(userId='me', body=request).execute()
 
         # Replace these values with your own
-        PROJECT_ID = "sample-420901"
-        TOPIC_NAME = "projects/reform-crm-1715524659999/topics/ReformCRM"
+        TOPIC_NAME = "projects/reformpubsub/topics/ReformTopic"
 
         # Create the Gmail API client
         gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
