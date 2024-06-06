@@ -262,7 +262,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             next = str(next.id)
         else:
             next = str(customer_id)
-    print(type(prev), next)
+    # print(type(prev), next)
     customer = Customers.objects.get(pk=customer_id)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
@@ -553,7 +553,7 @@ def Customer(request):
     result = [x for x in customers if x not in new_customers] 
 
     customers= new_customers + result
-    print(type(customers))
+    # print(type(customers))
     customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
@@ -779,7 +779,7 @@ def edit_customer(request, customer_id):
         customer.house_name = request.POST.get("house_name")
         customer.county = request.POST.get("county")
         customer.country = request.POST.get("country")
-        print(request.POST.get("county"),request.POST.get("country"))
+        # print(request.POST.get("county"),request.POST.get("country"))
         if customer.campaign == "nan" or customer.city == "nan" or customer.county == "nan" or customer.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
@@ -1779,7 +1779,7 @@ def get_message(historyId,userId):
             historyId1 = historys[0].history_id
             gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
             response = gmail.users().history().list(userId='me', startHistoryId=historyId1,historyTypes="messageAdded", labelId="UNREAD").execute()
-            print('response', response)
+            # print('response', response)
             if 'history' in response:
                 for history in response['history']:
                     if 'messagesAdded' in history:
@@ -1868,10 +1868,9 @@ def get_notifications(request):
         base64_bytes = base64_string.encode("ascii") 
         sample_string_bytes = base64.b64decode(base64_bytes) 
         sample_string = sample_string_bytes.decode("ascii")
-        print(sample_string, type(sample_string))
+        # print(sample_string, type(sample_string))
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
-        # print(request.body, historyId)
         get_message(historyId, userId)
     return HttpResponse(200)
