@@ -1868,7 +1868,7 @@ def get_notifications(request):
         base64_bytes = base64_string.encode("ascii") 
         sample_string_bytes = base64.b64decode(base64_bytes) 
         sample_string = sample_string_bytes.decode("ascii")
-        # print(sample_string, type(sample_string))
+        print(sample_string, type(sample_string))
         history_data = json.loads(sample_string)
         historyId = history_data["historyId"]
         userId = history_data["emailAddress"]
