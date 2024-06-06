@@ -35,28 +35,7 @@ def main():
             token.write(creds.to_json())
 
     try:
-        # Call the Gmail API
-        # service = build("gmail", "v1", credentials=creds)
-        # results = service.users().labels().list(userId="me").execute()
-        # labels = results.get("labels", [])
-
-        # if not labels:
-        #   print("No labels found.")
-        #   return
-        # print("Labels:")
-        # for label in labels:
-        #   print(label["name"])
-
-        # gmail = build("gmail", "v1", credentials=creds)
-        # request = {
-        #   'labelIds': ['INBOX'],
-        #   'topicName': 'projects/sample-420901/topics/MyTopic',
-        #   'labelFilterBehavior': 'INCLUDE'
-        # }
-        # gmail.users().watch(userId='me', body=request).execute()
-
-        # Replace these values with your own
-        TOPIC_NAME = "projects/reformpubsub/topics/ReformTopic"
+        TOPIC_NAME = "projects/nimble-factor-423106-t0/topics/ReformTopic"
 
         # Create the Gmail API client
         gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
@@ -81,24 +60,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-
-
-# # Replace these values with your own
-# PROJECT_ID = 'sample-420901'
-# TOPIC_NAME = 'projects/sample-420901/topics/MyTopic'
-
-# # Create the Gmail API client
-# gmail = googleapiclient.discovery.build('gmail', 'v1')
-
-# # Create the watch request
-# request = {
-#     'labelIds': ['INBOX'],
-#     'topicName': TOPIC_NAME,
-#     'labelFilterBehavior': 'INCLUDE'
-# }
-
-# # Execute the watch request
-# gmail.users().watch(userId='me', body=request).execute()
-
-# # Print a success message
-# print('Successfully set up watch for new emails.')
