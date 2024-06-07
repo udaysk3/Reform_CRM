@@ -27,7 +27,7 @@ def main():
             token.write(creds.to_json())
 
     try:
-        TOPIC_NAME = "projects/pubsubproject-425703/topics/Reform"
+        TOPIC_NAME = "projects/reform-crm-1715524659999/topics/ReformTopic"
 
         # Create the Gmail API client
         gmail = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
