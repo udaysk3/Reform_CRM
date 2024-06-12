@@ -707,14 +707,6 @@ def add_customer(request):
         country = request.POST.get("country")
         campaign = request.POST.get("campaign")
         agent = User.objects.get(email=request.user)
-        
-        
-
-        if campaign == "nan" or city == "nan" or county == "nan" or country == "nan":
-            messages.error(request, "Select all dropdown fields")
-            return redirect("/customer?page=add_customer")
-        
-        
 
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
@@ -723,6 +715,19 @@ def add_customer(request):
             phone_number = phone_number
         else:
             phone_number = "+44" + phone_number
+
+        if Customers.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists")
+            return redirect("/customer?page=add_customer")
+
+        if Customers.objects.filter(phone_number=phone_number).exists():
+            messages.error(request, "Phone number already exists")
+            return redirect("/customer?page=add_customer")
+
+        if campaign == "nan" or city == "nan" or county == "nan" or country == "nan":
+            messages.error(request, "Select all dropdown fields")
+            return redirect("/customer?page=add_customer")
+
         postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
         if district and not Councils.objects.filter(name=district).exists():

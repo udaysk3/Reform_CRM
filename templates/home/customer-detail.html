@@ -954,7 +954,7 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li><b>{{ v.0 }}</b> - {{ v.1 }} - {{ v.2 }} <b>{{ v.3 }} {{ v.4 }}</b> - <b> {{ v.5 }} </b>
+                        <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} - {{ v.2 }} <b>{{ v.3 }} {{ v.4 }}</b> - <b> {{ v.5 }} </b>
                           {% if v.5 == 'CB' %}
                           {{ v.6 }}
                           {% endif %}
@@ -969,7 +969,7 @@ table {
                       </ul>
                       {% endfor %}
                       {% if customer.imported %}
-                        <li> <b>{{ customer.created_at }}</b> - {{ customer.house_name }} - {{ customer.postcode }} - Imported/Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }} </li>
+                        <li class="mb-2"> <b>{{ customer.created_at }}</b> - {{ customer.house_name }} - {{ customer.postcode }} - Imported/Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }} </li>
                       {% endif %}
                     </ul>
                   </div>

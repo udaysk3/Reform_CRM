@@ -6,11 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    {{ body }}
-    {{ signature.signature }}
-    
-    <!-- <img src=" static 'signature.signature_img.img'" alt="static image"> -->
-    <img src="{{ domain_name }}{{ signature.signature_img.url }}" alt="Image 3" class="image">
-    {{ domain_name }}{{ signature.signature_img.url }}
+    {{ body }} <br>
+    {{ signature.signature }} <br>
+    <img src="{{ domain_name }}{{ signature.signature_img.url }}" alt="Signature" height="150px" width="200px">
 </body>
 </html>
