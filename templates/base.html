@@ -233,6 +233,7 @@
       </header>
       
       <!--  Header End -->
+      {% if request.GET.page != customer %}
       {% for message in messages %}
       <div class="container-fluid p-0 m-0">
         <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
@@ -245,6 +246,8 @@
         </div>
       </div>
       {% endfor %}
+      {% endif %}
+
       {% block content %}{% endblock content %}
         {% comment %} <div class="py-6 px-6 text-center">
           <p class="mb-0 fs-4">This is a Footer <a href="#" target="_blank" class="pe-1 text-primary text-decoration-underline">2024 @ Copyright Udaysk</a></p>

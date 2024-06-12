@@ -1089,6 +1089,7 @@ def import_customers_view(request):
     excel_columns = []
     expected_columns = ["history"]
     history = {}
+    message = []
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         campaign = request.POST.get("campaign")
@@ -1137,7 +1138,6 @@ def import_customers_view(request):
                 elif column_mappings[i] == "postcode":
                     postcode = str(row[i])
 
-
                     url = "https://api.postcodes.io/postcodes/" + postcode.strip()
                     try:
                         response = requests.get(
@@ -1158,6 +1158,18 @@ def import_customers_view(request):
                     customer_data[column_mappings[i]] = re.sub(r'\s+', ' ', postcode)
                 else:
                     customer_data[column_mappings[i]] = str(row[i])
+
+            if Customers.objects.filter(email=customer_data['email']).exists():
+                message.append(f'{customer_data["first_name"]} {customer_data["last_name"]}')
+                continue
+
+            elif Customers.objects.filter(
+                phone_number=customer_data['phone_number']
+            ).exists():
+                message.append(
+                    f'{customer_data["first_name"]} {customer_data["last_name"]}'
+                )
+                continue
 
             customer = Customers.objects.create(
                 **customer_data,
@@ -1187,7 +1199,10 @@ def import_customers_view(request):
                 action_type=f"Added {customer.first_name} {customer.last_name}  {customer.house_name } {customer.phone_number} {customer.email} {customer.house_name} {customer.street_name} {customer.city} {customer.county} {customer.country}",
                 keyevents=True,
         )
-        messages.success(request, "Customers imported successfully.")
+        if message:
+            messages.error(request, f"Customer with email or phone number already exists: {', '.join(message)}")
+        else:
+            messages.success(request, "Customers imported successfully.")
         return redirect("app:customer")
 
     campaigns = Campaign.objects.all()
