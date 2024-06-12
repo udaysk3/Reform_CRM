@@ -184,6 +184,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
     all_customers = []
     prev = None
     next = None
+    domain_name = request.build_absolute_uri("/")[:-1]
     signatures = Signature.objects.all()
     if request.GET.get('previous') == 'dashboard':
         user  = User.objects.get(email=request.user)
@@ -204,7 +205,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 if action.imported == False:
                     new_customers.append(customer)
                     break
-                
+
         new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
         result = [x for x in customers if x not in new_customers] 
         all_customers= new_customers + result
@@ -241,7 +242,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         )
 
         customers = list(customers)
-        
+
         new_customers = []
         for customer in customers:
             actions = customer.get_created_at_action_history()
@@ -250,9 +251,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 if action.imported == False:
                     new_customers.append(customer)
                     break
-                
-        new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
+        new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
         result = [x for x in customers if x not in new_customers] 
 
@@ -352,7 +352,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 ]
             )
 
-
     if customer.district:
         council= Councils.objects.get_or_create(name=customer.district)[0]
     else:
@@ -382,14 +381,13 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 for field in s_fields:
                     fields[field] = [s_fields[field], '']
                 values[name] = fields
-            
+
             for key, fields in values.items():
                 if key in stage_values:
                     for field in fields:
                         if field in stage_values[key]:
                             fields[field][1] = stage_values[key][field]
 
-            
             # print(stage_values, values)
             return render(
         request,
@@ -411,6 +409,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "reasons": reasons,
             "templates": templates,
             "signatures": signatures,
+            "domain_name": domain_name,
         },
     )
         return render(
@@ -432,6 +431,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "reasons": reasons,
             "templates": templates,
             "signatures": signatures,
+            "domain_name": domain_name,
         },
     )
 
@@ -453,6 +453,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "reasons": reasons,
             "templates": templates,
             "signatures": signatures,
+            "domain_name": domain_name,
         },
     )
 
@@ -706,10 +707,14 @@ def add_customer(request):
         country = request.POST.get("country")
         campaign = request.POST.get("campaign")
         agent = User.objects.get(email=request.user)
+        
+        
 
         if campaign == "nan" or city == "nan" or county == "nan" or country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect("/customer?page=add_customer")
+        
+        
 
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
@@ -1618,6 +1623,7 @@ def send_email(request, customer_id):
     date_str = request.POST.get("date_field")
     time_str = request.POST.get("time_field")
     date_time_str = f"{date_str} {time_str}"
+    domain_name = request.build_absolute_uri("/")[:-1]
     date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
     body = ""
     subject = ""
@@ -1662,6 +1668,7 @@ def send_email(request, customer_id):
     context = {
         "body": body,
         "signature": signature,
+        "domain_name": domain_name,
     }
 
     template_name = "../templates/home/email.html"
