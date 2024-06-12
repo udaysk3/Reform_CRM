@@ -638,6 +638,107 @@
   </div>
 </div>
 
+<div class="container-fluid">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech">
+      <div class="card w-100">
+        <div class="card-body">
+          
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            
+            <div class="mb-3 mb-sm-0">
+             <a href="{% url 'app:admin' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Signature Management</h5></a>
+            </div>
+            <div>
+              <a href="?page=add_signature" class="btn btn-primary">Add Signature</a>
+            </div>
+          </div>
+          <div>
+            <!-- User Table -->
+            
+            {% if request.GET.page == 'add_signature' %}
+              <h3>Add Signature</h3>
+                        <!-- User Addition Form -->
+                        <form id="addSignatureForm" method="post" action="{% url "app:add_signature" %}" enctype="multipart/form-data">
+                          {% csrf_token %}
+                            <div class="mb-3">
+                              <label for="signature" class="form-label">Signature</label>
+                              <textarea class="form-control" id="signature" rows="3" name="signature" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                              <label for="formFile" class="form-label">Signature Image</label>
+                              <input type="file" id="formFile" name="signature_img" class="form-control" >
+                            </div>
+                          <button type="submit" class="btn btn-primary">Add Signature</button>
+                        </form>
+                        <!-- End User Addition Form -->
+                        {% elif request.GET.page == 'edit_signature' %}
+                        {% if signature %}
+                          <button  class="mb-3 btn-outline-info btn">{{signature.signature}}</button>
+                          <form id="editSignatureForm" method="post" action="{% url 'app:edit_signature' signature.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                              <label for="signature" class="form-label">Signature</label>
+                              <textarea class="form-control" id="signature" rows="3" name="signature" required>{{signature.signature}}</textarea>
+                            </div>
+                            <div class="mb-3">
+                              <label for="formFile" class="form-label">Signature Image</label>
+                              <input type="file" id="formFile" name="signature_img" class="form-control" >
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Signature</button>
+                          </form>
+                      <!-- End User Edit Form -->
+                      {% else %}
+                          <p>Signature not found.</p>
+                        {% endif %}
+                      {% else %}
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Signature</th>
+                      <th>Signature Image</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if signatures %}
+                      {% for signature in signatures %}
+                        <tr>
+                          <td>{{ signature.id }}</td>
+                          <td>
+                            {{ signature.signature|truncatechars:50 }}
+                          </td>
+                          <td><a href="{{ signature.signature_img.url }}">Image</a></td>
+                          <td>
+                            <a href="?page=edit_signature&id={{ signature.id }}" class="edit-signature-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+                            </a>
+                            <a href="{% url 'app:remove_signature' signature.id %}" class="delete-reason-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                            </a>
+                          </td>
+                        </tr>
+          
+
+                      {% endfor %}
+                {% else %}
+                  <tr class="text-center display-flex align-items-center justify-content-center">
+                    <td colspan="9" class="text-center">No Signature</td>
+                  </tr>
+                {% endif %}
+              
+              </tbody>
+            </table>
+              {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const editButtons = document.querySelectorAll('.edit-user-btn');

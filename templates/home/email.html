@@ -1,0 +1,14 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    {{ body }}
+    {{ signature.signature }}{{ signature.signature_img }}
+    <!-- <img src=" static 'signature.signature_img.img'" alt="static image"> -->
+    <img src="{{ signature.signature_img.url }}" alt="Image 3" class="image">
+</body>
+</html>

@@ -4,7 +4,25 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Cities, Customers, Client, Campaign, Councils, Route, Stage, Document, Cities, Email, Reason, HistoryId, Countys, Countries
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .models import (
+    Cities,
+    Customers,
+    Client,
+    Campaign,
+    Councils,
+    Route,
+    Stage,
+    Document,
+    Cities,
+    Email,
+    Reason,
+    HistoryId,
+    Countys,
+    Countries,
+    Signature,
+)
 import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
@@ -166,6 +184,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
     all_customers = []
     prev = None
     next = None
+    signatures = Signature.objects.all()
     if request.GET.get('previous') == 'dashboard':
         user  = User.objects.get(email=request.user)
         customers = (
@@ -391,6 +410,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "events": events,
             "reasons": reasons,
             "templates": templates,
+            "signatures": signatures,
         },
     )
         return render(
@@ -411,6 +431,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "events": events,
             "reasons": reasons,
             "templates": templates,
+            "signatures": signatures,
         },
     )
 
@@ -431,6 +452,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "events": events,
             "reasons": reasons,
             "templates": templates,
+            "signatures": signatures,
         },
     )
 
@@ -607,7 +629,6 @@ def archive(request):
     )
 
 
-
 @login_required
 def council(request):
     if request.GET.get("page") == "edit_council" and request.GET.get("backto") is None:
@@ -648,11 +669,16 @@ def Admin(request):
         reason_id = request.GET.get("id")
         reason = Reason.objects.get(pk=reason_id)
         return render(request, "home/admin.html", {"reason": reason})
+    if request.GET.get("page") == "edit_signature":
+        signature_id = request.GET.get("id")
+        signature = Signature.objects.get(pk=signature_id)
+        return render(request, "home/admin.html", {"signature": signature})
     users = User.objects.filter(is_superuser=False).values()
     clients = Client.objects.filter()
     emails = Email.objects.all()
     reasons = Reason.objects.all()
-    return render(request, "home/admin.html", {"users": users, "clients": clients, "emails": emails, "reasons": reasons})
+    signatures = Signature.objects.all()
+    return render(request, "home/admin.html", {"users": users, "clients": clients, "emails": emails, "reasons": reasons, "signatures": signatures})
 
 
 @login_required
@@ -1460,7 +1486,7 @@ def set_stage_values(request, customer_id):
         customer.save()
         messages.success(request, f"{name} is set successfully!")
         return redirect(f"/customer-detail/{customer_id}")
-    
+
 @login_required
 def funding_route(request):
     routes = Route.objects.all()
@@ -1584,7 +1610,7 @@ def assign_agent(request):
     except Exception as e:
         messages.error(request, f"Error assigning customer: {e}")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
-    
+
 
 def send_email(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
@@ -1593,22 +1619,29 @@ def send_email(request, customer_id):
     time_str = request.POST.get("time_field")
     date_time_str = f"{date_str} {time_str}"
     date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
-    body = ''
-    subject = ''
-    text = ''
-    if email_id != 'nan':
-        email  = Email.objects.get(pk=email_id)
+    body = ""
+    subject = ""
+    text = ""
+
+    if request.POST.get("signature") == "nan":
+        messages.error(request, "Signature field should be mapped")
+        return redirect(f"/customer-detail/{customer_id}")
+
+    signature = Signature.objects.get(pk=request.POST.get("signature"))
+
+    if email_id != "nan":
+        email = Email.objects.get(pk=email_id)
         text = email.name
         body = email.body
         if customer.first_name:
             body = body.replace("{{first_name}}", customer.first_name)
-        if customer.last_name:    
+        if customer.last_name:
             body = body.replace("{{last_name}}", customer.last_name)
         if customer.phone_number:
             body = body.replace("{{phone_number}}", customer.phone_number)
         if customer.email:
             body = body.replace("{{email}}", customer.email)
-        if customer.house_name:    
+        if customer.house_name:
             body = body.replace("{{house_name}}", customer.house_name)
         if customer.street_name:
             body = body.replace("{{street_name}}", customer.street_name)
@@ -1624,15 +1657,27 @@ def send_email(request, customer_id):
     else:
         body = request.POST.get("text")
         text = request.POST.get("text")
+        subject = request.POST.get("subject")
 
-    email = EmailMessage(
-        subject=subject,
-        body=body,
-        from_email='support@reform-group.uk',
-        to=[customer.email],
+    context = {
+        "body": body,
+        "signature": signature,
+    }
+
+    template_name = "../templates/home/email.html"
+    convert_to_html_content = render_to_string(
+        template_name=template_name, context=context
     )
+    plain_message = strip_tags(convert_to_html_content)
 
-    email.send()
+    email = send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email="support@reform-group.uk",
+        recipient_list=[customer.email],
+        html_message=convert_to_html_content,
+    ) 
+
     if text == '':
         customer.add_action(
                 agent=User.objects.get(email=request.user),
@@ -1740,6 +1785,36 @@ def remove_reason(request, reason_id):
     reason = Reason.objects.get(pk=reason_id)
     reason.delete()
     messages.success(request, "Reason deleted successfully!")
+    return redirect("app:admin")
+
+
+def add_signature(request):
+    if request.method == "POST":
+        signature = request.POST.get("signature")
+        signature_img = request.FILES.get("signature_img")
+        template = Signature.objects.create(
+            signature=signature,
+            signature_img=signature_img,
+        )
+        messages.success(request, "Signature added successfully!")
+        return redirect("app:admin")
+    return render(request, "home/admin.html")
+
+
+def edit_signature(request, signature_id):
+    signature = Signature.objects.get(pk=signature_id)
+    if request.method == "POST":
+        signature.signature = request.POST.get("signature")
+        signature.signature_img = request.FILES.get("signature_img")
+        signature.save()
+        messages.success(request, "Signature updated successfully!")
+        return redirect("app:admin")
+    return redirect("app:admin")
+
+def remove_signature(request, signature_id):
+    signature = Signature.objects.get(pk=signature_id)
+    signature.delete()
+    messages.success(request, "Signature deleted successfully!")
     return redirect("app:admin")
 
 def get_body(payload):
@@ -1860,7 +1935,7 @@ def get_message(historyId,userId):
     else:
         historys = HistoryId.objects.create(history_id=historyId, created_at=datetime.now(pytz.timezone("Europe/London")))
     return HttpResponse(200)
-        
+
 @csrf_exempt
 def get_notifications(request):
     if request.method == "POST":

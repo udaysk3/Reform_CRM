@@ -648,13 +648,13 @@ table {
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Schedule Email</h1>
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Send Email</h1>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body row">
+                        <div class="modal-body row pt-0">
                           
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Template</label>
-                            <select id="select" class="form-select"  name="template">
+                            <select id="select" class="form-select mb-3"  name="template">
                               
                               <option value="nan"> Create a email </option>
                               {% for email in templates %}
@@ -662,10 +662,11 @@ table {
                               {% endfor %}
                             </select>
 
-                            <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Schedule next action</label>
+                            <div class="col ">
                           <div class="form-floating">
                             <div class="wrapper">
-                              <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
+                              <p for="date_field" class="mb-1" style="font-weight: 600; color: #2A3547">Date</p>
                               <label class="label" for="date_field">
                                 <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
                               </label>	
@@ -706,9 +707,23 @@ table {
                           </div>
 
                             <div class="form-floating mt-3">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 50px"
+                            name="subject"></textarea>
+                            <label for="floatingTextarea">Subject</label>
+                          </div>
+                            <div class="form-floating mt-3">
                             <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
                             name="text"></textarea>
-                            <label for="floatingTextarea">Comments</label>
+                            <label for="floatingTextarea">Body</label>
+                          </div>
+                          <div class="form-floating mt-3">
+                            <select id="select" class="form-select py-0"  name="signature">
+                              
+                              <option value="nan"> Select a signature </option>
+                              {% for signature in signatures %}
+                              <option value="{{ signature.id }}">{{ signature.signature|truncatechars:50 }}</option>
+                              {% endfor %}
+                            </select>
                           </div>
                         </div>
                         <div class="modal-footer">

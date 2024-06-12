@@ -155,3 +155,7 @@ class HistoryId(models.Model):
     
     def __str__(self):
         return f"{self.history_id}"
+    
+class Signature(models.Model):
+    signature = models.CharField(max_length=999, blank=True, null=True)
+    signature_img = models.FileField(upload_to="signatures", blank= True, null=True)
