@@ -548,7 +548,6 @@ def Customer(request):
                 "customers": customers,
             },
         )
-    
 
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     current_time = datetime.now(london_tz)
@@ -557,6 +556,7 @@ def Customer(request):
         Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
         .filter(closed=False)
+        .filter(email=(~Q('mailer-daemon@googlemail.com')))
         .order_by("earliest_action_date")
     )
 
@@ -569,9 +569,8 @@ def Customer(request):
             if action.imported == False:
                 new_customers.append(customer)
                 break
-            
-    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
+    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
     result = [x for x in customers if x not in new_customers] 
 
@@ -589,7 +588,7 @@ def Customer(request):
         page_obj = p_customers.page(1)
     except EmptyPage:
         page_obj = p_customers.page(p_customers.num_pages)
-        
+
     return render(
         request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj}
     )
@@ -600,6 +599,7 @@ def archive(request):
         Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_customer=None)
         .filter(closed=True)
+        
         .order_by("earliest_action_date")
     )
 
