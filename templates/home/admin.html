@@ -676,7 +676,7 @@
                         {% elif request.GET.page == 'edit_signature' %}
                         {% if signature %}
                           <button  class="mb-3 btn-outline-info btn">{{signature.signature}}</button>
-                          <form id="editSignatureForm" method="post" action="{% url 'app:edit_signature' signature.id %}">
+                          <form id="editSignatureForm" method="post" action="{% url 'app:edit_signature' signature.id %}" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-3">
                               <label for="signature" class="form-label">Signature</label>
@@ -706,6 +706,7 @@
                     {% if signatures %}
                       {% for signature in signatures %}
                         <tr>
+                          {{ signature.signature_img.url }}
                           <td>{{ signature.id }}</td>
                           <td>
                             {{ signature.signature|truncatechars:50 }}

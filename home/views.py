@@ -1684,6 +1684,8 @@ def send_email(request, customer_id):
         body = request.POST.get("text")
         text = request.POST.get("text")
         subject = request.POST.get("subject")
+        
+
 
     context = {
         "body": body,
