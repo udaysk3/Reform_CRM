@@ -16,7 +16,7 @@ class Customers(models.Model):
     constituency = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
     campaign = models.ForeignKey('Campaign', related_name='customers', on_delete=models.SET_NULL, null=True)
-    client = models.ForeignKey('Client', related_name='customers', on_delete=models.SET_NULL, null=True)
+    client = models.ForeignKey('Clients', related_name='customers', on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     assigned_to = models.ForeignKey(User, related_name= 'assigned_to', on_delete=models.DO_NOTHING, null=True)
     district = models.CharField(max_length=255, blank=True, null=True)
@@ -50,24 +50,62 @@ class Customers(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+class Clients(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=15)
+    email = models.EmailField(max_length=255)
+    postcode = models.CharField(max_length=255, blank=True, null=True)
+    house_name = models.CharField(max_length=255, blank=True, null=True)
+    street_name = models.TextField(max_length=999, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    county = models.CharField(max_length=255, blank=True, null=True)
+    country = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(blank= True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    # assigned_to = models.ForeignKey(User, related_name= 'assigned_to', on_delete=models.DO_NOTHING, null=True)
+    parent_client = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
+    primary_client = models.BooleanField(default=False)
+    council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
+    closed = models.BooleanField(default=False)
+    imported = models.BooleanField(default=False)
 
-class Client(models.Model):
-    name = models.CharField(max_length=255,blank=True, null=True)
-    main_contact = models.CharField(max_length=225,blank=True, null=True)
-    telephone = models.CharField(max_length=225,blank=True, null=True)
-    email= models.EmailField(max_length=225,blank=True, null=True)
 
+    def add_action(
+        self,
+        text=None,
+        agent=None, closed=False, imported=False, created_at=None, talked_with=None, date_time=None, action_type=None, keyevents=False
+    ):
+        client = self
+        client.closed = closed
+        client.save()
+        return Action.objects.create(client=self, date_time=date_time, text=text, agent=agent, imported=imported, created_at=created_at, talked_with=talked_with, action_type=action_type, keyevents=keyevents)
+
+    def get_created_at_action_history(self):
+        return (Action.objects.filter(client=self).order_by("-created_at"))
+
+    
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.first_name} {self.last_name}"
 
 
 class Campaign(models.Model):
-    name = models.CharField(max_length=255)
-    client = models.ForeignKey(Client, related_name='campaigns', on_delete=models.CASCADE)
-    
+    name = models.CharField(max_length=255, blank=True, null=True,)
+    description = models.CharField(max_length=999, blank=True, null=True,)
+    client = models.ForeignKey(Clients, related_name='campaigns', on_delete=models.CASCADE)
+
     def __str__(self):
-        return f"{self.client.name} {self.name}"
-    
+        return f"{self.client.first_name} {self.client.last_name} {self.name}"
+
+class Product(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True,)
+    description = models.CharField(max_length=999, blank=True, null=True,)
+    client = models.ForeignKey(Clients, related_name='products', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.client.first_name} {self.client.last_name} {self.name}"
+
+
 class Route(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     managed_by = models.CharField(max_length=999, blank= True, null=True)
@@ -77,11 +115,11 @@ class Route(models.Model):
     council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route', null=True, blank= True)
-    
+
 class Document(models.Model):
     document = models.FileField(upload_to="documents", blank= True, null=True)
 
-    
+
 class Councils(models.Model):
     name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
@@ -90,7 +128,7 @@ class Councils(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    
+
 class Cities(models.Model):
     name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
@@ -98,7 +136,7 @@ class Cities(models.Model):
     
     def __str__(self):
         return f"{self.name}"
-    
+
 class Countys(models.Model):
     name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
@@ -106,7 +144,7 @@ class Countys(models.Model):
     
     def __str__(self):
         return f"{self.name}"
-    
+
 class Countries(models.Model):
     name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
@@ -114,9 +152,10 @@ class Countries(models.Model):
     
     def __str__(self):
         return f"{self.name}"
-    
+
 class Action(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE, null=True)
+    client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True)
     council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True)
     date_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
@@ -132,7 +171,7 @@ class Stage(models.Model):
     council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
-    
+
 class Email(models.Model):
     name = models.CharField(max_length=255)
     subject = models.CharField(max_length=255)
@@ -140,14 +179,14 @@ class Email(models.Model):
     
     def __str__(self):
         return f"{self.email}"
-    
+
 class Reason(models.Model):
     name = models.CharField(max_length=255)
     reason = models.TextField(max_length=999)
     
     def __str__(self):
         return f"{self.name}"
-    
+
 
 class HistoryId(models.Model):
     history_id = models.CharField(max_length=255)
@@ -155,7 +194,7 @@ class HistoryId(models.Model):
     
     def __str__(self):
         return f"{self.history_id}"
-    
+
 class Signature(models.Model):
     signature = models.CharField(max_length=999, blank=True, null=True)
     signature_img = models.FileField(upload_to="signatures", blank= True, null=True)

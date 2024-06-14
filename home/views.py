@@ -9,7 +9,7 @@ from django.utils.html import strip_tags
 from .models import (
     Cities,
     Customers,
-    Client,
+    Clients,
     Campaign,
     Councils,
     Route,
@@ -22,19 +22,18 @@ from .models import (
     Countys,
     Countries,
     Signature,
+    Product,
 )
 import re
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, HttpResponse
 import pandas as pd
 import requests
-import csv
-from django.db.models import Max, BooleanField, Case, When
+from django.db.models import Max
 import pytz
 from user.models import User
 from pytz import timezone
 import json
-import numpy as np
 import os
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
@@ -46,7 +45,6 @@ from .epc import getEPC
 from simplegmail import Gmail
 from simplegmail.query import construct_query
 import base64 
-import quopri
 import requests
 import os.path
 import googleapiclient.discovery
@@ -459,6 +457,175 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
 
 @login_required
+def client_detail(request, client_id, s_client_id=None):
+    all_clients = []
+    prev = None
+    next = None
+    domain_name = request.build_absolute_uri("/")[:-1]
+    signatures = Signature.objects.all()
+    
+    clients = (
+        Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_client=None)
+        .filter(closed=False)
+        .order_by("earliest_action_date")
+    )
+    clients = list(clients)
+    new_clients = []
+    for client in clients:
+        actions = client.get_created_at_action_history()
+        flag = False
+        for action in actions:
+            if action.imported == False:
+                new_clients.append(client)
+                break
+    new_clients.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+    result = [x for x in clients if x not in new_clients] 
+    clients= new_clients + result
+    clients = clients[::-1]
+    if len(clients) == 1:
+        prev = client
+        next = client
+    else:
+        for i in range(len(clients)):
+            if clients[i].id == client_id:
+                if i == 0:
+                    prev = clients[i]
+                    next = clients[i + 1]
+                elif i == len(clients) - 1:
+                    prev = clients[i - 1]
+                    next = clients[i]
+                else:
+                    prev = clients[i - 1]
+                    next = clients[i + 1]
+    if prev:
+        prev = str(prev.id)
+    else:
+        prev = str(client_id)   
+    if next:     
+        next = str(next.id)
+    else:
+        next = str(client_id)
+    # print(type(prev), next)
+    client = Clients.objects.get(pk=client_id)
+    campaigns = Campaign.objects.all().filter(client=client)
+    products = Product.objects.all().filter(client=client)
+    child_clients = Clients.objects.all().filter(parent_client=client)
+    agents = User.objects.filter(is_superuser=False)
+    show_client = client
+    reasons = Reason.objects.all()
+    templates = Email.objects.all()
+    if s_client_id:
+        show_client = Clients.objects.get(pk=s_client_id)
+
+    history = {}
+    actions = client.get_created_at_action_history()
+    imported = {}
+    london_tz = timezone("Europe/London")
+    keyevents = client.get_created_at_action_history().filter(keyevents=True)
+    events = {}
+
+    for i in actions:
+        if i.imported:
+            if i.created_at.replace(tzinfo=london_tz).date() not in imported:
+                imported[i.created_at.replace(tzinfo=london_tz).date()] = []
+        else:
+            if i.created_at.replace(tzinfo=london_tz).date() not in history:
+                history[i.created_at.replace(tzinfo=london_tz).date()] = []
+    for i in actions:
+        if i.imported:
+            imported[i.created_at.replace(tzinfo=london_tz).date()].append(
+                [
+                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.text,
+                    i.agent.first_name,
+                    i.agent.last_name,
+                    i.imported,
+                    i.talked_with,
+                    i.client.postcode,
+                    i.client.house_name,
+                ]
+            )
+        else:
+            history[i.created_at.replace(tzinfo=london_tz).date()].append(
+                [
+                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.client.postcode,
+                    i.client.house_name,
+                    i.agent.first_name,
+                    i.agent.last_name,
+                    i.action_type,
+                    i.date_time,
+                    i.talked_with,
+                    i.text,
+                ]
+            )
+
+    for i in keyevents:
+        if i.created_at.replace(tzinfo=london_tz).date() not in events:
+            events[i.created_at.replace(tzinfo=london_tz).date()] = []
+    for i in keyevents:
+        events[i.created_at.replace(tzinfo=london_tz).date()].append(
+                [
+                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.client.postcode,
+                    i.client.house_name,
+                    i.agent.first_name,
+                    i.agent.last_name,
+                    i.action_type,
+                    i.date_time,
+                    i.talked_with,
+                    i.text
+                ]
+            )
+
+    
+        return render(
+        request,
+        "home/client-detail.html",
+        {
+            "client": client,
+            "history": history,
+            "imported": imported,
+            "prev": prev,
+            "next": next,
+            "child_clients": child_clients,
+            "agents" : agents,
+            "show_client": show_client,
+            "events": events,
+            "reasons": reasons,
+            "templates": templates,
+            "signatures": signatures,
+            "domain_name": domain_name,
+            "campaigns": campaigns,
+            "products":products,
+        },
+    )
+
+    return render(
+        request,
+        "home/client-detail.html",
+        {
+            "client": client,
+            "history": history,
+            "imported": imported,
+            "prev": prev,
+            "next": next,
+            "child_clients": child_clients,
+            "agents" : agents,
+            "show_client": show_client,
+            "events": events,
+            "reasons": reasons,
+            "templates": templates,
+            "signatures": signatures,
+            "domain_name": domain_name,
+            "campaigns": campaigns,
+            "products":products,
+        },
+    )
+
+
+@login_required
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
@@ -594,6 +761,81 @@ def Customer(request):
         request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj}
     )
 
+
+@login_required
+def Client(request):
+    if request.GET.get("page") == "edit_client" and request.GET.get("backto") is None:
+        client_id = request.GET.get("id")
+        client = Clients.objects.get(pk=client_id)
+        if client.parent_client:
+            edit_client = client
+            client = Clients.objects.get(pk=client.parent_client.id)
+            clients = Clients.objects.all().filter(parent_client=client)
+            return render(
+                request,
+                "home/client.html",
+                {
+                    "edit_client": edit_client,
+                    "client": client,
+                    "clients": clients,
+                },
+            )
+        edit_client = client
+        clients = Clients.objects.all().filter(parent_client=client)
+        return render(
+            request,
+            "home/client.html",
+            {
+                "edit_client": edit_client,
+                "client": client,
+                "clients": clients,
+            },
+        )
+    
+
+    # clients = Clients.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
+    current_time = datetime.now(london_tz)
+    user  = User.objects.get(email=request.user)
+    clients = (
+        Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
+        .filter(parent_client=None)
+        .filter(closed=False)
+        .order_by("earliest_action_date")
+    )
+
+    clients = list(clients)
+    new_clients = []
+    for client in clients:
+        actions = client.get_created_at_action_history()
+        flag = False
+        for action in actions:
+            if action.imported == False:
+                new_clients.append(client)
+                break
+            
+    new_clients.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+
+
+    result = [x for x in clients if x not in new_clients] 
+
+    clients= new_clients + result
+    # print(type(clients))
+    clients = clients[::-1]
+    campaigns = Campaign.objects.all()
+    agents = User.objects.filter(is_superuser=False)
+    p_clients = Paginator(clients, 50)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = p_clients.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = p_clients.page(1)
+    except EmptyPage:
+        page_obj = p_clients.page(p_clients.num_pages)
+        
+    return render(
+        request, "home/client.html", {"clients": p_clients, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj}
+    )
+
 @login_required
 def archive(request):
     customers = (
@@ -675,11 +917,10 @@ def Admin(request):
         signature = Signature.objects.get(pk=signature_id)
         return render(request, "home/admin.html", {"signature": signature})
     users = User.objects.filter(is_superuser=False).values()
-    clients = Client.objects.filter()
     emails = Email.objects.all()
     reasons = Reason.objects.all()
     signatures = Signature.objects.all()
-    return render(request, "home/admin.html", {"users": users, "clients": clients, "emails": emails, "reasons": reasons, "signatures": signatures})
+    return render(request, "home/admin.html", {"users": users, "emails": emails, "reasons": reasons, "signatures": signatures})
 
 
 @login_required
@@ -775,7 +1016,7 @@ def add_customer(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.first_name} {customer.last_name}  {customer.house_name } {customer.phone_number} {customer.email} {customer.house_name} {customer.street_name} {customer.city} {customer.county} {customer.country}",
+                action_type=f"Added  {customer.first_name}  {customer.last_name}  {customer.house_name }  {customer.phone_number}  {customer.email} {customer.house_name}  {customer.street_name}  {customer.city} {customer.county}  {customer.country}",
                 keyevents=True,
         )
         messages.success(request, "Customer added successfully!")
@@ -851,7 +1092,7 @@ def edit_customer(request, customer_id):
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Updated {customer.first_name} {customer.last_name} - " + changed,
+            action_type=f"Updated {customer.first_name}  {customer.last_name} - " + changed,
             keyevents=True,
         )
         messages.success(request, "Customer updated successfully!")
@@ -860,7 +1101,7 @@ def edit_customer(request, customer_id):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Updated {customer.parent_customer.firt_name} {customer.parent_customer.last_name} - " + changed,
+                action_type=f"Updated {customer.parent_customer.firt_name}  {customer.parent_customer.last_name} - " + changed,
                 keyevents=True,
             )
             return redirect(f"/customer-detail/{customer.parent_customer.id}")
@@ -869,6 +1110,130 @@ def edit_customer(request, customer_id):
 
     context = {"customer": customer}
     return render(request, "home/customer.html", context)
+
+
+
+@login_required
+def add_client(request):
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name").upper()
+        phone_number = request.POST.get("phone_number")
+        email = request.POST.get("email")
+        postcode = request.POST.get("postcode")
+        street_name = request.POST.get("street_name")
+        house_name = request.POST.get("house_name")
+        city = request.POST.get("city")
+        county = request.POST.get("county")
+        country = request.POST.get("country")
+        agent = User.objects.get(email=request.user)
+
+        if phone_number[0] == "0":
+            phone_number = phone_number[1:]
+            phone_number = "+44" + phone_number
+        elif phone_number[0] == "+":
+            phone_number = phone_number
+        else:
+            phone_number = "+44" + phone_number
+
+        if Clients.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists")
+            return redirect("/client?page=add_client")
+
+        if Clients.objects.filter(phone_number=phone_number).exists():
+            messages.error(request, "Phone number already exists")
+            return redirect("/client?page=add_client")
+
+
+        postcode = re.sub(r'\s+', ' ', postcode)
+        client = Clients.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            phone_number=phone_number,
+            email=email,
+            postcode=postcode,
+            street_name=street_name,
+            city=city,
+            house_name=house_name,
+            county=county,
+            country=country,
+            agent=agent,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            primary_client=True,
+        )
+        client.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type=f"Added {client.first_name}  {client.last_name}  {client.house_name }  {client.phone_number}  {client.email} {client.house_name}  {client.street_name}  {client.city}  {client.county}  {client.country}",
+                keyevents=True,
+        )
+        messages.success(request, "Client added successfully!")
+        return redirect("app:client")
+    return render(request, "home/client.html")
+
+
+@login_required
+def edit_client(request, client_id):
+    client = Clients.objects.get(pk=client_id)
+    if request.method == "POST":
+        changed = ''
+        if client.phone_number != request.POST.get("phone_number"):
+            changed += f'{request.POST.get("phone_number")}'
+        if client.email != request.POST.get('email'):
+            changed += f'{request.POST.get("email")}'
+        if client.postcode != request.POST.get("postcode"):
+            changed += f'{request.POST.get("postcode")}'
+        if client.street_name != request.POST.get("street_name"):
+            changed += f'{request.POST.get("street_name")}'
+        if client.city != request.POST.get("city"):
+            changed += f'{request.POST.get("city")}'
+        if client.house_name != request.POST.get("house_name"):
+            changed += f'{request.POST.get("house_name")}'
+        if client.county != request.POST.get("county"):
+            changed += f'{request.POST.get("county")}'
+        if client.country != request.POST.get("country"):
+            changed += f'{request.POST.get("country")}'
+
+        client.first_name = request.POST.get("first_name")
+        client.last_name = request.POST.get("last_name").upper()
+        client.phone_number = request.POST.get("phone_number")
+        client.email = request.POST.get("email")
+        client.postcode = re.sub(r'\s+', ' ', request.POST.get("postcode"))
+        client.street_name = request.POST.get("street_name")
+        client.city = request.POST.get("city")
+        client.house_name = request.POST.get("house_name")
+        client.county = request.POST.get("county")
+        client.country = request.POST.get("country")
+        # print(request.POST.get("county"),request.POST.get("country"))
+        if client.city == "nan" or client.county == "nan" or client.country == "nan":
+            messages.error(request, "Select all dropdown fields")
+            return redirect(f"/client?page=edit_client&id={client_id}")
+        
+        
+        client.save()
+        client.add_action(
+            agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type=f"Updated {client.first_name}  {client.last_name} - " + changed,
+            keyevents=True,
+        )
+        messages.success(request, "Client updated successfully!")
+        if client.parent_client:
+            client.parent_client.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type=f"Updated {client.parent_client.firt_name}  {client.parent_client.last_name} - " + changed,
+                keyevents=True,
+            )
+            return redirect(f"/client-detail/{client.parent_client.id}")
+
+        return redirect(f"/client-detail/{client_id}")
+
+    context = {"client": client}
+    return render(request, "home/client.html", context)
 
 
 @login_required
@@ -897,6 +1262,15 @@ def remove_customer(request, customer_id):
 
     messages.success(request, "Customer deleted successfully!")
     return redirect("app:customer")
+
+
+@login_required
+def remove_client(request, client_id):
+    client = Clients.objects.get(pk=client_id)
+    client.delete()
+
+    messages.success(request, "Client deleted successfully!")
+    return redirect("app:client")
 
 
 @login_required
@@ -995,6 +1369,93 @@ def close_action_submit(request, customer_id):
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
 
+def client_action_submit(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(id=client_id)
+        talked_with = request.POST.get("talked_client")
+        date_str = request.POST.get("date_field")
+        time_str = request.POST.get("time_field")
+        date_time_str = f"{date_str} {time_str}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = request.POST.get("text")
+
+        if talked_with == "nan":
+            messages.error(request, "Client field should be mapped")
+            return redirect(f"/client-detail/{client_id}")
+
+        client.add_action(
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            talked_with=talked_with,
+            date_time=date_time,
+            action_type="CB",
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/client-detail/" + str(client_id))
+
+def close_client_action_submit(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(id=client_id)
+        talked_with = request.POST.get("talked_client")
+        reason = request.POST.get("reason")
+        text = request.POST.get("text")
+        action_type = ''
+        c_text = ''
+        closed = False
+        
+        c_text = f'{reason} - {text}'
+
+        if reason == 'nan':
+            c_text = text
+        
+        if text == '':
+            c_text = reason
+            
+        if client.closed:
+            c_text = text
+        
+
+        if client.closed:
+            action_type = f"Reopened"
+            closed = False
+            try:
+                client = Clients.objects.get(pk=client_id)
+                client.assigned_to =  User.objects.get(pk=reason)
+                client.save()
+                client.add_action(
+                    agent=User.objects.get(email=request.user),
+                    date_time=datetime.now(pytz.timezone("Europe/London")),
+                    created_at=datetime.now(pytz.timezone("Europe/London")),
+                    action_type="Assigned to Agent",
+                )
+            except Exception as e:
+                messages.error(request, f"Error assigning client: {e}")
+                return HttpResponseRedirect("/client-detail/" + str(client_id))
+        else:
+            action_type = f"Closed"
+            closed = True
+
+        if talked_with == "nan":
+            messages.error(request, "Client field should be mapped")
+            return redirect(f"/client-detail/{client_id}")
+
+        client.add_action(
+            text=c_text,
+            closed=closed,
+            agent=User.objects.get(email=request.user),
+            date_time=datetime.now(pytz.timezone("Europe/London")),
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            talked_with=talked_with,
+            action_type=action_type,
+            keyevents=True,
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/client-detail/" + str(client_id))
+
 
 def council_action_submit(request, council_id):
     if request.method == "POST":
@@ -1083,6 +1544,46 @@ def lm_action_submit(request, customer_id):
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
+def na_client_action_submit(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(id=client_id)
+        date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
+        time_str = datetime.now(london_tz).strftime("%H:%M")
+        time_obj = datetime.strptime(time_str, "%H:%M")
+        time_obj += timedelta(minutes=60)
+        time_str_updated = time_obj.strftime("%H:%M")
+        date_time_str = f"{date_str} {time_str_updated}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+
+        client.add_action(
+            date_time=date_time,
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="NA",
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/client-detail/" + str(client_id))
+
+def lm_client_action_submit(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(id=client_id)
+        date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
+        time_str = datetime.now(london_tz).strftime("%H:%M")
+        time_obj = datetime.strptime(time_str, "%H:%M")
+        time_obj += timedelta(minutes=60)
+        time_str_updated = time_obj.strftime("%H:%M")
+        date_time_str = f"{date_str} {time_str_updated}"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+
+        client.add_action(
+            date_time=date_time,
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="LM",
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/client-detail/" + str(client_id))
 
 
 def import_customers_view(request):
@@ -1196,7 +1697,7 @@ def import_customers_view(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.first_name} {customer.last_name}  {customer.house_name } {customer.phone_number} {customer.email} {customer.house_name} {customer.street_name} {customer.city} {customer.county} {customer.country}",
+                action_type=f"Added {customer.first_name}  {customer.last_name}  {customer.house_name }  {customer.phone_number}  {customer.email} {customer.house_name}  {customer.street_name}  {customer.city} {customer.county}  {customer.country}",
                 keyevents=True,
         )
         if message:
@@ -1233,74 +1734,75 @@ def bulk_remove_customers(request):
         return redirect("app:customer")
     return render(request, "home/customer_list.html")
 
+def bulk_remove_clients(request):
+    if request.method == "GET":
+        client_ids_str = request.GET.get("ids", "")
+        try:
+            client_ids = [
+                int(id) for id in client_ids_str.split(",") if id.isdigit()
+            ]
+            if client_ids:
+                Clients.objects.filter(id__in=client_ids).delete()
+                messages.success(request, "Selected clients deleted successfully.")
+            else:
+                messages.warning(
+                    request, "No valid client IDs provided for deletion."
+                )
+        except Exception as e:
+            messages.error(request, f"Error deleting clients: {e}")
+        return redirect("app:client")
+    return render(request, "home/client_list.html")
 
-def add_client(request):
+
+def add_campaign(request, client_id):
     if request.method == "POST":
-        # email = request.POST.get('email')
-        # if Client.objects.filter(email=email).exists():
-        #     messages.error(request, 'Client with this email already exists!')
-        # return redirect('app:client')
+        description = request.POST.get("description")
         name = request.POST.get("name")
-        telephone = request.POST.get("telephone")
-        main_contact = request.POST.get("main_contact")
-        email = request.POST.get("email")
-        client = Client.objects.create(
-            name=name,
-            main_contact=main_contact,
-            email=email,
-            telephone=telephone,
-        )
-        messages.success(request, "Client added successfully!")
-        return redirect("app:admin")
-    return render(request, "admin.html")
-
-
-def add_campaign(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        client_id = request.POST.get("client_id")
         if Campaign.objects.filter(name=name).exists():
             messages.error(request, "Campaign with this name already exists!")
-            return redirect("app:admin")
+            return redirect(f"/client-detail/{client_id}")
         name = request.POST.get("name")
         campaign = Campaign.objects.create(
             client_id=client_id,
             name=name,
+            description=description,
         )
         messages.success(request, "Campaign added successfully!")
-        return redirect("app:admin")
-    return render(request, "admin.html")
+        return redirect(f"/client-detail/{client_id}")
+    return render(request, f"/client-detail/{client_id}")
 
 
-def edit_client(request, client_id):
-    client = Client.objects.get(pk=client_id)
-    if request.method == "POST":
-        client.name = request.POST.get("name")
-        client.main_contact = request.POST.get("main_contact")
-        client.telephone = request.POST.get("telephone")
-        client.email = request.POST.get("email")
-        client.save()
-        messages.success(request, "Client updated successfully!")
-        return redirect("app:admin")
-    context = {"client": client}
-    return redirect("app:adminview")
 
-
-def remove_client(request, client_id):
-    client = Client.objects.get(pk=client_id)
-    if not request.user.is_superuser:
-        messages.error(request, "You don't have permission to do this!")
-        return redirect("app:admin")
-    client.delete()
-    messages.success(request, "Client deleted successfully!")
-    return redirect("app:admin")
-
-
-def remove_campaign(request, campaign_id):
+def remove_campaign(request, campaign_id, client_id):
     campaign = Campaign.objects.get(pk=campaign_id)
     campaign.delete()
     messages.success(request, "Campaign deleted successfully!")
-    return redirect("app:admin")
+    return redirect(f"/client-detail/{client_id}")
+
+
+def add_product(request, client_id):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        if Product.objects.filter(name=name).exists():
+            messages.error(request, "Product with this name already exists!")
+            return redirect(f"/client-detail/{client_id}")
+        product = Product.objects.create(
+            client_id=client_id,
+            name=name,
+            description=description,
+        )
+        messages.success(request, "Product added successfully!")
+        return redirect(f"/client-detail/{client_id}")
+    return render(request, f"/client-detail/{client_id}")
+
+
+
+def remove_product(request, product_id, client_id):
+    product = Product.objects.get(pk=product_id)
+    product.delete()
+    messages.success(request, "Product deleted successfully!")
+    return redirect(f"/client-detail/{client_id}")
 
 
 def add_child_customer(request, customer_id):
@@ -1342,7 +1844,7 @@ def add_child_customer(request, customer_id):
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Added {child_customer.first_name} {child_customer.last_name} { child_customer.house_name } {child_customer.phone_number} {child_customer.email} {child_customer.house_name} {child_customer.street_name} {child_customer.city} {child_customer.county} {child_customer.country}",
+            action_type=f"Added {child_customer.first_name}  {child_customer.last_name}  { child_customer.house_name }  {child_customer.phone_number}  {child_customer.email}  {child_customer.house_name}  {child_customer.street_name}  {child_customer.city}  {child_customer.county}  {child_customer.country}",
             keyevents=True
         )
         messages.success(request, "Customer added successfully!")
@@ -1729,6 +2231,99 @@ def send_email(request, customer_id):
 
     messages.success(request, "Email sent successfully!")
     return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
+def send_client_email(request, cclient_id):
+    cclient = Cclients.objects.get(pk=cclient_id)
+    email_id = request.POST.get("template")
+    date_str = request.POST.get("date_field")
+    time_str = request.POST.get("time_field")
+    date_time_str = f"{date_str} {time_str}"
+    domain_name = request.build_absolute_uri("/")[:-1]
+    date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+    body = ""
+    subject = ""
+    text = ""
+
+    if request.POST.get("signature") == "nan":
+        messages.error(request, "Signature field should be mapped")
+        return redirect(f"/cclient-detail/{cclient_id}")
+
+    signature = Signature.objects.get(pk=request.POST.get("signature"))
+
+    if email_id != "nan":
+        email = Email.objects.get(pk=email_id)
+        text = email.name
+        body = email.body
+        if cclient.first_name:
+            body = body.replace("{{first_name}}", cclient.first_name)
+        if cclient.last_name:
+            body = body.replace("{{last_name}}", cclient.last_name)
+        if cclient.phone_number:
+            body = body.replace("{{phone_number}}", cclient.phone_number)
+        if cclient.email:
+            body = body.replace("{{email}}", cclient.email)
+        if cclient.house_name:
+            body = body.replace("{{house_name}}", cclient.house_name)
+        if cclient.street_name:
+            body = body.replace("{{street_name}}", cclient.street_name)
+        if cclient.city:
+            body = body.replace("{{city}}", cclient.city)
+        if cclient.county:
+            body = body.replace("{{county}}", cclient.county)
+        if cclient.country:
+            body = body.replace("{{country}}", cclient.country)
+        if cclient.postcode:
+            body = body.replace("{{postcode}}", cclient.postcode)
+        subject = email.subject
+    else:
+        body = request.POST.get("text")
+        text = request.POST.get("text")
+        subject = request.POST.get("subject")
+        
+
+
+    context = {
+        "body": body,
+        "signature": signature,
+        "domain_name": domain_name,
+    }
+
+    template_name = "../templates/home/email.html"
+    convert_to_html_content = render_to_string(
+        template_name=template_name, context=context
+    )
+    plain_message = strip_tags(convert_to_html_content)
+
+    email = send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email="support@reform-group.uk",
+        recipient_list=[cclient.email],
+        html_message=convert_to_html_content,
+    ) 
+
+    if text == '':
+        cclient.add_action(
+                agent=User.objects.get(email=request.user),
+                closed=False,
+                imported=False,
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email Sent",
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+            )
+    else:
+        cclient.add_action(
+                agent=User.objects.get(email=request.user),
+                closed=False,
+                imported=False,
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email Sent",
+                date_time=date_time,
+                text= text,
+            )
+
+    messages.success(request, "Email sent successfully!")
+    return HttpResponseRedirect("/cclient-detail/" + str(cclient_id))
 
 def query_city(request, q):
     cities = Cities.objects.all()

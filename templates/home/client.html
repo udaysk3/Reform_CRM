@@ -1,0 +1,812 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% load custom %}
+{% block search %}
+
+<input
+  class="form-control me-2"
+  type="search"
+  placeholder="Search"
+  aria-label="Search"
+  id="myInput"
+/>
+
+{% endblock %}
+{% block content %}
+<style>
+  .flex-container {
+    display: flex;
+    gap: 20px; /* Optional: Adds space between the two divs */
+}
+
+</style>
+
+<div class="container-fluid" style="max-width:1500px">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech w-100">
+      <div class="card w-100">
+        <div class="card-body">
+          
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}         
+          
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            
+            <div class="mb-3 mb-sm-0">
+             <a href="{% url 'app:client' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Client Management</h5></a>
+            </div>
+
+            {% if request.GET.page == None %}
+            <div>
+              <a href="?page=add_client" class="btn btn-primary">Add Client</a>
+            </div>
+            
+            {% comment %} 
+                <button type="button" class="btn btn-primary position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+                  <i class="bi bi-arrow-bar-right"></i> Assign to Agent
+                </button>
+  
+                <!-- Modal -->
+                <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Customers to the Agents</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method='post' action="{% url 'app:assign_agents'  %}">
+                        {% csrf_token %}
+                      <div class="modal-body flex-container">
+                        <div class="mb-3">
+                          <label for="maincontact" class="form-label">Main Contact</label>
+                          <input type="text" class="form-control" id="maincontact" name="main_contact">
+                        </div>
+                        <div class="mb-3">
+                          <label for="telephone" class="form-label">Telephone</label>
+                          <input type="text" class="form-control" id="telephone" name="telephone">
+                        </div>
+                        <div class="mb-3">
+                          <label for="email" class="form-label">email</label>
+                          <input type="email" class="form-control" id="email" name="email">
+                        </div> 
+                        <div class="mb-3">
+                          <input
+                                type="text"
+                                id="customers"
+                                placeholder="Select the Customers you wish to assign to the agents"
+                                autocomplete="off"
+                                name= "customers"
+                              />
+                           </div>
+                        <div class="mb-3">
+                          <input
+                                type="text"
+                                id="agents"
+                                placeholder="Select the Agents you wish to assign to the customers"
+                                autocomplete="off"
+                                name= "agents"
+                              />
+                           </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                      </div>
+                    </form>
+                    </div>
+                  </div>
+                </div>
+              
+              </div> {% endcomment %}
+            
+              
+            
+
+            {% comment %} <div class="">
+              <a href="{% url 'app:import_client' %}" class="btn btn-primary">Import Client</a>
+            </div> {% endcomment %}
+            {% elif request.GET.page == 'edit_client' %}
+{% comment %} 
+            <div>
+              <button class="btn btn-primary edit-user-btn" data-user-id="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </button>
+            </div>
+
+            {% for c_customer in customers %}
+              <div>
+                <button class="btn btn-primary edit-user-btn" data-user-id="{{ c_customer.id }}"> {{ c_customer.first_name }} {{ c_customer.last_name }} </button>
+              </div>
+            {% endfor %} {% endcomment %}
+
+            
+            
+         
+  {% comment %} <div>
+    <button data-bs-toggle="modal" data-bs-target="#add_child_customer" class="btn btn-primary">Add Customer</button>
+  </div> 
+
+<!-- Modal -->
+<div class="modal fade" id="add_child_customer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Customer</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+  <form method="post" action="{% url 'app:add_child_customer' customer.id %}">
+          {% csrf_token %}
+<div class="mb-3">
+<label for="first_name" class="form-label">First Name</label>
+<input type="text" class="form-control" id="first_name" name="first_name" required>
+</div>
+<div class="mb-3">
+<label for="last_name" class="form-label">Last Name</label>
+<input type="text" class="form-control" id="last_name" name="last_name" required>
+</div>
+<div class="mb-3">
+<label for="phone_number" class="form-label">Phone Number</label>
+<input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ customer.phone_number }}" required>
+</div>
+<div class="mb-3">
+<label for="email" class="form-label">Email</label>
+<input type="email" class="form-control" id="email" name="email" value="{{ customer.email }}" required>
+</div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+<button type="submit" class="btn btn-primary">Submit</button>
+</div>
+</div>
+</div>
+</div>
+      </form> 
+      {% endcomment %}
+            {% endif %}
+          </div>
+          <div>
+            
+            {% if request.GET.page == 'add_client' %}
+              <h3>Add Client</h3>
+              
+              <form name="addClientForm" id="addClientForm" method="post" action="{% url 'app:add_client' %}" onsubmit="return validateAddForm()">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="house_name" class="form-label">House Name/ Number</label>
+                    <input type="text" class="form-control" id="house_name" name="house_name"  required></input>
+                </div>
+                <div class="mb-3">
+                    <label for="street_name" class="form-label">Street Name</label>
+                    <input type="text" class="form-control" id="street_name" name="street_name"  required></input>
+                </div>
+                <div class="mb-3 row">
+                  <div class="col-6">
+                    <label for="postcode" class="form-label">Postcode</label>
+                    <input type="text" class="form-control" id="postcode" name="postcode"  required>
+                  </div>
+                  <div class="col-6 d-flex align-items-end">
+                    <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                  </div>
+                </div>
+
+
+                <div class="mb-3 input-row">
+                    <label for="city" class="form-label">City/Town</label>
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.city}}" data-list="city_from" autocomplete="off" value="{{client.city}}">  <!--list="city_from"-->
+                  <div id="city_from" class="places_box">
+                  </div>
+                </div>
+                <div class="mb-3">
+                    <label for="county" class="form-label">County</label>
+                    <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.county}}" data-list="county_from" autocomplete="off" value="{{client.county}}">  <!--list="county_from"-->
+                  <div id="county_from" class="places_box">
+                  </div>
+                </div>
+               
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.country}}" data-list="country_from" autocomplete="off" value="{{client.country}}">  <!--list="country_from"-->
+                  <div id="country_from" class="places_box">
+                  </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
+
+                {% comment %} <!-- Button trigger modal -->
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    Add Client
+                  </button>
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Campaign</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label for="campaign" class="form-label">Campaign</label>
+                            <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
+                              {% for campaign in campaigns %}
+                                <option value="{{campaign.id}}">{{campaign.name}}</option>
+                              {% endfor %}
+                            </select>
+                        </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div> {% endcomment %}
+
+
+            </form>
+              
+            {% elif request.GET.page == 'edit_client' %}
+              <!-- Similar to the user edit form, create a form for editing a customer -->
+              <!-- Adjust the form action URL and method accordingly -->
+              {% if client %}
+                <h3>Edit Client</h3>
+                <form name="editClientForm" id="editClientForm" method="post" action="{% url 'app:edit_client' edit_client.id %}" onsubmit="return validateForm()">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                      <label for="edit_first_name" class="form-label">First Name</label>
+                      <input type="text" class="form-control" id="edit_first_name" name="first_name" value="{% if edit_client.first_name != 'None' %}{{ edit_client.first_name }}{% endif %}" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="edit_last_name" class="form-label">Last Name</label>
+                      <input type="text" class="form-control" id="edit_last_name" name="last_name" value="{% if edit_client.last_name != 'None' %}{{ edit_client.last_name }}{% endif %}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{% if edit_client.phone_number != 'None' %}{{ edit_client.phone_number }}{% endif %}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email"  value="{% if edit_client.email != 'None' %}{{ edit_client.email }}{% endif %}" required>
+                </div>
+                <div class="mb-3">
+                  <label for="house_name" class="form-label">House Name/ Number</label>
+                  <input type="text" class="form-control" id="house_name" name = "house_name" value="{% if edit_client.house_name != 'None' %}{{ edit_client.house_name }}{% endif %}" required>
+              </div>
+                <div class="mb-3">
+                    <label for="street_name" class="form-label">Street Name</label>
+                    <input type="text" class="form-control" id="street_name" name="street_name" value="{% if edit_client.street_name != 'None' %}{{ edit_client.street_name }}{% endif %}" required>
+                </div>
+                <div class="mb-3 row">
+                  <div class="col-6">
+                  <label for="postcode" class="form-label">Postcode</label>
+                  <input type="text" class="form-control" id="postcode" name="postcode" value="{% if edit_client.postcode != 'None' %}{{ edit_client.postcode }}{% endif %}" required>
+                  </div>
+                  <div class="col-6 d-flex align-items-end">
+                    <button class="btn btn-primary editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                  </div>
+              </div>
+                  <div class="mb-3 input-row">
+                    <label for="city" class="form-label">City/Town</label>
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_client.city}}" data-list="city_from" autocomplete="off" value="{{edit_client.city}}">  <!--list="city_from"-->
+                  <div id="city_from" class="places_box">
+                  </div>
+                </div>
+              <div class="mb-3">
+                  <label for="county" class="form-label">County</label>
+
+                  <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_client.county}}" data-list="county_from" autocomplete="off" value="{{edit_client.county}}">  <!--list="county_from"-->
+                  <div id="county_from" class="places_box">
+                  </div>
+
+              </div>
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+
+                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{edit_client.country}}" data-list="country_from" autocomplete="off" value="{{edit_client.country}}">  <!--list="country_from"-->
+                  <div id="country_from" class="places_box">
+                  </div>
+            </div>
+                  <button  class="btn btn-primary">Update Client</button>
+              </form>
+              {% else %}
+                <p>Client not found.</p>
+              {% endif %}
+              
+            {% else %}
+                <table class="table">
+                  
+                  <thead>
+  <tr>
+    {% if user.is_staff %}
+      <th>
+        <input type="checkbox" id="selectAll">
+      </th>
+    {% endif %}
+   {% comment %} <th onclick="sortTable(0)">
+      ID <span id="arrow0"></span>
+    </th>  {% endcomment %}
+    <th>
+      Date Recieved
+    </th>
+    <th onclick="sortTable(0)">
+      Client <span id="arrow0"></span>
+    </th>
+    {% comment %} <th>
+      Funding Route
+    </th>
+    <th onclick="sortTable(1)">
+      Stage <span id="arrow1"></span>
+    </th> {% endcomment %}
+    <th >
+      Next Action <span id="arrow3"></span>
+    </th>
+    {% comment %} <th >
+      Assigned To
+    </th> {% endcomment %}
+  </tr>
+</thead>
+
+                  <tbody id="myTable">
+                    {% if page_obj %}
+                    {% for client in page_obj.object_list %}
+
+                      <tr>
+                        {% if user.is_staff %}
+                        <td>
+                          <input type="checkbox" class="select-client" data-client-id="{{ client.id }}">
+                        </td>
+                      {% endif %}
+                      
+                        <td style="width: 20%;">{{ client.created_at }}</td>
+                        <td class="text-underlined" style="width: 20%;"><a href="/client-detail/{{client.id}}">{{ client.first_name }} {{ client.last_name }}</a></td>
+                        {% comment %} {% if client.route %}
+                        <td style="width: 20%;">{{ client.route.name }}</td>
+                        {% else %}
+                        <td style="width: 20%;">-</td>
+                        {% endif %}
+                        <td style="width: 10%;">stage 1</td> {% endcomment %}
+                        {% with all_actions=client.get_created_at_action_history %}
+                          {% if all_actions|length >= 1 %}
+                            {% with action=all_actions.0 %}
+                            {% if action.imported %}
+                            <td style="width: 10%;">-</td>
+                            {% else %}
+                            <td style="width: 30%;"><b>{{ action.date_time }}</b> - {{ action.text|truncatechars:50 }}</td>
+
+                            {% endif %}
+                            {% endwith %}
+                          {% else %}
+                          <td style="width: 10%;">-</td>
+                          {% endif %}
+                        {% endwith %}
+                        {% comment %} {% if client.assigned_to %}
+                        <td >{{ client.assigned_to.first_name }} {{ client.assigned_to.last_name }}</td>
+                        {% else %}
+                        <td >-</td>
+                        {% endif %} {% endcomment %}
+                        <td style="display:none;" >{{ client.postcode }}</td>
+                      </tr>
+
+                    {% endfor %}
+                  {% else %}
+                    <tr class="text-center display-flex align-items-center justify-content-center">
+                      <td colspan="6" class="text-center">No Clients</td>
+                    </tr>
+                  {% endif %}
+                  </tbody>
+                  {% if user.is_staff %}
+                  <div>
+                    <button type="button" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
+                  </div>
+                {% endif %}
+                </table>
+            {% endif %}
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if request.GET.page != 'add_client' and request.GET.page != 'edit_client' %}
+<nav aria-label="Page navigation example" class="position-relative" style="top:-25px;">
+  <ul class="pagination pagination-lg justify-content-center">
+    {%if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}">{{page_obj.previous_page_number}}</a></li>
+    {% endif %}
+    <li class="page-item active"><a class="page-link" href="#">{{page_obj.number}}</a></li>
+    {%if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">{{page_obj.next_page_number}}</a></li>
+    {% endif %}
+
+  </ul>
+</nav>
+{% endif %}
+
+
+{% endblock content %}
+
+
+{% block js %}
+{% if request.GET.page == 'add_client' or request.GET.page == 'edit_client' %}
+<script src="{% static 'js/dropdown.js' %}"></script>
+{% endif %}
+<script>
+  $('#city').dropdown();
+  $('#county').dropdown();
+  $('#country').dropdown();
+  {% if request.GET.page == 'edit_client' %}
+  const editAddressBtn = document.querySelector('.editAddressBtn');
+  editAddressBtn.addEventListener('click', function () {
+    const postcode = document.forms["editClientForm"]["postcode"].value;
+    if (postcode) {
+      editAddressBtn.disabled = true;
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
+        .then(response => response.json())
+        .then(data => {
+          if (data) {
+
+            console.log(data)
+            const admin_district = data.results[0].address_components[2].long_name;
+            const pfa = data.results[0].address_components[3].long_name;
+            const country = data.results[0].address_components[4].long_name;
+            document.forms["editClientForm"]["city"].value = admin_district;
+            document.forms["editClientForm"]["county"].value = pfa;
+            document.forms["editClientForm"]["country"].value = country;
+          }
+        })
+        .catch(e => {
+          alert('Postcode isn\'t valid');
+        })
+        editAddressBtn.disabled = false;
+    } else {
+      alert('Please enter a postcode.');
+    }
+  });
+  {% endif %}
+  function loadBtn(e){
+    e.disabled = true
+    e.innerHTML = 'Loading...';
+    
+    if (document.forms["addClientForm"]["first_name"].value == 'None' || document.forms["addClientForm"]["first_name"].value == ' None' || document.forms["addClientForm"]["first_name"].value == '') {
+      alert('The first_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+    }
+    if (document.forms["addClientForm"]["last_name"].value == 'None' || document.forms["addClientForm"]["last_name"].value == ' None' || document.forms["addClientForm"]["last_name"].value == '') {
+      alert('The last_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addClientForm"]["phone_number"].value == 'None' || document.forms["addClientForm"]["phone_number"].value == ' None' || document.forms["addClientForm"]["phone_number"].value == '') {
+      alert('The phone_number field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addClientForm"]["email"].value == 'None' || document.forms["addClientForm"]["email"].value == ' None' || document.forms["addClientForm"]["email"].value == '') {
+      alert('The email field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addClientForm"]["house_name"].value == 'None' || document.forms["addClientForm"]["house_name"].value == ' None' || document.forms["addClientForm"]["house_name"].value == '') {
+      alert('The house_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addClientForm"]["street_name"].value == 'None' || document.forms["addClientForm"]["street_name"].value == ' None' || document.forms["addClientForm"]["street_name"].value == '') {
+      alert('The street_name field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+
+    }
+    if (document.forms["addClientForm"]["postcode"].value == 'None' || document.forms["addClientForm"]["postcode"].value == ' None' || document.forms["addClientForm"]["postcode"].value == '') {
+      alert('The postcode field is required.');
+      e.disabled = false
+      e.innerHTML = 'Submit';
+      return false;
+    }
+    document.getElementById('addClientForm').submit()
+  }
+
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+function sortTable(colIndex) {
+  var table,
+    rows,
+    switching,
+    i,
+    x,
+    y,
+    shouldSwitch,
+    dir,
+    switchcount = 0;
+  table = document.getElementById("myTable");
+  switching = true;
+  dir = "asc"; // Set the sorting direction to ascending by default
+
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    for (i = 0; i < rows.length - 1; i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("td")[colIndex];
+      y = rows[i + 1].getElementsByTagName("td")[colIndex];
+      if (dir === "asc") {form
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir === "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount++;
+    } else {
+      if (switchcount === 0 && dir === "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+
+  
+}
+
+const form = document.querySelector('#addClientForm');
+
+  function validateForm() {
+    // Get the form data.
+    const formData = new FormData(document.querySelector('form'));
+    // Validate the form data.
+    if (document.forms["editClientForm"]["street_name"].value == 'None' || document.forms["editClientForm"]["street_name"].value == ' None' || document.forms["editClientForm"]["street_name"].value == '') {
+      alert('The street_name field is required.');
+      return false;
+    }
+    if (document.forms["editClientForm"]["first_name"].value == 'None' || document.forms["editClientForm"]["first_name"].value == ' None' || document.forms["editClientForm"]["first_name"].value == '') {
+      alert('The first_name field is required.');
+      return false;
+    }
+    if (document.forms["editClientForm"]["last_name"].value == 'None' || document.forms["editClientForm"]["last_name"].value == ' None' || document.forms["editClientForm"]["last_name"].value == '') {
+      alert('The last_name field is required.');
+      return false;
+    }
+    if (document.forms["editClientForm"]["phone_number"].value == 'None' || document.forms["editClientForm"]["phone_number"].value == ' None' || document.forms["editClientForm"]["phone_number"].value == '') {
+      alert('The phone_number field is required.');
+      return false;
+    }
+    if (document.forms["editClientForm"]["email"].value == 'None' || document.forms["editClientForm"]["email"].value == ' None' || document.forms["editClientForm"]["email"].value == '') {
+      alert('The email field is required.');
+      return false;
+    }
+    if (document.forms["editClientForm"]["house_name"].value == 'None' || document.forms["editClientForm"]["house_name"].value == ' None' || document.forms["editClientForm"]["house_name"].value == '') {
+      alert('The house_name field is required.');
+      return false;
+    }
+    if (document.forms["editClientForm"]["postcode"].value == 'None' || document.forms["editClientForm"]["postcode"].value == ' None' || document.forms["editClientForm"]["postcode"].value == '') {
+      alert('The postcode field is required.');
+      return false;
+    }
+  
+    return true;
+  }  
+  
+  function validateAddForm() {
+    // Get the form data.
+    const formData = new FormData(document.querySelector('form'));
+    // Validate the form data.
+    if (document.forms["addClientForm"]["street_name"].value == 'None' || document.forms["addClientForm"]["street_name"].value == ' None' || document.forms["addClientForm"]["street_name"].value == '') {
+      alert('The street_name field is required.');
+      return false;
+    }
+    if (document.forms["addClientForm"]["first_name"].value == 'None' || document.forms["addClientForm"]["first_name"].value == ' None' || document.forms["addClientForm"]["first_name"].value == '') {
+      alert('The first_name field is required.');
+      return false;
+    }
+    if (document.forms["addClientForm"]["last_name"].value == 'None' || document.forms["addClientForm"]["last_name"].value == ' None' || document.forms["addClientForm"]["last_name"].value == '') {
+      alert('The last_name field is required.');
+      return false;
+    }
+    if (document.forms["addClientForm"]["phone_number"].value == 'None' || document.forms["addClientForm"]["phone_number"].value == ' None' || document.forms["addClientForm"]["phone_number"].value == '') {
+      alert('The phone_number field is required.');
+      return false;
+    }
+    if (document.forms["addClientForm"]["email"].value == 'None' || document.forms["addClientForm"]["email"].value == ' None' || document.forms["addClientForm"]["email"].value == '') {
+      alert('The email field is required.');
+      return false;
+    }
+    if (document.forms["addClientForm"]["house_name"].value == 'None' || document.forms["addClientForm"]["house_name"].value == ' None' || document.forms["addClientForm"]["house_name"].value == '') {
+      alert('The house_name field is required.');
+      return false;
+    }
+    if (document.forms["addClientForm"]["postcode"].value == 'None' || document.forms["addClientForm"]["postcode"].value == ' None' || document.forms["addClientForm"]["postcode"].value == '') {
+      alert('The postcode field is required.');
+      return false;
+    }
+  
+    return true;
+  }  
+
+  
+  
+
+</script>
+
+<script type="module">
+//  jQuery(document).ready(function ($) {
+//    
+//    const options = [
+//      {
+//        id:0,
+//        title: 'All Unassigned Clients'
+//      }
+//    ]
+//    let agents = JSON.parse("{{ agents | escapejs }}");
+//    for (let i = 0; i < agents.length; i++) {
+//      options.push({
+//        id: i+1,
+//        title: agents[i].fields.first_name + ' ' + agents[i].fields.last_name + ' - ' + agents[i].pk
+//      });
+//    }
+//    comboTree1 = $("#customers").comboTree({
+//      source: options,
+//      isMultiple: true,
+//      cascadeSelect: false,
+//      collapse: true,
+//    });
+//  });
+//  jQuery(document).ready(function ($) {
+//    let agents = JSON.parse("{{ agents | escapejs }}");
+//
+//    let comboSource2 = agents.map(agent => {
+//      return {
+//        id: agent.pk,
+//        title: agent.fields.first_name + ' ' + agent.fields.last_name + ' - ' + agent.pk
+//      };  
+//    });
+//    comboTree2 = $("#agents").comboTree({
+//      source: comboSource2,
+//      isMultiple: true,
+//      cascadeSelect: false,
+//      collapse: true,
+//      selectAll: true,
+//    });
+//  });
+
+  
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const ceditButtons = document.querySelectorAll('.edit-user-btn');
+    ceditButtons.forEach(cbutton => {
+      cbutton.addEventListener('click', function (event) {
+        event.preventDefault();
+        const userId = cbutton.getAttribute('data-user-id');
+        window.location.href = `/client?page=edit_client&id=${userId}`;
+      });
+    });
+  });
+
+  
+</script>
+{% if request.GET.page == 'add_client' %}
+<script>
+  const findAddressBtn = document.querySelector('.find-address');
+  findAddressBtn.addEventListener('click', function () {
+    const postcode = document.forms["addClientForm"]["postcode"].value;
+    if (postcode) {
+      findAddressBtn.disable = true;
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
+        .then(response => response.json())
+        .then(data => {
+          if (data) {
+            console.log(data)
+            const admin_district = data.results[0].address_components[2].long_name;
+            const pfa = data.results[0].address_components[3].long_name;
+            const country = data.results[0].address_components[4].long_name;
+            document.forms["addClientForm"]["city"].value = admin_district;
+            document.forms["addClientForm"]["county"].value = pfa;
+            document.forms["addClientForm"]["country"].value = country;
+          }
+        });
+      findAddressBtn.disable = false;
+    } else {
+      alert('Please enter a postcode.');
+    }
+  });
+
+
+
+
+</script>
+
+{% endif %}
+
+
+{% if request.GET.page != 'add_client' and request.GET.page != 'edit_client' %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Select/deselect all checkboxes
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const clientCheckboxes = document.querySelectorAll('.select-client');
+
+  selectAllCheckbox.addEventListener('change', function () {
+    clientCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+  });
+
+  // Bulk delete
+  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+  deleteSelectedBtn.addEventListener('click', function () {
+    const selectedClientIds = Array.from(clientCheckboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.getAttribute('data-client-id'));
+
+    if (selectedClientIds.length > 0) {
+      const confirmDelete = confirm('Are you sure you want to delete selected clients?');
+      if (confirmDelete) {
+        window.location.href = `bulk_remove_clients/?ids=${selectedClientIds.join(',')}`;
+      }
+    } else {
+      alert('Please select clients to delete.');
+    }
+  });
+});
+
+
+
+</script>
+
+{% endif %}
+  
+
+{% endblock js %}

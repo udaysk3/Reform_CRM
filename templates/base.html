@@ -67,6 +67,16 @@
               </a>
             </li>
             {% endif %}
+            {% if request.user.client %}
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url "app:client" %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-article"></i>
+                </span>
+                <span class="hide-menu">Client</span>
+              </a>
+            </li>
+            {% endif %}
             {% if request.user.archive %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:archive" %}" aria-expanded="false">

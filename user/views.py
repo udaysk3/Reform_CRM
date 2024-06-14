@@ -49,6 +49,7 @@ def add_user(request):
         password = request.POST.get('password') 
         dashboard = request.POST.get('dashboard') == 'on'
         customer = request.POST.get('customer') == 'on'
+        client = request.POST.get('client') == 'on'
         council = request.POST.get('council') == 'on'
         funding_route = request.POST.get('funding_route') == 'on'
         admin = request.POST.get('admin') == 'on'
@@ -63,6 +64,7 @@ def add_user(request):
             password= hashed_password,
             dashboard=dashboard,
             customer=customer,
+            client=client,
             council=council,
             funding_route=funding_route,
             admin=admin,
@@ -83,6 +85,7 @@ def edit_user(request, user_id):
             user.password = make_password(request.POST.get('password'))
         user.dashboard = request.POST.get('dashboard') == 'on'
         user.customer = request.POST.get('customer') == 'on'
+        user.client = request.POST.get('client') == 'on'
         user.council = request.POST.get('council') == 'on'
         user.funding_route = request.POST.get('funding_route') == 'on'
         user.admin = request.POST.get('admin') == 'on'

@@ -58,6 +58,10 @@
                             <label class="form-check-label" for="customer">Customer</label>
                           </div>
                           <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="client" name="client" checked>
+                            <label class="form-check-label" for="client">Client</label>
+                          </div>
+                          <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="archive" name="archive" checked>
                             <label class="form-check-label" for="archive">Archive</label>
                           </div>
@@ -107,6 +111,10 @@
                               <label class="form-check-label"  for="editCustomer">Customer</label>
                             </div>
                             <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.client %}checked{% endif %} class="form-check-input" id="editClient" name="client" >
+                              <label class="form-check-label"  for="editClient">Client</label>
+                            </div>
+                            <div class="mb-3 form-check">
                               <input type="checkbox" {% if user.archive %}checked{% endif %} class="form-check-input" id="editArchive" name="archive" >
                               <label class="form-check-label"  for="editArchive">Archive</label>
                             </div>
@@ -145,6 +153,7 @@
                       <th>Email</th>
                       <th>Dashboard</th>
                       <th>Customer</th>
+                      <th>Client</th>
                       <th>Archive</th>
                       <th>Council</th>
                       <th>funding_route</th>
@@ -172,6 +181,18 @@
                           {% endif %}
                           
                           {% if user.customer %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+                          
+                          
+                          
+                          {% if user.client %}
                           <td>
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
                           </td>
@@ -267,7 +288,7 @@
   </div>
 </div>
 
-<div class="container-fluid">
+{% comment %} <div class="container-fluid">
   <!-- Row 1 -->
   <div class="row">
     <div class="col-lg-12 d-flex align-items-strech">
@@ -422,7 +443,7 @@
       </div>
     </div>
   </div>
-</div>
+</div> {% endcomment %}
 
 <div class="container-fluid">
   <!-- Row 1 -->
