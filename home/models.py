@@ -198,3 +198,11 @@ class HistoryId(models.Model):
 class Signature(models.Model):
     signature = models.CharField(max_length=999, blank=True, null=True)
     signature_img = models.FileField(upload_to="signatures", blank= True, null=True)
+
+class Postcode(models.Model):
+    postcode = models.CharField(max_length=255)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.postcode}"

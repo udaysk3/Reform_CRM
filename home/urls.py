@@ -104,4 +104,5 @@ urlpatterns = [
     path("edit_signature/<int:signature_id>", views.edit_signature, name="edit_signature"),
     path("remove_signature/<int:signature_id>", views.remove_signature, name="remove_signature"),
     path('get_notifications', views.get_notifications, name='get_notifications'),
+    path('map', views.map, name='map'),
 ]

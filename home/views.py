@@ -1,4 +1,5 @@
 from hmac import new
+import io, csv
 from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.core.serializers import serialize
@@ -23,6 +24,7 @@ from .models import (
     Countries,
     Signature,
     Product,
+    Postcode
 )
 import re
 from datetime import datetime, timedelta
@@ -1112,7 +1114,6 @@ def edit_customer(request, customer_id):
     return render(request, "home/customer.html", context)
 
 
-
 @login_required
 def add_client(request):
     if request.method == "POST":
@@ -1772,7 +1773,6 @@ def add_campaign(request, client_id):
     return render(request, f"/client-detail/{client_id}")
 
 
-
 def remove_campaign(request, campaign_id, client_id):
     campaign = Campaign.objects.get(pk=campaign_id)
     campaign.delete()
@@ -1795,7 +1795,6 @@ def add_product(request, client_id):
         messages.success(request, "Product added successfully!")
         return redirect(f"/client-detail/{client_id}")
     return render(request, f"/client-detail/{client_id}")
-
 
 
 def remove_product(request, product_id, client_id):
@@ -2573,3 +2572,8 @@ def get_notifications(request):
         userId = history_data["emailAddress"]
         get_message(historyId, userId)
     return HttpResponse(200)
+
+def map(request):
+    postcodes = Postcode.objects.all()
+    postcodes = list(postcodes)
+    return render(request, 'home/map.html', {'postcodes': postcodes})
