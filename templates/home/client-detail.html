@@ -203,7 +203,7 @@ table {
 
 #map{
   width: 350px;
-  height: 165px;
+  height: 160px;
 }
 
 </style>
@@ -318,9 +318,9 @@ table {
           <div class="col-sm-4">
             <div class="card m-0">
               <div class="card-body p-0" style="height: 200px;">
-
+<p class="position-absolute card-title">Coverage</p>
                 <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary position-relative" style="right:-59%" data-bs-toggle="modal" data-bs-target="#coverageArea">
+<button type="button" class="btn btn-primary position-relative" style="right:-195px" data-bs-toggle="modal" data-bs-target="#coverageArea">
   Add Coverage areas
 </button>
 
@@ -336,8 +336,11 @@ table {
         <form method="post" action="{% url 'app:add_coverage_areas' client.id %}">
           {% csrf_token %}
           <div class="form-floating">
-            <input type="text" class="form-control" id="floatingInput" placeholder="Postcode" name="postcode">
-            <label for="floatingInput">Postcode</label>
+            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Postcode" name="postcode">
+            <label  for="floatingInput">Postcode</label>
+            {% for area in coverage_areas.postcode.all %}
+    <p class="ms-2">{{ area.postcode }}</p>
+{% endfor %}
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
