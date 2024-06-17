@@ -24,6 +24,7 @@ from .models import (
     Countries,
     Signature,
     Product,
+    CoverageAreas,
     Postcode
 )
 import re
@@ -465,7 +466,7 @@ def client_detail(request, client_id, s_client_id=None):
     next = None
     domain_name = request.build_absolute_uri("/")[:-1]
     signatures = Signature.objects.all()
-    
+    coverage_area = CoverageAreas.objects.get(client=Clients.objects.get(pk=client_id)) if CoverageAreas.objects.filter(client=Clients.objects.get(pk=client_id)).exists() else None
     clients = (
         Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_client=None)
@@ -601,6 +602,7 @@ def client_detail(request, client_id, s_client_id=None):
             "domain_name": domain_name,
             "campaigns": campaigns,
             "products":products,
+            "coverage_areas": coverage_area,
         },
     )
 
@@ -623,6 +625,7 @@ def client_detail(request, client_id, s_client_id=None):
             "domain_name": domain_name,
             "campaigns": campaigns,
             "products":products,
+            "coverage_areas": coverage_area,
         },
     )
 
@@ -2573,7 +2576,29 @@ def get_notifications(request):
         get_message(historyId, userId)
     return HttpResponse(200)
 
-def map(request):
-    postcodes = Postcode.objects.all()
-    postcodes = list(postcodes)
-    return render(request, 'home/map.html', {'postcodes': postcodes})
+def add_coverage_areas(request, client_id):
+    if request.method == "POST":
+
+        if CoverageAreas.objects.filter(
+            client=Clients.objects.get(pk=client_id)
+        ).exists():
+            postcode = Postcode.objects.get(
+                    postcode=re.sub(r"\s+", " ", request.POST.get("postcode"))
+                )
+            template = CoverageAreas.objects.get(client=Clients.objects.get(pk=client_id))
+            template.postcode.add(postcode)
+            template.save()
+            messages.success(request, "Coverage Area added successfully!")
+            return redirect(r"/client-detail/" + str(client_id))
+
+        postcode = Postcode.objects.get(
+                postcode=re.sub(r"\s+", " ", request.POST.get("postcode"))
+            )
+        template = CoverageAreas.objects.create(
+            client=Clients.objects.get(pk=client_id),
+        )
+        template.postcode.add(postcode)
+        template.save()
+        messages.success(request, "Coverage Area added successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
+    return render(request, "home/admin.html")

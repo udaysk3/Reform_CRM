@@ -206,3 +206,10 @@ class Postcode(models.Model):
 
     def __str__(self):
         return f"{self.postcode}"
+
+class CoverageAreas(models.Model):
+    client = models.ForeignKey(Clients, related_name='coverage_areas', on_delete=models.CASCADE)
+    postcode = models.ManyToManyField(Postcode, related_name='coverage_areas', null=True, blank= True)
+
+    def __str__(self):
+        return f"{self.id}"

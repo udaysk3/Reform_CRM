@@ -201,7 +201,13 @@ table {
   scrollbar-width: none;  /* Firefox */
 }
 
+#map{
+  width: 350px;
+  height: 165px;
+}
+
 </style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 {% endblock %} {% block content %}
 
@@ -309,11 +315,42 @@ table {
               </div>
             </div>
           </div>
-
           <div class="col-sm-4">
             <div class="card m-0">
-              <div class="card-body" style="height: 200px;">
-                
+              <div class="card-body p-0" style="height: 200px;">
+
+                <!-- Button trigger modal -->
+<button type="button" class="btn btn-primary position-relative" style="right:-59%" data-bs-toggle="modal" data-bs-target="#coverageArea">
+  Add Coverage areas
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="coverageArea" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Coverage areas</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{% url 'app:add_coverage_areas' client.id %}">
+          {% csrf_token %}
+          <div class="form-floating">
+            <input type="text" class="form-control" id="floatingInput" placeholder="Postcode" name="postcode">
+            <label for="floatingInput">Postcode</label>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+                <div id="map"></div>
               </div>
             </div>
           </div>
@@ -992,88 +1029,99 @@ table {
 
         
 <div class="mt-5">
-                    {% if campaigns %}
-                    {% for camp in campaigns %}
-                      <button type="button" class="btn btn-primary d-block mb-3" data-bs-toggle="modal" data-bs-target="#CAMPAIGN{{forloop.counter}}">
-                      {{ camp.name }}
-                    </button>
+    {% if campaigns %}
+    {% for camp in campaigns %}
+        <button type="button" class="btn btn-primary d-block mb-3" data-bs-toggle="modal" data-bs-target="#CAMPAIGN{{forloop.counter}}">
+            {{ camp.name }}
+        </button>
 
-                    <div class="modal fade" id="CAMPAIGN{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Campaign</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                              <div class="form-floating">
-                                <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
-                                <label for="floatingInput">Campaign Name</label>
-                              </div>
-                              <div class="form-floating">
-                                <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
-                                <label for="floatingInput">Campaign Description</label>
-                              </div>
-                              
-                              
-                          </div>
-                        </div>
-                      </div>
+        <div class="modal fade" id="CAMPAIGN{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Campaign</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    {% endfor %}
-                    {% endif %}
-
-
-                  </div>
-
-
-
-
-  </div>
-  </div>
-  
-  </div>
+                    <div class="modal-body">
+                        <div class="form-floating">
+                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
+                            <label for="floatingInput">Campaign Name</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
+                            <label for="floatingInput">Campaign Description</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% endif %}
 </div>
+
+
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+{% for area in coverage_areas.postcode.all %}
+    <p class="latitude" style="visibility: hidden;">{{ area.latitude }}</p>
+    <p class="longitude" style="visibility: hidden;">{{ area.longitude }}</p>
+{% endfor %}
 
 
 {% endblock %} {% block js %}
 
-<script>
-
-  window.addEventListener('DOMContentLoaded', function () {
-    const postcode = '{{ client.postcode }}';
-    if (postcode) {
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
-        .then(response => response.json())
-        .then(data => {
-          if (data) {
-            const googlemap = document.querySelector('.googlemap');
-            const longitude = data.results[0].geometry.location.lng;
-            const latitude = data.results[0].geometry.location.lat;
-            googlemap.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            
-          }
-        });
-      findAddressBtn.disable = false;
-    } else {
-      alert('Please enter a postcode.');
-    }
-  });
-
-
-
-</script>
+ <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+        ({key: "AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg", v: "weekly"});</script>
 
 <script scr="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
 <script src="{% static 'node_modules/jquery-clock-timepicker/jquery-clock-timepicker.min.js' %}"></script>
-<script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
-      crossorigin="anonymous"
-    ></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
 <script>
+  var lat = document.querySelectorAll('.latitude');
+  var long = document.querySelectorAll('.longitude');
+
+  async function initMap() {
+  // Request needed libraries.
+  const { Map } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  const map = new Map(document.getElementById("map"), {
+    center: { lat: 53.667603611772805, lng: -2.2139166064168174 },
+    zoom: 4,
+    mapId: "e09c21068633cc77",
+  });
+  if (lat.length === 0){
+    return;
+  }
+  for(var i=0;i<lat.length;i++){
+    new google.maps.Marker({
+      position: { lat: parseFloat(lat[i].innerHTML), lng: parseFloat(long[i].innerHTML) },
+      map: map,
+    });
+  }
+}
+
+
+
+initMap();
+
+
 
   function SubmitClose(e){
     const reason = document.querySelector('.c_reason').value;
@@ -1087,32 +1135,6 @@ table {
       return false;
     }
     document.querySelector('.close_form').submit();
-  }
-
-
-  document.getElementById('assigned_to').addEventListener('click',()=>{
-    let assigned_to_modal = new bootstrap.Modal(
-          document.getElementById("assigned_to_modal"),
-          {}
-        );
-        // https://getbootstrap.com/docs/5.0/components/modal/#show
-        assigned_to_modal.show();
-    });
-
-
-
-  var accordions = document.getElementsByClassName("accordion");
-
-  for (var i = 0; i<accordions.length; i++) {
-    accordions[i].addEventListener("click", function() {
-      this.classList.toggle("active");
-      var panel = this.nextElementSibling;
-      if (panel.style.maxHeight) {
-        panel.style.maxHeight = null;
-      } else {
-        panel.style.maxHeight = panel.scrollHeight + "px";
-      }
-    });
   }
 </script>
 

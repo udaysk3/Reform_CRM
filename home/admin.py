@@ -15,6 +15,7 @@ from .models import (
     Signature,
     Product,
     Postcode,
+    CoverageAreas
 )
 
 admin.site.register(Action)
@@ -32,3 +33,4 @@ admin.site.register(Countries)
 admin.site.register(Signature)
 admin.site.register(Product)
 admin.site.register(Postcode)
+admin.site.register(CoverageAreas)

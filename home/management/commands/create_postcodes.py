@@ -3,7 +3,6 @@ from home.models import Postcode
 import os
 import csv
 
-
 class Command(BaseCommand):
     help = "Create postcode only once"
 
