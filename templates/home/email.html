@@ -7,7 +7,11 @@
 </head>
 <body>
     {{ body }} <br>
+    {% if  signature.signature %}
     {{ signature.signature }} <br>
+    {% endif %}
+    {% if  signature.signature_img %}
     <img src="{{ domain_name }}{{ signature.signature_img.url }}" alt="Signature" height="150px" width="200px">
+    {% endif %}
 </body>
 </html>
