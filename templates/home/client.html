@@ -172,99 +172,100 @@
           <div>
             
             {% if request.GET.page == 'add_client' %}
-              <h3>Add Client</h3>
-              
+              <div class="row">
+                <h3 class="col-2">Add Client</h3>
+                <button class="btn btn-primary bank_details" style="width: fit-content !important;">Bank Details</button>
+                <button class="btn btn-primary add_details" style="width: fit-content !important; display: none;">Add Details</button>
+              </div>
               <form name="addClientForm" id="addClientForm" method="post" action="{% url 'app:add_client' %}" onsubmit="return validateAddForm()">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="first_name" name="first_name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="last_name" name="last_name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
+
+                <div class="tab_add">
+                    <div class="mb-3">
+                      <label for="company_name" class="form-label">Company Name</label>
+                      <input type="text" class="form-control" id="company_name" name="company_name" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="company_phno" class="form-label">Company Phno</label>
+                      <input type="text" class="form-control" id="company_phno" name="company_phno" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="first_name" class="form-label">First Name</label>
+                      <input type="text" class="form-control" id="first_name" name="first_name" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="last_name" class="form-label">Last Name</label>
+                      <input type="text" class="form-control" id="last_name" name="last_name" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="phone_number" class="form-label">Phone Number</label>
+                      <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="email" class="form-label">Email</label>
+                      <input type="email" class="form-control" id="email" name="email" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="house_name" class="form-label">House Name/ Number</label>
+                      <input type="text" class="form-control" id="house_name" name="house_name"  required></input>
+                  </div>
+                  <div class="mb-3">
+                      <label for="street_name" class="form-label">Street Name</label>
+                      <input type="text" class="form-control" id="street_name" name="street_name"  required></input>
+                  </div>
+                  <div class="mb-3 row">
+                    <div class="col-6">
+                      <label for="postcode" class="form-label">Postcode</label>
+                      <input type="text" class="form-control" id="postcode" name="postcode"  required>
+                    </div>
+                    <div class="col-6 d-flex align-items-end">
+                      <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                    </div>
+                  </div>
+
+
+                  <div class="mb-3 input-row">
+                      <label for="city" class="form-label">City/Town</label>
+                      <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.city}}" data-list="city_from" autocomplete="off" value="{{client.city}}">  <!--list="city_from"-->
+                    <div id="city_from" class="places_box">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                      <label for="county" class="form-label">County</label>
+                      <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.county}}" data-list="county_from" autocomplete="off" value="{{client.county}}">  <!--list="county_from"-->
+                    <div id="county_from" class="places_box">
+                    </div>
+                  </div>
                 
                 <div class="mb-3">
-                    <label for="house_name" class="form-label">House Name/ Number</label>
-                    <input type="text" class="form-control" id="house_name" name="house_name"  required></input>
+                  <label for="country" class="form-label">Country</label>
+                  <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.country}}" data-list="country_from" autocomplete="off" value="{{client.country}}">  <!--list="country_from"-->
+                    <div id="country_from" class="places_box">
+                    </div>
+              </div>
                 </div>
-                <div class="mb-3">
-                    <label for="street_name" class="form-label">Street Name</label>
-                    <input type="text" class="form-control" id="street_name" name="street_name"  required></input>
-                </div>
-                <div class="mb-3 row">
-                  <div class="col-6">
-                    <label for="postcode" class="form-label">Postcode</label>
-                    <input type="text" class="form-control" id="postcode" name="postcode"  required>
+                <div class="tab_bank" style="display: none;">
+                  <div class="mb-3">
+                      <label for="acc_number" class="form-label">Account Number</label>
+                      <input type="text" class="form-control" id="acc_number" name="acc_number"  required></input>
                   </div>
-                  <div class="col-6 d-flex align-items-end">
-                    <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                  <div class="mb-3">
+                      <label for="sort_code" class="form-label">Sort Code</label>
+                      <input type="text" class="form-control" id="sort_code" name="sort_code"  required></input>
                   </div>
-                </div>
-
-
-                <div class="mb-3 input-row">
-                    <label for="city" class="form-label">City/Town</label>
-                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.city}}" data-list="city_from" autocomplete="off" value="{{client.city}}">  <!--list="city_from"-->
-                  <div id="city_from" class="places_box">
+                  <div class="mb-3">
+                      <label for="iban" class="form-label">IBAN</label>
+                      <input type="text" class="form-control" id="iban" name="iban"  required></input>
                   </div>
-                </div>
-                <div class="mb-3">
-                    <label for="county" class="form-label">County</label>
-                    <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.county}}" data-list="county_from" autocomplete="off" value="{{client.county}}">  <!--list="county_from"-->
-                  <div id="county_from" class="places_box">
+                  <div class="mb-3">
+                      <label for="bic_swift" class="form-label">BIC/SWIFT</label>
+                      <input type="text" class="form-control" id="bic_swift" name="bic_swift"  required></input>
                   </div>
                 </div>
-               
-              <div class="mb-3">
-                <label for="country" class="form-label">Country</label>
-                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{client.country}}" data-list="country_from" autocomplete="off" value="{{client.country}}">  <!--list="country_from"-->
-                  <div id="country_from" class="places_box">
-                  </div>
-            </div>
+                
 
             <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
-
-                {% comment %} <!-- Button trigger modal -->
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                    Add Client
-                  </button>
-
-                  <!-- Modal -->
-                  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Campaign</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <div class="mb-3">
-                            <label for="campaign" class="form-label">Campaign</label>
-                            <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
-                              {% for campaign in campaigns %}
-                                <option value="{{campaign.id}}">{{campaign.name}}</option>
-                              {% endfor %}
-                            </select>
-                        </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div> {% endcomment %}
-
 
             </form>
               
@@ -272,9 +273,22 @@
               <!-- Similar to the user edit form, create a form for editing a customer -->
               <!-- Adjust the form action URL and method accordingly -->
               {% if client %}
-                <h3>Edit Client</h3>
+                <div class="row">
+                <h3 class="col-2">Edit Client</h3>
+                <button class="btn btn-primary bank_details" style="width: fit-content !important;">Bank Details</button>
+                <button class="btn btn-primary add_details" style="width: fit-content !important; display: none;">Add Details</button>
+              </div>
                 <form name="editClientForm" id="editClientForm" method="post" action="{% url 'app:edit_client' edit_client.id %}" onsubmit="return validateForm()">
                   {% csrf_token %}
+                  <div class="tab_add">
+                  <div class="mb-3">
+                      <label for="edit_company_name" class="form-label">Company Name</label>
+                      <input type="text" class="form-control" id="edit_company_name" name="company_name" value="{% if edit_client.company_name != 'None' %}{{ edit_client.company_name }}{% endif %}" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="edit_company_phno" class="form-label">Company Phno</label>
+                      <input type="text" class="form-control" id="edit_company_phno" name="company_phno" value="{% if edit_client.company_phno != 'None' %}{{ edit_client.company_phno }}{% endif %}" required>
+                  </div>
                   <div class="mb-3">
                       <label for="edit_first_name" class="form-label">First Name</label>
                       <input type="text" class="form-control" id="edit_first_name" name="first_name" value="{% if edit_client.first_name != 'None' %}{{ edit_client.first_name }}{% endif %}" required>
@@ -329,6 +343,25 @@
                   <div id="country_from" class="places_box">
                   </div>
             </div>
+            </div>
+            <div class="tab_bank" style="display: none;">
+                  <div class="mb-3">
+                      <label for="acc_number" class="form-label">Account Number</label>
+                      <input type="text" class="form-control" id="acc_number" name="acc_number" value="{% if edit_client.acc_number != 'None' %}{{ edit_client.acc_number }}{% endif %}" required></input>
+                  </div>
+                  <div class="mb-3">
+                      <label for="sort_code" class="form-label">Sort Code</label>
+                      <input type="text" class="form-control" id="sort_code" name="sort_code" value="{% if edit_client.sort_code != 'None' %}{{ edit_client.sort_code }}{% endif %}" required></input>
+                  </div>
+                  <div class="mb-3">
+                      <label for="iban" class="form-label">IBAN</label>
+                      <input type="text" class="form-control" id="iban" name="iban" value="{% if edit_client.iban != 'None' %}{{ edit_client.iban }}{% endif %}" required></input>
+                  </div>
+                  <div class="mb-3">
+                      <label for="bic_swift" class="form-label">BIC/SWIFT</label>
+                      <input type="text" class="form-control" id="bic_swift" name="bic_swift" value="{% if edit_client.bic_swift != 'None' %}{{ edit_client.bic_swift }}{% endif %}" required></input>
+                  </div>
+                </div>
                   <button  class="btn btn-primary">Update Client</button>
               </form>
               {% else %}
@@ -381,7 +414,7 @@
                       {% endif %}
                       
                         <td style="width: 20%;">{{ client.created_at }}</td>
-                        <td class="text-underlined" style="width: 20%;"><a href="/client-detail/{{client.id}}">{{ client.first_name }} {{ client.last_name }}</a></td>
+                        <td class="text-underlined" style="width: 20%;"><a href="/client-detail/{{client.id}}">{{ client.company_name }}</a></td>
                         {% comment %} {% if client.route %}
                         <td style="width: 20%;">{{ client.route.name }}</td>
                         {% else %}
@@ -804,8 +837,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+
+
+
 </script>
 
+{% endif %}
+
+{% if request.GET.page == 'add_client' %}
+<script>
+  const bankDetailsBtn = document.querySelector('.bank_details');
+  const addDetailsBtn = document.querySelector('.add_details');
+  const tabAdd = document.querySelector('.tab_add');
+  const tabBank = document.querySelector('.tab_bank');
+
+  bankDetailsBtn.addEventListener('click', function () {
+    tabAdd.style.display = 'none';
+    tabBank.style.display = 'block';
+    bankDetailsBtn.style.display = 'none';
+    addDetailsBtn.style.display = 'block';
+  });
+
+  addDetailsBtn.addEventListener('click', function () {
+    tabAdd.style.display = 'block';
+    tabBank.style.display = 'none';
+    bankDetailsBtn.style.display = 'block';
+    addDetailsBtn.style.display = 'none';
+  });
+</script>
+{% endif %}
+
+{% if request.GET.page == 'edit_client' %}
+<script>
+  const bankDetailsBtn = document.querySelector('.bank_details');
+  const addDetailsBtn = document.querySelector('.add_details');
+  const tabAdd = document.querySelector('.tab_add');
+  const tabBank = document.querySelector('.tab_bank');
+
+  bankDetailsBtn.addEventListener('click', function () {
+    tabAdd.style.display = 'none';
+    tabBank.style.display = 'block';
+    bankDetailsBtn.style.display = 'none';
+    addDetailsBtn.style.display = 'block';
+  });
+
+  addDetailsBtn.addEventListener('click', function () {
+    tabAdd.style.display = 'block';
+    tabBank.style.display = 'none';
+    bankDetailsBtn.style.display = 'block';
+    addDetailsBtn.style.display = 'none';
+  });
+</script>
 {% endif %}
   
 

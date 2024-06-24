@@ -667,9 +667,9 @@ table {
 
                             <label style="border: medium dashed #fff;" for="select" class="form-label fs-5 mt-3">Schedule next action</label>
                             <div class="col ">
-                          <div class="form-floating">
+                          <div class="form-floating" style=" margin-left: -5px;">
                             <div class="wrapper">
-                              <p for="date_field" class="mb-1" style="font-weight: 600; color: #2A3547">Date</p>
+                              <p for="date_field" class="mb-1 " style="font-weight: 600; color: #2A3547;">Date</p>
                               <label class="label" for="date_field">
                                 <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
                               </label>	
@@ -679,7 +679,7 @@ table {
                           
 
                           </div>
-                          <div class="col">
+                          <div class="col" style=" margin-right: -60px;">
                             <div class="mb-0">
                             <div class="wrapper">
                             <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
@@ -693,19 +693,19 @@ table {
                             <button class="btn btn-primary my-3 minutes" type="button">Minutes</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 hour" type="button">Hour</button>
+                            <button class="btn btn-primary my-3 hour" style=" margin-left: 40px; width: 85px;" type="button">Hour</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 day" type="button">Day</button>
+                            <button class="btn btn-primary my-3 day" style=" margin-left: 72px; width: 85px;" type="button">Day</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 week" type="button">Week</button>
+                            <button class="btn btn-primary my-3 week" style="width: 85px;" type="button">Week</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 month" type="button">Month</button>
+                            <button class="btn btn-primary my-3 month" style=" margin-left: 40px; width: 85px;" type="button">Month</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 year" type="button">Year</button>
+                            <button class="btn btn-primary my-3 year position-relative" style=" margin-left: 72px; width: 85px;" type="button">Year</button>
                           </div>  
                           </div>
 
@@ -1477,6 +1477,22 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     return confirm(date);
   }
 </script>
+<script>
+    const drop2 = document.querySelector('#drop2')
+    const dropDiv = document.querySelector('.drop2div')
+    drop2.addEventListener('click',()=>{
+      if (drop2.classList.contains('show')){
+        drop2.classList.remove('show')
+        dropDiv.classList.remove('show')
+        dropDiv.removeAttribute('data-bs-popper')
+      } else{
+        drop2.classList.add('show')
+        dropDiv.classList.add('show')
+        dropDiv.setAttribute('data-bs-popper','true')
+      }
+    })
+    
+  </script>
 
 
 {% endblock %}

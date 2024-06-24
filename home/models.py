@@ -2,10 +2,10 @@ from django.db import models
 from user.models import User
 
 class Customers(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15)
-    email = models.EmailField(max_length=255)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     postcode = models.CharField(max_length=255, blank=True, null=True)
     house_name = models.CharField(max_length=255, blank=True, null=True)
     street_name = models.TextField(max_length=999, blank=True, null=True)
@@ -51,10 +51,16 @@ class Customers(models.Model):
 
 
 class Clients(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15)
-    email = models.EmailField(max_length=255)
+    acc_number = models.CharField(max_length=255, blank=True, null=True)
+    sort_code = models.CharField(max_length=255, blank=True, null=True)
+    iban = models.CharField(max_length=255, blank=True, null=True)
+    bic_swift = models.CharField(max_length=255, blank=True, null=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    company_name = models.CharField(max_length=255, blank=True, null=True)
+    company_phno = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     postcode = models.CharField(max_length=255, blank=True, null=True)
     house_name = models.CharField(max_length=255, blank=True, null=True)
     street_name = models.TextField(max_length=999, blank=True, null=True)
@@ -70,7 +76,6 @@ class Clients(models.Model):
     closed = models.BooleanField(default=False)
     imported = models.BooleanField(default=False)
 
-
     def add_action(
         self,
         text=None,
@@ -84,7 +89,6 @@ class Clients(models.Model):
     def get_created_at_action_history(self):
         return (Action.objects.filter(client=self).order_by("-created_at"))
 
-    
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -93,6 +97,7 @@ class Campaign(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
     client = models.ForeignKey(Clients, related_name='campaigns', on_delete=models.CASCADE)
+    archive = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.client.first_name} {self.client.last_name} {self.name}"
@@ -101,6 +106,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
     client = models.ForeignKey(Clients, related_name='products', on_delete=models.CASCADE)
+    archive = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.client.first_name} {self.client.last_name} {self.name}"
@@ -209,7 +215,7 @@ class Postcode(models.Model):
 
 class CoverageAreas(models.Model):
     client = models.ForeignKey(Clients, related_name='coverage_areas', on_delete=models.CASCADE)
-    postcode = models.ManyToManyField(Postcode, related_name='coverage_areas', null=True, blank= True)
+    postcode = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.id}"

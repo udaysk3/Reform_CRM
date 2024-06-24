@@ -245,14 +245,17 @@
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                          <div class="mb-3">
-                            <label for="campaign" class="form-label">Campaign</label>
-                            <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
-                              {% for campaign in campaigns %}
-                                <option value="{{campaign.id}}">{{campaign.name}}</option>
+                          <div class="mb-3 client">
+                            <label for="client" class="form-label">Client</label>
+                            <select class="form-select client_input" id="client" name="client" aria-label="Default select example">
+                              <option value="nan">Select the client</option>
+                              {% for client in clients %}
+                                <option value="{{client.id}}">{{client.company_name}}</option>
                               {% endfor %}
                             </select>
-                        </div>
+                          </div>
+
+                          
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -452,6 +455,32 @@
 {% block js %}
 {% if request.GET.page == 'add_customer' or request.GET.page == 'edit_customer' %}
 <script src="{% static 'js/dropdown.js' %}"></script>
+<script>
+  const client = document.querySelector('.client')
+  document.querySelector('.client_input').addEventListener('change',()=>{
+    const value = document.querySelector('.client_input').value
+    fetch('/get_campaign/'+value)
+    .then(response => response.json())
+    .then(data => {
+      if (document.querySelector('.campaign')) {
+        document.querySelector('.campaign').remove();
+      }
+      const newField = document.createElement('div');
+      newField.classList.add('mb-3', 'campaign');
+      var input = `
+        <label for="campaign" class="form-label">Campaign</label>
+        <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
+      `;
+      data.forEach(campaign => {
+        console.log(campaign)
+        input += `<option value="${campaign.campaign_id}">${campaign.campaign_name}</option>`
+      })
+      input += `</select>`;
+      newField.innerHTML = input;
+      client.insertAdjacentElement('afterend', newField);
+    })
+  })
+</script>
 {% endif %}
 <script>
   $('#city').dropdown();
@@ -818,6 +847,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 {% endif %}
+
   
 
 {% endblock js %}

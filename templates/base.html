@@ -229,9 +229,9 @@
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
-                  <img src={% static "images/profile/user-1.jpg" %} alt="" width="35" height="35" class="rounded-circle">
+                  <img src="{% static 'images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
                 </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up drop2div" aria-labelledby="drop2">
                   <div class="message-body">
                     <a href="{% url "user:logout" %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                   </div>
@@ -265,13 +265,13 @@
       </div>
     </div>
   </div>
-  <script src="{% static "libs/jquery/dist/jquery.min.js" %}"></script>
-  <script src="{% static "libs/bootstrap/dist/js/bootstrap.bundle.min.js" %}"></script>
-  <script src="{% static "js/sidebarmenu.js" %}"></script>
-  <script src="{% static "js/app.min.js" %}"></script>
-  <script src="{% static "libs/apexcharts/dist/apexcharts.min.js" %}"></script>
-  <script src="{% static "libs/simplebar/dist/simplebar.js" %}"></script>
-  <script src="{% static "js/dashboard.js" %}"></script>
+  <script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
+  <script src="{% static 'libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/sidebarmenu.js' %}"></script>
+  <script src="{% static 'js/app.min.js' %}"></script>
+  <script src="{% static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+  <script src="{% static 'libs/simplebar/dist/simplebar.js' %}"></script>
+  <script src="{% static 'js/dashboard.js' %}"></script>
  
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
@@ -281,7 +281,9 @@
 
 
   <script src="{% static 'js/comboTreePlugin.js' %} " type="text/javascript"></script>
+  
   {% block js %}
+  
   {% endblock js %}
 
 </body>

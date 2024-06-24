@@ -78,7 +78,7 @@ def dashboard(request):
         .filter(parent_customer=None)
         .order_by("earliest_action_date")
     )
-    
+
     customers = (
         Customers.objects.all()
         .filter(assigned_to=user)
@@ -97,10 +97,30 @@ def dashboard(request):
             if action.imported == False:
                 new_customers.append(customer)
                 break
-            
+
     new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
     result = [x for x in customers if x not in new_customers] 
     customers= new_customers + result
+    date_wise_customers = {}
+    brand_new_customers = []
+    for i in customers:
+        if i.get_created_at_action_history()[0].date_time.date() not in date_wise_customers:
+            date_wise_customers[i.get_created_at_action_history()[0].date_time.date()] = []
+        date_wise_customers[i.get_created_at_action_history()[0].date_time.date()].append(i)
+    for key, values in date_wise_customers.items():
+        cb_wise_customers = []
+        for i in values:
+            if i.get_created_at_action_history()[0].action_type == 'CB':
+                cb_wise_customers.insert(0,i)
+            else:
+                if cb_wise_customers == []:
+                    cb_wise_customers.append(i)
+                else:
+                    cb_wise_customers.insert(1,i)
+        print(cb_wise_customers)
+        brand_new_customers += cb_wise_customers
+    customers = brand_new_customers[::-1]
+
     na=[]
     lm=[]
     cb=[]
@@ -114,7 +134,6 @@ def dashboard(request):
         actions = customer.get_created_at_action_history().filter(agent=user)
         for i in actions:
             if i.action_type == 'NA':
-                print(i.action_type == 'NA')
                 na.append(i)
             elif i.action_type == 'LM':
                 lm.append(i)
@@ -124,8 +143,7 @@ def dashboard(request):
                 sms.append(i)
             elif i.action_type == 'EMAIL':
                 email.append(i)
-            
-            
+
             if i.imported:
                 if i.created_at.replace(tzinfo=london_tz).date() not in imported:
                     imported[i.created_at.replace(tzinfo=london_tz).date()] = []
@@ -166,7 +184,7 @@ def dashboard(request):
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
-    
+
     p_customers = Paginator(customers, 50)
     page_number = request.GET.get('page')
     try:
@@ -175,8 +193,7 @@ def dashboard(request):
         page_obj = p_customers.page(1)
     except EmptyPage:
         page_obj = p_customers.page(p_customers.num_pages)
-        
-    
+
     return render(request, "home/dashboard.html", {"customers": customers, "all_customers": all_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "history": history, "imported": imported,"agents": serialize('json', agents),'na':len(na), 'lm':len(lm), 'cb':len(cb), 'sms':len(sms), 'email':len(email), 'page_obj':page_obj})
 
 
@@ -466,7 +483,7 @@ def client_detail(request, client_id, s_client_id=None):
     next = None
     domain_name = request.build_absolute_uri("/")[:-1]
     signatures = Signature.objects.all()
-    coverage_area = CoverageAreas.objects.get(client=Clients.objects.get(pk=client_id)) if CoverageAreas.objects.filter(client=Clients.objects.get(pk=client_id)).exists() else None
+    coverage_area = CoverageAreas.objects.all().filter(client=Clients.objects.get(pk=client_id)) 
     clients = (
         Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_client=None)
@@ -511,8 +528,10 @@ def client_detail(request, client_id, s_client_id=None):
         next = str(client_id)
     # print(type(prev), next)
     client = Clients.objects.get(pk=client_id)
-    campaigns = Campaign.objects.all().filter(client=client)
-    products = Product.objects.all().filter(client=client)
+    campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
+    uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
+    products = Product.objects.all().filter(client=client).filter(archive=False)
+    unproducts = Product.objects.all().filter(client=client).filter(archive=True)
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
     show_client = client
@@ -582,7 +601,6 @@ def client_detail(request, client_id, s_client_id=None):
                 ]
             )
 
-    
         return render(
         request,
         "home/client-detail.html",
@@ -601,7 +619,9 @@ def client_detail(request, client_id, s_client_id=None):
             "signatures": signatures,
             "domain_name": domain_name,
             "campaigns": campaigns,
+            "uncampaigns":uncampaigns,
             "products":products,
+            "unproducts":unproducts,
             "coverage_areas": coverage_area,
         },
     )
@@ -624,7 +644,9 @@ def client_detail(request, client_id, s_client_id=None):
             "signatures": signatures,
             "domain_name": domain_name,
             "campaigns": campaigns,
+            "uncampaigns": uncampaigns,
             "products":products,
+            "unproducts":unproducts,
             "coverage_areas": coverage_area,
         },
     )
@@ -761,9 +783,10 @@ def Customer(request):
         page_obj = p_customers.page(1)
     except EmptyPage:
         page_obj = p_customers.page(p_customers.num_pages)
-        
+    
+    client = Clients.objects.all()    
     return render(
-        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj}
+        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj, 'clients':client}
     )
 
 
@@ -952,6 +975,7 @@ def add_customer(request):
         county = request.POST.get("county")
         country = request.POST.get("country")
         campaign = request.POST.get("campaign")
+        client = request.POST.get("client")
         agent = User.objects.get(email=request.user)
 
         if phone_number[0] == "0":
@@ -970,7 +994,7 @@ def add_customer(request):
             messages.error(request, "Phone number already exists")
             return redirect("/customer?page=add_customer")
 
-        if campaign == "nan" or city == "nan" or county == "nan" or country == "nan":
+        if campaign == "nan" or city == "nan" or county == "nan" or country == "nan" or client == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect("/customer?page=add_customer")
 
@@ -1010,7 +1034,7 @@ def add_customer(request):
             district=district,
             constituency=constituency,
             campaign=Campaign.objects.get(id=campaign),
-            client=Campaign.objects.get(id=campaign).client,
+            client=Clients.objects.get(pk=client),
             created_at=datetime.now(pytz.timezone("Europe/London")),
             primary_customer=True,
             energy_rating=energy_rating,
@@ -1021,7 +1045,7 @@ def add_customer(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added  {customer.first_name}  {customer.last_name}  {customer.house_name }  {customer.phone_number}  {customer.email} {customer.house_name}  {customer.street_name}  {customer.city} {customer.county}  {customer.country}",
+                action_type=f"Added  {customer.first_name}  {customer.last_name},  {customer.house_name },  {customer.phone_number},  {customer.email}, {customer.house_name},  {customer.street_name},  {customer.city} {customer.county},  {customer.country}",
                 keyevents=True,
         )
         messages.success(request, "Customer added successfully!")
@@ -1035,21 +1059,21 @@ def edit_customer(request, customer_id):
     if request.method == "POST":
         changed = ''
         if customer.phone_number != request.POST.get("phone_number"):
-            changed += f'{request.POST.get("phone_number")}'
+            changed += f'{request.POST.get("phone_number")}, '
         if customer.email != request.POST.get('email'):
-            changed += f'{request.POST.get("email")}'
+            changed += f'{request.POST.get("email")}, '
         if customer.postcode != request.POST.get("postcode"):
-            changed += f'{request.POST.get("postcode")}'
+            changed += f'{request.POST.get("postcode")}, '
         if customer.street_name != request.POST.get("street_name"):
-            changed += f'{request.POST.get("street_name")}'
+            changed += f'{request.POST.get("street_name")}, '
         if customer.city != request.POST.get("city"):
-            changed += f'{request.POST.get("city")}'
+            changed += f'{request.POST.get("city")}, '
         if customer.house_name != request.POST.get("house_name"):
-            changed += f'{request.POST.get("house_name")}'
+            changed += f'{request.POST.get("house_name")}, '
         if customer.county != request.POST.get("county"):
-            changed += f'{request.POST.get("county")}'
+            changed += f'{request.POST.get("county")}, '
         if customer.country != request.POST.get("country"):
-            changed += f'{request.POST.get("country")}'
+            changed += f'{request.POST.get("country")}, '
 
         customer.first_name = request.POST.get("first_name")
         customer.last_name = request.POST.get("last_name").upper()
@@ -1097,7 +1121,7 @@ def edit_customer(request, customer_id):
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Updated {customer.first_name}  {customer.last_name} - " + changed,
+            action_type=f"Updated {customer.first_name},  {customer.last_name} - " + changed,
             keyevents=True,
         )
         messages.success(request, "Customer updated successfully!")
@@ -1106,7 +1130,7 @@ def edit_customer(request, customer_id):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Updated {customer.parent_customer.firt_name}  {customer.parent_customer.last_name} - " + changed,
+                action_type=f"Updated {customer.parent_customer.firt_name},  {customer.parent_customer.last_name} - " + changed,
                 keyevents=True,
             )
             return redirect(f"/customer-detail/{customer.parent_customer.id}")
@@ -1120,6 +1144,12 @@ def edit_customer(request, customer_id):
 @login_required
 def add_client(request):
     if request.method == "POST":
+        acc_number = request.POST.get("acc_number")
+        sort_code = request.POST.get("sort_code")
+        iban = request.POST.get("iban")
+        bic_swift = request.POST.get("bic_swift")
+        company_name = request.POST.get("company_name").upper()
+        company_phno = request.POST.get("company_phno")
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
@@ -1151,6 +1181,12 @@ def add_client(request):
 
         postcode = re.sub(r'\s+', ' ', postcode)
         client = Clients.objects.create(
+            acc_number = acc_number,
+            sort_code = sort_code,
+            iban = iban,
+            bic_swift = bic_swift,
+            company_name=company_name,
+            company_phno=company_phno,
             first_name=first_name,
             last_name=last_name,
             phone_number=phone_number,
@@ -1169,7 +1205,7 @@ def add_client(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {client.first_name}  {client.last_name}  {client.house_name }  {client.phone_number}  {client.email} {client.house_name}  {client.street_name}  {client.city}  {client.county}  {client.country}",
+                action_type=f"Added {client.first_name}  {client.last_name},  {client.house_name },  {client.phone_number},  {client.email}, {client.house_name},  {client.street_name},  {client.city},  {client.county},  {client.country}",
                 keyevents=True,
         )
         messages.success(request, "Client added successfully!")
@@ -1182,6 +1218,18 @@ def edit_client(request, client_id):
     client = Clients.objects.get(pk=client_id)
     if request.method == "POST":
         changed = ''
+        if client.acc_number != request.POST.get("acc_number"):
+            changed += f'{request.POST.get("acc_number")}'
+        if client.sort_code != request.POST.get("sort_code"):
+            changed += f'{request.POST.get("sort_code")}'
+        if client.iban != request.POST.get("iban"):
+            changed += f'{request.POST.get("iban")}'
+        if client.bic_swift != request.POST.get("bic_swift"):
+            changed += f'{request.POST.get("bic_swift")}'
+        if client.company_name != request.POST.get("company_name"):
+            changed += f'{request.POST.get("company_name")}'
+        if client.company_phno != request.POST.get("company_phno"):
+            changed += f'{request.POST.get("company_phno")}'
         if client.phone_number != request.POST.get("phone_number"):
             changed += f'{request.POST.get("phone_number")}'
         if client.email != request.POST.get('email'):
@@ -1199,6 +1247,12 @@ def edit_client(request, client_id):
         if client.country != request.POST.get("country"):
             changed += f'{request.POST.get("country")}'
 
+        client.acc_number = request.POST.get("acc_number")
+        client.sort_code = request.POST.get("sort_code")
+        client.iban = request.POST.get("iban")
+        client.bic_swift = request.POST.get("bic_swift")
+        client.company_name = request.POST.get("company_name").upper()
+        client.company_phno = request.POST.get("company_phno")
         client.first_name = request.POST.get("first_name")
         client.last_name = request.POST.get("last_name").upper()
         client.phone_number = request.POST.get("phone_number")
@@ -1213,14 +1267,13 @@ def edit_client(request, client_id):
         if client.city == "nan" or client.county == "nan" or client.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/client?page=edit_client&id={client_id}")
-        
-        
+
         client.save()
         client.add_action(
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Updated {client.first_name}  {client.last_name} - " + changed,
+            action_type=f"Updated {client.first_name},  {client.last_name} - " + changed,
             keyevents=True,
         )
         messages.success(request, "Client updated successfully!")
@@ -1229,7 +1282,7 @@ def edit_client(request, client_id):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Updated {client.parent_client.firt_name}  {client.parent_client.last_name} - " + changed,
+                action_type=f"Updated {client.parent_client.firt_name},  {client.parent_client.last_name} - " + changed,
                 keyevents=True,
             )
             return redirect(f"/client-detail/{client.parent_client.id}")
@@ -1701,7 +1754,7 @@ def import_customers_view(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.first_name}  {customer.last_name}  {customer.house_name }  {customer.phone_number}  {customer.email} {customer.house_name}  {customer.street_name}  {customer.city} {customer.county}  {customer.country}",
+                action_type=f"Added {customer.first_name}  {customer.last_name},  {customer.house_name },  {customer.phone_number},  {customer.email}, {customer.house_name},  {customer.street_name},  {customer.city}, {customer.county},  {customer.country}",
                 keyevents=True,
         )
         if message:
@@ -1783,22 +1836,22 @@ def remove_campaign(request, campaign_id, client_id):
     return redirect(f"/client-detail/{client_id}")
 
 
+@login_required
+def add_product_view(request, client_id):
+    return render(request, 'home/add_products.html', {'client_id': client_id})
+
 def add_product(request, client_id):
     if request.method == "POST":
+        client = Clients.objects.get(pk=client_id)
         name = request.POST.get("name")
         description = request.POST.get("description")
-        if Product.objects.filter(name=name).exists():
-            messages.error(request, "Product with this name already exists!")
-            return redirect(f"/client-detail/{client_id}")
         product = Product.objects.create(
-            client_id=client_id,
+            client=client,
             name=name,
             description=description,
         )
         messages.success(request, "Product added successfully!")
         return redirect(f"/client-detail/{client_id}")
-    return render(request, f"/client-detail/{client_id}")
-
 
 def remove_product(request, product_id, client_id):
     product = Product.objects.get(pk=product_id)
@@ -1846,7 +1899,7 @@ def add_child_customer(request, customer_id):
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
-            action_type=f"Added {child_customer.first_name}  {child_customer.last_name}  { child_customer.house_name }  {child_customer.phone_number}  {child_customer.email}  {child_customer.house_name}  {child_customer.street_name}  {child_customer.city}  {child_customer.county}  {child_customer.country}",
+            action_type=f"Added {child_customer.first_name}  {child_customer.last_name}  { child_customer.house_name }  {child_customer.phone_number},  {child_customer.email},  {child_customer.house_name},  {child_customer.street_name},  {child_customer.city},  {child_customer.county},  {child_customer.country}",
             keyevents=True
         )
         messages.success(request, "Customer added successfully!")
@@ -2579,26 +2632,43 @@ def get_notifications(request):
 def add_coverage_areas(request, client_id):
     if request.method == "POST":
 
-        if CoverageAreas.objects.filter(
-            client=Clients.objects.get(pk=client_id)
-        ).exists():
-            postcode = Postcode.objects.get(
-                    postcode=re.sub(r"\s+", " ", request.POST.get("postcode"))
-                )
-            template = CoverageAreas.objects.get(client=Clients.objects.get(pk=client_id))
-            template.postcode.add(postcode)
-            template.save()
-            messages.success(request, "Coverage Area added successfully!")
-            return redirect(r"/client-detail/" + str(client_id))
-
-        postcode = Postcode.objects.get(
-                postcode=re.sub(r"\s+", " ", request.POST.get("postcode"))
-            )
-        template = CoverageAreas.objects.create(
-            client=Clients.objects.get(pk=client_id),
+        client = Clients.objects.get(pk=client_id)
+        coverage_area = CoverageAreas.objects.create(
+            client=client,
+            postcode=re.sub(r"\s+", " ", request.POST.get("postcode")),
         )
-        template.postcode.add(postcode)
-        template.save()
+        
         messages.success(request, "Coverage Area added successfully!")
         return redirect(r"/client-detail/" + str(client_id))
     return render(request, "home/admin.html")
+
+def archive_campaign(request,client_id, campaign_id):
+    campaign = Campaign.objects.get(pk=campaign_id)
+    if campaign.archive == False:
+        campaign.archive = True
+        campaign.save()
+        messages.success(request, "Archived successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
+    else:
+        campaign.archive = False
+        campaign.save()
+        messages.success(request, "Unarchived successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
+
+def get_campaign(request, client_id):
+    client = Clients.objects.get(pk=client_id)
+    campaigns = Campaign.objects.all().filter(client=client)
+    return JsonResponse([{"campaign_id": campaign.id,"campaign_name":campaign.name} for campaign in campaigns], safe=False)
+
+def archive_product(request,client_id, product_id):
+    product = Product.objects.get(pk=product_id)
+    if product.archive == False:
+        product.archive = True
+        product.save()
+        messages.success(request, "Archived successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
+    else:
+        product.archive = False
+        product.save()
+        messages.success(request, "Unarchived successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
