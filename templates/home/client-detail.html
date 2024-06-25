@@ -297,7 +297,7 @@ table {
                   <b> Company Name : </b> {{show_client.company_name }}
                 </h6>
                 <h6>
-                  <b> Company Phno : </b> {{show_client.company_phno }}
+                  <b> Company Number : </b> {{show_client.company_phno }}
                 </h6>
                 <h6>
                   <b> Name : </b> {{show_client.first_name}} {{show_client.last_name}}
@@ -956,6 +956,10 @@ table {
                             <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
                             <label for="floatingInput">Product Description</label>
                         </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control mb-3" id="rules_regulations" placeholder="Rules & Regulations" name="rules_regulations" value="{{ camp.rules_regulations }}" disabled>
+                            <label for="floatingInput">Rules & Regulations</label>
+                        </div>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -995,6 +999,10 @@ table {
                         <div class="form-floating">
                             <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Description" name="description" value="{{ camp.description }}" disabled>
                             <label for="floatingInput">Product Description</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control mb-3" id="rules_regulations" placeholder="Rules & Regulations" name="rules_regulations" value="{{ camp.rules_regulations }}" disabled>
+                            <label for="floatingInput">Rules & Regulations</label>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1214,7 +1222,7 @@ table {
     function drawCircle(location) {
       const circle = new google.maps.Circle({
         map: map,
-        radius: 5000, // 5 kilometers
+        radius: 5000, 
         fillColor: '#FF0000',
         fillOpacity: 0.35,
         strokeColor: '#FF0000',

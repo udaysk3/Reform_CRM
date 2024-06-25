@@ -154,7 +154,7 @@ def dashboard(request):
             if i.imported:
                 imported[i.created_at.replace(tzinfo=london_tz).date()].append(
                     [
-                        i.created_at.replace(tzinfo=london_tz).time(),
+                        i.created_at.astimezone(london_tz).time(),
                         i.text,
                         i.agent.first_name,
                         i.agent.last_name,
@@ -168,7 +168,7 @@ def dashboard(request):
             else:
                 history[i.created_at.replace(tzinfo=london_tz).date()].append(
                     [
-                        i.created_at.replace(tzinfo=london_tz).time(),
+                        i.created_at.astimezone(london_tz).time(),
                         i.customer.postcode,
                         i.customer.house_name,
                         i.agent.first_name,
@@ -327,7 +327,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         if i.imported:
             imported[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
-                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.created_at.astimezone(london_tz).time(),
                     i.text,
                     i.agent.first_name,
                     i.agent.last_name,
@@ -340,7 +340,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         else:
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
-                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.created_at.astimezone(london_tz).time(),
                     i.customer.postcode,
                     i.customer.house_name,
                     i.agent.first_name,
@@ -358,7 +358,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
     for i in keyevents:
         events[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
-                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.created_at.astimezone(london_tz).time(),
                     i.customer.postcode,
                     i.customer.house_name,
                     i.agent.first_name,
@@ -558,7 +558,7 @@ def client_detail(request, client_id, s_client_id=None):
         if i.imported:
             imported[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
-                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.created_at.astimezone(london_tz).time(),
                     i.text,
                     i.agent.first_name,
                     i.agent.last_name,
@@ -571,7 +571,7 @@ def client_detail(request, client_id, s_client_id=None):
         else:
             history[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
-                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.created_at.astimezone(london_tz).time(),
                     i.client.postcode,
                     i.client.house_name,
                     i.agent.first_name,
@@ -589,7 +589,7 @@ def client_detail(request, client_id, s_client_id=None):
     for i in keyevents:
         events[i.created_at.replace(tzinfo=london_tz).date()].append(
                 [
-                    i.created_at.replace(tzinfo=london_tz).time(),
+                    i.created_at.astimezone(london_tz).time(),
                     i.client.postcode,
                     i.client.house_name,
                     i.agent.first_name,
@@ -687,7 +687,7 @@ def council_detail(request, council_id):
     for i in actions:
         history[i.created_at.replace(tzinfo=london_tz).date()].append(
             [
-                i.created_at.replace(tzinfo=london_tz).time(),
+                i.created_at.astimezone(london_tz).time(),
                 i.text,
                 i.agent.first_name,
                 i.agent.last_name,
@@ -1616,7 +1616,7 @@ def na_client_action_submit(request, client_id):
         client.add_action(
             date_time=date_time,
             agent=User.objects.get(email=request.user),
-            created_at=datetime.now(pytz.timezone("Europe/London")),
+            created_at=datetime.now(london_tz),
             action_type="NA",
         )
         messages.success(request, "Action added successfully!")
@@ -1845,10 +1845,12 @@ def add_product(request, client_id):
         client = Clients.objects.get(pk=client_id)
         name = request.POST.get("name")
         description = request.POST.get("description")
+        rules_regulations = request.POST.get("rules_regulations")
         product = Product.objects.create(
             client=client,
             name=name,
             description=description,
+            rules_regulations=rules_regulations,
         )
         messages.success(request, "Product added successfully!")
         return redirect(f"/client-detail/{client_id}")
@@ -2241,21 +2243,24 @@ def send_email(request, customer_id):
         body = request.POST.get("text")
         text = request.POST.get("text")
         subject = request.POST.get("subject")
-        
 
+    # body = re.sub(r"\r?\n", "\n", body)
+    # signature.signature = re.sub(r"\r?\n", "\n", signature.signature)
 
     context = {
         "body": body,
         "signature": signature,
         "domain_name": domain_name,
     }
+    print(body)
+    print(signature.signature)
 
     template_name = "../templates/home/email.html"
     convert_to_html_content = render_to_string(
         template_name=template_name, context=context
     )
     plain_message = strip_tags(convert_to_html_content)
-
+    print(convert_to_html_content)
     email = send_mail(
         subject=subject,
         message=plain_message,
@@ -2286,6 +2291,7 @@ def send_email(request, customer_id):
 
     messages.success(request, "Email sent successfully!")
     return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
 
 def send_client_email(request, cclient_id):
     cclient = Cclients.objects.get(pk=cclient_id)
@@ -2334,12 +2340,17 @@ def send_client_email(request, cclient_id):
         body = request.POST.get("text")
         text = request.POST.get("text")
         subject = request.POST.get("subject")
-        
 
+    # Replace newline characters with <br> tags
+    body = re.sub(r"\r?\n", "<br>", body)
+    signature_content = re.sub(r"\r?\n", "<br>", signature.signature)
+
+    print(body)
+    print(signature_content)
 
     context = {
         "body": body,
-        "signature": signature,
+        "signature": signature_content,
         "domain_name": domain_name,
     }
 
@@ -2355,30 +2366,31 @@ def send_client_email(request, cclient_id):
         from_email="support@reform-group.uk",
         recipient_list=[cclient.email],
         html_message=convert_to_html_content,
-    ) 
+    )
 
-    if text == '':
+    if text == "":
         cclient.add_action(
-                agent=User.objects.get(email=request.user),
-                closed=False,
-                imported=False,
-                created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type="Email Sent",
-                date_time=datetime.now(pytz.timezone("Europe/London")),
-            )
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Email Sent",
+            date_time=datetime.now(pytz.timezone("Europe/London")),
+        )
     else:
         cclient.add_action(
-                agent=User.objects.get(email=request.user),
-                closed=False,
-                imported=False,
-                created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type="Email Sent",
-                date_time=date_time,
-                text= text,
-            )
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Email Sent",
+            date_time=date_time,
+            text=text,
+        )
 
     messages.success(request, "Email sent successfully!")
     return HttpResponseRedirect("/cclient-detail/" + str(cclient_id))
+
 
 def query_city(request, q):
     cities = Cities.objects.all()

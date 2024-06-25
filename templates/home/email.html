@@ -4,11 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        div {
+    white-space: pre-wrap;
+}
+    </style>
 </head>
 <body>
-    {{ body }} <br>
+    <div>{{ body }}</div>
     {% if  signature.signature %}
-    {{ signature.signature }} <br>
+    <div>{{ signature.signature }}</div>
     {% endif %}
     {% if  signature.signature_img %}
     <img src="{{ domain_name }}{{ signature.signature_img.url }}" alt="Signature" height="150px" width="200px">

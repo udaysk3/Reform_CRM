@@ -186,7 +186,7 @@
                       <input type="text" class="form-control" id="company_name" name="company_name" required>
                   </div>
                   <div class="mb-3">
-                      <label for="company_phno" class="form-label">Company Phno</label>
+                      <label for="company_phno" class="form-label">Company Number</label>
                       <input type="text" class="form-control" id="company_phno" name="company_phno" required>
                   </div>
                   <div class="mb-3">
@@ -276,7 +276,7 @@
                 <div class="row">
                 <h3 class="col-2">Edit Client</h3>
                 <button class="btn btn-primary bank_details" style="width: fit-content !important;">Bank Details</button>
-                <button class="btn btn-primary add_details" style="width: fit-content !important; display: none;">Add Details</button>
+                <button class="btn btn-primary add_details" style="width: fit-content !important; display: none;">Bank Details</button>
               </div>
                 <form name="editClientForm" id="editClientForm" method="post" action="{% url 'app:edit_client' edit_client.id %}" onsubmit="return validateForm()">
                   {% csrf_token %}
@@ -286,7 +286,7 @@
                       <input type="text" class="form-control" id="edit_company_name" name="company_name" value="{% if edit_client.company_name != 'None' %}{{ edit_client.company_name }}{% endif %}" required>
                   </div>
                   <div class="mb-3">
-                      <label for="edit_company_phno" class="form-label">Company Phno</label>
+                      <label for="edit_company_phno" class="form-label">Company Number</label>
                       <input type="text" class="form-control" id="edit_company_phno" name="company_phno" value="{% if edit_client.company_phno != 'None' %}{{ edit_client.company_phno }}{% endif %}" required>
                   </div>
                   <div class="mb-3">

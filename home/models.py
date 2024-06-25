@@ -107,6 +107,7 @@ class Product(models.Model):
     description = models.CharField(max_length=999, blank=True, null=True,)
     client = models.ForeignKey(Clients, related_name='products', on_delete=models.CASCADE)
     archive = models.BooleanField(default=False)
+    rules_regulations = models.TextField(max_length=999, blank=True, null=True)
 
     def __str__(self):
         return f"{self.client.first_name} {self.client.last_name} {self.name}"
@@ -202,7 +203,7 @@ class HistoryId(models.Model):
         return f"{self.history_id}"
 
 class Signature(models.Model):
-    signature = models.CharField(max_length=999, blank=True, null=True)
+    signature = models.TextField(max_length=999, blank=True, null=True)
     signature_img = models.FileField(upload_to="signatures", blank= True, null=True)
 
 class Postcode(models.Model):
