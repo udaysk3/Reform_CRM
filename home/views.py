@@ -118,8 +118,8 @@ def dashboard(request):
                 else:
                     cb_wise_customers.insert(1,i)
         print(cb_wise_customers)
-        brand_new_customers += cb_wise_customers
-    customers = brand_new_customers[::-1]
+        brand_new_customers += cb_wise_customers[::-1]
+    customers = brand_new_customers
 
     na=[]
     lm=[]

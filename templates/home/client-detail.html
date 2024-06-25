@@ -1211,10 +1211,9 @@ table {
           const location = results[0].geometry.location;
           map.setCenter(location);
           drawCircle(location);
-          callback(); // Proceed to the next postcode
+          callback();
         } else {
-          alert('Geocode was not successful for the following reason: ' + status);
-          callback(); // Proceed to the next postcode even if this one fails
+          return 
         }
       });
     }
