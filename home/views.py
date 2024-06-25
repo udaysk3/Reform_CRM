@@ -109,12 +109,16 @@ def dashboard(request):
         date_wise_customers[i.get_created_at_action_history()[0].date_time.date()].append(i)
     for key, values in date_wise_customers.items():
         cb_wise_customers = []
+        values = values
         for i in values:
             if i.get_created_at_action_history()[0].action_type == 'CB':
-                cb_wise_customers = [i] + cb_wise_customers 
+                if cb_wise_customers and cb_wise_customers[0].get_created_at_action_history()[0].action_type == 'CB':
+                    cb_wise_customers.insert(1, i) 
+                else:
+                    cb_wise_customers = [i] + cb_wise_customers
             else:
-                cb_wise_customers.append(i)
-        brand_new_customers += cb_wise_customers[::-1]
+                cb_wise_customers = cb_wise_customers +[i]
+        brand_new_customers += cb_wise_customers
     customers = brand_new_customers
 
     na=[]

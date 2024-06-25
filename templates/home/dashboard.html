@@ -283,7 +283,7 @@
 
                   <tbody id="myTable">
                     {% if page_obj %}
-                    {% for customer in page_obj.object_list reversed   %}
+                    {% for customer in page_obj.object_list    %}
                     
 
                       <tr {% with all_actions=customer.get_created_at_action_history %} {% if all_actions|length >= 1 %} {% with action=all_actions.0 %} {% if action.action_type == 'CB' %} class=" text-white" style="background: #FA5959" {% elif action.action_type == 'Email Sent' %} class=" text-white" style="background: #75E980" {% endif %} {% endwith %} {% endif %} {% endwith %} >
