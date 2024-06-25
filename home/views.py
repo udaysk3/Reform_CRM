@@ -2653,7 +2653,7 @@ def add_coverage_areas(request, client_id):
             postcode=re.sub(r"\s+", " ", request.POST.get("postcode")),
         )
         
-        messages.success(request, "Coverage Area added successfully!")
+        messages.success(request, "Postcode can be added")
         return redirect(r"/client-detail/" + str(client_id))
     return render(request, "home/admin.html")
 
