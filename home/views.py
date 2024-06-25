@@ -111,13 +111,9 @@ def dashboard(request):
         cb_wise_customers = []
         for i in values:
             if i.get_created_at_action_history()[0].action_type == 'CB':
-                cb_wise_customers.insert(0,i)
+                cb_wise_customers = [i] + cb_wise_customers 
             else:
-                if cb_wise_customers == []:
-                    cb_wise_customers.append(i)
-                else:
-                    cb_wise_customers.insert(1,i)
-        print(cb_wise_customers)
+                cb_wise_customers.append(i)
         brand_new_customers += cb_wise_customers[::-1]
     customers = brand_new_customers
 
