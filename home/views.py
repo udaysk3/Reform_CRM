@@ -1651,6 +1651,7 @@ def import_customers_view(request):
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         campaign = request.POST.get("campaign")
+        client = request.POST.get("client")
         if campaign == "nan":
             messages.error(request, "Select a Campaign")
             return redirect("app:import_customers")
@@ -1728,12 +1729,16 @@ def import_customers_view(request):
                     f'{customer_data["first_name"]} {customer_data["last_name"]}'
                 )
                 continue
+            
+            if campaign == "nan" or client == "nan":
+                messages.error(request, "Select all dropdown fields")
+                return redirect("/customer?page=add_customer")
 
             customer = Customers.objects.create(
                 **customer_data,
                 district=district,
                 campaign=Campaign.objects.get(id=campaign),
-                client=Campaign.objects.get(id=campaign).client,
+                client=Clients.objects.get(pk=client),
                 agent=User.objects.get(email=request.user),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
                 imported=True,
@@ -1764,11 +1769,13 @@ def import_customers_view(request):
         return redirect("app:customer")
 
     campaigns = Campaign.objects.all()
+    client = Clients.objects.all()    
+
 
     return render(
         request,
         "home/import_customers.html",
-        {"excel_columns": excel_columns, "campaigns": campaigns},
+        {"excel_columns": excel_columns, "campaigns": campaigns, 'clients':client},
     )
 
 
