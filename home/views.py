@@ -530,8 +530,12 @@ def client_detail(request, client_id, s_client_id=None):
     client = Clients.objects.get(pk=client_id)
     campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
     uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
+    all_products = Product.objects.all()
     products = Product.objects.all().filter(client=client).filter(archive=False)
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
+    all_routes = Route.objects.all()
+    routes = Route.objects.all().filter(client=client).filter(archive=False)
+    unroutes = Route.objects.all().filter(client=client).filter(archive=True)
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
     show_client = client
@@ -602,29 +606,34 @@ def client_detail(request, client_id, s_client_id=None):
             )
 
         return render(
-        request,
-        "home/client-detail.html",
-        {
-            "client": client,
-            "history": history,
-            "imported": imported,
-            "prev": prev,
-            "next": next,
-            "child_clients": child_clients,
-            "agents" : agents,
-            "show_client": show_client,
-            "events": events,
-            "reasons": reasons,
-            "templates": templates,
-            "signatures": signatures,
-            "domain_name": domain_name,
-            "campaigns": campaigns,
-            "uncampaigns":uncampaigns,
-            "products":products,
-            "unproducts":unproducts,
-            "coverage_areas": coverage_area,
-        },
-    )
+            request,
+            "home/client-detail.html",
+            {
+                "client": client,
+                "history": history,
+                "imported": imported,
+                "prev": prev,
+                "next": next,
+                "child_clients": child_clients,
+                "agents": agents,
+                "show_client": show_client,
+                "events": events,
+                "reasons": reasons,
+                "templates": templates,
+                "signatures": signatures,
+                "domain_name": domain_name,
+                "campaigns": campaigns,
+                "uncampaigns": uncampaigns,
+                "products": products,
+                "unproducts": unproducts,
+                "coverage_areas": coverage_area,
+                "all_products": all_products,
+                "all_routes": all_routes,
+                "routes":routes,
+                "unroutes":unroutes,
+                
+            },
+        )
 
     return render(
         request,
@@ -648,6 +657,10 @@ def client_detail(request, client_id, s_client_id=None):
             "products":products,
             "unproducts":unproducts,
             "coverage_areas": coverage_area,
+            "all_products":all_products,
+            "all_routes":all_routes,
+            "routes":routes,
+            "unroutes":unroutes,
         },
     )
 
@@ -1842,31 +1855,37 @@ def remove_campaign(request, campaign_id, client_id):
     messages.success(request, "Campaign deleted successfully!")
     return redirect(f"/client-detail/{client_id}")
 
+def add_product_client(request,client_id):
+    if request.method == 'POST':
+        product = Product.objects.get(pk=request.POST.get('product_id'))
+        client = Clients.objects.get(pk=client_id)
+        product.client = client
+        product.save()
+        messages.success(request, "Product added successfully to a Client!")
+        return redirect(f'/client-detail/{client_id}')
+
 
 @login_required
-def add_product_view(request, client_id):
-    return render(request, 'home/add_products.html', {'client_id': client_id})
-
-def add_product(request, client_id):
+def add_product(request):
+    clients = Clients.objects.all()
     if request.method == "POST":
-        client = Clients.objects.get(pk=client_id)
         name = request.POST.get("name")
         description = request.POST.get("description")
         rules_regulations = request.POST.get("rules_regulations")
         product = Product.objects.create(
-            client=client,
             name=name,
             description=description,
             rules_regulations=rules_regulations,
         )
         messages.success(request, "Product added successfully!")
-        return redirect(f"/client-detail/{client_id}")
+        return redirect('/product')
+    return render(request, "home/add_products.html", {"clients": clients})
 
-def remove_product(request, product_id, client_id):
+def remove_product(request, product_id):
     product = Product.objects.get(pk=product_id)
     product.delete()
     messages.success(request, "Product deleted successfully!")
-    return redirect(f"/client-detail/{client_id}")
+    return redirect(f"/product")
 
 
 def add_child_customer(request, customer_id):
@@ -1945,17 +1964,9 @@ def make_primary(request, parent_customer_id, child_customer_id):
 def add_funding_route(request):
     if request.method == "POST":
         name = request.POST.get("name")
-        # managed_by = request.POST.get("managed_by")
-        # main_contact = request.POST.get("main_contact")
-        # email = request.POST.get("email")
-        # telephone = request.POST.get("telephone")
         description = request.POST.get("description") 
         route = Route.objects.create(
             name=name,
-            # managed_by=managed_by,
-            # telephone=telephone,
-            # main_contact=main_contact,
-            # email=email,
             description=description,
         )
         documents = request.FILES.getlist("document")
@@ -1967,6 +1978,15 @@ def add_funding_route(request):
         return redirect(f"/funding_route")
     return render(request, "admin.html")
 
+def add_route_client(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(pk=client_id)
+        route = Route.objects.get(pk=request.POST.get("route"))
+        print(route)
+        client.route = route
+        client.save()
+        messages.success(request, "Funding Route added successfully to a Client!")
+        return redirect(f"/client-detail/{client_id}")
 
 def add_council_funding_route(request, council_id):
     if request.method == "POST":
@@ -2000,17 +2020,19 @@ def remove_funding_route(request, route_id):
 
 
 @login_required
-def create_stage(request, route_id):
-    route = Route.objects.get(pk=route_id)
-    stages=Stage.objects.all().filter(route=route)
+def create_stage(request):
+    stages=Stage.objects.all()
+    routes = Route.objects.all()
     if request.GET.get("page")== 'edit_page':
         stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
-        return render(request, 'home/stages.html', {"route": route,"stage":stage, "fields":json.loads(stage.fields)})
+        return render(request, 'home/stages.html', {"stage":stage, "fields":json.loads(stage.fields)})
 
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
         dynamic_labels = request.POST.getlist("dynamic_label")
-
+        order = request.POST.get('order')
+        description = request.POST.get('description')
+        route = Route.objects.get(pk=request.POST.get("route"))
         dynamic_fields = {}
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
@@ -2019,33 +2041,57 @@ def create_stage(request, route_id):
             name=request.POST.get("name"),
             route=route,
             fields=fields,
+            order=order,
+            description=description,
         )
-        return redirect(f"/{route_id}/stages") 
-    return render(request, "home/stages.html", {"route": route, "stages": stages}) 
+        return redirect("app:create_stage")
+    return render(request, "home/stages.html", {"routes": routes, "stages": stages}) 
+
 
 @login_required
 def remove_stage(request, stage_id):
     stage = Stage.objects.get(pk=stage_id)
-    route_id = stage.route.id
     stage.delete()
     messages.success(request, "Stage deleted successfully!")
-    return redirect(f"/{route_id}/stages")
+    return redirect(f"/stages")
 
 @login_required
-def edit_stage(request, route_id, stage_id):
+def edit_stage(request, stage_id):
     stage = Stage.objects.get(pk=stage_id)
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
         dynamic_labels = request.POST.getlist("dynamic_label")
+        order = request.POST.get("order")
+        description = request.POST.get("description")
         dynamic_fields = {}
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
         fields = json.dumps(dynamic_fields)
         stage.name = request.POST.get("name")
         stage.fields = fields
+        stage.order = order
+        stage.description = description
         stage.save()
         messages.success(request, "Stage updated successfully!")
-        return redirect(f"/{route_id}/stages")
+        return redirect(f"/stages")
+
+@login_required    
+def product(request):
+    products = Product.objects.all()
+    return render(request, "home/products.html", {"products": products})
+
+
+@login_required
+def edit_product(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    if request.method == "POST":
+        product.name = request.POST.get("name")
+        product.description = request.POST.get("description")
+        product.rules_regulations = request.POST.get("rules_regulations")
+        product.save()
+        messages.success(request, "Product updated successfully!")
+        return redirect(f"/product")
+    return render(request, "home/edit_products.html", {"product": product})
 
 @login_required
 def set_customer_route(request, customer_id, route_id):
@@ -2689,5 +2735,18 @@ def archive_product(request,client_id, product_id):
     else:
         product.archive = False
         product.save()
+        messages.success(request, "Unarchived successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
+
+def archive_route(request,client_id, route_id):
+    route = Route.objects.get(pk=route_id)
+    if route.archive == False:
+        route.archive = True
+        route.save()
+        messages.success(request, "Archived successfully!")
+        return redirect(r"/client-detail/" + str(client_id))
+    else:
+        route.archive = False
+        route.save()
         messages.success(request, "Unarchived successfully!")
         return redirect(r"/client-detail/" + str(client_id))

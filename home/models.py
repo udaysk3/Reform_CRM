@@ -75,6 +75,9 @@ class Clients(models.Model):
     council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
     closed = models.BooleanField(default=False)
     imported = models.BooleanField(default=False)
+    route = models.ForeignKey(
+        'Route', related_name="client", on_delete=models.CASCADE, null=True
+    )
 
     def add_action(
         self,
@@ -105,7 +108,13 @@ class Campaign(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
-    client = models.ForeignKey(Clients, related_name='products', on_delete=models.CASCADE)
+    client = models.ForeignKey(
+        Clients,
+        related_name="products",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
     archive = models.BooleanField(default=False)
     rules_regulations = models.TextField(max_length=999, blank=True, null=True)
 
@@ -122,6 +131,8 @@ class Route(models.Model):
     council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route', null=True, blank= True)
+    archive = models.BooleanField(default=False)
+
 
 class Document(models.Model):
     document = models.FileField(upload_to="documents", blank= True, null=True)
@@ -176,6 +187,8 @@ class Action(models.Model):
 class Stage(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
+    order = models.CharField(max_length=999, blank=True, null=True)
+    description = models.CharField(max_length=999, blank=True, null=True)
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
 

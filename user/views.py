@@ -50,6 +50,8 @@ def add_user(request):
         dashboard = request.POST.get('dashboard') == 'on'
         customer = request.POST.get('customer') == 'on'
         client = request.POST.get('client') == 'on'
+        stage = request.POST.get('stage') == 'on'
+        product = request.POST.get('product') == 'on'
         council = request.POST.get('council') == 'on'
         funding_route = request.POST.get('funding_route') == 'on'
         admin = request.POST.get('admin') == 'on'
@@ -66,6 +68,8 @@ def add_user(request):
             customer=customer,
             client=client,
             council=council,
+            stage=stage,
+            product=product,
             funding_route=funding_route,
             admin=admin,
             finance=finance,
@@ -87,6 +91,8 @@ def edit_user(request, user_id):
         user.customer = request.POST.get('customer') == 'on'
         user.client = request.POST.get('client') == 'on'
         user.council = request.POST.get('council') == 'on'
+        user.stage = request.POST.get('stage') == 'on'
+        user.product = request.POST.get('product') == 'on'
         user.funding_route = request.POST.get('funding_route') == 'on'
         user.admin = request.POST.get('admin') == 'on'
         user.finance = request.POST.get('finance') == 'on'

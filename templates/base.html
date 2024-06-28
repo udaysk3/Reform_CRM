@@ -59,12 +59,12 @@
             </li>
             {% if request.user.customer %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:customer" %}" aria-expanded="false">
+              <div class="sidebar-link customer " aria-expanded="false">
                 <span>
                   <i class="ti ti-article"></i>
                 </span>
-                <span class="hide-menu">Customer</span>
-              </a>
+                <span class="hide-menu">Customers</span>
+              </div>
             </li>
             {% endif %}
             {% if request.user.client %}
@@ -77,16 +77,7 @@
               </a>
             </li>
             {% endif %}
-            {% if request.user.archive %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:archive" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-article"></i>
-                </span>
-                <span class="hide-menu">Archive</span>
-              </a>
-            </li>
-            {% endif %}
+            
             {% if request.user.council %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:council" %}" aria-expanded="false">
@@ -97,16 +88,14 @@
               </a>
             </li>
             {% endif %}
-            {% if request.user.funding_route %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
+              <div class="sidebar-link customer-journey" aria-expanded="false">
                 <span>
                   <i class="ti ti-article"></i>
                 </span>
-                <span class="hide-menu">Funding Route</span>
-              </a>
+                <span class="hide-menu">Customer Journey</span>
+              </div>
             </li>
-            {% endif %}
             {% if request.user.admin %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:admin" %}" aria-expanded="false">
@@ -243,7 +232,7 @@
       </header>
       
       <!--  Header End -->
-      {% if request.GET.page != customer %}
+      {% if request.GET.page != 'customer' or request.GET.page != 'product' %}
       {% for message in messages %}
       <div class="container-fluid p-0 m-0">
         <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
@@ -251,8 +240,6 @@
             <span aria-hidden="True">&times;</span>
           </button>
          {{ message }}
-    
-      
         </div>
       </div>
       {% endfor %}
@@ -281,7 +268,139 @@
 
 
   <script src="{% static 'js/comboTreePlugin.js' %} " type="text/javascript"></script>
+
   
+  <script>
+    const customer = document.querySelector('.customer');
+    customer.addEventListener('click',()=>{
+        {% if request.user.archive %}
+        if(document.querySelector('.archive')){
+          document.querySelector('.archive').remove()
+        } else{
+          
+        const a = document.createElement("li");
+        a.classList.add('sidebar-item','archive');
+        a.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:archive" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Archive</span>
+              </a>
+        `
+        customer.parentNode.insertAdjacentElement("afterend", a);
+        
+      }
+      {% endif %}
+      if(document.querySelector('.customers')){
+          document.querySelector('.customers').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','customers');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:customer" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Customer</span>
+              </a>
+        `
+        customer.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+      })
+    
+      
+    </script>
+
+  
+  <script>
+    const customerJourney = document.querySelector('.customer-journey');
+    customerJourney.addEventListener('click',()=>{
+        {% if request.user.funding_route %}
+        if(document.querySelector('.funding_route')){
+          document.querySelector('.funding_route').remove()
+        } else{
+          
+        const a = document.createElement("li");
+        a.classList.add('sidebar-item','funding_route');
+        a.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Funding Route</span>
+              </a>
+        `
+        customerJourney.parentNode.insertAdjacentElement("afterend", a);
+        
+      }
+      {% endif %}
+
+        {% if request.user.stage %}
+        if(document.querySelector('.stage')){
+          document.querySelector('.stage').remove()
+        } else{
+          
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','stage');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:create_stage" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Stage</span>
+              </a>
+        `
+        customerJourney.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+      {% endif %}
+
+        {% if request.user.product %}
+        if(document.querySelector('.product')){
+          document.querySelector('.product').remove()
+        } else{
+          
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','product');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:product" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Product</span>
+              </a>
+        `
+        customerJourney.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+      {% endif %}
+      })
+    
+      
+    </script>
+
   {% block js %}
   
   {% endblock js %}

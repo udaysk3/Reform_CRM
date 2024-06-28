@@ -78,6 +78,14 @@
                             <label class="form-check-label" for="admin">Admin</label>
                           </div>
                           <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="stage" name="stage">
+                            <label class="form-check-label" for="stage">Stage</label>
+                          </div>
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="product" name="product">
+                            <label class="form-check-label" for="product">Product</label>
+                          </div>
+                          <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="finance" name="finance">
                             <label class="form-check-label" for="finance">Finance</label>
                           </div>
@@ -131,6 +139,14 @@
                               <label class="form-check-label"  for="editAdmin">Admin</label>
                             </div>
                             <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.stage %}checked{% endif %} class="form-check-input" id="editstage" name="stage">
+                              <label class="form-check-label"  for="editstage">Stage</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                              <input type="checkbox" {% if user.product %}checked{% endif %} class="form-check-input" id="editproduct" name="product">
+                              <label class="form-check-label"  for="editproduct">product</label>
+                            </div>
+                            <div class="mb-3 form-check">
                               <input type="checkbox" {% if user.finance %}checked{% endif %} class="form-check-input" id="editFinance"  name="finance" >
                               <label class="form-check-label" for="editFinance">Finance</label>
                             </div>
@@ -158,6 +174,8 @@
                       <th>Council</th>
                       <th>funding_route</th>
                       <th>Admin</th>
+                      <th>Stage</th>
+                      <th>Product</th>
                       <th>Finance</th>
                       <th>HR</th>
                       <th>Action</th>
@@ -235,6 +253,26 @@
                           {% endif %}
 
                           {% if user.admin %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+
+                          {% if user.stage %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                          </td>
+                          {% else %}
+                          <td>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                          </td>
+                          {% endif %}
+
+                          {% if user.product %}
                           <td>
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
                           </td>

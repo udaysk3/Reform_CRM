@@ -110,8 +110,8 @@ urlpatterns = [
     ),
     path("add_client", views.add_client, name="add_client"),
     path("add_campaign/<int:client_id>", views.add_campaign, name="add_campaign"),
-    path("add_product_view/<int:client_id>", views.add_product_view, name="add_product_view"),
-    path("add_product/<int:client_id>", views.add_product, name="add_product"),
+    path("add_product", views.add_product, name="add_product"),
+    path("edit_product/<int:product_id>", views.edit_product, name="edit_product"),
     path("edit_client/<int:client_id>", views.edit_client, name="edit_client"),
     path("remove_client/<int:client_id>", views.remove_client, name="remove_client"),
     path(
@@ -120,7 +120,7 @@ urlpatterns = [
         name="remove_campaign",
     ),
     path(
-        "remove_product/<int:product_id>/<int:client_id>",
+        "remove_product/<int:product_id>",
         views.remove_product,
         name="remove_product",
     ),
@@ -149,11 +149,20 @@ urlpatterns = [
         views.remove_funding_route,
         name="remove_funding_route",
     ),
-    path("<int:route_id>/stages", views.create_stage, name="create_stage"),
-    path("remove_stage/<int:stage_id>", views.remove_stage, name="remove_stage"),
+    path("stages", views.create_stage, name="create_stage"),
+    path("product", views.product, name="product"),
     path(
-        "edit_stage/<int:route_id>/<int:stage_id>", views.edit_stage, name="edit_stage"
+        "add_product_client/<int:client_id>",
+        views.add_product_client,
+        name="add_product_client",
     ),
+    path(
+        "add_route_client/<int:client_id>",
+        views.add_route_client,
+        name="add_route_client",
+    ),
+    path("remove_stage/<int:stage_id>", views.remove_stage, name="remove_stage"),
+    path("edit_stage/<int:stage_id>", views.edit_stage, name="edit_stage"),
     path(
         "set_customer_route/<int:customer_id>/<int:route_id>",
         views.set_customer_route,
@@ -219,6 +228,11 @@ urlpatterns = [
         "archive_product/<int:client_id>/<int:product_id>",
         views.archive_product,
         name="archive_product",
+    ),
+    path(
+        "archive_route/<int:client_id>/<int:route_id>",
+        views.archive_route,
+        name="archive_route",
     ),
     path(
         "get_campaign/<int:client_id>",

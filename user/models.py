@@ -29,6 +29,8 @@ class UserManager(BaseUserManager):
             "archive": True,
             "funding_route":True,
             "admin": True,
+            "stage": True,
+            "product": True,
             "finance": True,
             "council":True,
             "hr": True,
@@ -58,6 +60,8 @@ class User(AbstractUser):
     archive = models.BooleanField(default=True)
     council = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
+    stage = models.BooleanField(default=False)
+    product = models.BooleanField(default=False)
     finance = models.BooleanField(default=False)
     funding_route = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)
