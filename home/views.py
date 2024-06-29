@@ -374,7 +374,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         council= Councils.objects.get_or_create(name=customer.district)[0]
     else:
         council = None
-    routes = Route.objects.all().filter(council=council)
+    routes = Route.objects.all().filter(client=customer.client)
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [
@@ -2703,7 +2703,7 @@ def add_coverage_areas(request, client_id):
             postcode=re.sub(r"\s+", " ", request.POST.get("postcode")),
         )
         
-        messages.success(request, "Postcode can be added")
+        messages.success(request, "Postcode Added Successfully")
         return redirect(r"/client-detail/" + str(client_id))
     return render(request, "home/admin.html")
 
