@@ -216,12 +216,13 @@
               {% block search %}
               {% endblock %}
               <li class="nav-item dropdown">
-                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                <a class="nav-link nav-icon-hover drop2" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
                   <img src="{% static 'images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
                 </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up drop2div" aria-labelledby="drop2">
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up drop3" aria-labelledby="drop2">
                   <div class="message-body">
+                    <a href="" class="btn btn-primary mx-3 mt-2 d-block">Profile</a>
                     <a href="{% url "user:logout" %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                   </div>
                 </div>
@@ -246,9 +247,6 @@
       {% endif %}
 
       {% block content %}{% endblock content %}
-        {% comment %} <div class="py-6 px-6 text-center">
-          <p class="mb-0 fs-4">This is a Footer <a href="#" target="_blank" class="pe-1 text-primary text-decoration-underline">2024 @ Copyright Udaysk</a></p>
-        </div> {% endcomment %}
       </div>
     </div>
   </div>

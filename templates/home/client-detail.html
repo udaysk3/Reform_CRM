@@ -1317,6 +1317,22 @@ table {
 
 {% endblock %} {% block js %}
 
+<script>
+  const drop2 = document.querySelector('.drop2');
+  drop2.addEventListener('click',()=>{
+    if(drop2.classList.contains('show')){
+      const drop3 = document.querySelector('.drop3');
+      drop2.classList.remove('show');
+      drop3.classList.remove('show');
+      drop3.removeAttribute('data-bs-popper');
+    } else{
+      const drop3 = document.querySelector('.drop3');
+      drop2.classList.add('show');
+      drop3.classList.add('show');
+      drop3.setAttribute('data-bs-popper','static');
+    }
+  })
+</script>
 
 <script scr="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
