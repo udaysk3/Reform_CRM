@@ -984,117 +984,51 @@ table {
           <div class="col-sm-6">
             <div class="card m-0">
               <div class="card-body">
-                <div class="d-grid gap-2 d-md-block">
-                    <!-- Modal -->
-                    <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Funding Route</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <form method='post' action="{% url 'app:add_funding_route' %}">
-                            {% csrf_token %}
-                          <div class="modal-body">
-                            <div class="mb-3">
-                              <label for="name" class="form-label">Name</label>
-                              <input type="text" class="form-control" id="name" name='name'>
-                            </div>
-                            <div class="mb-3">
-                              <label for="maincontact" class="form-label">Main Contact</label>
-                              <input type="text" class="form-control" id="maincontact" name="main_5contact">
-                            </div>
-                            <div class="mb-3">
-                              <label for="telephone" class="form-label">Telephone</label>
-                              <input type="text" class="form-control" id="telephone" name="telephone">
-                            </div>
-                            <div class="mb-3">
-                              <label for="email" class="form-label">email</label>
-                              <input type="email" class="form-control" id="email" name="email">
-                            </div>
-                            <div class="mb-3">
-                              <label for="anothercontact" class="form-label">Another Contact</label>
-                              <input type="text" class="form-control" id="anothercontact" name="another_contact">
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary ">Submit</button>
-                          </div>
-                        </form>
-                        </div>
-                      </div>
-                    </div>
+                <h6>Available Funding Routes</h6>
+                
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                  >
+                    <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
+                      {% for route in routes %}
+                          <button  class="btn btn-primary"
+                          {% if route in council_routes %}
+                          {% else %}
+                          disabled
+                          {% endif %}
+                           >
+                           {% if route in council_routes %}
+                           <i class="bi-check-square me-1"></i>
+                          {% else %}
+                          <i class="bi bi-x-square me-1"></i>
+                          {% endif %}
+                            {{ route.name }} </button>
+                      {% endfor %}
                 </div>
-                <h6>Funding Routes</h6>
-{% if customer.route %}
-
-
-{% if values %}
-
-
-
-<div class="card p-0 m-0 accordion-container">
-  <div class="card-body p-3 m-0" style="height: 390px">
-    <a href="/remove_customer_route/{{ customer.id }}" class="btn btn-lg"><i class="bi bi-arrow-left"></i></a>
-    {% for name, field in values.items %}
-    
-    <button class="accordion">{{ name }}</button>
-    <div class="panel">
-     <form method="post" action="/set_stage_values/{{ customer.id }}">
-       {% csrf_token %}
-       <input type="hidden" name="name" value="{{ name }}">
-       {% for key, value in field.items %}
-       {% if value.0 == 'checkbox' %}
-
-       <div class="form-check my-3">
-        <input class="form-check-input" type="checkbox" {% if value.1 %} checked {% endif %} name="dynamic_input" id="flexCheckDefault">
-       <input type="hidden" name="dynamic_label" value="{{ key }}">
-        <label class="form-check-label" for="flexCheckDefault">
-          {{ key }}
-        </label>
-      </div>
-{% elif value.0 == 'dropdown' %}
-{% with array=key|split:',' %}
-
-<div class="mb-3">
-  <label class="form-label">{{ array.0 }}</label>
-  <input type="hidden" name="dynamic_label" value="{{ key }}">
-  
-  <select class="form-select" aria-label="Default select example" name="dynamic_input">
-    {% for option in array %}
-    {% if forloop.counter == 1 %}
-    {% else %}
-    <option {% if value.1 == option %} selected {% endif %} value="{{ option }}" >{{ option }}</option>
-    {% endif %}
-    {% endfor %}
-  </select>
-    
-  </div>
-
-{% endwith %}
-{% else %}
-       <div class="form-floating my-3">
-         <input type="{{ value.0 }}" class="form-control" id="floatingInput1" name="dynamic_input" value="{{ value.1 }}">
-       <input type="hidden" name="dynamic_label" value="{{ key }}">
-         <label for="floatingInput1">{{ key }}</label>
-       </div>
-       {% endif %}
-       {% endfor %}
-         <button type="submit" class="btn btn-primary mb-3 ">Submit</button>
-     </form>
-   </div>
-
-      {% endfor %} 
-  </div>
-</div>
-
-{% else %}
-                  <div class="card p-0 m-0 accordion-container">
-                  <div class="card-body p-3 m-0" style="height: 390px">
-    <a href="/remove_customer_route/{{ customer.id }}" class="btn btn-lg"><i class="bi bi-arrow-left"></i></a>
-
-                    {% for name, field in stages.items %}
+                  </div>
+                </div>
+                <h6>Available Products</h6>
+                
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                  >
+                    <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
+                      {% for product in products %}
+                          <button  class="btn btn-primary"> {{ product.name }} </button>
+                      {% endfor %}
+                </div>
+                  </div>
+                </div>
+                <h6>Stage</h6>
+                {% if values %}
+                              
+                              
+                              
+                <div class="card p-0 m-0 accordion-container">
+                  <div class="card-body p-3 m-0">
+                    {% for name, field in values.items %}
                     
                     <button class="accordion">{{ name }}</button>
                     <div class="panel">
@@ -1102,35 +1036,37 @@ table {
                        {% csrf_token %}
                        <input type="hidden" name="name" value="{{ name }}">
                        {% for key, value in field.items %}
-                        {% if value == 'checkbox' %}
-                        <div class="form-check my-3">
-                          <input class="form-check-input" type="checkbox" name="dynamic_input" id="flexCheckDefault">
-                         <input type="hidden" name="dynamic_label" value="{{ key }}">
-                          <label class="form-check-label" for="flexCheckDefault">
-                            {{ key }}
-                          </label>
-                        </div>
-                        {% elif value == 'dropdown' %}
-                        {% with array=key|split:',' %}
-                        <div class="mb-3">
-                          <label class="form-label">{{ array.0 }}</label>
-                          <input type="hidden" name="dynamic_label" value="{{ key }}">
-                          
-                          <select class="form-select" aria-label="Default select example" name="dynamic_input">
-                            {% for option in array %}
-                            {% if forloop.counter == 1 %}
-                            {% else %}
-                            <option value="{{ option }}" >{{ option }}</option>
-                            {% endif %}
-                            {% endfor %}
-                          </select>
-                            
-                          </div>
-                          {% endwith %}
-                          {% else %}
-
+                       {% if value.0 == 'checkbox' %}
+                    
+                       <div class="form-check my-3">
+                        <input class="form-check-input" type="checkbox" {% if value.1 %} checked {% endif %} name="dynamic_input" id="flexCheckDefault">
+                       <input type="hidden" name="dynamic_label" value="{{ key }}">
+                        <label class="form-check-label" for="flexCheckDefault">
+                          {{ key }}
+                        </label>
+                      </div>
+                {% elif value.0 == 'dropdown' %}
+                {% with array=key|split:',' %}
+                    
+                <div class="mb-3">
+                  <label class="form-label">{{ array.0 }}</label>
+                  <input type="hidden" name="dynamic_label" value="{{ key }}">
+                  
+                  <select class="form-select" aria-label="Default select example" name="dynamic_input">
+                    {% for option in array %}
+                    {% if forloop.counter == 1 %}
+                    {% else %}
+                    <option {% if value.1 == option %} selected {% endif %} value="{{ option }}" >{{ option }}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                    
+                  </div>
+                
+                {% endwith %}
+                {% else %}
                        <div class="form-floating my-3">
-                         <input type="{{ value }}" class="form-control" id="floatingInput1" name="dynamic_input">
+                         <input type="{{ value.0 }}" class="form-control" id="floatingInput1" name="dynamic_input" value="{{ value.1 }}">
                        <input type="hidden" name="dynamic_label" value="{{ key }}">
                          <label for="floatingInput1">{{ key }}</label>
                        </div>
@@ -1139,31 +1075,69 @@ table {
                          <button type="submit" class="btn btn-primary mb-3 ">Submit</button>
                      </form>
                    </div>
-
+                  
                       {% endfor %} 
                   </div>
                 </div>
-
-{% endif %}
-
-
-{% else %}
-                  {% for route in routes %}
-                  <a href="/set_customer_route/{{ customer.id }}/{{ route.id }}">
-                  <div class="col-sm-4 model-btn mt-3" style="width: 100%">
-                    <div class="card m-0 ">
-                      <div class="card-body row">
-                        <div class="col-10">
-                        <h6><b>Name : </b> {{route.name}}</h6>
-                        <h6><b>Email</b> : {{route.email}}</h6>
-                        <h6><b>Telephone</b> : {{route.telephone}}</h6>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-                {% endfor%}
+                
+                {% else %}
+                <div class="card p-0 m-0 accordion-container">
+                <div class="card-body p-3 m-0" style="height: 390px">
+                                  
+                                    {% for name, field in stages.items %}
+                                    
+                                    <button class="accordion">{{ name }}</button>
+                                    <div class="panel">
+                                     <form method="post" action="/set_stage_values/{{ customer.id }}">
+                                       {% csrf_token %}
+                                       <input type="hidden" name="name" value="{{ name }}">
+                                       {% for key, value in field.items %}
+                                        {% if value == 'checkbox' %}
+                                        <div class="form-check my-3">
+                                          <input class="form-check-input" type="checkbox" name="dynamic_input" id="flexCheckDefault">
+                                         <input type="hidden" name="dynamic_label" value="{{ key }}">
+                                          <label class="form-check-label" for="flexCheckDefault">
+                                            {{ key }}
+                                          </label>
+                                        </div>
+                                        {% elif value == 'dropdown' %}
+                                        {% with array=key|split:',' %}
+                                        <div class="mb-3">
+                                          <label class="form-label">{{ array.0 }}</label>
+                                          <input type="hidden" name="dynamic_label" value="{{ key }}">
+                                          
+                                          <select class="form-select" aria-label="Default select example" name="dynamic_input">
+                                            {% for option in array %}
+                                            {% if forloop.counter == 1 %}
+                                            {% else %}
+                                            <option value="{{ option }}" >{{ option }}</option>
+                                            {% endif %}
+                                            {% endfor %}
+                                          </select>
+                                            
+                                          </div>
+                                          {% endwith %}
+                                          {% else %}
+                                        
+                                       <div class="form-floating my-3">
+                                         <input type="{{ value }}" class="form-control" id="floatingInput1" name="dynamic_input">
+                                       <input type="hidden" name="dynamic_label" value="{{ key }}">
+                                         <label for="floatingInput1">{{ key }}</label>
+                                       </div>
+                                       {% endif %}
+                                       {% endfor %}
+                                         <button type="submit" class="btn btn-primary mb-3 ">Submit</button>
+                                     </form>
+                                   </div>
+                                  
+                                      {% endfor %} 
+                                  </div>
+                                </div>
+                              
                 {% endif %}
+                              
+
+                  
                   </div>
                 </div>
               </div>

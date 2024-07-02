@@ -1,5 +1,3 @@
-from hmac import new
-import io, csv
 from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.core.serializers import serialize
@@ -25,7 +23,7 @@ from .models import (
     Signature,
     Product,
     CoverageAreas,
-    Postcode
+    Stage,
 )
 import re
 from datetime import datetime, timedelta
@@ -38,15 +36,12 @@ from user.models import User
 from pytz import timezone
 import json
 import os
-from django.core.mail import send_mail, EmailMessage
-from django.conf import settings
+from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
 from .tasks import getLA
 from .epc import getEPC
-from simplegmail import Gmail
-from simplegmail.query import construct_query
 import base64 
 import requests
 import os.path
@@ -375,6 +370,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
     else:
         council = None
     routes = Route.objects.all().filter(client=customer.client)
+    council_routes = Route.objects.all().filter(council=council)
+    products = Product.objects.all().filter(client=customer.client)
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [
@@ -386,73 +383,49 @@ def customer_detail(request, customer_id, s_customer_id=None):
         processed_recommendations.append(
             {"improvement": improvement, "indicative_cost": indicative_cost[:-1]}
         )
-    if customer.route:
-        all_stages = customer.route.stage.all()
-        stages = {}
-        for stage in all_stages:
-            stages[stage.name] = json.loads(stage.fields)
-        if customer.stage_values:
-            stage_values = json.loads(customer.stage_values)
-            values = {}
-            for name,s_fields in stages.items():
-                fields = {}
-                for field in s_fields:
-                    fields[field] = [s_fields[field], '']
-                values[name] = fields
-
-            for key, fields in values.items():
-                if key in stage_values:
-                    for field in fields:
-                        if field in stage_values[key]:
-                            fields[field][1] = stage_values[key][field]
-
-            # print(stage_values, values)
-            return render(
-        request,
-        "home/customer-detail.html",
-        {
-            "customer": customer,
-            "history": history,
-            "imported": imported,
-            "prev": prev,
-            "next": next,
-            "child_customers": child_customers,
-            "recommendations_list": processed_recommendations,
-            "routes": routes,
-            "stages": stages,
-            "values": values,
-            "agents": agents,
-            "show_customer": show_customer,
-            "events": events,
-            "reasons": reasons,
-            "templates": templates,
-            "signatures": signatures,
-            "domain_name": domain_name,
-        },
-    )
+    all_stages = Stage.objects.all()
+    stages = {}
+    for stage in all_stages:
+        stages[stage.name] = json.loads(stage.fields)
+    if customer.stage_values:
+        stage_values = json.loads(customer.stage_values)
+        values = {}
+        for name,s_fields in stages.items():
+            fields = {}
+            for field in s_fields:
+                fields[field] = [s_fields[field], '']
+            values[name] = fields
+        for key, fields in values.items():
+            if key in stage_values:
+                for field in fields:
+                    if field in stage_values[key]:
+                        fields[field][1] = stage_values[key][field]
+        # print(stage_values, values)
         return render(
-        request,
-        "home/customer-detail.html",
-        {
-            "customer": customer,
-            "history": history,
-            "imported": imported,
-            "prev": prev,
-            "next": next,
-            "child_customers": child_customers,
-            "recommendations_list": processed_recommendations,
-            "routes": routes,
-            "stages": stages,
-            "agents" : agents,
-            "show_customer": show_customer,
-            "events": events,
-            "reasons": reasons,
-            "templates": templates,
-            "signatures": signatures,
-            "domain_name": domain_name,
-        },
-    )
-
+                request,
+                "home/customer-detail.html",
+                {
+                    "customer": customer,
+                    "history": history,
+                    "imported": imported,
+                    "prev": prev,
+                    "next": next,
+                    "child_customers": child_customers,
+                    "recommendations_list": processed_recommendations,
+                    "routes": routes,
+                    "council_routes": council_routes,
+                    "stages": stages,
+                    "values": values,
+                    "agents": agents,
+                    "show_customer": show_customer,
+                    "events": events,
+                    "reasons": reasons,
+                    "templates": templates,
+                    "signatures": signatures,
+                    "domain_name": domain_name,
+                    "products": products,
+                },
+            )
     return render(
         request,
         "home/customer-detail.html",
@@ -465,6 +438,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
             "routes": routes,
+            "council_routes":council_routes,
+            "stages": stages,
             "agents" : agents,
             "show_customer": show_customer,
             "events": events,
@@ -472,6 +447,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "templates": templates,
             "signatures": signatures,
             "domain_name": domain_name,
+            "products": products,
         },
     )
 
@@ -690,26 +666,7 @@ def council_detail(request, council_id):
                     next = all_councils[i + 1]
 
     history = {}
-    actions = council.get_created_at_council_action_history()
-    london_tz = timezone("Europe/London")
 
-    for i in actions:
-        if i.created_at.replace(tzinfo=london_tz).date() not in history:
-            history[i.created_at.replace(tzinfo=london_tz).date()] = []
-
-    for i in actions:
-        history[i.created_at.replace(tzinfo=london_tz).date()].append(
-            [
-                i.created_at.astimezone(london_tz).time(),
-                i.text,
-                i.agent.first_name,
-                i.agent.last_name,
-                i.imported,
-                i.talked_with,
-                i.customer.postcode,
-                i.customer.house_name,
-            ]
-        )
     # routes = Route.objects.all().filter(funding_route=funding_route)
 
     return render(
