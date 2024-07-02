@@ -69,15 +69,12 @@ class Clients(models.Model):
     country = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    # assigned_to = models.ForeignKey(User, related_name= 'assigned_to', on_delete=models.DO_NOTHING, null=True)
     parent_client = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
     primary_client = models.BooleanField(default=False)
     council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
     closed = models.BooleanField(default=False)
     imported = models.BooleanField(default=False)
-    route = models.ForeignKey(
-        'Route', related_name="client", on_delete=models.CASCADE, null=True
-    )
+    
 
     def add_action(
         self,
@@ -128,6 +125,13 @@ class Route(models.Model):
     main_contact = models.CharField(max_length=999, blank= True, null=True)
     telephone = models.CharField(max_length=15, blank= True, null=True)
     email = models.EmailField(max_length=255)
+    client = models.ForeignKey(
+        Clients,
+        related_name="route",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
     council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route', null=True, blank= True)

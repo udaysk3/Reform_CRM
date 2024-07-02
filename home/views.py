@@ -1939,9 +1939,8 @@ def add_route_client(request, client_id):
     if request.method == "POST":
         client = Clients.objects.get(pk=client_id)
         route = Route.objects.get(pk=request.POST.get("route"))
-        print(route)
-        client.route = route
-        client.save()
+        route.client = client
+        route.save()
         messages.success(request, "Funding Route added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
 

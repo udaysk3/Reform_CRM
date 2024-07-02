@@ -10,7 +10,7 @@
       </svg></a>
   </div>
   <div class="cnav-item fs-6 col-10">
-    <span class="col"> <b>Funding Route</b> - </span> {{ council.name }}
+    <span class="col"> <b>Local Authority</b> - </span> {{ council.name }}
   </div>
   <div class="cnav-item fs-6 col-1">
     <a class="btn btn-primary fs-6" href="/council-detail/{{next.id}}"><svg xmlns="http://www.w3.org/2000/svg"
@@ -97,11 +97,6 @@
                             <h6><b>Name : </b> {{route.name}}</h6>
                             <h6><b>Email</b> : {{route.email}}</h6>
                             <h6><b>Telephone</b> : {{route.telephone}}</h6>
-                            </div>
-                            <div class="col-1">
-                              <form action="/{{ route.id }}/stages">
-                              <button type="submit" class="position-relative btn btn-secondary" style="right: 15px;" data-bs-dismiss="modal"> Stage </button>
-                              </form>
                             </div>
                           </div>
                         </div>

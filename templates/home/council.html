@@ -32,11 +32,8 @@
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             
             <div class="mb-3 mb-sm-0">
-             <a href="{% url 'app:council' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Council Management</h5></a>
+             <a href="{% url 'app:council' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Local Authority Management</h5></a>
             </div>
-            {% comment %} <div class="">
-              <a href="{% url 'app:import_customers' %}" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Add Funding Route</a>
-            </div> {% endcomment %}
             <div class="mb-3 mb-sm-0">
               <!-- Button trigger modal -->
                <button type="button" class="btn btn-primary position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
@@ -58,18 +55,7 @@
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name='name'>
                       </div>
-                      {% comment %} <div class="mb-3">
-                        <label for="maincontact" class="form-label">Main Contact</label>
-                        <input type="text" class="form-control" id="maincontact" name="main_contact">
-                      </div>
-                      <div class="mb-3">
-                        <label for="telephone" class="form-label">Telephone</label>
-                        <input type="text" class="form-control" id="telephone" name="telephone">
-                      </div>
-                      <div class="mb-3">
-                        <label for="email" class="form-label">email</label>
-                        <input type="email" class="form-control" id="email" name="email">
-                      </div> {% endcomment %}
+                      
                       <div class="mb-3">
                         <input
                               type="text"
