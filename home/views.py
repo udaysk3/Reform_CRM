@@ -2032,14 +2032,12 @@ def create_stage(request):
         dynamic_labels = request.POST.getlist("dynamic_label")
         order = request.POST.get('order')
         description = request.POST.get('description')
-        route = Route.objects.get(pk=request.POST.get("route"))
         dynamic_fields = {}
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
         fields = json.dumps(dynamic_fields)
         stage = Stage.objects.create(
             name=request.POST.get("name"),
-            route=route,
             fields=fields,
             order=order,
             description=description,
