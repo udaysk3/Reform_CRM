@@ -367,10 +367,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
     if customer.district:
         council= Councils.objects.get_or_create(name=customer.district)[0]
+        council_routes = Route.objects.all().filter(council=council)
     else:
         council = None
+        council_routes = None
     routes = Route.objects.all().filter(client=customer.client)
-    council_routes = Route.objects.all().filter(council=council)
     products = Product.objects.all().filter(client=customer.client)
     recommendations_list = []
     if customer.recommendations:
@@ -1816,7 +1817,7 @@ def add_product_client(request,client_id):
     if request.method == 'POST':
         product = Product.objects.get(pk=request.POST.get('product_id'))
         client = Clients.objects.get(pk=client_id)
-        product.client = client
+        client.product(product)
         product.save()
         messages.success(request, "Product added successfully to a Client!")
         return redirect(f'/client-detail/{client_id}')
@@ -1939,7 +1940,7 @@ def add_route_client(request, client_id):
     if request.method == "POST":
         client = Clients.objects.get(pk=client_id)
         route = Route.objects.get(pk=request.POST.get("route"))
-        route.client = client
+        client.route.add(route)
         route.save()
         messages.success(request, "Funding Route added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")

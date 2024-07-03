@@ -74,7 +74,12 @@ class Clients(models.Model):
     council = models.ForeignKey('Councils', on_delete=models.SET_NULL, null=True)
     closed = models.BooleanField(default=False)
     imported = models.BooleanField(default=False)
-    
+    route = models.ManyToManyField(
+        "home.Route", related_name="client", null=True, blank=True
+    )
+    product = models.ManyToManyField(
+        "home.Product", related_name="client", null=True, blank=True
+    )
 
     def add_action(
         self,
@@ -90,7 +95,7 @@ class Clients(models.Model):
         return (Action.objects.filter(client=self).order_by("-created_at"))
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.company_name}"
 
 
 class Campaign(models.Model):
@@ -105,18 +110,11 @@ class Campaign(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
-    client = models.ForeignKey(
-        Clients,
-        related_name="products",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )
     archive = models.BooleanField(default=False)
     rules_regulations = models.TextField(max_length=999, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.client.first_name} {self.client.last_name} {self.name}"
+        return f"{self.name}"
 
 
 class Route(models.Model):
@@ -125,13 +123,6 @@ class Route(models.Model):
     main_contact = models.CharField(max_length=999, blank= True, null=True)
     telephone = models.CharField(max_length=15, blank= True, null=True)
     email = models.EmailField(max_length=255)
-    client = models.ForeignKey(
-        Clients,
-        related_name="route",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )
     council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route', null=True, blank= True)
