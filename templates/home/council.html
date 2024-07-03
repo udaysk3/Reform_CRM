@@ -37,7 +37,7 @@
             <div class="mb-3 mb-sm-0">
               <!-- Button trigger modal -->
                <button type="button" class="btn btn-primary position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
-                <i class="bi bi-plus-lg"></i> Funding Route
+                <i class="bi bi-plus-lg"></i> Local Authority
               </button>
 
               <!-- Modal -->
@@ -45,10 +45,10 @@
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Funding Route</h1>
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Local Authority</h1>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method='post' action="{% url 'app:add_funding_route'  %}">
+                    <form method='post' action="{% url 'app:add_local_authority'  %}">
                       {% csrf_token %}
                     <div class="modal-body">
                       <div class="mb-3">
@@ -56,19 +56,11 @@
                         <input type="text" class="form-control" id="name" name='name'>
                       </div>
                       
-                      <div class="mb-3">
-                        <input
-                              type="text"
-                              id="justAnInputBox"
-                              placeholder="Areas Of Operations"
-                              autocomplete="off"
-                              name= "areas_of_operations"
-                            />
-                         </div>
+                      
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary">Submit</button>
+                      <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
                   </form>
                   </div>

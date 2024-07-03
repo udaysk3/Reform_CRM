@@ -1954,6 +1954,17 @@ def add_council_funding_route(request, council_id):
         messages.success(request, "Funding Route added successfully to a Council!")
         return redirect(f"/council-detail/{council_id}")
 
+def add_local_authority(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        council = Councils.objects.create(
+            name=name,
+            created_at=datetime.now(pytz.timezone('Europe/London')),
+            agent=User.objects.get(email=request.user),
+        )
+        messages.success(request, "Local Authority added successfully!")
+        return redirect("app:council")
+    return render(request, "home/council.html")
 
 def edit_funding_route(request, route_id):
     route = Route.objects.get(pk=route_id)
