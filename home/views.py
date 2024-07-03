@@ -1817,7 +1817,7 @@ def add_product_client(request,client_id):
     if request.method == 'POST':
         product = Product.objects.get(pk=request.POST.get('product_id'))
         client = Clients.objects.get(pk=client_id)
-        client.product(product)
+        client.product.add(product)
         product.save()
         messages.success(request, "Product added successfully to a Client!")
         return redirect(f'/client-detail/{client_id}')
