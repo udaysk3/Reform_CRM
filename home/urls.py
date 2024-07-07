@@ -12,11 +12,9 @@ urlpatterns = [
     path("archive", views.archive, name="archive"),
     path("finance", views.Finance, name="finance"),
     path("adminview", views.Admin, name="admin"),
-    path("funding_route", views.funding_route, name="funding_route"),
     path("hr", views.HR, name="hr"),
     path("add_customer", views.add_customer, name="add_customer"),
     path("add_client", views.add_client, name="add_client"),
-    path("add_funding_route", views.add_funding_route, name="add_funding_route"),
     path("import_customers/", views.import_customers_view, name="import_customers"),
     path(
         "bulk_remove_customers/",
@@ -112,7 +110,9 @@ urlpatterns = [
     path("add_local_authority", views.add_local_authority, name="add_local_authority"),
     path("add_campaign/<int:client_id>", views.add_campaign, name="add_campaign"),
     path("add_product", views.add_product, name="add_product"),
+    path("add_funding_route", views.add_funding_route, name="add_funding_route"),
     path("edit_product/<int:product_id>", views.edit_product, name="edit_product"),
+    path("edit_funding_route/<int:funding_route_id>", views.edit_funding_route, name="edit_funding_route"),
     path("edit_client/<int:client_id>", views.edit_client, name="edit_client"),
     path("remove_client/<int:client_id>", views.remove_client, name="remove_client"),
     path(
@@ -141,17 +141,13 @@ urlpatterns = [
         name="add_council_funding_route",
     ),
     path(
-        "edit_funding_route/<int:route_id>",
-        views.edit_funding_route,
-        name="edit_funding_route",
-    ),
-    path(
         "remove_funding_route/<int:route_id>",
         views.remove_funding_route,
         name="remove_funding_route",
     ),
     path("stages", views.create_stage, name="create_stage"),
     path("product", views.product, name="product"),
+    path("funding_route", views.funding_route, name="funding_route"),
     path(
         "add_product_client/<int:client_id>",
         views.add_product_client,
@@ -178,11 +174,6 @@ urlpatterns = [
         "remove_customer_route/<int:customer_id>",
         views.remove_customer_route,
         name="remove_customer_route",
-    ),
-    path(
-        "funding_route_detail/<int:route_id>",
-        views.funding_route_detail,
-        name="funding_route_detail",
     ),
     path("assign_agents", views.assign_agents, name="assign_agents"),
     path("assign_agent", views.assign_agent, name="assign_agent"),

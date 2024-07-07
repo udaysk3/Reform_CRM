@@ -347,22 +347,22 @@
             <div class="tab_bank" style="display: none;">
                   <div class="mb-3">
                       <label for="acc_number" class="form-label">Account Number</label>
-                      <input type="text" class="form-control" id="acc_number" name="acc_number" value="{% if edit_client.acc_number != 'None' %}{{ edit_client.acc_number }}{% endif %}" required></input>
+                      <input type="text" class="form-control" id="acc_number" name="acc_number" value="{% if edit_client.acc_number != 'None' %}{{ edit_client.acc_number }}{% endif %}" ></input>
                   </div>
                   <div class="mb-3">
                       <label for="sort_code" class="form-label">Sort Code</label>
-                      <input type="text" class="form-control" id="sort_code" name="sort_code" value="{% if edit_client.sort_code != 'None' %}{{ edit_client.sort_code }}{% endif %}" required></input>
+                      <input type="text" class="form-control" id="sort_code" name="sort_code" value="{% if edit_client.sort_code != 'None' %}{{ edit_client.sort_code }}{% endif %}" ></input>
                   </div>
                   <div class="mb-3">
                       <label for="iban" class="form-label">IBAN</label>
-                      <input type="text" class="form-control" id="iban" name="iban" value="{% if edit_client.iban != 'None' %}{{ edit_client.iban }}{% endif %}" required></input>
+                      <input type="text" class="form-control" id="iban" name="iban" value="{% if edit_client.iban != 'None' %}{{ edit_client.iban }}{% endif %}" ></input>
                   </div>
                   <div class="mb-3">
                       <label for="bic_swift" class="form-label">BIC/SWIFT</label>
-                      <input type="text" class="form-control" id="bic_swift" name="bic_swift" value="{% if edit_client.bic_swift != 'None' %}{{ edit_client.bic_swift }}{% endif %}" required></input>
+                      <input type="text" class="form-control" id="bic_swift" name="bic_swift" value="{% if edit_client.bic_swift != 'None' %}{{ edit_client.bic_swift }}{% endif %}" ></input>
                   </div>
                 </div>
-                  <button  class="btn btn-primary">Update Client</button>
+                  <button type="submit" class="btn btn-primary">Update Client</button>
               </form>
               {% else %}
                 <p>Client not found.</p>

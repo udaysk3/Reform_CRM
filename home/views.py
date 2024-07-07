@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+import ast
 from .models import (
     Cities,
     Customers,
@@ -371,8 +372,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
     else:
         council = None
         council_routes = None
-    routes = Route.objects.all().filter(client=customer.client)
-    products = Product.objects.all().filter(client=customer.client)
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [
@@ -384,24 +383,152 @@ def customer_detail(request, customer_id, s_customer_id=None):
         processed_recommendations.append(
             {"improvement": improvement, "indicative_cost": indicative_cost[:-1]}
         )
-    all_stages = Stage.objects.all()
+    routes = Route.objects.all().filter(client=customer.client)
+    all_stages = Stage.objects.all()    
+    products = Product.objects.all().filter(client=customer.client)
+    true_products = [True] * len(products)
+    true_routes = [True] * len(routes)
     stages = {}
+
     for stage in all_stages:
         stages[stage.name] = json.loads(stage.fields)
+
     if customer.stage_values:
         stage_values = json.loads(customer.stage_values)
         values = {}
-        for name,s_fields in stages.items():
+        for name, s_fields in stages.items():
             fields = {}
             for field in s_fields:
                 fields[field] = [s_fields[field], '']
             values[name] = fields
+
         for key, fields in values.items():
             if key in stage_values:
                 for field in fields:
                     if field in stage_values[key]:
                         fields[field][1] = stage_values[key][field]
-        # print(stage_values, values)
+
+        # print("Values loaded from stages and customer stage values:")
+        # print(values)
+
+        i = 0
+        for product in products:
+            product_rules = {}
+            for key, value in ast.literal_eval(product.rules_regulations).items():
+                rule_key = value[0].split(",")[0]
+                rule_value = value[1].split(',')[0]
+                rule_additional_value = value[2]
+
+                if rule_key not in product_rules:
+                    product_rules[rule_key] = {rule_value: [rule_additional_value]}
+                else:
+                    if rule_value not in product_rules[rule_key]:
+                        product_rules[rule_key][rule_value] = [rule_additional_value]
+                    else:
+                        product_rules[rule_key][rule_value].append(rule_additional_value)
+
+            # print(f"Product rules for product {product.id}:")
+            # print(product_rules)
+
+            for stage, rules in product_rules.items():
+                if stage in values:
+                    for field, rule in rules.items():
+                        for key, value in values[stage].items():
+                            if ',' in key:
+                                key = key.split(',')[0]
+                            if field == key:
+                                # print(f"Checking rule for {field}: {rule} against value: {value}")
+                                if value[0] in ['time', 'date', 'number', 'month']:
+                                    if value[0] == 'date':
+                                        if check_date(value[1], rule):
+                                            pass
+                                        else:
+                                            true_products[i] = False
+                                    elif value[0] == 'time':
+                                        if check_time(value[1], rule):
+                                            pass
+                                        else:
+                                            true_products[i] = False
+                                    elif value[0] == 'number':
+                                        if check_number(value[1], rule):
+                                            pass
+                                        else:
+                                            true_products[i] = False
+                                    elif value[0] == 'month':
+                                        if check_month(value[1], rule):
+                                            pass
+                                        else:
+                                            true_products[i] = False
+                                else:
+                                    if value[1] in rule or value[1] == '':
+                                        pass
+                                    else:
+                                        true_products[i] = False
+                                # print("True products result:")
+                                # print(true_products)
+
+            i += 1
+
+
+        j = 0
+        for route in routes:
+            route_rules = {}
+            for key, value in ast.literal_eval(route.rules_regulations).items():
+                rule_key = value[0].split(",")[0]
+                rule_value = value[1].split(',')[0]
+                rule_additional_value = value[2]
+
+                if rule_key not in route_rules:
+                    route_rules[rule_key] = {rule_value: [rule_additional_value]}
+                else:
+                    if rule_value not in route_rules[rule_key]:
+                        route_rules[rule_key][rule_value] = [rule_additional_value]
+                    else:
+                        route_rules[rule_key][rule_value].append(rule_additional_value)
+
+            # print(f"route rules for route {route.id}:")
+            # print(route_rules)
+
+            for stage, rules in route_rules.items():
+                if stage in values:
+                    for field, rule in rules.items():
+                        for key, value in values[stage].items():
+                            if ',' in key:
+                                key = key.split(',')[0]
+                            if field == key:
+                                # print(f"Checking rule for {field}: {rule} against value: {value}")
+                                if value[0] in ['time', 'date', 'number', 'month']:
+                                    if value[0] == 'date':
+                                        if check_date(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                    elif value[0] == 'time':
+                                        if check_time(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                    elif value[0] == 'number':
+                                        if check_number(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                    elif value[0] == 'month':
+                                        if check_month(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                else:
+                                    if value[1] in rule or value[1] == '':
+                                        pass
+                                    else:
+                                        true_routes[j] = False
+                                # print("True routes result:")
+                                print(true_routes)
+
+            j += 1
+
+
         return render(
                 request,
                 "home/customer-detail.html",
@@ -425,6 +552,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     "signatures": signatures,
                     "domain_name": domain_name,
                     "products": products,
+                    "true_products": true_products,
+                    "true_routes": true_routes,
                 },
             )
     return render(
@@ -451,6 +580,86 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "products": products,
         },
     )
+
+def check_date(date_to_check, conditions):
+    if date_to_check == '':
+        return True
+    date_to_check = datetime.strptime(date_to_check, '%Y-%m-%d')
+    
+    for condition in conditions:
+        date_str, comparator = condition.split(',')
+        condition_date = datetime.strptime(date_str, '%Y-%m-%d')
+        
+        if comparator.strip() == 'Less Than' and date_to_check < condition_date:
+            return True
+        elif comparator.strip() == 'Greater Than' and date_to_check > condition_date:
+            return True
+        elif comparator.strip() == 'Equal' and date_to_check == condition_date:
+            return True
+        elif comparator.strip() == '':
+            return True
+    
+    return False
+
+def check_month(month_to_check, conditions):
+    if month_to_check == '':
+        return True
+    month_to_check = datetime.strptime(month_to_check, '%Y-%m')
+
+    for condition in conditions:
+        month_str, comparator = condition.split(',')
+        condition_month = datetime.strptime(month_str, '%Y-%m')
+
+        if comparator.strip() == 'Less Than' and month_to_check < condition_month:
+            return True
+        elif comparator.strip() == 'Greater Than' and month_to_check > condition_month:
+            return True
+        elif comparator.strip() == 'Equal' and month_to_check == condition_month:
+            return True
+        elif comparator.strip() == "":
+            return True
+
+    return False
+
+def check_number(number_to_check, conditions):
+    if number_to_check == '':
+        return True
+    number_to_check = int(number_to_check)
+
+    for condition in conditions:
+        number_str, comparator = condition.split(',')
+        condition_number = int(number_str)
+
+        if comparator.strip() == 'Less Than' and number_to_check < condition_number:
+            return True
+        elif comparator.strip() == 'Greater Than' and number_to_check > condition_number:
+            return True
+        elif comparator.strip() == 'Equal' and number_to_check == condition_number:
+            return True
+        elif comparator.strip() == "":
+            return True
+
+    return False
+
+def check_time(time_to_check, conditions):
+    if time_to_check == '':
+        return True
+    time_to_check = datetime.strptime(time_to_check, '%H:%M')
+
+    for condition in conditions:
+        time_str, comparator = condition.split(',')
+        condition_time = datetime.strptime(time_str, '%H:%M')
+
+        if comparator.strip() == 'Less Than' and time_to_check < condition_time:
+            return True
+        elif comparator.strip() == 'Greater Than' and time_to_check > condition_time:
+            return True
+        elif comparator.strip() == 'Equal' and time_to_check == condition_time:
+            return True
+        elif comparator.strip() == "":
+            return True
+
+    return False
 
 
 @login_required
@@ -668,7 +877,6 @@ def council_detail(request, council_id):
 
     history = {}
 
-    # routes = Route.objects.all().filter(funding_route=funding_route)
 
     return render(
         request,
@@ -1824,12 +2032,94 @@ def add_product_client(request,client_id):
 
 
 @login_required
+def product(request):
+    products = Product.objects.all()
+    return render(request, "home/products.html", {"products": products})
+
+@login_required
+def funding_route(request):
+    funding_routes = Route.objects.all()
+    return render(request, "home/funding_routes.html", {"funding_routes": funding_routes})
+
+
+@login_required
+def edit_product(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    stages = Stage.objects.all()
+    fields = {}
+    saved_rules_regulations = json.loads(product.rules_regulations)
+    if stages[0]:
+        for stage in stages:
+            fields[stage.name] = json.loads(stage.fields)
+    if request.method == "POST":
+        product.name = request.POST.get("name")
+        product.description = request.POST.get("description")
+        dynamicStages = request.POST.getlist("dynamicStage")
+        dynamicFields = request.POST.getlist("dynamicField")
+        dynamicRules = request.POST.getlist("dynamicRule")
+        rules_regulations = {}
+        i=0
+        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
+            rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
+            i+=1
+        product.rules_regulations = json.dumps(rules_regulations)
+        product.save()
+        messages.success(request, "Product updated successfully!")
+        return redirect(f"/product")
+    return render(
+        request, "home/edit_products.html", {"product": product, "fields": fields, 'saved_rules_regulations': saved_rules_regulations}
+    )
+
+@login_required
+def edit_funding_route(request, funding_route_id):
+    funding_route = Route.objects.get(pk=funding_route_id)
+    stages = Stage.objects.all()
+    fields = {}
+    saved_rules_regulations = json.loads(funding_route.rules_regulations)
+    if stages[0]:
+        for stage in stages:
+            fields[stage.name] = json.loads(stage.fields)
+    if request.method == "POST":
+        funding_route.name = request.POST.get("name")
+        funding_route.description = request.POST.get("description")
+        dynamicStages = request.POST.getlist("dynamicStage")
+        dynamicFields = request.POST.getlist("dynamicField")
+        dynamicRules = request.POST.getlist("dynamicRule")
+        rules_regulations = {}
+        i = 0
+        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
+            rules_regulations[f"{i}"] = [d_stage, d_field, d_rule]
+            i += 1
+        funding_route.rules_regulations = json.dumps(rules_regulations)
+        funding_route.save()
+        messages.success(request, "Funding Route updated successfully!")
+        return redirect(f"/funding_route")
+    return render(
+        request, "home/edit_funding_routes.html", {"funding_route": funding_route, "fields": fields, 'saved_rules_regulations': saved_rules_regulations}
+    )
+
+
+@login_required
 def add_product(request):
     clients = Clients.objects.all()
+    stages = Stage.objects.all()
+    fields = {}
+    if stages[0]:
+        for stage in stages:
+            fields[stage.name] =  json.loads(stage.fields)
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
-        rules_regulations = request.POST.get("rules_regulations")
+        dynamicStages = request.POST.getlist("dynamicStage")
+        dynamicFields = request.POST.getlist("dynamicField")
+        dynamicRules = request.POST.getlist("dynamicRule")
+        rules_regulations = {}
+        i=0
+        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
+            rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
+            i+=1
+        rules_regulations = json.dumps(rules_regulations)
+        
         product = Product.objects.create(
             name=name,
             description=description,
@@ -1837,7 +2127,45 @@ def add_product(request):
         )
         messages.success(request, "Product added successfully!")
         return redirect('/product')
-    return render(request, "home/add_products.html", {"clients": clients})
+    return render(
+        request,
+        "home/add_products.html",
+        {"clients": clients, "stages": stages, "fields": fields},
+    )
+
+@login_required
+def add_funding_route(request):
+    clients = Clients.objects.all()
+    stages = Stage.objects.all()
+    fields = {}
+    if stages[0]:
+        for stage in stages:
+            fields[stage.name] =  json.loads(stage.fields)
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        dynamicStages = request.POST.getlist("dynamicStage")
+        dynamicFields = request.POST.getlist("dynamicField")
+        dynamicRules = request.POST.getlist("dynamicRule")
+        rules_regulations = {}
+        i=0
+        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
+            rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
+            i+=1
+        rules_regulations = json.dumps(rules_regulations)
+        
+        funding_route = Route.objects.create(
+            name=name,
+            description=description,
+            rules_regulations=rules_regulations,
+        )
+        messages.success(request, "Funding Route added successfully!")
+        return redirect('/funding_route')
+    return render(
+        request,
+        "home/add_funding_routes.html",
+        {"clients": clients, "stages": stages, "fields": fields},
+    )
 
 def remove_product(request, product_id):
     product = Product.objects.get(pk=product_id)
@@ -1875,8 +2203,8 @@ def add_child_customer(request, customer_id):
             country=parent_customer.country,
             agent=parent_customer.agent,
             district=parent_customer.district,
-            campaign=Campaign.objects.get(id=parent_customer.campaign.id),
-            client=Campaign.objects.get(id=parent_customer.campaign.id).client,
+            campaign=Campaign.objects.get(id=parent_customer.campaign.id),  # type: ignore
+            client=Campaign.objects.get(id=parent_customer.campaign.id).client,  # type: ignore
             created_at=datetime.now(pytz.timezone("Europe/London")),
             parent_customer=parent_customer,
             primary_customer=True,
@@ -1919,23 +2247,6 @@ def make_primary(request, parent_customer_id, child_customer_id):
     return redirect(f"/customer-detail/{parent_customer_id}")
 
 
-def add_funding_route(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description") 
-        route = Route.objects.create(
-            name=name,
-            description=description,
-        )
-        documents = request.FILES.getlist("document")
-        for document in documents:
-            doc = Document.objects.create(document=document)
-            route.documents.add(doc)
-        route.save()
-        messages.success(request, "Funding Route added successfully!")
-        return redirect(f"/funding_route")
-    return render(request, "admin.html")
-
 def add_route_client(request, client_id):
     if request.method == "POST":
         client = Clients.objects.get(pk=client_id)
@@ -1966,20 +2277,6 @@ def add_local_authority(request):
         return redirect("app:council")
     return render(request, "home/council.html")
 
-def edit_funding_route(request, route_id):
-    route = Route.objects.get(pk=route_id)
-    if request.method == "POST":
-        route.name = request.POST.get("name")
-        # route.managed_by = request.POST.get("managed_by")
-        # route.main_contact = request.POST.get("main_contact")
-        # route.email = request.POST.get("email")
-        # route.telephone = request.POST.get("telephone")
-        route.description = request.POST.get("description")
-        route.document = request.FILE.get("document")
-        route.save()
-        messages.success(request, "Route updated successfully!")
-        return redirect("app:funding_route")
-
 def remove_funding_route(request, route_id):
     route = Route.objects.get(pk=route_id)
     route.delete()
@@ -1989,8 +2286,9 @@ def remove_funding_route(request, route_id):
 
 @login_required
 def create_stage(request):
-    stages=Stage.objects.all()
+    stages=Stage.objects.all().order_by("order")
     routes = Route.objects.all()
+    
     if request.GET.get("page")== 'edit_page':
         stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
         return render(request, 'home/stages.html', {"stage":stage, "fields":json.loads(stage.fields)})
@@ -2000,6 +2298,12 @@ def create_stage(request):
         dynamic_labels = request.POST.getlist("dynamic_label")
         order = request.POST.get('order')
         description = request.POST.get('description')
+        if order.isdigit():
+            order = int(order)
+        else:
+            messages.error(request, "Order should be a number")
+            return redirect("app:create_stage")
+        
         dynamic_fields = {}
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
@@ -2030,6 +2334,11 @@ def edit_stage(request, stage_id):
         order = request.POST.get("order")
         description = request.POST.get("description")
         dynamic_fields = {}
+        if order.isdigit():
+            order = int(order)
+        else:
+            messages.error(request, "Order should be a number")
+            return redirect(f"/stages")
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
         fields = json.dumps(dynamic_fields)
@@ -2041,23 +2350,6 @@ def edit_stage(request, stage_id):
         messages.success(request, "Stage updated successfully!")
         return redirect(f"/stages")
 
-@login_required    
-def product(request):
-    products = Product.objects.all()
-    return render(request, "home/products.html", {"products": products})
-
-
-@login_required
-def edit_product(request, product_id):
-    product = Product.objects.get(pk=product_id)
-    if request.method == "POST":
-        product.name = request.POST.get("name")
-        product.description = request.POST.get("description")
-        product.rules_regulations = request.POST.get("rules_regulations")
-        product.save()
-        messages.success(request, "Product updated successfully!")
-        return redirect(f"/product")
-    return render(request, "home/edit_products.html", {"product": product})
 
 @login_required
 def set_customer_route(request, customer_id, route_id):
@@ -2090,26 +2382,12 @@ def set_stage_values(request, customer_id):
         messages.success(request, f"{name} is set successfully!")
         return redirect(f"/customer-detail/{customer_id}")
 
-@login_required
-def funding_route(request):
-    routes = Route.objects.all()
-    return render(request, 'home/funding-route.html', {"routes": routes})
-
 def remove_customer_route(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     customer.route = None
     customer.save()
     messages.success(request, "Route removed successfully!")
     return redirect(f"/customer-detail/{customer_id}")
-
-@login_required
-def funding_route_detail(request, route_id):
-    route = Route.objects.get(pk=route_id)
-    documents = []
-    for doc in route.documents.all():
-        documents.append(doc.document)
-    # print(documents)
-    return render(request, 'home/funding-route_detail.html', {"route": route, "documents": documents})
 
 from django.http import JsonResponse
 from .models import Customers

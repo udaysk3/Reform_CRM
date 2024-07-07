@@ -111,7 +111,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
     archive = models.BooleanField(default=False)
-    rules_regulations = models.TextField(max_length=999, blank=True, null=True)
+    rules_regulations = models.JSONField(blank= True, null=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -127,6 +127,7 @@ class Route(models.Model):
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route', null=True, blank= True)
     archive = models.BooleanField(default=False)
+    rules_regulations = models.JSONField(blank=True, null=True)
 
 
 class Document(models.Model):
@@ -182,7 +183,7 @@ class Action(models.Model):
 class Stage(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
-    order = models.CharField(max_length=999, blank=True, null=True)
+    order = models.IntegerField(unique=True, blank=True, null=True)
     description = models.CharField(max_length=999, blank=True, null=True)
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
@@ -193,7 +194,7 @@ class Email(models.Model):
     body = models.TextField(max_length=9999)
     
     def __str__(self):
-        return f"{self.email}"
+        return f"{self.name}"
 
 class Reason(models.Model):
     name = models.CharField(max_length=255)
@@ -225,6 +226,3 @@ class Postcode(models.Model):
 class CoverageAreas(models.Model):
     client = models.ForeignKey(Clients, related_name='coverage_areas', on_delete=models.CASCADE)
     postcode = models.CharField(max_length=255, blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.id}"

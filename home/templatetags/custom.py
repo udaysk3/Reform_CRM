@@ -1,13 +1,32 @@
 from django import template
+import ast
 import os
 import pandas as pd
 from datetime import datetime
 register = template.Library()
 
+
+@register.filter(name="index")
+def index(sequence, position):
+    try:
+        return sequence[position]
+    except IndexError:
+        return None
+
 @register.filter(name='split')
 def split(value, arg):
-    print(arg, value)
     return value.split(arg)
+
+
+@register.filter(name='firstsplitconvert')
+def firstsplitconvert(value, arg):
+    return ast.literal_eval(value.split(arg, 1)[1])
+
+
+@register.filter(name='firstsplit')
+def firstsplit(value, arg):
+    return value.split(arg, 1)
+
 
 @register.filter(name='date')
 def date(value):

@@ -992,19 +992,29 @@ table {
                   >
                     <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
                       {% for route in routes %}
+                      {% with i=forloop.counter0 %}                        
                           <button  class="btn btn-primary me-2" style="width: fit-content; display: flex;"
                           {% if route not in council_routes or  council_routes == None %}
                           disabled
                           {% else %}
+                            {% if true_routes and true_routes|index:i %}
+                            {% else %}
+                            disabled
+                            {% endif %}
                           {% endif %}
                            >
                            {% if route not in council_routes or  council_routes == None %}
                            <i class="bi bi-x-square me-1"></i>
                            {% else %}
-                           <i class="bi-check-square me-1"></i>
+                           {% if true_routes and true_routes|index:i %}
+                            <i class="bi-check-square me-1"></i>
+                            {% else %}
+                            <i class="bi bi-x-square me-1"></i>
+                            {% endif %}
                           {% endif %}
                           
                             {{ route.name }}  </button>
+                      {% endwith %}
                       {% endfor %}
                       
                       
@@ -1019,8 +1029,23 @@ table {
                   >
                     <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
                       {% for product in products %}
-                          <button  class="btn btn-primary"><i class="bi-check-square me-1"></i> {{ product.name }} </button>
-                      {% endfor %}
+                      {% with i=forloop.counter0 %}                        
+                        <button class="btn btn-primary me-2" style="width: fit-content; display: flex;"
+                            {% if true_products and true_products|index:i %}
+                            {% else %}
+                            disabled
+                            {% endif %}
+                        >
+                            {% if true_products and true_products|index:i %}
+                            <i class="bi-check-square me-1"></i>
+                            {% else %}
+                            <i class="bi bi-x-square me-1"></i>
+                            {% endif %}
+                            {{ product.name }}
+                        </button>
+                      {% endwith %}
+                  {% endfor %}
+
                       
                       
                 </div>
@@ -1037,16 +1062,17 @@ table {
                     
                     <button class="accordion">{{ name }}</button>
                     <div class="panel">
-                     <form method="post" action="/set_stage_values/{{ customer.id }}">
+                     <form class="stage_submit_form" method="post" action="/set_stage_values/{{ customer.id }}">
                        {% csrf_token %}
                        <input type="hidden" name="name" value="{{ name }}">
                        {% for key, value in field.items %}
                        {% if value.0 == 'checkbox' %}
                     
                        <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" {% if value.1 %} checked {% endif %} name="dynamic_input" id="flexCheckDefault">
-                       <input type="hidden" name="dynamic_label" value="{{ key }}">
-                        <label class="form-check-label" for="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" {% if value.1 == "on" %} checked {% endif %} name="dynamic_input" id="flexCheckDefault{{ forloop.counter }}">
+                        <input type="hidden" value="off" name="dynamic_input" class="checkboxno">
+                        <input type="hidden" name="dynamic_label" value="{{ key }}">
+                        <label class="form-check-label" for="flexCheckDefault{{ forloop.counter }}">
                           {{ key }}
                         </label>
                       </div>
@@ -1093,13 +1119,14 @@ table {
                                     
                                     <button class="accordion">{{ name }}</button>
                                     <div class="panel">
-                                     <form method="post" action="/set_stage_values/{{ customer.id }}">
+                                     <form method="post" class="stage_submit_form" action="/set_stage_values/{{ customer.id }}">
                                        {% csrf_token %}
                                        <input type="hidden" name="name" value="{{ name }}">
                                        {% for key, value in field.items %}
                                         {% if value == 'checkbox' %}
                                         <div class="form-check my-3">
-                                          <input class="form-check-input" type="checkbox" name="dynamic_input" id="flexCheckDefault">
+                                          <input class="form-check-input" type="checkbox" name="dynamic_input" id="flexCheckDefault{{ forloop.counter }}">
+                                          <input type="hidden" value="off" name="dynamic_input" class="checkboxno">
                                          <input type="hidden" name="dynamic_label" value="{{ key }}">
                                           <label class="form-check-label" for="flexCheckDefault">
                                             {{ key }}
@@ -1158,6 +1185,16 @@ table {
 {% endblock %} {% block js %}
 
 <script>
+
+  const stage_submit_form = document.querySelector('.stage_submit_form')
+  stage_submit_form.addEventListener('submit', () => {
+    const stage_checkboxs = stage_submit_form.querySelectorAll('input[type="checkbox"]')
+    stage_checkboxs.forEach((stage_checkbox) => {
+      if(stage_checkbox.checked) {
+        stage_checkbox.parentElement.querySelector('.checkboxno').disabled = true;
+      }
+    })
+  })
 
   window.addEventListener('DOMContentLoaded', function () {
     const postcode = '{{ customer.postcode }}';
