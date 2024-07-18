@@ -1048,10 +1048,10 @@ table {
                     class="card-body p-3 m-0"
                     style="height: 200px; overflow-y: auto"
                   >
-                     <button type="button" class="btn btn-primary position-absolute" style="right:10px" data-bs-toggle="modal" data-bs-target="#productManagement">
+                     <a href="/add_product/{{ client.id }}" class="btn btn-primary position-absolute" style="right:10px" >
                       Add Product
-                    </button>
-                    <div class="modal fade" id="productManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    </a>
+                    {% comment %} <div class="modal fade" id="productManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
@@ -1076,7 +1076,7 @@ table {
                           </form>
                         </div>
                       </div>
-                    </div>
+                    </div> {% endcomment %}
 
                     
 
@@ -1086,11 +1086,11 @@ table {
     <h3>Unarchive</h3>
     {% if products %}
     {% for camp in products %}
-        <button type="button" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#product{{forloop.counter}}">
+        <a href="/edit_product/{{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
             {{ camp.name }}
-        </button>
+        </a>
 
-        <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        {% comment %} <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1120,7 +1120,7 @@ table {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> {% endcomment %}
     {% endfor %}
     {% endif %}
     </div>
@@ -1130,11 +1130,11 @@ table {
     <h3>Archive</h3>
     {% if unproducts %}
     {% for camp in unproducts %}
-        <button type="button" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#product{{forloop.counter}}">
+        <a href="/edit_product/{{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
             {{ camp.name }}
-        </button>
+        </a>
 
-        <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        {% comment %} <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1164,7 +1164,7 @@ table {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> {% endcomment %}
     {% endfor %}
     {% endif %}
     </div>

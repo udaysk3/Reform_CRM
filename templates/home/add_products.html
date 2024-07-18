@@ -9,7 +9,7 @@
             class="d-sm-flex d-block align-items-center justify-content-between mb-9"
           >
             <div class="mb-3 mb-sm-0">
-              <a href="{% url 'app:add_product'%}">
+              <a href="{% url 'app:add_product' client_id %}">
                 <h5
                   class="card-title fw-semibold text-primary text-decoration-underline"
                 >
@@ -23,7 +23,7 @@
               name="addClientForm"
               id="addClientForm"
               method="post"
-              action="{% url 'app:add_product' %} "
+              action="{% url 'app:add_product' client_id %} "
               onsubmit="submitForm()"
             >
               {% csrf_token %}

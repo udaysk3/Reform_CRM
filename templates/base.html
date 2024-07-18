@@ -88,14 +88,14 @@
               </a>
             </li>
             {% endif %}
-            <li class="sidebar-item">
+            {% comment %} <li class="sidebar-item">
               <div class="sidebar-link customer-journey" aria-expanded="false">
                 <span>
                   <i class="ti ti-article"></i>
                 </span>
                 <span class="hide-menu">Customer Journey</span>
               </div>
-            </li>
+            </li> {% endcomment %}
             {% if request.user.admin %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:admin" %}" aria-expanded="false">
@@ -320,7 +320,7 @@
     </script>
 
   
-  <script>
+  {% comment %} <script>
     const customerJourney = document.querySelector('.customer-journey');
     customerJourney.addEventListener('click',()=>{
         {% if request.user.funding_route %}
@@ -397,7 +397,7 @@
       })
     
       
-    </script>
+    </script> {% endcomment %}
 
   {% block js %}
   

@@ -2100,10 +2100,11 @@ def edit_funding_route(request, funding_route_id):
 
 
 @login_required
-def add_product(request):
+def add_product(request, client_id):
     clients = Clients.objects.all()
     stages = Stage.objects.all()
     fields = {}
+    client = Clients.objects.get(pk=client_id)
     if stages[0]:
         for stage in stages:
             fields[stage.name] =  json.loads(stage.fields)
@@ -2125,12 +2126,14 @@ def add_product(request):
             description=description,
             rules_regulations=rules_regulations,
         )
+        client.product.add(product)
+        client.save()
         messages.success(request, "Product added successfully!")
-        return redirect('/product')
+        return redirect(f'/client-detail/{client_id}')
     return render(
         request,
         "home/add_products.html",
-        {"clients": clients, "stages": stages, "fields": fields},
+        {"clients": clients, "stages": stages, "fields": fields, "client_id": client_id},
     )
 
 @login_required
