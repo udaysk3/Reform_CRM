@@ -187,6 +187,7 @@ class Stage(models.Model):
     description = models.CharField(max_length=999, blank=True, null=True)
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
+    client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
 
 class Email(models.Model):
     name = models.CharField(max_length=255)

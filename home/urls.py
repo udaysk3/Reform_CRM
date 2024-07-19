@@ -110,7 +110,11 @@ urlpatterns = [
     path("add_local_authority", views.add_local_authority, name="add_local_authority"),
     path("add_campaign/<int:client_id>", views.add_campaign, name="add_campaign"),
     path("add_product/<int:client_id>", views.add_product, name="add_product"),
-    path("add_funding_route", views.add_funding_route, name="add_funding_route"),
+    path(
+        "add_funding_route/<int:council_id>",
+        views.add_funding_route,
+        name="add_funding_route",
+    ),
     path("edit_product/<int:product_id>", views.edit_product, name="edit_product"),
     path(
         "edit_funding_route/<int:funding_route_id>",
@@ -149,7 +153,7 @@ urlpatterns = [
         views.remove_funding_route,
         name="remove_funding_route",
     ),
-    path("stages", views.create_stage, name="create_stage"),
+    path("stages/<int:client_id>", views.create_stage, name="create_stage"),
     path("product", views.product, name="product"),
     path("funding_route", views.funding_route, name="funding_route"),
     path(
@@ -235,4 +239,6 @@ urlpatterns = [
         views.get_campaign,
         name="get_campaign",
     ),
-]
+    path("change_customer_client/<int:customer_id>",views.change_customer_client,name="change_customer_client"),
+    path("change_customer_campaign/<int:customer_id>",views.change_customer_campaign,name="change_customer_campaign"),
+] 

@@ -195,6 +195,8 @@ def dashboard(request):
 
 @login_required
 def customer_detail(request, customer_id, s_customer_id=None):
+    clients = Clients.objects.all()
+    campaigns = Campaign.objects.all()
     all_customers = []
     prev = None
     next = None
@@ -554,6 +556,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     "products": products,
                     "true_products": true_products,
                     "true_routes": true_routes,
+                    "clients": clients,
+                    "campaigns": campaigns,
                 },
             )
     return render(
@@ -578,6 +582,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "signatures": signatures,
             "domain_name": domain_name,
             "products": products,
+            "clients": clients,
+            "campaigns": campaigns,
         },
     )
 
@@ -714,6 +720,7 @@ def client_detail(request, client_id, s_client_id=None):
         next = str(client_id)
     # print(type(prev), next)
     client = Clients.objects.get(pk=client_id)
+    stages = Stage.objects.all().filter(client=client)
     campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
     uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
     all_products = Product.objects.all()
@@ -817,6 +824,7 @@ def client_detail(request, client_id, s_client_id=None):
                 "all_routes": all_routes,
                 "routes":routes,
                 "unroutes":unroutes,
+                "stages": stages,
                 
             },
         )
@@ -847,6 +855,7 @@ def client_detail(request, client_id, s_client_id=None):
             "all_routes":all_routes,
             "routes":routes,
             "unroutes":unroutes,
+            "stages": stages,
         },
     )
 
@@ -1167,10 +1176,36 @@ def add_customer(request):
 
         if Customers.objects.filter(email=email).exists():
             messages.error(request, "Email already exists")
+            request.session['first_name'] = first_name,
+            request.session['last_name'] = last_name,
+            request.session['phone_number'] = phone_number,
+            request.session['email'] = email,
+            request.session['postcode'] = postcode,
+            request.session['street_name'] = street_name,
+            request.session['house_name'] = house_name,
+            request.session['city'] = city,
+            request.session['county'] = county,
+            request.session['country'] = country,
+            request.session['campaign'] = campaign,
+            request.session['client'] = client,
+
             return redirect("/customer?page=add_customer")
 
         if Customers.objects.filter(phone_number=phone_number).exists():
             messages.error(request, "Phone number already exists")
+            request.session["first_name"] = (first_name,)
+            request.session["last_name"] = (last_name,)
+            request.session["phone_number"] = (phone_number,)
+            request.session["email"] = (email,)
+            request.session["postcode"] = (postcode,)
+            request.session["street_name"] = (street_name,)
+            request.session["house_name"] = (house_name,)
+            request.session["city"] = (city,)
+            request.session["county"] = (county,)
+            request.session["country"] = (country,)
+            request.session["campaign"] = (campaign,)
+            request.session["client"] = (client,)
+
             return redirect("/customer?page=add_customer")
 
         if campaign == "nan" or city == "nan" or county == "nan" or country == "nan" or client == "nan":
@@ -1228,6 +1263,19 @@ def add_customer(request):
                 keyevents=True,
         )
         messages.success(request, "Customer added successfully!")
+        if request.session["first_name"]:
+            del request.session['first_name']
+            del request.session['last_name']
+            del request.session['phone_number']
+            del request.session['email']
+            del request.session['postcode']
+            del request.session['street_name']
+            del request.session['house_name']
+            del request.session['city']
+            del request.session['county']
+            del request.session['country']
+            del request.session['campaign']
+            del request.session['client']
         return redirect("app:customer")
     return render(request, "home/customer.html")
 
@@ -2137,10 +2185,11 @@ def add_product(request, client_id):
     )
 
 @login_required
-def add_funding_route(request):
+def add_funding_route(request, council_id):
     clients = Clients.objects.all()
     stages = Stage.objects.all()
     fields = {}
+    council = Councils.objects.get(pk=council_id)
     if stages[0]:
         for stage in stages:
             fields[stage.name] =  json.loads(stage.fields)
@@ -2162,12 +2211,13 @@ def add_funding_route(request):
             description=description,
             rules_regulations=rules_regulations,
         )
+        funding_route.council.add(council)
         messages.success(request, "Funding Route added successfully!")
-        return redirect('/funding_route')
+        return redirect('/council-detail/'+str(council_id))
     return render(
         request,
         "home/add_funding_routes.html",
-        {"clients": clients, "stages": stages, "fields": fields},
+        {"clients": clients, "stages": stages, "fields": fields, "council_id": council_id},
     )
 
 def remove_product(request, product_id):
@@ -2288,9 +2338,10 @@ def remove_funding_route(request, route_id):
 
 
 @login_required
-def create_stage(request):
+def create_stage(request, client_id):
     stages=Stage.objects.all().order_by("order")
     routes = Route.objects.all()
+    client = Clients.objects.get(pk=client_id)
     
     if request.GET.get("page")== 'edit_page':
         stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
@@ -2305,7 +2356,10 @@ def create_stage(request):
             order = int(order)
         else:
             messages.error(request, "Order should be a number")
-            return redirect("app:create_stage")
+            return redirect("/client-detail/"+str(client_id))
+        if Stage.objects.filter(order=order).exists():
+            messages.error(request, "Stage with this order already exists!")
+            return redirect("/client-detail/"+str(client_id))
         
         dynamic_fields = {}
         for label, field_type in zip(dynamic_labels, dynamic_types):
@@ -2316,9 +2370,10 @@ def create_stage(request):
             fields=fields,
             order=order,
             description=description,
+            client=client,
         )
-        return redirect("app:create_stage")
-    return render(request, "home/stages.html", {"routes": routes, "stages": stages}) 
+        return redirect("/client-detail/"+str(client_id))
+    return render(request, "home/stages.html", {"routes": routes, "stages": stages, "client_id": client_id}) 
 
 
 @login_required
@@ -2997,3 +3052,23 @@ def archive_route(request,client_id, route_id):
         route.save()
         messages.success(request, "Unarchived successfully!")
         return redirect(r"/client-detail/" + str(client_id))
+
+def change_customer_client(request, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+    if request.method == "POST":
+        client = Clients.objects.get(pk=request.POST.get("client"))
+        customer.client = client
+        customer.save()
+        messages.success(request, "Client changed successfully!")
+        return redirect(r"/customer-detail/" + str(customer_id))
+    return render(request, "home/admin.html")
+
+def change_customer_campaign(request, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+    if request.method == "POST":
+        campaign = Campaign.objects.get(pk=request.POST.get("campaign"))
+        customer.campaign = campaign
+        customer.save()
+        messages.success(request, "Campaign changed successfully!")
+        return redirect(r"/customer-detail/" + str(customer_id))
+    return render(request, "home/admin.html")

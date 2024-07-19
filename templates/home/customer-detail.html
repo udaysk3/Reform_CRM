@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
 
 <style>
-  #assigned_to{
+  #assigned_to, #change_client, #change_campaign {
     cursor: pointer;
   }
   .accordion-container {
@@ -226,23 +226,81 @@ table {
   </div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Campaign</b> - </span>
-    <div class="mt-1">
+    <div class="mt-1 link-primary" id="change_campaign">
     {% if customer.campaign %}
      {{ customer.campaign.name }}
     {% else %}
       Unassigned
     {% endif %}
     </div>
+    <div class="d-grid gap-2 d-md-block">
+      <!-- Button trigger modal -->
+      <!-- Modal -->
+      <div class="modal fade" id="change_campaign_modal" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Campaign</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method='post' action="{% url 'app:change_customer_campaign' customer.id  %}">
+              {% csrf_token %}
+              <div class="modal-body">
+                <select class="form-select" aria-label="Default select example" name="campaign">
+                  {% for agent in campaigns %}
+                  <option value="{{ agent.id }}">{{ agent.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="cnav-item fs-6 col-2"><span class="col"> <b>Route</b> - </span><div class="mt-1"> value </div></div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Client</b> - </span>
-    <div class="mt-1">
+    <div class="mt-1 link-primary" id="change_client">
     {% if customer.client %}
      {{ customer.client.company_name }}
     {% else %}
       Unassigned
     {% endif %}
+    </div>
+    <div class="d-grid gap-2 d-md-block">
+      <!-- Button trigger modal -->
+      <!-- Modal -->
+      <div class="modal fade" id="change_client_modal" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Client</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method='post' action="{% url 'app:change_customer_client' customer.id  %}">
+              {% csrf_token %}
+              <div class="modal-body">
+                <select class="form-select" aria-label="Default select example" name="client">
+                  {% for agent in clients %}
+                  <option value="{{ agent.id }}">{{ agent.company_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="cnav-item fs-6 col-2">
@@ -1253,6 +1311,24 @@ table {
         );
         // https://getbootstrap.com/docs/5.0/components/modal/#show
         assigned_to_modal.show();
+    });
+
+  document.getElementById('change_client').addEventListener('click',()=>{
+    let change_client_modal = new bootstrap.Modal(
+          document.getElementById("change_client_modal"),
+          {}
+        );
+        // https://getbootstrap.com/docs/5.0/components/modal/#show
+        change_client_modal.show();
+    });
+
+  document.getElementById('change_campaign').addEventListener('click',()=>{
+    let change_campaign_modal = new bootstrap.Modal(
+          document.getElementById("change_campaign_modal"),
+          {}
+        );
+        // https://getbootstrap.com/docs/5.0/components/modal/#show
+        change_campaign_modal.show();
     });
 
 

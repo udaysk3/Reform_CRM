@@ -53,12 +53,11 @@
                 <div class="card-body">
                   <div class="d-grid gap-2 d-md-block">
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-primary position-relative mb-3" style="right:-70%"
-                      data-bs-toggle="modal" data-bs-target="#fundingroute">
+                    <a href="/add_funding_route/{{ council.id }}" class="btn btn-primary position-relative mb-3" style="right:-70%">
                       <i class="bi bi-plus-lg"></i> Funding Route
-                    </button>
+                    </a>
 
-                    <!-- Modal -->
+                    {% comment %} <!-- Modal -->
                     <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false"
                       tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                       <div class="modal-dialog">
@@ -83,7 +82,7 @@
                           </form>
                         </div>
                       </div>
-                    </div>
+                    </div> {% endcomment %}
                   </div>
                   <div class="card p-0 m-0">
                     <div class="card-body p-3 m-0" style="height: 390px; overflow-y: auto">
@@ -93,11 +92,11 @@
                        <div class="col-sm-4 mt-3" style="width: 100%">
                         <div class="card m-0 ">
                           <div class="card-body row">
-                            <div class="col-10">
+                            <a href="/edit_funding_route/{{ route.id }}" class="col-10">
                             <h6><b>Name : </b> {{route.name}}</h6>
                             <h6><b>Email</b> : {{route.email}}</h6>
                             <h6><b>Telephone</b> : {{route.telephone}}</h6>
-                            </div>
+                            </a>
                           </div>
                         </div>
                       </div> 

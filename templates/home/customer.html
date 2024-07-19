@@ -177,33 +177,33 @@
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ request.session.first_name.0 }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ request.session.last_name.0 }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ request.session.phone_number.0 }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" value="{{ request.session.email.0 }}" class="form-control" id="email" name="email" required>
                 </div>
                 
                 <div class="mb-3">
                     <label for="house_name" class="form-label">House Name/ Number</label>
-                    <input type="text" class="form-control" id="house_name" name="house_name"  required></input>
+                    <input type="text" class="form-control" id="house_name" name="house_name" value="{{ request.session.house_name.0 }}"  required></input>
                 </div>
                 <div class="mb-3">
                     <label for="street_name" class="form-label">Street Name</label>
-                    <input type="text" class="form-control" id="street_name" name="street_name"  required></input>
+                    <input type="text" class="form-control" id="street_name" name="street_name" value="{{ request.session.street_name.0 }}"  required></input>
                 </div>
                 <div class="mb-3 row">
                   <div class="col-6">
                     <label for="postcode" class="form-label">Postcode</label>
-                    <input type="text" class="form-control" id="postcode" name="postcode"  required>
+                    <input type="text" value="{{ request.session.postcode.0 }}" class="form-control" id="postcode" name="postcode"  required>
                   </div>
                   <div class="col-6 d-flex align-items-end">
                     <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
@@ -213,20 +213,20 @@
 
                 <div class="mb-3 input-row">
                     <label for="city" class="form-label">City/Town</label>
-                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.city}}" data-list="city_from" autocomplete="off" value="{{customer.city}}">  <!--list="city_from"-->
+                    <input type="text" name="city" placeholder="City" id="city" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{request.session.city.0}}" data-list="city_from" autocomplete="off" value="{{request.session.city.0}}">  <!--list="city_from"-->
                   <div id="city_from" class="places_box">
                   </div>
                 </div>
                 <div class="mb-3">
                     <label for="county" class="form-label">County</label>
-                    <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.county}}" data-list="county_from" autocomplete="off" value="{{customer.county}}">  <!--list="county_from"-->
+                    <input type="text" name="county" placeholder="County" id="county" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{request.session.county.0}}" data-list="county_from" autocomplete="off" value="{{request.session.county.0}}">  <!--list="county_from"-->
                   <div id="county_from" class="places_box">
                   </div>
                 </div>
                
               <div class="mb-3">
                 <label for="country" class="form-label">Country</label>
-                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{customer.country}}" data-list="country_from" autocomplete="off" value="{{customer.country}}">  <!--list="country_from"-->
+                <input type="text" name="country" placeholder="Country" id="country" class="form-control mr-sm-3" onblur="hideplaces(this)" data-value="{{request.session.country.0}}" data-list="country_from" autocomplete="off" value="{{request.session.country.0}}">  <!--list="country_from"-->
                   <div id="country_from" class="places_box">
                   </div>
             </div>
