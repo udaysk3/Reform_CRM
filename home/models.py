@@ -75,11 +75,9 @@ class Clients(models.Model):
     closed = models.BooleanField(default=False)
     imported = models.BooleanField(default=False)
     route = models.ManyToManyField(
-        "home.Route", related_name="client", null=True, blank=True
+        "home.Route", related_name="client",
     )
-    product = models.ManyToManyField(
-        "home.Product", related_name="client", null=True, blank=True
-    )
+    
 
     def add_action(
         self,
@@ -112,6 +110,13 @@ class Product(models.Model):
     description = models.CharField(max_length=999, blank=True, null=True,)
     archive = models.BooleanField(default=False)
     rules_regulations = models.JSONField(blank= True, null=True)
+    documents = models.ManyToManyField(
+        "home.Document", related_name="product", 
+    )
+    client = models.ManyToManyField(
+        Clients,
+        related_name="product",
+    )
 
     def __str__(self):
         return f"{self.name}"
@@ -123,9 +128,9 @@ class Route(models.Model):
     main_contact = models.CharField(max_length=999, blank= True, null=True)
     telephone = models.CharField(max_length=15, blank= True, null=True)
     email = models.EmailField(max_length=255)
-    council = models.ManyToManyField('home.Councils',related_name='routes', null=True, blank= True)
+    council = models.ManyToManyField('home.Councils',related_name='routes', )
     description = models.CharField(max_length=999, blank= True, null=True)
-    documents = models.ManyToManyField('home.Document',related_name='route', null=True, blank= True)
+    documents = models.ManyToManyField('home.Document',related_name='route', )
     archive = models.BooleanField(default=False)
     rules_regulations = models.JSONField(blank=True, null=True)
 
@@ -188,6 +193,9 @@ class Stage(models.Model):
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
     client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
+    documents = models.ManyToManyField(
+        "home.Document", related_name="stage",
+    )
     templateable = models.BooleanField(default=False)
 
 class Email(models.Model):

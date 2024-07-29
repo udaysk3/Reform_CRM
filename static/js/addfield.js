@@ -77,11 +77,3 @@ function addOption(e) {
   
 }
 
-function submitForm() {
-  const options = document.querySelectorAll('.option');
-  options.forEach(option => {
-    
-    option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
-  // console.log(e.parentElement.parentElement.children[0].value)
-  });
-}

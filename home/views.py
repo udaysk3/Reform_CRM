@@ -2093,7 +2093,10 @@ def funding_route(request):
 @login_required
 def edit_product(request, product_id):
     product = Product.objects.get(pk=product_id)
-    stages = Stage.objects.all()
+    clients = product.client.all()
+    if clients.exists():
+        client_id = clients.first().id
+    stages = Stage.objects.all().filter(client=Clients.objects.get(client_id))
     fields = {}
     saved_rules_regulations = json.loads(product.rules_regulations)
     if stages[0]:
@@ -2105,15 +2108,20 @@ def edit_product(request, product_id):
         dynamicStages = request.POST.getlist("dynamicStage")
         dynamicFields = request.POST.getlist("dynamicField")
         dynamicRules = request.POST.getlist("dynamicRule")
+        documents = request.FILES.getlist("document")
+
         rules_regulations = {}
         i=0
         for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
             rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
             i+=1
         product.rules_regulations = json.dumps(rules_regulations)
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            product.documents.add(doc)
         product.save()
         messages.success(request, "Product updated successfully!")
-        return redirect(f"/product")
+        return redirect(f"/client-detail/{client_id}")
     return render(
         request, "home/edit_products.html", {"product": product, "fields": fields, 'saved_rules_regulations': saved_rules_regulations}
     )
@@ -2121,6 +2129,9 @@ def edit_product(request, product_id):
 @login_required
 def edit_funding_route(request, funding_route_id):
     funding_route = Route.objects.get(pk=funding_route_id)
+    councils = funding_route.council.all()
+    if councils.exists():
+        council_id = councils.first().id
     stages = Stage.objects.all()
     fields = {}
     saved_rules_regulations = json.loads(funding_route.rules_regulations)
@@ -2133,19 +2144,24 @@ def edit_funding_route(request, funding_route_id):
         dynamicStages = request.POST.getlist("dynamicStage")
         dynamicFields = request.POST.getlist("dynamicField")
         dynamicRules = request.POST.getlist("dynamicRule")
+        documents = request.FILES.getlist("document")
+        
         rules_regulations = {}
         i = 0
         for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
             rules_regulations[f"{i}"] = [d_stage, d_field, d_rule]
             i += 1
         funding_route.rules_regulations = json.dumps(rules_regulations)
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            funding_route.documents.add(doc)
         funding_route.save()
+        print(funding_route.council.all())
         messages.success(request, "Funding Route updated successfully!")
-        return redirect(f"/funding_route")
+        return redirect(f"/council-detail/{council_id}")
     return render(
         request, "home/edit_funding_routes.html", {"funding_route": funding_route, "fields": fields, 'saved_rules_regulations': saved_rules_regulations}
     )
-
 
 @login_required
 def add_product(request, client_id):
@@ -2162,20 +2178,25 @@ def add_product(request, client_id):
         dynamicStages = request.POST.getlist("dynamicStage")
         dynamicFields = request.POST.getlist("dynamicField")
         dynamicRules = request.POST.getlist("dynamicRule")
+        documents = request.FILES.getlist("document")
+
         rules_regulations = {}
         i=0
         for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
             rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
             i+=1
         rules_regulations = json.dumps(rules_regulations)
-        
+
         product = Product.objects.create(
             name=name,
             description=description,
             rules_regulations=rules_regulations,
         )
         client.product.add(product)
-        client.save()
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            product.documents.add(doc)
+        product.save()
         messages.success(request, "Product added successfully!")
         return redirect(f'/client-detail/{client_id}')
     return render(
@@ -2199,19 +2220,25 @@ def add_funding_route(request, council_id):
         dynamicStages = request.POST.getlist("dynamicStage")
         dynamicFields = request.POST.getlist("dynamicField")
         dynamicRules = request.POST.getlist("dynamicRule")
+        documents = request.FILES.getlist("document")
+
         rules_regulations = {}
         i=0
         for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
             rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
             i+=1
         rules_regulations = json.dumps(rules_regulations)
-        
+
         funding_route = Route.objects.create(
             name=name,
             description=description,
             rules_regulations=rules_regulations,
         )
         funding_route.council.add(council)
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            funding_route.documents.add(doc)
+        funding_route.save()
         messages.success(request, "Funding Route added successfully!")
         return redirect('/council-detail/'+str(council_id))
     return render(
@@ -2303,6 +2330,9 @@ def make_primary(request, parent_customer_id, child_customer_id):
 def add_route_client(request, client_id):
     if request.method == "POST":
         client = Clients.objects.get(pk=client_id)
+        if request.POST.get("route") == "nan":
+            messages.error(request, "Route should be selected")
+            return redirect(f"/client-detail/{client_id}")
         route = Route.objects.get(pk=request.POST.get("route"))
         client.route.add(route)
         route.save()
@@ -2353,6 +2383,8 @@ def create_stage(request, client_id):
         order = request.POST.get('order')
         templateable = request.POST.get('templateable') == 'on'
         description = request.POST.get('description')
+        documents = request.FILES.getlist("document")
+
         if order.isdigit():
             order = int(order)
         else:
@@ -2374,6 +2406,10 @@ def create_stage(request, client_id):
             templateable=templateable,
             client=client,
         )
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            stage.documents.add(doc)
+        stage.save()
         return redirect("/client-detail/"+str(client_id))
     return render(request, "home/stages.html", {"routes": routes, "stages": stages, "client_id": client_id, "templateablestages": templateablestages}) 
 
@@ -2394,6 +2430,7 @@ def edit_stage(request, stage_id):
         order = request.POST.get("order") 
         templateable = request.POST.get("templateable") == "on"
         description = request.POST.get("description")
+        documents = request.FILES.getlist("document")
         dynamic_fields = {}
         if order.isdigit():
             order = int(order)
@@ -2408,6 +2445,9 @@ def edit_stage(request, stage_id):
         stage.order = order
         stage.description = description
         stage.templateable = templateable
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            stage.documents.add(doc)
         stage.save()
         messages.success(request, "Stage updated successfully!")
         return redirect("/client-detail/"+str(stage.client.id))
@@ -2611,9 +2651,6 @@ def send_email(request, customer_id):
         "signature": signature,
         "domain_name": domain_name,
     }
-    print(body)
-    print(signature.signature)
-
     template_name = "../templates/home/email.html"
     convert_to_html_content = render_to_string(
         template_name=template_name, context=context
@@ -3088,9 +3125,12 @@ def delete_customer_session(request):
 
 def stage_template(request):
     if request.method == 'POST':
+        client_id = request.POST.get('client_id')
+        if request.POST.get("template") == "nan":
+            messages.error(request, "Select a template")
+            return redirect(f"/client-detail/{client_id}")
         template_id = request.POST.get('template')
         template = Stage.objects.get(pk=template_id)
-        client_id = request.POST.get('client_id')
         templateablestages = Stage.objects.all().filter(templateable=True)
         messages.success(request, "Template copied successfully!")
-        return render(request, 'home/add_stage_template.html', {"stage":template, "templateablestages":templateablestages, "client_id": client_id})
+        return render(request, 'home/add_stage_template.html', {"stage":template, "templateablestages":templateablestages,"fields":json.loads(template.fields), "client_id": client_id})
