@@ -707,17 +707,6 @@ const form = document.querySelector('#addCustomerForm');
 
 <script type="module">
   jQuery(document).ready(function ($) {
-    // Get the unassigned customers from the backend
-    //let unassignedCustomers = JSON.parse("{{ unassigned_customers | escapejs }}");
-
-    // Extract the names of unassigned customers
-    
-    //let comboSource = unassignedCustomers.map(customer => {
-     // return {
-     //   id: customer.pk,
-     //   title: customer.fields.first_name + ' ' + customer.fields.last_name + ' - ' + customer.pk,
-    //  };
-    //});
     const options = [
       {
         id:0,
@@ -843,11 +832,13 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-
 </script>
 
 {% endif %}
 
-  
+<script>
+
+  console.log()
+</script>
 
 {% endblock js %}

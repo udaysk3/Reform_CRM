@@ -241,23 +241,39 @@ table {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Campaign</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method='post' action="{% url 'app:change_customer_campaign' customer.id  %}">
-              {% csrf_token %}
-              <div class="modal-body">
-                <select class="form-select" aria-label="Default select example" name="campaign">
-                  {% for agent in campaigns %}
-                  <option value="{{ agent.id }}">{{ agent.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </div>
-            </form>
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit Campaign</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method='post' action="{% url 'app:change_customer_client' customer.id  %}">
+                          {% csrf_token %}
+                        <div class="modal-body">
+                          <div class="mb-3 client">
+                            <label for="client" class="form-label">Client</label>
+                            <select class="form-select client_input" id="client" name="client" aria-label="Default select example">
+                              <option value="nan">Select the client</option>
+                              {% for client in clients %}
+                                <option {% if customer.client == client %} selected {% endif %} value="{{client.id}}">{{client.company_name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="mb-3 campaign">
+                            <label for="campaign" class="form-label">Campaign</label>
+                            <select class="form-select campaign_input" id="campaign" name="campaign" aria-label="Default select example">
+                              <option value="nan">Select the Campaign</option>
+                              {% for campaign in customer.client.campaigns.all %}
+                                <option {% if customer.campaign == campaign %} selected {% endif %} value="{{campaign.id}}">{{campaign.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          
+
+                          
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button class="btn btn-primary" >Submit</button>
+                        </div>
+                      </form>
           </div>
         </div>
       </div>
@@ -273,35 +289,7 @@ table {
       Unassigned
     {% endif %}
     </div>
-    <div class="d-grid gap-2 d-md-block">
-      <!-- Button trigger modal -->
-      <!-- Modal -->
-      <div class="modal fade" id="change_client_modal" data-bs-backdrop="static" data-bs-keyboard="false"
-        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Client</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method='post' action="{% url 'app:change_customer_client' customer.id  %}">
-              {% csrf_token %}
-              <div class="modal-body">
-                <select class="form-select" aria-label="Default select example" name="client">
-                  {% for agent in clients %}
-                  <option value="{{ agent.id }}">{{ agent.company_name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+    
   </div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Assigned To</b> - </span>
@@ -1314,12 +1302,11 @@ table {
     });
 
   document.getElementById('change_client').addEventListener('click',()=>{
-    let change_client_modal = new bootstrap.Modal(
-          document.getElementById("change_client_modal"),
+     let change_campaign_modal = new bootstrap.Modal(
+          document.getElementById("change_campaign_modal"),
           {}
         );
-        // https://getbootstrap.com/docs/5.0/components/modal/#show
-        change_client_modal.show();
+        change_campaign_modal.show();
     });
 
   document.getElementById('change_campaign').addEventListener('click',()=>{
@@ -1327,7 +1314,6 @@ table {
           document.getElementById("change_campaign_modal"),
           {}
         );
-        // https://getbootstrap.com/docs/5.0/components/modal/#show
         change_campaign_modal.show();
     });
 
@@ -1586,5 +1572,31 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     
   </script>
 
+  <script>
+  const client = document.querySelector('.client')
+  document.querySelector('.client_input').addEventListener('change',()=>{
+    const value = document.querySelector('.client_input').value
+    fetch('/get_campaign/'+value)
+    .then(response => response.json())
+    .then(data => {
+      if (document.querySelector('.campaign')) {
+        document.querySelector('.campaign').remove();
+      }
+      const newField = document.createElement('div');
+      newField.classList.add('mb-3', 'campaign');
+      var input = `
+        <label for="campaign" class="form-label">Campaign</label>
+        <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
+      `;
+      data.forEach(campaign => {
+        console.log(campaign)
+        input += `<option value="${campaign.campaign_id}">${campaign.campaign_name}</option>`
+      })
+      input += `</select>`;
+      newField.innerHTML = input;
+      client.insertAdjacentElement('afterend', newField);
+    })
+  })
+</script>
 
 {% endblock %}

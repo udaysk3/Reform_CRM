@@ -240,5 +240,5 @@ urlpatterns = [
         name="get_campaign",
     ),
     path("change_customer_client/<int:customer_id>",views.change_customer_client,name="change_customer_client"),
-    path("change_customer_campaign/<int:customer_id>",views.change_customer_campaign,name="change_customer_campaign"),
+    path("stage_template",views.stage_template,name="stage_template"),
 ] 

@@ -61,6 +61,8 @@ def home(request):
 
 @login_required
 def dashboard(request):
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     all_customers = (
         Customers.objects.annotate(earliest_action_date=Max("action__created_at"))
         .filter(parent_customer=None)
@@ -720,7 +722,7 @@ def client_detail(request, client_id, s_client_id=None):
         next = str(client_id)
     # print(type(prev), next)
     client = Clients.objects.get(pk=client_id)
-    stages = Stage.objects.all().filter(client=client)
+    stages = Stage.objects.all().filter(client=client).order_by('order')
     campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
     uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
     all_products = Product.objects.all()
@@ -903,6 +905,7 @@ def council_detail(request, council_id):
 
 @login_required
 def Customer(request):
+
     if request.GET.get("page") == "edit_customer" and request.GET.get("backto") is None:
         customer_id = request.GET.get("id")
         customer = Customers.objects.get(pk=customer_id)
@@ -930,7 +933,6 @@ def Customer(request):
                 "customers": customers,
             },
         )
-    
 
     # customers = Customers.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     current_time = datetime.now(london_tz)
@@ -951,9 +953,8 @@ def Customer(request):
             if action.imported == False:
                 new_customers.append(customer)
                 break
-            
-    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
+    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
     result = [x for x in customers if x not in new_customers] 
 
@@ -971,8 +972,10 @@ def Customer(request):
         page_obj = p_customers.page(1)
     except EmptyPage:
         page_obj = p_customers.page(p_customers.num_pages)
-    
+
     client = Clients.objects.all()    
+    if request.session.get("first_name") and request.GET.get("page") != "add_customer":
+        delete_customer_session(request)
     return render(
         request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj, 'clients':client}
     )
@@ -980,6 +983,8 @@ def Customer(request):
 
 @login_required
 def Client(request):
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     if request.GET.get("page") == "edit_client" and request.GET.get("backto") is None:
         client_id = request.GET.get("id")
         client = Clients.objects.get(pk=client_id)
@@ -1007,7 +1012,6 @@ def Client(request):
                 "clients": clients,
             },
         )
-    
 
     # clients = Clients.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
     current_time = datetime.now(london_tz)
@@ -1028,9 +1032,8 @@ def Client(request):
             if action.imported == False:
                 new_clients.append(client)
                 break
-            
-    new_clients.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
+    new_clients.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
     result = [x for x in clients if x not in new_clients] 
 
@@ -1047,7 +1050,7 @@ def Client(request):
         page_obj = p_clients.page(1)
     except EmptyPage:
         page_obj = p_clients.page(p_clients.num_pages)
-        
+
     return render(
         request, "home/client.html", {"clients": p_clients, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj}
     )
@@ -1070,12 +1073,10 @@ def archive(request):
             if action.imported == False:
                 new_customers.append(customer)
                 break
-            
+
     new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
 
-
     result = [x for x in customers if x not in new_customers] 
-
 
     # for customer in customers:
     #     print(customer.get_action_history())
@@ -1083,6 +1084,8 @@ def archive(request):
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     return render(
         request, "home/archive.html", {"customers": customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents)}
     )
@@ -1105,6 +1108,8 @@ def council(request):
 
     # for i in councils:
     # print(i)
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     return render(
         request, "home/council.html", {"councils": councils, "campaigns": campaigns}
     )
@@ -1132,6 +1137,8 @@ def Admin(request):
         signature_id = request.GET.get("id")
         signature = Signature.objects.get(pk=signature_id)
         return render(request, "home/admin.html", {"signature": signature})
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     users = User.objects.filter(is_superuser=False).values()
     emails = Email.objects.all()
     reasons = Reason.objects.all()
@@ -1141,11 +1148,15 @@ def Admin(request):
 
 @login_required
 def Finance(request):
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     return render(request, "home/finance.html")
 
 
 @login_required
 def HR(request):
+    if request.session.get("first_name"):
+        delete_customer_session(request)
     return render(request, "home/hr.html")
 
 
@@ -1174,8 +1185,8 @@ def add_customer(request):
         else:
             phone_number = "+44" + phone_number
 
-        if Customers.objects.filter(email=email).exists():
-            messages.error(request, "Email already exists")
+        if Customers.objects.filter(email=email).filter(client=client).exists():
+            messages.error(request, "Email with this Client already exists")
             request.session['first_name'] = first_name,
             request.session['last_name'] = last_name,
             request.session['phone_number'] = phone_number,
@@ -1263,19 +1274,8 @@ def add_customer(request):
                 keyevents=True,
         )
         messages.success(request, "Customer added successfully!")
-        if request.session["first_name"]:
-            del request.session['first_name']
-            del request.session['last_name']
-            del request.session['phone_number']
-            del request.session['email']
-            del request.session['postcode']
-            del request.session['street_name']
-            del request.session['house_name']
-            del request.session['city']
-            del request.session['county']
-            del request.session['country']
-            del request.session['campaign']
-            del request.session['client']
+        if request.session.get("first_name"):
+            delete_customer_session(request)
         return redirect("app:customer")
     return render(request, "home/customer.html")
 
@@ -2339,28 +2339,29 @@ def remove_funding_route(request, route_id):
 
 @login_required
 def create_stage(request, client_id):
-    stages=Stage.objects.all().order_by("order")
     routes = Route.objects.all()
     client = Clients.objects.get(pk=client_id)
-    
+    stages=Stage.objects.all().filter(client=client).order_by("order")
+    templateablestages = Stage.objects.all().filter(templateable=True)
     if request.GET.get("page")== 'edit_page':
         stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
-        return render(request, 'home/stages.html', {"stage":stage, "fields":json.loads(stage.fields)})
+        return render(request, 'home/stages.html', {"stage":stage, "fields":json.loads(stage.fields), "templateablestages": templateablestages})
 
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
         dynamic_labels = request.POST.getlist("dynamic_label")
         order = request.POST.get('order')
+        templateable = request.POST.get('templateable') == 'on'
         description = request.POST.get('description')
         if order.isdigit():
             order = int(order)
         else:
             messages.error(request, "Order should be a number")
             return redirect("/client-detail/"+str(client_id))
-        if Stage.objects.filter(order=order).exists():
+        if Stage.objects.filter(client=client).filter(order=order).exists():
             messages.error(request, "Stage with this order already exists!")
             return redirect("/client-detail/"+str(client_id))
-        
+
         dynamic_fields = {}
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
@@ -2370,10 +2371,11 @@ def create_stage(request, client_id):
             fields=fields,
             order=order,
             description=description,
+            templateable=templateable,
             client=client,
         )
         return redirect("/client-detail/"+str(client_id))
-    return render(request, "home/stages.html", {"routes": routes, "stages": stages, "client_id": client_id}) 
+    return render(request, "home/stages.html", {"routes": routes, "stages": stages, "client_id": client_id, "templateablestages": templateablestages}) 
 
 
 @login_required
@@ -2381,7 +2383,7 @@ def remove_stage(request, stage_id):
     stage = Stage.objects.get(pk=stage_id)
     stage.delete()
     messages.success(request, "Stage deleted successfully!")
-    return redirect(f"/stages")
+    return redirect("/client-detail/" + str(stage.client.id))
 
 @login_required
 def edit_stage(request, stage_id):
@@ -2389,14 +2391,15 @@ def edit_stage(request, stage_id):
     if request.method == "POST":
         dynamic_types = request.POST.getlist("dynamic_type")
         dynamic_labels = request.POST.getlist("dynamic_label")
-        order = request.POST.get("order")
+        order = request.POST.get("order") 
+        templateable = request.POST.get("templateable") == "on"
         description = request.POST.get("description")
         dynamic_fields = {}
         if order.isdigit():
             order = int(order)
         else:
             messages.error(request, "Order should be a number")
-            return redirect(f"/stages")
+            return redirect("/client-detail/" + str(stage.client.id))
         for label, field_type in zip(dynamic_labels, dynamic_types):
             dynamic_fields[label] = field_type
         fields = json.dumps(dynamic_fields)
@@ -2404,9 +2407,10 @@ def edit_stage(request, stage_id):
         stage.fields = fields
         stage.order = order
         stage.description = description
+        stage.templateable = templateable
         stage.save()
         messages.success(request, "Stage updated successfully!")
-        return redirect(f"/stages")
+        return redirect("/client-detail/"+str(stage.client.id))
 
 
 @login_required
@@ -3057,18 +3061,36 @@ def change_customer_client(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     if request.method == "POST":
         client = Clients.objects.get(pk=request.POST.get("client"))
+        campaign = Campaign.objects.get(pk=request.POST.get("campaign"))
+        if Customers.objects.filter(email=customer.email).filter(client=client).exists():
+            messages.success(request, "Customer with this Client already exist!")
+            return redirect(r"/customer-detail/" + str(customer_id))
         customer.client = client
+        customer.campaign = campaign
         customer.save()
-        messages.success(request, "Client changed successfully!")
+        messages.success(request, "Client or Campaign changed successfully!")
         return redirect(r"/customer-detail/" + str(customer_id))
     return render(request, "home/admin.html")
 
-def change_customer_campaign(request, customer_id):
-    customer = Customers.objects.get(pk=customer_id)
-    if request.method == "POST":
-        campaign = Campaign.objects.get(pk=request.POST.get("campaign"))
-        customer.campaign = campaign
-        customer.save()
-        messages.success(request, "Campaign changed successfully!")
-        return redirect(r"/customer-detail/" + str(customer_id))
-    return render(request, "home/admin.html")
+def delete_customer_session(request):
+    del request.session['first_name']
+    del request.session['last_name']
+    del request.session['phone_number']
+    del request.session['email']
+    del request.session['postcode']
+    del request.session['street_name']
+    del request.session['house_name']
+    del request.session['city']
+    del request.session['county']
+    del request.session['country']
+    del request.session['campaign']
+    del request.session['client']
+
+def stage_template(request):
+    if request.method == 'POST':
+        template_id = request.POST.get('template')
+        template = Stage.objects.get(pk=template_id)
+        client_id = request.POST.get('client_id')
+        templateablestages = Stage.objects.all().filter(templateable=True)
+        messages.success(request, "Template copied successfully!")
+        return render(request, 'home/add_stage_template.html', {"stage":template, "templateablestages":templateablestages, "client_id": client_id})

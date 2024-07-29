@@ -183,11 +183,12 @@ class Action(models.Model):
 class Stage(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
-    order = models.IntegerField(unique=True, blank=True, null=True)
+    order = models.IntegerField(blank=True, null=True)
     description = models.CharField(max_length=999, blank=True, null=True)
     route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
     client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
+    templateable = models.BooleanField(default=False)
 
 class Email(models.Model):
     name = models.CharField(max_length=255)
