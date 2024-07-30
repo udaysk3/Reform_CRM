@@ -1218,37 +1218,11 @@ table {
     <h3>Unarchive</h3>
     {% if routes %}
     {% for camp in routes %}
-        <button type="button" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#route{{forloop.counter}}">
+        <a href="{% url 'app:edit_local_funding_route' camp.id %}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
             {{ camp.name }}
-        </button>
+        </a>
 
-        <div class="modal fade" id="route{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Funding Route</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
-                            <label for="floatingInput">Name</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
-                            <label for="floatingInput"> Description</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <form method="post" action="{% url 'app:archive_route' client.id camp.id %}">
-                        {% csrf_token %}
-                      <button class="btn btn-primary">Archive</button>
-                      </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     {% endfor %}
     {% endif %}
     </div>
@@ -1258,37 +1232,10 @@ table {
     <h3>Archive</h3>
     {% if unroutes %}
     {% for camp in unroutes %}
-        <button type="button" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#route{{forloop.counter}}">
+        <a href="{% url 'app:edit_local_funding_route' camp.id %}" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
             {{ camp.name }}
-        </button>
+        </a>
 
-        <div class="modal fade" id="route{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Funding Route</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Name" name="name" value="{{ camp.name }}" disabled>
-                            <label for="floatingInput">Name</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Description" name="description" value="{{ camp.description }}" disabled>
-                            <label for="floatingInput">Description</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <form method="post" action="{% url 'app:archive_route' client.id camp.id %}">
-                        {% csrf_token %}
-                      <button class="btn btn-primary">Unarchive</button>
-                      </form>
-                    </div>
-                </div>
-            </div>
-        </div>
     {% endfor %}
     {% endif %}
     </div>

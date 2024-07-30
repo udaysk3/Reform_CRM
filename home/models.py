@@ -133,6 +133,11 @@ class Route(models.Model):
     documents = models.ManyToManyField('home.Document',related_name='route', )
     archive = models.BooleanField(default=False)
     rules_regulations = models.JSONField(blank=True, null=True)
+    sub_rules_regulations = models.JSONField(blank=True, null=True)
+    parent_route = models.BooleanField(blank=True, null=True)
+    child_route = models.ForeignKey(
+        "self", blank=True, null=True, related_name="+", on_delete=models.CASCADE
+    )
 
 
 class Document(models.Model):

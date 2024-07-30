@@ -239,6 +239,15 @@ urlpatterns = [
         views.get_campaign,
         name="get_campaign",
     ),
-    path("change_customer_client/<int:customer_id>",views.change_customer_client,name="change_customer_client"),
-    path("stage_template",views.stage_template,name="stage_template"),
-] 
+    path(
+        "change_customer_client/<int:customer_id>",
+        views.change_customer_client,
+        name="change_customer_client",
+    ),
+    path("stage_template", views.stage_template, name="stage_template"),
+    path(
+        "edit_local_funding_route/<int:funding_route_id>",
+        views.edit_local_funding_route,
+        name="edit_local_funding_route",
+    ),
+]

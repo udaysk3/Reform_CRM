@@ -2132,7 +2132,7 @@ def edit_funding_route(request, funding_route_id):
     councils = funding_route.council.all()
     if councils.exists():
         council_id = councils.first().id
-    stages = Stage.objects.all()
+    stages = Stage.objects.all().filter(route=funding_route)
     fields = {}
     saved_rules_regulations = json.loads(funding_route.rules_regulations)
     if stages[0]:
@@ -2156,7 +2156,14 @@ def edit_funding_route(request, funding_route_id):
             doc = Document.objects.create(document=document)
             funding_route.documents.add(doc)
         funding_route.save()
-        print(funding_route.council.all())
+        for child_route in funding_route.child_route.all():
+            child_route.rules_regulations = json.dumps(rules_regulations)
+            child_route.name = request.POST.get("name")
+            child_route.description = request.POST.get("description")
+            for document in documents:
+                doc = Document.objects.create(document=document)
+                child_route.documents.add(doc)
+            child_route.save()
         messages.success(request, "Funding Route updated successfully!")
         return redirect(f"/council-detail/{council_id}")
     return render(
@@ -2166,9 +2173,9 @@ def edit_funding_route(request, funding_route_id):
 @login_required
 def add_product(request, client_id):
     clients = Clients.objects.all()
-    stages = Stage.objects.all()
     fields = {}
     client = Clients.objects.get(pk=client_id)
+    stages = Stage.objects.all().filter(client=client)
     if stages[0]:
         for stage in stages:
             fields[stage.name] =  json.loads(stage.fields)
@@ -2208,9 +2215,9 @@ def add_product(request, client_id):
 @login_required
 def add_funding_route(request, council_id):
     clients = Clients.objects.all()
-    stages = Stage.objects.all()
     fields = {}
     council = Councils.objects.get(pk=council_id)
+    stages = Stage.objects.all()
     if stages[0]:
         for stage in stages:
             fields[stage.name] =  json.loads(stage.fields)
@@ -2233,6 +2240,7 @@ def add_funding_route(request, council_id):
             name=name,
             description=description,
             rules_regulations=rules_regulations,
+            parent_route=True,
         )
         funding_route.council.add(council)
         for document in documents:
@@ -2333,9 +2341,17 @@ def add_route_client(request, client_id):
         if request.POST.get("route") == "nan":
             messages.error(request, "Route should be selected")
             return redirect(f"/client-detail/{client_id}")
-        route = Route.objects.get(pk=request.POST.get("route"))
-        client.route.add(route)
-        route.save()
+        main_route = Route.objects.get(pk=request.POST.get("route"))
+        funding_route = Route.objects.create(
+            name=main_route.name,
+            description=main_route.description,
+            rules_regulations=main_route.rules_regulations,
+        )
+        client.route.add(funding_route)
+        funding_route.save()
+        main_route.child_route = funding_route
+        main_route.save()
+        client.save()
         messages.success(request, "Funding Route added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
 
@@ -3134,3 +3150,51 @@ def stage_template(request):
         templateablestages = Stage.objects.all().filter(templateable=True)
         messages.success(request, "Template copied successfully!")
         return render(request, 'home/add_stage_template.html', {"stage":template, "templateablestages":templateablestages,"fields":json.loads(template.fields), "client_id": client_id})
+
+
+@login_required
+def edit_local_funding_route(request, funding_route_id):
+    funding_route = Route.objects.get(pk=funding_route_id)
+    clients = funding_route.client.all()
+    if clients.exists():
+        client_id = clients.first().id
+    stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
+    fields = {}
+    saved_rules_regulations = json.loads(funding_route.rules_regulations)
+    if stages.exists():
+        for stage in stages:
+            fields[stage.name] = json.loads(stage.fields)
+    if funding_route.sub_rules_regulations:
+        sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
+    else:
+        sub_rules_regulations = None
+    if stages[0]:
+        for stage in stages:
+            fields[stage.name] = json.loads(stage.fields)
+    if request.method == "POST":
+        funding_route.name = request.POST.get("name")
+        funding_route.description = request.POST.get("description")
+        dynamicStages = request.POST.getlist("subDynamicStage")
+        dynamicFields = request.POST.getlist("subDynamicField")
+        dynamicRules = request.POST.getlist("subDynamicRule")
+        
+        rules_regulations = {}
+        i = 0
+        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
+            rules_regulations[f"{i}"] = [d_stage, d_field, d_rule]
+            i += 1
+        print(dynamicStages,dynamicFields,dynamicRules)
+        funding_route.sub_rules_regulations = json.dumps(rules_regulations)
+        funding_route.save()
+        messages.success(request, "Funding Route updated successfully!")
+        return redirect(f"/client-detail/{client_id}")
+    return render(
+        request,
+        "home/edit_local_funding_routes.html",
+        {
+            "funding_route": funding_route,
+            "fields": fields,
+            "saved_rules_regulations": saved_rules_regulations,
+            "sub_rules_regulations": sub_rules_regulations,
+        },
+    )

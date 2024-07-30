@@ -238,7 +238,8 @@
               name="addClientForm"
               id="addClientForm"
               method="post"
-              action="{% url 'app:edit_funding_route' funding_route.id %} "
+              onsubmit="SubmitForm()"
+              action="{% url 'app:edit_local_funding_route' funding_route.id %} "
             >
               {% csrf_token %}
 
@@ -267,34 +268,6 @@
               </div>
 
               <div class="mb-3">
-            <label for="formFile" class="form-label">Stage Documentation</label>
-            <div class="container">
-              <div class="header-section">
-                  <h1>Upload Files</h1>
-                  <p>PDF files are only allowed.</p>
-              </div>
-              <div class="drop-section">
-                  <div class="col">
-                      <div class="cloud-icon">
-                          <img width="100px" src="{% static "assets/img/pdf.png" %}" alt="cloud">
-                          
-                      </div>
-                      <span>Drag & Drop your files here</span>
-                      <span>OR</span>
-                      <button type="button" class="file-selector">Browse Files</button>
-                      <input type="file" id="formFile" name="document" accept="application/pdf" class="from-input file-selector-input" multiple>
-                  </div>
-                  <div class="col">
-                      <div class="drop-here">Drop Here</div>
-                  </div>
-              </div>
-              <div class="list-section">
-                  <div class="list-title">Uploaded Files</div>
-                  <div class="list"></div>
-              </div>
-          </div>
-
-              <div class="mb-3">
                 <label for="rules_regulations" class="form-label"
                   >Global Rules & Regulations</label
                 >
@@ -302,7 +275,98 @@
                   {% for a,b in saved_rules_regulations.items %}
                     <div class="my-3 row">
                       <div class="row">
-                      <select class="form-select col" id="name" name="dynamicStage" onchange="checkStageSeletcted(this)">
+                      <select disabled class="form-select col" id="name" name="dynamicStage" onchange="checkStageSeletcted(this)">
+                        <option value="nan"> Select a Stage </option>
+                        {% with stage=b.0|split:',' %}
+                        {% for key,value in fields.items %}
+                          <option value="{{ key }},{{value}}" {% if key == stage.0 %} selected {% endif %} > {{ key }} </option>
+                        {% endfor %}
+                        {% endwith %}
+                      </select>
+                      
+                      </div>
+                      <div class="my-3 row">
+                        <div class="row mt-3 ms-3">
+                          <select disabled class="form-select col stage-fields" id="name" name="dynamicField" onchange="checkFieldSelected(this)">  
+                            <option value="nan"> Select a field </option>
+                            {% with stages=b.0|firstsplitconvert:',' %}
+                            {% with field=b.1|firstsplit:',' %}
+                            {% for key,value in stages.items%}
+                              {% if value == 'dropdown' %}
+                              {% with keys=key|firstsplit:',' %}
+                              
+                              <option {% if field.0 == keys.0 %} selected {% endif %} value="{{ keys.0 }},{{value}},{{ keys.1 }}"> {{keys.0}} </option> 
+                              {% endwith %}
+                              {% else %}
+                              <option {% if field.0 == key %} selected {% endif %} value="{{ key }},{{value}}"> {{key}} </option> 
+                              {% endif %}
+                              {% endfor %}
+                              {% endwith %}
+                            {% endwith %}
+                          </select>
+                          
+                          <div class="my-3 row">
+                            {% with fieldvalue=b.1|firstsplit:',' %}
+                              {% with field=fieldvalue.1|firstsplit:',' %}
+                                {% if field.1 %}
+                                {% with options=field.1|split:',' %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <select disabled class="form-select" id="name" name="dynamicRule">
+                                      <option value="nan"> Select a Rule </option>
+                                      {% for option in options %}
+                                        <option value="{{ option }}" {% if b.2 == option %} selected {% endif %}> {{ option }} </option>
+                                      
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                {% endwith %}
+                                {% else %}
+                                  {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input disabled type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.2 }}" placeholder="Enter The Value">
+                                    </div>
+                                  {% elif field.0 == "checkbox" %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input disabled type="{{field.0}}" {% if b.2 == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                    </div>
+                                  {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                                  {% with options=b.2|split:',' %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <div class="form-check">
+                                      <input disabled {% if options.1 == 'Less Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Less" class="form-check-input " placeholder="Enter The Value" value="Less Than"> <label for="{{ forloop.counter }}Less">Less Than</label>
+                                    </div>
+                                    <div class="form-check">
+                                      <input disabled {% if options.1 == 'Greater Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Greater" class="form-check-input " placeholder="Enter The Value" value="Greater Than"> <label for="{{ forloop.counter }}Greater">Greater Than</label>
+                                    </div>
+                                    <div class="form-check">
+                                      <input disabled {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
+                                    </div>
+                                    <input disabled type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
+                                    <input name="dynamicRule" type="hidden">
+                                  </div>
+                                  {% endwith %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endwith %}
+                            {% endwith %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              
+
+              <div class="mb-3">
+                <label for="rules_regulations" class="form-label"
+                  >Local Rules & Regulations</label
+                >
+                <div class="mb-3 col">
+                  {% for a,b in sub_rules_regulations.items %}
+                    <div class="my-3 row">
+                      <div class="row">
+                      <select class="form-select col" id="name" name="subDynamicStage" onchange="checkStageSeletcted(this)">
                         <option value="nan"> Select a Stage </option>
                         {% with stage=b.0|split:',' %}
                         {% for key,value in fields.items %}
@@ -316,7 +380,7 @@
                       </div>
                       <div class="my-3 row">
                         <div class="row mt-3 ms-3">
-                          <select class="form-select col stage-fields" id="name" name="dynamicField" onchange="checkFieldSelected(this)">  
+                          <select class="form-select col stage-fields" id="name" name="subDynamicField" onchange="checkFieldSelected(this)">  
                             <option value="nan"> Select a field </option>
                             {% with stages=b.0|firstsplitconvert:',' %}
                             {% with field=b.1|firstsplit:',' %}
@@ -342,7 +406,7 @@
                                 {% if field.1 %}
                                 {% with options=field.1|split:',' %}
                                   <div class="col-6 rules mt-3 ms-3">
-                                    <select class="form-select" id="name" name="dynamicRule">
+                                    <select class="form-select" id="name" name="subDynamicRule">
                                       <option value="nan"> Select a Rule </option>
                                       {% for option in options %}
                                         <option value="{{ option }}" {% if b.2 == option %} selected {% endif %}> {{ option }} </option>
@@ -354,11 +418,11 @@
                                 {% else %}
                                   {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
                                     <div class="col-6 rules mt-3 ms-3">
-                                      <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.2 }}" placeholder="Enter The Value">
+                                      <input type="{{field.0}}" name="subDynamicRule" class="form-control " value="{{ b.2 }}" placeholder="Enter The Value">
                                     </div>
                                   {% elif field.0 == "checkbox" %}
                                     <div class="col-6 rules mt-3 ms-3">
-                                      <input type="{{field.0}}" {% if b.2 == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                      <input type="{{field.0}}" {% if b.2 == 'on' %} checked {% endif %} name="subDynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
                                     </div>
                                   {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
                                   {% with options=b.2|split:',' %}
@@ -373,7 +437,7 @@
                                       <input {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
                                     </div>
                                     <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
-                                    <input name="dynamicRule" type="hidden">
+                                    <input name="subDynamicRule" type="hidden">
                                   </div>
                                   {% endwith %}
                                   {% endif %}
@@ -393,7 +457,6 @@
                     <i class="bi bi-plus-lg"></i> Add Rule
                   </button>
                 </div>
-              </div>
               </div>
 
               <button type="submit" id="submitBtn" class="btn btn-primary">Submit</button>
@@ -421,7 +484,7 @@
     newField.classList.add("my-3", "row");
     newField.innerHTML = `
         <div class="row">
-          <select class="form-select col" id="name" name="dynamicStage" onchange="checkStageSeletcted(this)">
+          <select class="form-select col" id="name" name="subDynamicStage" onchange="checkStageSeletcted(this)">
             <option value="nan"> Select a Stage </option>
             {% for key,value in fields.items %}
               <option value="{{ key }},{{value}}"> {{ key }} </option>
@@ -469,7 +532,7 @@
     stageField.classList.add("my-3", "row");
     stageField.innerHTML = `
         <div class="row mt-3 ms-3">
-            <select class="form-select col stage-fields" id="name" name="dynamicField" onchange="checkFieldSelected(this)">  
+            <select class="form-select col stage-fields" id="name" name="subDynamicField" onchange="checkFieldSelected(this)">  
               ${options}
             
         </select>
@@ -500,7 +563,7 @@
       rule.classList.add("my-3", "row");
       rule.innerHTML = `
           <div class="col-6 rules mt-3 ms-3">
-            <select class="form-select" id="name" name="dynamicRule">
+            <select class="form-select" id="name" name="subDynamicRule">
               <option value="nan"> Select a Rule </option>
               ${options}
             </select>
@@ -518,7 +581,7 @@
         rule.classList.add("my-3", "row");
         rule.innerHTML = `        
             <div class="col-6 rules mt-3 ms-3">
-              <input type="${type}" name="dynamicRule" class="form-control " placeholder="Enter The Value">
+              <input type="${type}" name="subDynamicRule" class="form-control " placeholder="Enter The Value">
             </div>
           `;
         field.insertAdjacentElement("beforeEnd", rule);
@@ -527,7 +590,7 @@
         rule.classList.add("my-3", "row");
         rule.innerHTML = `        
             <div class="col-6 rules mt-3 ms-3">
-              <input type="${type}" name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+              <input type="${type}" name="subDynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
             </div>
           `;
         field.insertAdjacentElement("beforeEnd", rule);
@@ -549,7 +612,7 @@
                 <input name="checkboxinput${radioGroupCounter}" type="radio" id="Equal${radioGroupCounter}" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="Equal${radioGroupCounter}">Equal</label>
               </div>
               <input type="${type}" class="form-control checkboxinput" placeholder="Enter The Value">
-              <input name="dynamicRule" type="hidden">
+              <input name="subDynamicRule" type="hidden">
             </div>
           `;
         field.insertAdjacentElement("beforeEnd", rule);
@@ -562,114 +625,9 @@
 
 
 <script >
-  const dropArea = document.querySelector(".drop-section");
-const listSection = document.querySelector(".list-section");
-const listContainer = document.querySelector(".list");
-const fileSelector = document.querySelector(".file-selector");
-const fileSelectorInput = document.querySelector(".file-selector-input");
-
-// upload files with browse button
-fileSelector.onclick = () => fileSelectorInput.click();
-fileSelectorInput.onchange = () => {
-  [...fileSelectorInput.files].forEach((file) => {
-    if (typeValidation(file.type)) {
-      uploadFile(file);
-    }
-  });
-};
-
-// check the file type
-function typeValidation(type) {
-  var splitType = type.split("/")[0];
-  if (type == "application/pdf") {
-    return true;
-  }
-}
-
-// when file is over the drag area
-dropArea.ondragover = (e) => {
-  e.preventDefault();
-  [...e.dataTransfer.items].forEach((item) => {
-    if (typeValidation(item.type)) {
-      dropArea.classList.add("drag-over-effect");
-    }
-  });
-};
-// when file leave the drag area
-dropArea.ondragleave = () => {
-  dropArea.classList.remove("drag-over-effect");
-};
-// when file drop on the drag area
-dropArea.ondrop = (e) => {
-  e.preventDefault();
-  dropArea.classList.remove("drag-over-effect");
-  if (e.dataTransfer.items) {
-    [...e.dataTransfer.items].forEach((item) => {
-      if (item.kind === "file") {
-        const file = item.getAsFile();
-        if (typeValidation(file.type)) {
-          uploadFile(file);
-        }
-      }
-    });
-  } else {
-    [...e.dataTransfer.files].forEach((file) => {
-      if (typeValidation(file.type)) {
-        uploadFile(file);
-      }
-    });
-  }
-};
-
-// Array to store uploaded files
-let queuedFiles = [];
-
-// Upload file function
-function uploadFile(file) {
-  listSection.style.display = "block";
-  var li = document.createElement("li");
-  li.classList.add("in-prog");
-  li.innerHTML = `
-        <div class="col">
-            <img src="icons/${iconSelector(file.type)}" alt="">
-        </div>
-        <div class="col">
-            <div class="file-name">
-                <div class="name">${file.name}</div>
-                <span></span>
-            </div>
-            <div class="file-size">${(file.size / (1024 * 1024)).toFixed(
-              2
-            )} MB</div>
-        </div>
-        <div class="col">
-            <svg xmlns="http://www.w3.org/2000/svg" class="cross" height="20" width="20"><path d="m5.979 14.917-.854-.896 4-4.021-4-4.062.854-.896 4.042 4.062 4-4.062.854.896-4 4.062 4 4.021-.854.896-4-4.063Z"/></svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="tick" height="20" width="20"><path d="m8.229 14.438-3.896-3.917 1.438-1.438 2.458 2.459 6-6L15.667 7Z"/></svg>
-        </div>
-    `;
-  listContainer.prepend(li);
-
-  // Create FormData object and append necessary fields
-  var data = new FormData();
-  data.append("documents", file);
-  // Add file to queued files
-  queuedFiles.push({ file: file, formData: data, listItem: li });
-
-  // Set up remove handler
-  li.querySelector(".cross").onclick = () => {
-    // Remove file from queuedFiles array
-    const index = queuedFiles.findIndex((item) => item.file === file);
-    if (index !== -1) {
-      queuedFiles.splice(index, 1);
-    }
-    // Remove the list item from the DOM
-    li.remove();
-  };
-  console.log(queuedFiles);
-}
-
+ 
 // Submit button click handler
-document.querySelector("#submitBtn").addEventListener("click", (event) => {
+function SubmitForm() {
   const checkboxinputs = document.querySelectorAll(".checkboxinput");
     if (checkboxinputs){
       checkboxinputs.forEach((checkboxinput) => {
@@ -677,82 +635,12 @@ document.querySelector("#submitBtn").addEventListener("click", (event) => {
         const radios = checkboxdiv.querySelectorAll("input[type='radio']");
         radios.forEach((radio) => {
           if (radio.checked) {
-            checkboxdiv.querySelector("input[name='dynamicRule']").value = `${checkboxinput.value},${radio.value}`;
+            checkboxdiv.querySelector("input[name='subDynamicRule']").value = `${checkboxinput.value},${radio.value}`;
           }
         });
       });
     }
-    event.preventDefault(); // Prevent default form submission
-    const options = document.querySelectorAll('.option');
-    options.forEach(option => {
-        option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
-    });
-
-    var name = document.querySelector("#name").value;
-    var description = document.querySelector("#description").value;
-    var dynamicStages = document.querySelectorAll("[name=dynamicStage]");
-    var dynamicFields = document.querySelectorAll("[name=dynamicField]");
-    var dynamicRules = document.querySelectorAll("[name=dynamicRule]");
-        
-    
-
-    var allData = new FormData();
-    allData.append("name", name);
-    allData.append("description", description);
-    
-    queuedFiles.forEach((queuedFile) => {
-        allData.append("document", queuedFile.file);
-    });
-    dynamicStages.forEach((e)=>{
-      allData.append("dynamicStage",e.value);
-    })
-    dynamicFields.forEach((e)=>{
-      allData.append("dynamicField",e.value);
-    })
-    dynamicRules.forEach((e)=>{
-      allData.append("dynamicRule",e.value);
-    })
-
-    var http = new XMLHttpRequest();
-    http.onload = () => {
-        console.log("Files uploaded successfully");
-        queuedFiles = [];
-        document.querySelector(".list").innerHTML = "";
-        window.location.href=`/council-detail/{{funding_route.council.all.0.id}}`;
-    };
-    const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-
-    http.open("POST", `/edit_funding_route/{{ funding_route.id }}`, true);
-    http.setRequestHeader("X-CSRFToken", csrftoken);
-    http.send(allData);
-});
-
-
-// Helper function to get CSRF token from cookie
-function getCookie(name) {
-  var cookieValue = null;
-  if (document.cookie && document.cookie !== "") {
-    var cookies = document.cookie.split(";");
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === name + "=") {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
 }
-
-// find icon for file
-function iconSelector(type) {
-  var splitType =
-    type.split("/")[0] == "application"
-      ? type.split("/")[1]
-      : type.split("/")[0];
-  return splitType + ".png";
-}
-
 </script>
 
 {% endblock %}
