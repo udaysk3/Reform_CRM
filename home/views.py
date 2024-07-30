@@ -369,10 +369,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.text
                 ]
             )
-
     if customer.district:
         council= Councils.objects.get_or_create(name=customer.district)[0]
         council_routes = Route.objects.all().filter(council=council)
+        print(Route.objects.all().filter(council=council))
     else:
         council = None
         council_routes = None
@@ -431,9 +431,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     else:
                         product_rules[rule_key][rule_value].append(rule_additional_value)
 
-            # print(f"Product rules for product {product.id}:")
-            # print(product_rules)
-
             for stage, rules in product_rules.items():
                 if stage in values:
                     for field, rule in rules.items():
@@ -473,11 +470,70 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
             i += 1
 
-
         j = 0
         for route in routes:
             route_rules = {}
             for key, value in ast.literal_eval(route.rules_regulations).items():
+                rule_key = value[0].split(",")[0]
+                rule_value = value[1].split(",")[0]
+                rule_additional_value = value[2]
+
+                if rule_key not in route_rules:
+                    route_rules[rule_key] = {rule_value: [rule_additional_value]}
+                else:
+                    if rule_value not in route_rules[rule_key]:
+                        route_rules[rule_key][rule_value] = [rule_additional_value]
+                    else:
+                        route_rules[rule_key][rule_value].append(rule_additional_value)
+
+            # print(f"route rules for route {route.id}:")
+            # print(route_rules)
+
+            for stage, rules in route_rules.items():
+                if stage in values:
+                    for field, rule in rules.items():
+                        for key, value in values[stage].items():
+                            if "," in key:
+                                key = key.split(",")[0]
+                            if field == key:
+                                # print(f"Checking rule for {field}: {rule} against value: {value}")
+                                if value[0] in ["time", "date", "number", "month"]:
+                                    if value[0] == "date":
+                                        if check_date(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                    elif value[0] == "time":
+                                        if check_time(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                    elif value[0] == "number":
+                                        if check_number(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                    elif value[0] == "month":
+                                        if check_month(value[1], rule):
+                                            pass
+                                        else:
+                                            true_routes[j] = False
+                                else:
+                                    if value[1] in rule or value[1] == "":
+                                        pass
+                                    else:
+                                        true_routes[j] = False
+                                # print("True routes result:")
+                                print("route",true_routes)
+
+            j += 1
+
+        j = 0
+        for route in routes:
+            route_rules = {}
+            if route.sub_rules_regulations == None:
+                continue
+            for key, value in ast.literal_eval(route.sub_rules_regulations).items():
                 rule_key = value[0].split(",")[0]
                 rule_value = value[1].split(',')[0]
                 rule_additional_value = value[2]
@@ -531,7 +587,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                                 print(true_routes)
 
             j += 1
-
 
         return render(
                 request,
@@ -728,7 +783,7 @@ def client_detail(request, client_id, s_client_id=None):
     all_products = Product.objects.all()
     products = Product.objects.all().filter(client=client).filter(archive=False)
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
-    all_routes = Route.objects.all()
+    all_routes = Route.objects.all().filter(parent_route=True)
     routes = Route.objects.all().filter(client=client).filter(archive=False)
     unroutes = Route.objects.all().filter(client=client).filter(archive=True)
     child_clients = Clients.objects.all().filter(parent_client=client)
@@ -2132,7 +2187,7 @@ def edit_funding_route(request, funding_route_id):
     councils = funding_route.council.all()
     if councils.exists():
         council_id = councils.first().id
-    stages = Stage.objects.all().filter(route=funding_route)
+    stages = Stage.objects.all()
     fields = {}
     saved_rules_regulations = json.loads(funding_route.rules_regulations)
     if stages[0]:
@@ -2156,6 +2211,7 @@ def edit_funding_route(request, funding_route_id):
             doc = Document.objects.create(document=document)
             funding_route.documents.add(doc)
         funding_route.save()
+        print(funding_route.child_route.all())
         for child_route in funding_route.child_route.all():
             child_route.rules_regulations = json.dumps(rules_regulations)
             child_route.name = request.POST.get("name")
@@ -2348,8 +2404,10 @@ def add_route_client(request, client_id):
             rules_regulations=main_route.rules_regulations,
         )
         client.route.add(funding_route)
+        for council in main_route.council.all():
+            funding_route.council.add(council)
         funding_route.save()
-        main_route.child_route = funding_route
+        main_route.child_route.add(funding_route)
         main_route.save()
         client.save()
         messages.success(request, "Funding Route added successfully to a Client!")

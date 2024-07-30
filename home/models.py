@@ -135,9 +135,7 @@ class Route(models.Model):
     rules_regulations = models.JSONField(blank=True, null=True)
     sub_rules_regulations = models.JSONField(blank=True, null=True)
     parent_route = models.BooleanField(blank=True, null=True)
-    child_route = models.ForeignKey(
-        "self", blank=True, null=True, related_name="+", on_delete=models.CASCADE
-    )
+    child_route = models.ManyToManyField("self", related_name="+")
 
 
 class Document(models.Model):
