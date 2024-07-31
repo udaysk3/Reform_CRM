@@ -218,16 +218,10 @@
     <div class="card-body p-3 m-0">
       <div class="row">
         <h1 class="col ">Add Stages</h1>
-        <a class="btn btn-primary col-2" style="width: fit-content; height: fit-content;" href="{% url 'app:make_template_stage' stage.id %}">
-          {% if stage.templateable %}
-          Remove Template
-          {% else %}
-          Make Template
-          {% endif %}
-        </a>
+        
         </div>
         <!-- Button trigger modal -->
-        <button type="button" style="width: fit-content; height: fit-content;" class="col-3 btn btn-primary me-4" data-bs-toggle="modal" data-bs-target="#template">
+        <button type="button" style="width: fit-content; height: fit-content; right: 0px; top:20px;" class="col-3 btn btn-primary me-4 position-absolute" data-bs-toggle="modal" data-bs-target="#template">
           Template
         </button>
 

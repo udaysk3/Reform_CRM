@@ -2148,7 +2148,7 @@ def edit_product(request, product_id):
     stages = Stage.objects.all().filter(client=Clients.objects.get(client_id))
     fields = {}
     saved_rules_regulations = json.loads(product.rules_regulations)
-    if stages[0]:
+    if stages.exists():
         for stage in stages:
             fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
@@ -2186,7 +2186,7 @@ def edit_funding_route(request, funding_route_id):
     saved_rules_regulations = {}
     if funding_route.rules_regulations:
         saved_rules_regulations = json.loads(funding_route.rules_regulations)
-    if stages[0]:
+    if stages.exists():
         for stage in stages:
             fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
@@ -2228,7 +2228,7 @@ def add_product(request, client_id):
     fields = {}
     client = Clients.objects.get(pk=client_id)
     stages = Stage.objects.all().filter(client=client)
-    if stages[0]:
+    if stages.exists():
         for stage in stages:
             fields[stage.name] =  json.loads(stage.fields)
     if request.method == "POST":
@@ -3213,7 +3213,9 @@ def edit_local_funding_route(request, funding_route_id):
         client_id = clients.first().id
     stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
     fields = {}
-    saved_rules_regulations = json.loads(funding_route.rules_regulations)
+    saved_rules_regulations = {}
+    if funding_route.rules_regulations:
+        saved_rules_regulations = json.loads(funding_route.rules_regulations)
     if stages.exists():
         for stage in stages:
             fields[stage.name] = json.loads(stage.fields)
@@ -3221,7 +3223,7 @@ def edit_local_funding_route(request, funding_route_id):
         sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
     else:
         sub_rules_regulations = None
-    if stages[0]:
+    if stages.exists():
         for stage in stages:
             fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
