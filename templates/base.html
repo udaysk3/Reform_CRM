@@ -126,6 +126,16 @@
               </a>
             </li>
             {% endif %}
+            {% if request.user.funding_route %}
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-file-description"></i>
+                </span>
+                <span class="hide-menu">Funding Route</span>
+              </a>
+            </li>
+            {% endif %}
             {% comment %} </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">

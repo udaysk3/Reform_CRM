@@ -51,43 +51,39 @@
             <div class="col-sm-6">
               <div class="card m-0">
                 <div class="card-body">
-                  <div class="d-grid gap-2 d-md-block">
-                    <!-- Button trigger modal -->
-                    <a href="/add_funding_route/{{ council.id }}" class="btn btn-primary position-relative mb-3" style="right:-70%">
-                      <i class="bi bi-plus-lg"></i> Funding Route
-                    </a>
-
-                    {% comment %} <!-- Modal -->
-                    <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false"
-                      tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <button type="button" class="btn btn-primary position-relative" style="left:330px" data-bs-toggle="modal" data-bs-target="#fundingManagement">
+                      Add Funding Route
+                    </button>
+                    <div class="modal fade" id="fundingManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Select Funding Route</h1>
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Funding Route</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
-                          <form method='post' action="/add_council_funding_route/{{ council.id }}">
-                            {% csrf_token %}
-                            <div class="modal-body">
-                              <select class="form-select" aria-label="Default select example" name="route">
-                                {% for route in routes %}
-                                <option value="{{ route.id }}">{{ route.name }}</option>
-                                {% endfor %}
-                              </select>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                              <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
+                          <div class="modal-body">
+                            <form action="/add_funding_route/{{ council.id }}" method="post">
+                              {% csrf_token %}
+                            <label for="product" class="form-label">Funding Route</label>
+                            <select class="form-select client_input" id="product" name="route" aria-label="Default select example">
+                              <option value="nan">Select the route</option>
+                              {% for product in all_routes %}
+                                <option value="{{product.id}}">{{product.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                          </div>
                           </form>
                         </div>
                       </div>
-                    </div> {% endcomment %}
-                  </div>
+                    </div>
                   <div class="card p-0 m-0">
                     <div class="card-body p-3 m-0" style="height: 390px; overflow-y: auto">
 
-                      {% for route in c_routes %}
+                      {% for route in routes %}
 
                        <div class="col-sm-4 mt-3" style="width: 100%">
                         <div class="card m-0 ">

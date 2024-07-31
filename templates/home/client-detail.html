@@ -1258,36 +1258,7 @@ table {
                      <a href="/stages/{{ client.id }}?page=add_stage" class="btn btn-primary position-absolute" style="right:10px">
                       Add Stage
                     </a>
-                    {% comment %} <div class="modal fade" id="stagemanagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Funding Route</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            <form action="{% url 'app:add_route_client' client.id %}" method="post">
-                              {% csrf_token %}
-                            <label for="product" class="form-label">Funding Route</label>
-                            <select class="form-select client_input" id="product" name="route" aria-label="Default select example">
-                              <option value="nan">Select the route</option>
-                              {% for product in all_routes %}
-                                <option value="{{product.id}}">{{product.name}}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                          </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div> {% endcomment %}
-
                     
-
-        
 <div class="mt-5 row">
                      <div >
     {% if stages %}

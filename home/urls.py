@@ -250,4 +250,14 @@ urlpatterns = [
         views.edit_local_funding_route,
         name="edit_local_funding_route",
     ),
+    path(
+        "add_new_funding_route",
+        views.add_new_funding_route,
+        name="add_new_funding_route",
+    ),
+    path(
+        "make_template_stage/<int:stage_id>",
+        views.make_template_stage,
+        name="make_template_stage",
+    ),
 ]
