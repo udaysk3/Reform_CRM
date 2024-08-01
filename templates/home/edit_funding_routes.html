@@ -242,9 +242,34 @@
             >
               {% csrf_token %}
               
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  required
+                  value="{{ funding_route.name }}"
+                  disabled
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  required
+                  value="{{ funding_route.description }}"
+                  disabled
+                />
+              </div>
 
               <div class="mb-5">
-            <label for="formFile" class="form-label">Stage Documentation</label>
+            <label for="formFile" class="form-label">Funding Route Documentation</label>
             <div class="container">
               <div class="header-section">
                   <h1>Upload Files</h1>

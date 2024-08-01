@@ -528,6 +528,8 @@ function uploadFile(file) {
 
 // Submit button click handler
 document.querySelector("#submitBtn").addEventListener("click", (event) => {
+  document.querySelector("#submitBtn").disabled = true;
+  document.querySelector("#submitBtn").innerHTML = "Loading...";
     event.preventDefault(); // Prevent default form submission
     const options = document.querySelectorAll('.option');
     options.forEach(option => {

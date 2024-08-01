@@ -58,4 +58,13 @@
   </div>
 </div>
 
+<script>
+  submitBtn = document.getElementById("submitBtn");
+  submitBtn.addEventListener("click", function () {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "Loading...";
+    document.getElementById("addClientForm").submit();
+  });
+</script>
+
 {% endblock content %}

@@ -562,6 +562,8 @@ function uploadFile(file) {
 
 // Submit button click handler
 document.querySelector("#submitBtn").addEventListener("click", (event) => {
+  document.querySelector("#submitBtn").innerHTML = "Loading...";
+  document.querySelector("#submitBtn").disabled = true;
   const checkboxinputs = document.querySelectorAll(".checkboxinput");
     if (checkboxinputs){
       checkboxinputs.forEach((checkboxinput) => {
