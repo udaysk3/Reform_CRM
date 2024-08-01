@@ -241,30 +241,7 @@
               action="{% url 'app:edit_funding_route' funding_route.id %} "
             >
               {% csrf_token %}
-
-              <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="name"
-                  name="name"
-                  value="{{ funding_route.name }}"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="description"
-                  name="description"
-                  value="{{ funding_route.description }}"
-                  required
-                />
-              </div>
+              
 
               <div class="mb-5">
             <label for="formFile" class="form-label">Stage Documentation</label>
@@ -292,6 +269,11 @@
                   <div class="list-title">Uploaded Files</div>
                   <div class="list"></div>
               </div>
+              {% for link in funding_route.documents.all %}
+                <div class="row">
+                  <b><a href="{{ link.document.url }}" target="_blank">Document {{ forloop.counter }} </a></b>
+                </div>
+              {% endfor %}
           </div>
 
               <div class="mb-3" style="margin-top: 50px;">
@@ -688,8 +670,6 @@ document.querySelector("#submitBtn").addEventListener("click", (event) => {
         option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
     });
 
-    var name = document.querySelector("#name").value;
-    var description = document.querySelector("#description").value;
     var dynamicStages = document.querySelectorAll("[name=dynamicStage]");
     var dynamicFields = document.querySelectorAll("[name=dynamicField]");
     var dynamicRules = document.querySelectorAll("[name=dynamicRule]");
@@ -697,8 +677,6 @@ document.querySelector("#submitBtn").addEventListener("click", (event) => {
     
 
     var allData = new FormData();
-    allData.append("name", name);
-    allData.append("description", description);
     
     queuedFiles.forEach((queuedFile) => {
         allData.append("document", queuedFile.file);

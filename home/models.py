@@ -94,7 +94,36 @@ class Clients(models.Model):
 
     def __str__(self):
         return f"{self.company_name}"
+    
+class Route(models.Model):
+    name = models.CharField(max_length=999, blank= True, null=True)
+    managed_by = models.CharField(max_length=999, blank= True, null=True)
+    main_contact = models.CharField(max_length=999, blank= True, null=True)
+    telephone = models.CharField(max_length=15, blank= True, null=True)
+    email = models.EmailField(max_length=255)
+    council = models.ManyToManyField('home.Councils',related_name='routes', )
+    description = models.CharField(max_length=999, blank= True, null=True)
+    documents = models.ManyToManyField('home.Document',related_name='route', )
+    archive = models.BooleanField(default=False)
+    rules_regulations = models.JSONField(blank=True, null=True)
+    sub_rules_regulations = models.JSONField(blank=True, null=True)
+    council_route = models.ManyToManyField("self", related_name="+")
+    client_route = models.ManyToManyField("self", related_name="+")
+    parent_route = models.BooleanField(blank=True, null=True)
+    main_route = models.BooleanField(blank=True, null=True)
 
+
+class Document(models.Model):
+    document = models.FileField(upload_to="documents", blank= True, null=True)
+
+
+class Councils(models.Model):
+    name = models.CharField(max_length=999, unique=True)
+    created_at = models.DateTimeField(blank= True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    
+    def __str__(self):
+        return f"{self.name}"
 
 class Campaign(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
@@ -122,33 +151,7 @@ class Product(models.Model):
         return f"{self.name}"
 
 
-class Route(models.Model):
-    name = models.CharField(max_length=999, blank= True, null=True)
-    managed_by = models.CharField(max_length=999, blank= True, null=True)
-    main_contact = models.CharField(max_length=999, blank= True, null=True)
-    telephone = models.CharField(max_length=15, blank= True, null=True)
-    email = models.EmailField(max_length=255)
-    council = models.ManyToManyField('home.Councils',related_name='routes', )
-    description = models.CharField(max_length=999, blank= True, null=True)
-    documents = models.ManyToManyField('home.Document',related_name='route', )
-    archive = models.BooleanField(default=False)
-    rules_regulations = models.JSONField(blank=True, null=True)
-    sub_rules_regulations = models.JSONField(blank=True, null=True)
-    parent_route = models.BooleanField(blank=True, null=True)
-    child_route = models.ManyToManyField("self", related_name="+")
 
-
-class Document(models.Model):
-    document = models.FileField(upload_to="documents", blank= True, null=True)
-
-
-class Councils(models.Model):
-    name = models.CharField(max_length=999, unique=True)
-    created_at = models.DateTimeField(blank= True, null=True)
-    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    
-    def __str__(self):
-        return f"{self.name}"
 
 
 class Cities(models.Model):

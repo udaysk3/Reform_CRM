@@ -1197,7 +1197,7 @@ table {
                             <select class="form-select client_input" id="product" name="route" aria-label="Default select example">
                               <option value="nan">Select the route</option>
                               {% for product in all_routes %}
-                                <option value="{{product.id}}">{{product.name}}</option>
+                                <option value="{{product.id}}">{{product.name}} - {{ product.council.all.0 }}</option>
                               {% endfor %}
                             </select>
                           </div>

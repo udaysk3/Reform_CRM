@@ -260,4 +260,10 @@ urlpatterns = [
         views.make_template_stage,
         name="make_template_stage",
     ),
+    path(
+        "edit_new_funding_route/<int:route_id>",
+        views.edit_new_funding_route,
+        name="edit_new_funding_route",
+    ),
+    path("remove_doc/<int:doc_id>", views.remove_doc, name="remove_doc"),
 ]

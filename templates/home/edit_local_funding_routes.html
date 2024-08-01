@@ -244,30 +244,6 @@
               {% csrf_token %}
 
               <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="name"
-                  name="name"
-                  value="{{ funding_route.name }}"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="description"
-                  name="description"
-                  value="{{ funding_route.description }}"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
                 <label for="rules_regulations" class="form-label"
                   >Global Rules & Regulations</label
                 >

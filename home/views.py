@@ -767,7 +767,7 @@ def client_detail(request, client_id, s_client_id=None):
     all_products = Product.objects.all()
     products = Product.objects.all().filter(client=client).filter(archive=False)
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
-    all_routes = Route.objects.all().filter(parent_route=True)
+    all_routes = Route.objects.all().filter(main_route=True)
     routes = Route.objects.all().filter(client=client).filter(archive=False)
     unroutes = Route.objects.all().filter(client=client).filter(archive=True)
     child_clients = Clients.objects.all().filter(parent_client=client)
@@ -905,7 +905,7 @@ def client_detail(request, client_id, s_client_id=None):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council).filter(parent_route=True)
+    routes = Route.objects.all().filter(council=council).filter(main_route=True)
     all_routes = Route.objects.all().filter(parent_route=True)
     prev = None
     next = None
@@ -2144,6 +2144,22 @@ def add_new_funding_route(request):
         return redirect("app:funding_route")
     return render(request, "home/add_new_funding_routes.html")
 
+@login_required
+def edit_new_funding_route(request,route_id):
+    route = Route.objects.get(pk=route_id)
+    if request.method == "POST":
+        route.name = request.POST.get("name")
+        route.description = request.POST.get("description")
+        route.save()
+        print(route.council_route.all())
+        for council_route in route.council_route.all():
+            council_route.name=route.name
+            council_route.description=route.description
+            council_route.save()
+        messages.success(request, "Funding Route created successfully!")
+        return redirect("app:funding_route")
+    return render(request, "home/edit_new_funding_routes.html",{"route":route})
+
 
 @login_required
 def edit_product(request, product_id):
@@ -2196,8 +2212,6 @@ def edit_funding_route(request, funding_route_id):
         for stage in stages:
             fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
-        funding_route.name = request.POST.get("name")
-        funding_route.description = request.POST.get("description")
         dynamicStages = request.POST.getlist("dynamicStage")
         dynamicFields = request.POST.getlist("dynamicField")
         dynamicRules = request.POST.getlist("dynamicRule")
@@ -2213,11 +2227,8 @@ def edit_funding_route(request, funding_route_id):
             doc = Document.objects.create(document=document)
             funding_route.documents.add(doc)
         funding_route.save()
-        print(funding_route.child_route.all())
-        for child_route in funding_route.child_route.all():
+        for child_route in funding_route.client_route.all():
             child_route.rules_regulations = json.dumps(rules_regulations)
-            child_route.name = request.POST.get("name")
-            child_route.description = request.POST.get("description")
             for document in documents:
                 doc = Document.objects.create(document=document)
                 child_route.documents.add(doc)
@@ -2278,7 +2289,14 @@ def add_funding_route(request, council_id):
             messages.error(request, "Route should be selected")
             return redirect(f"/council-detail/{council_id}")
         route = Route.objects.get(pk=request.POST.get("route"))
-        route.council.add(council)
+        council_route = Route.objects.create(
+            name=route.name,
+            description=route.description,
+            main_route=True,
+        )
+        council_route.council.add(council)
+        route.council_route.add(council_route)
+        council_route.save()
         route.save()
         messages.success(request, "Funding Route added successfully!")
         return redirect('/council-detail/'+str(council_id))
@@ -2379,7 +2397,7 @@ def add_route_client(request, client_id):
         for council in main_route.council.all():
             funding_route.council.add(council)
         funding_route.save()
-        main_route.child_route.add(funding_route)
+        main_route.client_route.add(funding_route)
         main_route.save()
         client.save()
         messages.success(request, "Funding Route added successfully to a Client!")
@@ -3236,8 +3254,6 @@ def edit_local_funding_route(request, funding_route_id):
         for stage in stages:
             fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
-        funding_route.name = request.POST.get("name")
-        funding_route.description = request.POST.get("description")
         dynamicStages = request.POST.getlist("subDynamicStage")
         dynamicFields = request.POST.getlist("subDynamicField")
         dynamicRules = request.POST.getlist("subDynamicRule")
@@ -3247,7 +3263,6 @@ def edit_local_funding_route(request, funding_route_id):
         for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
             rules_regulations[f"{i}"] = [d_stage, d_field, d_rule]
             i += 1
-        print(dynamicStages,dynamicFields,dynamicRules)
         funding_route.sub_rules_regulations = json.dumps(rules_regulations)
         funding_route.save()
         messages.success(request, "Funding Route updated successfully!")
@@ -3272,3 +3287,6 @@ def make_template_stage(request,stage_id):
     else:
         messages.success(request, "Stage is not a template!")
     return redirect(f"/client-detail/{stage.client.id}")
+
+def remove_doc(request,doc_id):
+    pass
