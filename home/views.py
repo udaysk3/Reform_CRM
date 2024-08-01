@@ -1212,6 +1212,16 @@ def add_customer(request):
         client = request.POST.get("client")
         agent = User.objects.get(email=request.user)
 
+        if (
+            campaign == "nan"
+            or city == "nan"
+            or county == "nan"
+            or country == "nan"
+            or client == "nan"
+        ):
+            messages.error(request, "Select all dropdown fields")
+            return redirect("/customer?page=add_customer")
+
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
             phone_number = "+44" + phone_number
@@ -1256,10 +1266,6 @@ def add_customer(request):
             request.session["campaign"] = (campaign,)
             request.session["client"] = (client,)
 
-            return redirect("/customer?page=add_customer")
-
-        if campaign == "nan" or city == "nan" or county == "nan" or country == "nan" or client == "nan":
-            messages.error(request, "Select all dropdown fields")
             return redirect("/customer?page=add_customer")
 
         postcode = re.sub(r'\s+', ' ', postcode)
@@ -2145,7 +2151,7 @@ def edit_product(request, product_id):
     clients = product.client.all()
     if clients.exists():
         client_id = clients.first().id
-    stages = Stage.objects.all().filter(client=Clients.objects.get(client_id))
+    stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
     fields = {}
     saved_rules_regulations = json.loads(product.rules_regulations)
     if stages.exists():
@@ -2268,6 +2274,9 @@ def add_product(request, client_id):
 def add_funding_route(request, council_id):
     council = Councils.objects.get(pk=council_id)
     if request.method == "POST":
+        if request.POST.get("route") == "nan":
+            messages.error(request, "Route should be selected")
+            return redirect(f"/council-detail/{council_id}")
         route = Route.objects.get(pk=request.POST.get("route"))
         route.council.add(council)
         route.save()

@@ -726,7 +726,6 @@ document.querySelector("#submitBtn").addEventListener("click", (event) => {
     var order = document.querySelector("#order").value;
     var dynamic_types = document.querySelectorAll("[name=dynamic_type]");
     var dynamic_labels = document.querySelectorAll("[name=dynamic_label]");
-    var templateable = document.querySelector("[name=templateable]").value;
     
 
     var allData = new FormData();
@@ -743,8 +742,6 @@ document.querySelector("#submitBtn").addEventListener("click", (event) => {
     dynamic_types.forEach((e)=>{
       allData.append("dynamic_type",e.value);
     })
-    console.log(templateable)
-    allData.append("templateable",templateable)
     
     {% if request.GET.page == "edit_page" %}
     allData.append("client_id","{{ stage.client.id }}")
