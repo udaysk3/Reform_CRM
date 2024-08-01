@@ -291,6 +291,11 @@
                   <div class="list-title">Uploaded Files</div>
                   <div class="list"></div>
               </div>
+              {% for link in product.documents.all %}
+                <div class="row">
+                  <b><a href="{{ link.document.url }}" target="_blank">Document {{ forloop.counter }} </a></b>
+                </div>
+              {% endfor %}
           </div>
 
               <div class="mb-3" style="margin-top: 50px;">
