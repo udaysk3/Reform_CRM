@@ -24,6 +24,8 @@ from .models import (
     Signature,
     Product,
     CoverageAreas,
+    Questions,
+    QAction,
     Stage,
 )
 import re
@@ -2131,8 +2133,14 @@ def product(request):
 
 @login_required
 def funding_route(request):
+    products = Product.objects.all()
+    if request.GET.get("page") == "edit":
+        route_id = request.GET.get("route_id")
+        route = Route.objects.get(pk=route_id)
+        
+        return render(request, "home/funding_routes.html", {"route": route,"products": products})
     funding_routes = Route.objects.all().filter(parent_route=True)
-    return render(request, "home/funding_routes.html", {"funding_routes": funding_routes})
+    return render(request, "home/funding_routes.html", {"funding_routes": funding_routes, "products": products})
 
 @login_required
 def add_new_funding_route(request):
@@ -3290,3 +3298,183 @@ def make_template_stage(request,stage_id):
 
 def remove_doc(request,doc_id):
     pass
+
+def questions(request):
+    questions = Questions.objects.all()
+    actions = QAction.objects.all()
+    return render(request, 'home/question_actions.html', {'questions':questions,'actions':actions})
+
+def add_question(request):
+    if request.method == 'POST':
+        question = request.POST.get('question')
+        question_frequency = request.POST.get('question_frequency')
+        type = request.POST.get('type')
+        new_question = Questions.objects.create(
+            question=question,
+            type=type,
+            answer_frequency=question_frequency,
+        )
+    messages.success(request, "Question is created successfully!")
+    return redirect("/questions")
+
+
+def add_action(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        type = request.POST.get('type')
+        new_action = QAction.objects.create(
+            action=action,
+            script=type,
+        )
+    messages.success(request, "Action is created successfully!")
+    return redirect("/questions")
+
+def edit_question(request, question_id):
+    if request.method == 'POST':
+        qquestion = Questions.objects.get(pk=question_id)
+        question = request.POST.get('question')
+        question_frequency = request.POST.get('question_frequency')
+        type = request.POST.get('type')
+        question_frequency=int(question_frequency)
+        qquestion.question=question
+        qquestion.type=type
+        qquestion.answer_frequency=question_frequency
+        qquestion.save()
+    messages.success(request, "Question is edited successfully!")
+    return redirect("/questions")
+
+
+def edit_action(request, action_id):
+    if request.method == "POST":
+        qaction = QAction.objects.get(pk=action_id)
+        action = request.POST.get("action")
+        script = request.POST.get("script")
+        qaction.action = action
+        qaction.script = script
+        qaction.save()
+    messages.success(request, "Action is edited successfully!")
+    return redirect("/questions")
+
+
+def delete_question(request, question_id):
+    qquestion = Questions.objects.get(pk=question_id)
+    qquestion.delete()
+    messages.success(request, "Question is deleted successfully!")
+    return redirect("/questions")
+
+def delete_action(request, action_id):
+    qaction = QAction.objects.get(pk=action_id)
+    qaction.delete()
+    messages.success(request, "Action is deleted successfully!")
+    return redirect("/questions")
+
+def add_new_product(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        product = Product.objects.create(
+            name=name,
+            description=description,
+        )
+        messages.success(request, "Product added successfully!")
+        return redirect("app:product")
+    return render(request, 'home/add_new_product.html')
+
+def edit_new_product(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        product.name = name
+        product.description = description
+        product.save()
+        messages.success(request, "Product updated successfully!")
+        return redirect("app:product")
+    return render(request, 'home/edit_new_product.html', {'product':product})
+
+
+def delete_product(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    product.delete()
+    messages.success(request, "Product deleted successfully!")
+    return redirect("app:product")
+
+
+def delete_route(request, route_id):
+    route = Route.objects.get(pk=route_id)
+    route.delete()
+    messages.success(request, "Route deleted successfully!")
+    return redirect("app:funding_route")
+
+def edit_route(request, route_id):
+    route = Route.objects.get(pk=route_id)
+    products = Product.objects.all()
+    if request.method == "POST":
+        route.name = request.POST.get("name")
+        route.description = request.POST.get("description")
+        for product in products:
+            if product.name in request.POST:
+                route.product.add(product)
+            else:
+                if route.product.filter(name=product.name).exists():
+                    route.product.remove(product)
+        route.save()
+        messages.success(request, "Route updated successfully!")
+        return redirect("app:funding_route")
+    return redirect("app:funding_route")
+
+def customer_journey(request):
+    routes = Route.objects.all()
+    stages = Stage.objects.all()
+    return render(request, "home/customer_journey.html", {"funding_routes": routes, "stages":stages})
+
+def add_stage(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        stage = Stage.objects.create(
+            name=name,
+            description=description,
+        )
+        messages.success(request, "Stage added successfully!")
+        return redirect("app:customer_journey")
+    return render(request, "home/add_stage.html")
+
+def cj_route(request,route_id):
+    route = Route.objects.get(pk=route_id)
+    return render(request, 'home/cj_route.html', {'route':route})
+
+def cj_product(request ,route_id ,product_id):
+    product = Product.objects.get(pk=product_id)
+    stages = Stage.objects.all()
+    if request.method == 'POST':
+        stage = Stage.objects.get(pk=request.POST.get('stage'))
+        product.stage.add(stage)
+        product.save()
+        messages.success(request, "Stage added to product successfully!")
+        return redirect(f"/cj_product/{route_id}/{product_id}")
+    return render(
+        request, "home/cj_product.html", {"product": product, "stages": stages}
+    )
+
+def cj_stage(request,route_id ,product_id ,stage_id):
+    stage = Stage.objects.get(pk=stage_id)
+    questions = Questions.objects.all()
+    if request.method == 'POST':
+        question = Questions.objects.get(pk=request.POST.get('question'))
+        stage.question.add(question)
+        stage.save()
+        messages.success(request, "Question added to stage successfully!")
+        return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
+    return render(request, 'home/cj_stage.html', {'stage':stage, 'questions':questions})
+
+
+def add_stage_rule(request, route_id, product_id, stage_id):
+    stage = Stage.objects.get(pk=stage_id)
+    if request.method == 'POST':
+        dynamicRules = request.POST.getlist('dynamicRule')
+
+        stage.rules_regulations = dynamicRules
+        stage.save()
+        messages.success(request, "Rules and Regulations added successfully!")
+        return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")

@@ -1,0 +1,67 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<div class="row container-fluid">
+  {% for message in messages %}
+  <div
+    class="alert {{ message.tags }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %}
+
+  <div class="container-fluid pt-4">
+    <div class="card p-0">
+      <div class="card-body p-3 m-0">
+        <h5 class="card-title">Customer Journey - {{ route.name }}</h5>
+        <div
+          class="d-sm-flex d-block align-items-center justify-content-between mb-9"
+        >
+          <div class="mb-3 mb-sm-0">
+            <a href="{% url 'app:funding_route' %}">
+              <h5
+                class="card-title fw-semibold text-primary text-decoration-underline"
+              >
+                Customer Journey Management
+              </h5></a
+            >
+          </div>
+          <div></div>
+        </div>
+        <div style="overflow-x: auto">
+          <table class="table" style="overflow-x: auto">
+            <thead>
+              <tr>
+                <th>Product</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if route.product.all %} {% for product in route.product.all %}
+              <tr>
+                <td>
+                  <a href="{% url 'app:cj_product' route.id product.id %}">
+                  {{ product.name }}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %} {% else %}
+              <tr
+                class="text-center display-flex align-items-center justify-content-center"
+              >
+                <td colspan="9" class="text-center">No Products</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

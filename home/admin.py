@@ -15,7 +15,9 @@ from .models import (
     Signature,
     Product,
     Postcode,
-    CoverageAreas
+    CoverageAreas,
+    Questions,
+    QAction,
 )
 
 admin.site.register(Action)
@@ -34,3 +36,5 @@ admin.site.register(Signature)
 admin.site.register(Product)
 admin.site.register(Postcode)
 admin.site.register(CoverageAreas)
+admin.site.register(Questions)
+admin.site.register(QAction)
