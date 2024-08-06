@@ -3441,8 +3441,7 @@ def edit_route(request, route_id):
             if product.name in request.POST:
                 route.product.add(product)
             else:
-                if route.product.filter(name=product.name).exists():
-                    route.product.remove(product)
+                route.product.remove(product)
         route.save()
         messages.success(request, "Route updated successfully!")
         return redirect("app:funding_route")
@@ -3465,11 +3464,12 @@ def add_stage(request):
         return redirect("app:customer_journey")
     return render(request, "home/add_stage.html")
 
-def cj_route(request,route_id):
+def cj_route(request, route_id):
     route = Route.objects.get(pk=route_id)
     return render(request, 'home/cj_route.html', {'route':route})
 
 def cj_product(request ,route_id ,product_id):
+    route = Route.objects.get(pk=route_id)
     product = Product.objects.get(pk=product_id)
     stages = Stage.objects.all()
     if request.method == 'POST':
@@ -3479,10 +3479,13 @@ def cj_product(request ,route_id ,product_id):
         messages.success(request, "Stage added to product successfully!")
         return redirect(f"/cj_product/{route_id}/{product_id}")
     return render(
-        request, "home/cj_product.html", {"product": product, "stages": stages}
+        request, "home/cj_product.html", {"product": product, "stages": stages, "route":route}
     )
 
-def cj_stage(request,route_id ,product_id ,stage_id):
+
+def cj_stage(request, route_id, product_id, stage_id):
+    route = Route.objects.get(pk=route_id)
+    product = Product.objects.get(pk=product_id)
     stage = Stage.objects.get(pk=stage_id)
     questions = Questions.objects.all()
     if request.method == 'POST':
@@ -3491,7 +3494,7 @@ def cj_stage(request,route_id ,product_id ,stage_id):
         stage.save()
         messages.success(request, "Question added to stage successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
-    return render(request, 'home/cj_stage.html', {'stage':stage, 'questions':questions})
+    return render(request, 'home/cj_stage.html', {'stage':stage, 'questions':questions, 'route':route, 'product':product})
 
 
 def add_stage_rule(request, route_id, product_id, stage_id):
@@ -3503,3 +3506,9 @@ def add_stage_rule(request, route_id, product_id, stage_id):
         stage.save()
         messages.success(request, "Rules and Regulations added successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
+
+def delete_stage(request, stage_id):
+    stage = Stage.objects.get(pk=stage_id)
+    stage.delete()
+    messages.success(request, "Stage deleted successfully!")
+    return redirect("app:customer_journey")
