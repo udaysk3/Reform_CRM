@@ -62,16 +62,6 @@
                   name="question"
                 />
               </div>
-              <div class="mb-3">
-                <label for="question_frequency" class="form-label">Question Frequecny</label>
-                <input
-                type="number"
-                class="form-control"
-                id="question_frequency"
-                placeholder="Question Frequency"
-                name="question_frequency"
-                />
-              </div>
               <input type="hidden" name="type">
               <div class="mb-3">
                 <select
@@ -172,17 +162,6 @@
                                   placeholder="Question"
                                   name="question"
                                   value="{{ product.question }}"
-                                />
-                              </div>
-                              <div class="mb-3">
-                                <label for="question_frequency" class="form-label">Question Frequecny</label>
-                                <input
-                                  type="number"
-                                  class="form-control"
-                                  id="question_frequency"
-                                  placeholder="Question Frequency"
-                                  name="question_frequency"
-                                  value="{{ product.answer_frequency }}"
                                 />
                               </div>
                               <input type="hidden" name="type" value="{{ product.type }}">
@@ -569,17 +548,18 @@
   forms.forEach((form) => {
     form.addEventListener("submit", () => {
       const options = form.querySelectorAll(".option");
-      options[0].parentElement.parentElement.children[2].value = 'dropdown';
+      console.log(options[0].parentElement.parentElement.children[1]);
+      options[0].parentElement.parentElement.children[1].value = 'dropdown';
       options.forEach((option) => {
 
-        option.parentElement.parentElement.children[2].value =
-        option.parentElement.parentElement.children[2].value +
+        option.parentElement.parentElement.children[1].value =
+        option.parentElement.parentElement.children[1].value +
         "," +
         option.parentElement.children[0].value;
-        console.log(option.parentElement.parentElement.children[2].value);
+        console.log(option.parentElement.parentElement.children[1].value);
       });
       if (options.length > 0) {
-        form.querySelector('select').disabled = true;
+        form.querySelector('select').remove()
       }
     });
   });

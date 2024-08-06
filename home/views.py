@@ -3317,12 +3317,10 @@ def questions(request):
 def add_question(request):
     if request.method == 'POST':
         question = request.POST.get('question')
-        question_frequency = request.POST.get('question_frequency')
         type = request.POST.get('type')
         new_question = Questions.objects.create(
             question=question,
             type=type,
-            answer_frequency=question_frequency,
         )
     messages.success(request, "Question is created successfully!")
     return redirect("/questions")
@@ -3343,12 +3341,9 @@ def edit_question(request, question_id):
     if request.method == 'POST':
         qquestion = Questions.objects.get(pk=question_id)
         question = request.POST.get('question')
-        question_frequency = request.POST.get('question_frequency')
         type = request.POST.get('type')
-        question_frequency=int(question_frequency)
         qquestion.question=question
         qquestion.type=type
-        qquestion.answer_frequency=question_frequency
         qquestion.save()
     messages.success(request, "Question is edited successfully!")
     return redirect("/questions")
@@ -3512,3 +3507,11 @@ def delete_stage(request, stage_id):
     stage.delete()
     messages.success(request, "Stage deleted successfully!")
     return redirect("app:customer_journey")
+
+def delete_cj_stage(request, route_id ,product_id, stage_id):
+    product = Product.objects.get(pk=product_id)
+    stage = Stage.objects.get(pk=stage_id)
+    product.stage.remove(stage)
+    product.save()
+    messages.success(request, "Stage deleted successfully!")
+    return redirect(f"/cj_product/{route_id}/{product_id}")

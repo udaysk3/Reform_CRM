@@ -311,4 +311,9 @@ urlpatterns = [
         views.delete_stage,
         name="delete_stage",
     ),
+    path(
+        "delete_cj_stage/<int:route_id>/<int:product_id>/<int:stage_id>",
+        views.delete_cj_stage,
+        name="delete_cj_stage",
+    ),
 ]

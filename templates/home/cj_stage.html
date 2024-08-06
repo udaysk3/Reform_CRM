@@ -69,90 +69,118 @@
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Action</th>
+                <th>Regulation</th>
               </tr>
             </thead>
             <tbody>
               {% if stage.question.all %} {% for question in stage.question.all %}
               <tr>
                 <td>{{ question.question }}</td>
-                {% if question.rules_regulations %}
-                  <td>{{ question.rules_regulations }}</td>
+                {% if question.stage.all.0.rules_regulations %}
+                  <td>
+                    {% with b=question.stage.all.0.rules_regulations %}
+                            {% with field=question.type|firstsplit:',' %}
+                              {% if field.1 %}
+                              {% with options=field.1|split:',' %}
+                                {{ b.0 }}
+                              {% endwith %}
+                              {% else %}
+                                {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                  {{ b.0 }}
+                                {% elif field.0 == "checkbox" %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> 
+                                  </div>
+                                {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                                {% with options=b.0|split:',' %}
+                                {% if options.1 == 'Less Than' %} < {% endif %}  
+                                  {% if options.1 == 'Greater Than' %} > {% endif %} 
+                                   {% if options.1 == 'Equal' %} = {% endif %} 
+                                  {{ options.0 }}
+                                {% endwith %}
+                                {% endif %}
+                              {% endif %}
+                          {% endwith %}
+                          {% endwith %}
+                  </td>
+                  <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRegulation{{ forloop.counter }}">
+                      Edit Regulation
+                    </button></td>
                 {% else %}
                   <td>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRegulation{{ forloop.counter }}">
                       Add Regulation
                     </button>
                   
-                    <div class="modal fade" id="addRegulation{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <form action="{% url 'app:add_stage_rule' route.id product.id stage.id %}" method="post">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Regulation</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            {% csrf_token %}
-
-                            <div class="mb-3">
-
-                              {% with b=question.stage.all.0.rules_regulations %}
-                              {% with field=question.type|firstsplit:',' %}
-                                {% if field.1 %}
-                                {% with options=field.1|split:',' %}
-                                  <div class="col-6 rules mt-3 ms-3">
-                                    <select class="form-select" id="name" name="dynamicRule">
-                                      <option value="nan"> Select a Rule </option>
-                                      {% for option in options %}
-                                        <option value="{{ option }}" {% if b == option %} selected {% endif %}> {{ option }} </option>
-                                      
-                                      {% endfor %}
-                                    </select>
-                                  </div>
-                                {% endwith %}
-                                {% else %}
-                                  {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
-                                    <div class="col-6 rules mt-3 ms-3">
-                                      <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
-                                    </div>
-                                  {% elif field.0 == "checkbox" %}
-                                    <div class="col-6 rules mt-3 ms-3">
-                                      <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
-                                    </div>
-                                  {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
-                                  {% with options=b.0|split:',' %}
-                                  <div class="col-6 rules mt-3 ms-3">
-                                    <div class="form-check">
-                                      <input {% if options.1 == 'Less Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Less" class="form-check-input " placeholder="Enter The Value" value="Less Than"> <label for="{{ forloop.counter }}Less">Less Than</label>
-                                    </div>
-                                    <div class="form-check">
-                                      <input {% if options.1 == 'Greater Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Greater" class="form-check-input " placeholder="Enter The Value" value="Greater Than"> <label for="{{ forloop.counter }}Greater">Greater Than</label>
-                                    </div>
-                                    <div class="form-check">
-                                      <input {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
-                                    </div>
-                                    <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
-                                    <input name="dynamicRule" type="hidden">
-                                  </div>
-                                  {% endwith %}
-                                  {% endif %}
-                                {% endif %}
-                            {% endwith %}
-                            {% endwith %}
-                            </div>
-                            
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button class="btn btn-primary">Submit</button>
-                          </div>
-                          </form>
+                  </td>
+                  {% endif %}
+                  <div class="modal fade" id="addRegulation{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form action="{% url 'app:add_stage_rule' route.id product.id stage.id %}" method="post">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Regulation</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                        <div class="modal-body">
+                          {% csrf_token %}
+
+                          <div class="mb-3">
+
+                            {% with b=question.stage.all.0.rules_regulations %}
+                            {% with field=question.type|firstsplit:',' %}
+                              {% if field.1 %}
+                              {% with options=field.1|split:',' %}
+                                <div class="col-6 rules mt-3 ms-3">
+                                  <select class="form-select" id="name" name="dynamicRule">
+                                    <option value="nan"> Select a Rule </option>
+                                    {% for option in options %}
+                                      <option value="{{ option }}" {% if b == option %} selected {% endif %}> {{ option }} </option>
+                                    
+                                    {% endfor %}
+                                  </select>
+                                </div>
+                              {% endwith %}
+                              {% else %}
+                                {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                                  </div>
+                                {% elif field.0 == "checkbox" %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                  </div>
+                                {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                                {% with options=b.0|split:',' %}
+                                <div class="col-6 rules mt-3 ms-3">
+                                  <div class="form-check">
+                                    <input {% if options.1 == 'Less Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Less" class="form-check-input " placeholder="Enter The Value" value="Less Than"> <label for="{{ forloop.counter }}Less">Less Than</label>
+                                  </div>
+                                  <div class="form-check">
+                                    <input {% if options.1 == 'Greater Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Greater" class="form-check-input " placeholder="Enter The Value" value="Greater Than"> <label for="{{ forloop.counter }}Greater">Greater Than</label>
+                                  </div>
+                                  <div class="form-check">
+                                    <input {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
+                                  </div>
+                                  <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
+                                  <input name="dynamicRule" type="hidden">
+                                </div>
+                                {% endwith %}
+                                {% endif %}
+                              {% endif %}
+                          {% endwith %}
+                          {% endwith %}
+                          </div>
+                          
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button class="btn btn-primary">Submit</button>
+                        </div>
+                        </form>
                       </div>
                     </div>
-                  </td>
-                {% endif %}
+                  </div>
               </tr>
               {% endfor %} {% else %}
               <tr
