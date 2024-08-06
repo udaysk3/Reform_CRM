@@ -306,4 +306,9 @@ urlpatterns = [
         views.add_stage_rule,
         name="add_stage_rule",
     ),
+    path(
+        "delete_stage/<int:stage_id>",
+        views.delete_stage,
+        name="delete_stage",
+    ),
 ]
