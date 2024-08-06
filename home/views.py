@@ -3402,6 +3402,11 @@ def edit_new_product(request, product_id):
         description = request.POST.get('description')
         product.name = name
         product.description = description
+        documents = request.FILES.getlist('document')
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            product.documents.add(doc)
+
         product.save()
         messages.success(request, "Product updated successfully!")
         return redirect("app:product")
