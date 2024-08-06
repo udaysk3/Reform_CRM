@@ -378,7 +378,6 @@
 
   function checkFieldSelected(e) {
     const field = e.parentElement;
-    console.log(e.value)
     const type = e.value.split(/,(.+)/)[1];
     const rules = field.querySelector(".rules");
     if (rules) {

@@ -266,4 +266,44 @@ urlpatterns = [
         name="edit_new_funding_route",
     ),
     path("remove_doc/<int:doc_id>", views.remove_doc, name="remove_doc"),
+    path("questions", views.questions, name="questions"),
+    path("add_question", views.add_question, name="add_question"),
+    path("add_action", views.add_action, name="add_action"),
+    path("edit_question/<int:question_id>", views.edit_question, name="edit_question"),
+    path("edit_action/<int:action_id>", views.edit_action, name="edit_action"),
+    path(
+        "delete_question/<int:question_id>",
+        views.delete_question,
+        name="delete_question",
+    ),
+    path("delete_action/<int:action_id>", views.delete_action, name="delete_action"),
+    path("add_new_product", views.add_new_product, name="add_new_product"),
+    path(
+        "edit_new_product/<int:product_id>",
+        views.edit_new_product,
+        name="edit_new_product",
+    ),
+    path(
+        "delete_product/<int:product_id>", views.delete_product, name="delete_product"
+    ),
+    path("delete_route/<int:route_id>", views.delete_route, name="delete_route"),
+    path("edit_route/<int:route_id>", views.edit_route, name="edit_route"),
+    path("customer_journey", views.customer_journey, name="customer_journey"),
+    path("add_stage", views.add_stage, name="add_stage"),
+    path("cj_route/<int:route_id>", views.cj_route, name="cj_route"),
+    path(
+        "cj_product/<int:route_id>/<int:product_id>",
+        views.cj_product,
+        name="cj_product",
+    ),
+    path(
+        "cj_stage/<int:route_id>/<int:product_id>/<int:stage_id>",
+        views.cj_stage,
+        name="cj_stage",
+    ),
+    path(
+        "add_stage_rule/<int:route_id>/<int:product_id>/<int:stage_id>",
+        views.add_stage_rule,
+        name="add_stage_rule",
+    ),
 ]

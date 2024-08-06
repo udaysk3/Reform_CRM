@@ -94,16 +94,16 @@ class Clients(models.Model):
 
     def __str__(self):
         return f"{self.company_name}"
-    
+
 class Route(models.Model):
     name = models.CharField(max_length=999, blank= True, null=True)
     managed_by = models.CharField(max_length=999, blank= True, null=True)
     main_contact = models.CharField(max_length=999, blank= True, null=True)
     telephone = models.CharField(max_length=15, blank= True, null=True)
     email = models.EmailField(max_length=255)
-    council = models.ManyToManyField('home.Councils',related_name='routes', )
+    council = models.ManyToManyField('home.Councils',related_name='routes')
     description = models.CharField(max_length=999, blank= True, null=True)
-    documents = models.ManyToManyField('home.Document',related_name='route', )
+    documents = models.ManyToManyField('home.Document',related_name='route')
     archive = models.BooleanField(default=False)
     rules_regulations = models.JSONField(blank=True, null=True)
     sub_rules_regulations = models.JSONField(blank=True, null=True)
@@ -111,6 +111,7 @@ class Route(models.Model):
     client_route = models.ManyToManyField("self", related_name="+")
     parent_route = models.BooleanField(blank=True, null=True)
     main_route = models.BooleanField(blank=True, null=True)
+    product = models.ManyToManyField("home.Product", related_name="route")
 
 
 class Document(models.Model):
@@ -146,12 +147,10 @@ class Product(models.Model):
         Clients,
         related_name="product",
     )
+    stage = models.ManyToManyField("home.Stage", related_name="product")
 
     def __str__(self):
         return f"{self.name}"
-
-
-
 
 
 class Cities(models.Model):
@@ -196,13 +195,14 @@ class Stage(models.Model):
     council = models.ForeignKey(Councils, related_name='stage', on_delete=models.CASCADE, null=True)
     order = models.IntegerField(blank=True, null=True)
     description = models.CharField(max_length=999, blank=True, null=True)
-    route = models.ForeignKey(Route, related_name='stage', on_delete=models.CASCADE, null=True)
     fields = models.JSONField(blank= True, null=True)
     client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
     documents = models.ManyToManyField(
         "home.Document", related_name="stage",
     )
     templateable = models.BooleanField(default=False)
+    question = models.ManyToManyField("home.Questions", related_name="stage")
+    rules_regulations = models.JSONField(blank=True, null=True)
 
 class Email(models.Model):
     name = models.CharField(max_length=255)
@@ -242,3 +242,12 @@ class Postcode(models.Model):
 class CoverageAreas(models.Model):
     client = models.ForeignKey(Clients, related_name='coverage_areas', on_delete=models.CASCADE)
     postcode = models.CharField(max_length=255, blank=True, null=True)
+
+class Questions(models.Model):
+    question = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    answer_frequency = models.IntegerField(blank=True, null=True)
+
+class QAction(models.Model):
+    action = models.CharField(max_length=255, blank=True, null=True)
+    script = models.TextField(max_length=255, blank=True, null=True)
