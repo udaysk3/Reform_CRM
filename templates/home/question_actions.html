@@ -77,7 +77,7 @@
                 <select
                   class="form-select"
                   id="name"
-                  
+                  name="type"
                   onchange="checkSeletcted(this)"
                 >
                   <option value="text">Text</option>
@@ -185,6 +185,7 @@
                                   value="{{ product.answer_frequency }}"
                                 />
                               </div>
+                              <input type="hidden" name="type" value="{{ product.type }}">
                               <div class="mb-3">
                                 <select
                                   class="form-select"
@@ -570,12 +571,16 @@
       const options = form.querySelectorAll(".option");
       options[0].parentElement.parentElement.children[2].value = 'dropdown';
       options.forEach((option) => {
+
         option.parentElement.parentElement.children[2].value =
         option.parentElement.parentElement.children[2].value +
         "," +
         option.parentElement.children[0].value;
         console.log(option.parentElement.parentElement.children[2].value);
       });
+      if (options.length > 0) {
+        form.querySelector('select').disabled = true;
+      }
     });
   });
 </script>

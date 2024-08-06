@@ -2147,7 +2147,13 @@ def add_new_funding_route(request):
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
+        documents = request.FILES.getlist("document")
+        
         route = Route.objects.create(name=name, description=description,parent_route=True)
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            route.documents.add(doc)
+        route.save()
         messages.success(request, "Funding Route created successfully!")
         return redirect("app:funding_route")
     return render(request, "home/add_new_funding_routes.html")
@@ -2158,6 +2164,10 @@ def edit_new_funding_route(request,route_id):
     if request.method == "POST":
         route.name = request.POST.get("name")
         route.description = request.POST.get("description")
+        documents = request.FILES.getlist("document")
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            route.documents.add(doc)
         route.save()
         print(route.council_route.all())
         for council_route in route.council_route.all():
@@ -3372,10 +3382,15 @@ def add_new_product(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
+        documents = request.FILES.getlist('document')
         product = Product.objects.create(
             name=name,
             description=description,
         )
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            product.documents.add(doc)
+        product.save()
         messages.success(request, "Product added successfully!")
         return redirect("app:product")
     return render(request, 'home/add_new_product.html')
@@ -3412,6 +3427,11 @@ def edit_route(request, route_id):
     if request.method == "POST":
         route.name = request.POST.get("name")
         route.description = request.POST.get("description")
+        documents = request.FILES.getlist("document")
+        for document in documents:
+            doc = Document.objects.create(document=document)
+            route.documents.add(doc)
+            
         for product in products:
             if product.name in request.POST:
                 route.product.add(product)
