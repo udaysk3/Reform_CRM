@@ -248,7 +248,7 @@
                   </div>
               </div>
 
-              <button id="submitBtn" class="btn btn-primary">Submit</button>
+              <button id="submitBtn" type="button" class="btn btn-primary">Submit</button>
             </form>
           </div>
         </div>
@@ -257,14 +257,14 @@
   </div>
 </div>
 
-<script>
+{% comment %} <script>
   submitBtn = document.getElementById("submitBtn");
   submitBtn.addEventListener("click", function () {
     submitBtn.disabled = true;
     submitBtn.innerHTML = "Loading...";
     document.getElementById("addClientForm").submit();
   });
-</script>
+</script> {% endcomment %}
 
 <script >
   const dropArea = document.querySelector(".drop-section");

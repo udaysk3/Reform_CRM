@@ -76,9 +76,9 @@
               {% if stage.question.all %} {% for question in stage.question.all %}
               <tr>
                 <td>{{ question.question }}</td>
-                {% if question.stage.all.0.rules_regulations %}
+                {% if question.rules_regulations %}
                   <td>
-                    {% with b=question.stage.all.0.rules_regulations %}
+                    {% with b=question.rules_regulations %}
                             {% with field=question.type|firstsplit:',' %}
                               {% if field.1 %}
                               {% with options=field.1|split:',' %}
@@ -114,10 +114,33 @@
                   
                   </td>
                   {% endif %}
+                  <td>
+                    <a href="/delete_cj_stage_question/{{ route.id }}/{{ product.id }}/{{stage.id}}/{{ question.id }}">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="text-danger icon icon-tabler icon-tabler-trash"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 7l16 0" />
+                    <path d="M10 11l0 6" />
+                    <path d="M14 11l0 6" />
+                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                  </svg>
+                </a>
+                  </td>
                   <div class="modal fade" id="addRegulation{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
                       <div class="modal-content">
-                        <form action="{% url 'app:add_stage_rule' route.id product.id stage.id %}" method="post">
+                        <form action="{% url 'app:add_stage_rule' route.id product.id stage.id question.id %}" method="post">
                         <div class="modal-header">
                           <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Regulation</h1>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -127,7 +150,7 @@
 
                           <div class="mb-3">
 
-                            {% with b=question.stage.all.0.rules_regulations %}
+                            {% with b=question.rules_regulations %}
                             {% with field=question.type|firstsplit:',' %}
                               {% if field.1 %}
                               {% with options=field.1|split:',' %}
