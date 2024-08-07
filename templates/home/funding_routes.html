@@ -524,7 +524,8 @@ function uploadFile(file) {
 
 // Submit button click handler
 document.querySelector("#submitBtn").addEventListener("click", (event) => {
-  
+    document.querySelector("#submitBtn").innerHTML = "Loading...";
+    document.querySelector("#submitBtn").disabled = true;
     event.preventDefault(); 
 
     

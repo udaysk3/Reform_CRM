@@ -3493,7 +3493,6 @@ def cj_stage(request, route_id, product_id, stage_id):
 
 
 def add_stage_rule(request, route_id, product_id, stage_id,question_id):
-    stage = Stage.objects.all()
     question = Questions.objects.get(pk=question_id)
     if request.method == 'POST':
         dynamicRules = request.POST.getlist('dynamicRule')
