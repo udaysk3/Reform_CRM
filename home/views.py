@@ -3317,12 +3317,10 @@ def questions(request):
 def add_question(request):
     if request.method == 'POST':
         question = request.POST.get('question')
-        question_frequency = request.POST.get('question_frequency')
         type = request.POST.get('type')
         new_question = Questions.objects.create(
             question=question,
             type=type,
-            answer_frequency=question_frequency,
         )
     messages.success(request, "Question is created successfully!")
     return redirect("/questions")
@@ -3343,12 +3341,9 @@ def edit_question(request, question_id):
     if request.method == 'POST':
         qquestion = Questions.objects.get(pk=question_id)
         question = request.POST.get('question')
-        question_frequency = request.POST.get('question_frequency')
         type = request.POST.get('type')
-        question_frequency=int(question_frequency)
         qquestion.question=question
         qquestion.type=type
-        qquestion.answer_frequency=question_frequency
         qquestion.save()
     messages.success(request, "Question is edited successfully!")
     return redirect("/questions")
@@ -3436,9 +3431,9 @@ def edit_route(request, route_id):
         for document in documents:
             doc = Document.objects.create(document=document)
             route.documents.add(doc)
-            
+
         for product in products:
-            if product.name in request.POST:
+            if request.POST.get(product.name) == 'true':
                 route.product.add(product)
             else:
                 route.product.remove(product)
@@ -3497,13 +3492,12 @@ def cj_stage(request, route_id, product_id, stage_id):
     return render(request, 'home/cj_stage.html', {'stage':stage, 'questions':questions, 'route':route, 'product':product})
 
 
-def add_stage_rule(request, route_id, product_id, stage_id):
-    stage = Stage.objects.get(pk=stage_id)
+def add_stage_rule(request, route_id, product_id, stage_id,question_id):
+    question = Questions.objects.get(pk=question_id)
     if request.method == 'POST':
         dynamicRules = request.POST.getlist('dynamicRule')
-
-        stage.rules_regulations = dynamicRules
-        stage.save()
+        question.rules_regulations = dynamicRules
+        question.save()
         messages.success(request, "Rules and Regulations added successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
 
@@ -3512,3 +3506,21 @@ def delete_stage(request, stage_id):
     stage.delete()
     messages.success(request, "Stage deleted successfully!")
     return redirect("app:customer_journey")
+
+def delete_cj_stage(request, route_id ,product_id, stage_id):
+    product = Product.objects.get(pk=product_id)
+    stage = Stage.objects.get(pk=stage_id)
+    product.stage.remove(stage)
+    product.save()
+    messages.success(request, "Stage deleted successfully!")
+    return redirect(f"/cj_product/{route_id}/{product_id}")
+
+def delete_cj_stage_question(request, route_id, product_id, stage_id, question_id):
+    stage = Stage.objects.get(pk=stage_id)
+    question = Questions.objects.get(pk=question_id)
+    stage.question.remove(question)
+    question.rules_regulations = ''
+    question.save()
+    stage.save()
+    messages.success(request, "Question removed successfully!")
+    return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")

@@ -202,7 +202,7 @@ class Stage(models.Model):
     )
     templateable = models.BooleanField(default=False)
     question = models.ManyToManyField("home.Questions", related_name="stage")
-    rules_regulations = models.JSONField(blank=True, null=True)
+
 
 class Email(models.Model):
     name = models.CharField(max_length=255)
@@ -247,6 +247,7 @@ class Questions(models.Model):
     question = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     answer_frequency = models.IntegerField(blank=True, null=True)
+    rules_regulations = models.JSONField(blank=True, null=True)
 
 class QAction(models.Model):
     action = models.CharField(max_length=255, blank=True, null=True)

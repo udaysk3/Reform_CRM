@@ -302,7 +302,7 @@ urlpatterns = [
         name="cj_stage",
     ),
     path(
-        "add_stage_rule/<int:route_id>/<int:product_id>/<int:stage_id>",
+        "add_stage_rule/<int:route_id>/<int:product_id>/<int:stage_id>//<int:question_id>",
         views.add_stage_rule,
         name="add_stage_rule",
     ),
@@ -310,5 +310,15 @@ urlpatterns = [
         "delete_stage/<int:stage_id>",
         views.delete_stage,
         name="delete_stage",
+    ),
+    path(
+        "delete_cj_stage/<int:route_id>/<int:product_id>/<int:stage_id>",
+        views.delete_cj_stage,
+        name="delete_cj_stage",
+    ),
+    path(
+        "delete_cj_stage_question/<int:route_id>/<int:product_id>/<int:stage_id>/<int:question_id>",
+        views.delete_cj_stage_question,
+        name="delete_cj_stage_question",
     ),
 ]
