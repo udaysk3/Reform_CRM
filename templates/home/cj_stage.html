@@ -160,7 +160,7 @@
                                   <input type="hidden" class="cb" id="name" name="dynamicRule">
                                     {% for option in options %}
                                       <div class="form-check">
-  <input class="form-check-input check-box" type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
+  <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
   <label class="form-check-label" for="check{{ forloop.counter }}">
     {{option}}
   </label>
@@ -307,8 +307,8 @@
     forms.forEach((form)=>{
     form.addEventListener("submit", (e) => {
 
-      const cb = document.querySelector('.cb');
-    const checkBoxs = document.querySelectorAll('.check-box');
+      const cb = form.parentElement.querySelector('.cb');
+    const checkBoxs = form.parentElement.querySelectorAll('.check-box');
 
     checkBoxs.forEach((checkBox)=>{
       if (checkBox.checked){

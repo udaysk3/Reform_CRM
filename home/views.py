@@ -3551,8 +3551,13 @@ def delete_cj_stage(request, route_id ,product_id, stage_id):
 def delete_cj_stage_question(request, route_id, product_id, stage_id, question_id):
     stage = Stage.objects.get(pk=stage_id)
     question = Questions.objects.get(pk=question_id)
+    route = Route.objects.get(pk=route_id)
+    product = Product.objects.get(pk=product_id)
     stage.question.remove(question)
-    question.rules_regulation = ''
+    rule = Rule_Regulation.objects.filter(
+            route=route, product=product, stage=stage, question=question
+        ).first()
+    rule.delete()
     question.save()
     stage.save()
     messages.success(request, "Question removed successfully!")
