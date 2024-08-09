@@ -1,0 +1,216 @@
+{% extends "base.html" %} {% load static %}{% load custom %} {%block content%}
+
+<div class="container-fluid" style="max-width: 1500px">
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech w-100">
+      <div class="card w-100">
+        <div class="card-body">
+          <div
+            class="d-sm-flex d-block align-items-center justify-content-between mb-9"
+          >
+            <div class="mb-3 mb-sm-0">
+              <a href="{% url 'app:edit_question' question.id %}">
+                <h5
+                  class="card-title fw-semibold text-primary text-decoration-underline"
+                >
+                  Edit Question
+                </h5></a
+              >
+            </div>
+          </div>
+          <div>
+            <form
+              name="addClientForm"
+              id="addClientForm"
+              method="post"
+              action="{% url 'app:edit_question' question.id %} "
+            >
+              {% csrf_token %}
+
+              <div class="mb-3">
+                <label for="name" class="form-label">Type</label>
+                <select class="form-select" name="parameter">
+                  <option {% if question.parameter == 'Customer Question' %} selected {% endif %} value="Customer Question">Customer Question</option>
+                  <option {% if question.parameter == 'Customer Action' %} selected {% endif %} value="Customer Action">Customer Action</option>
+                  <option {% if question.parameter == 'Internal Action' %} selected {% endif %} value="Internal Action">Internal Action</option>
+                  <option {% if question.parameter == 'External Action' %} selected {% endif %} value="External Action">External Action</option>
+                  <option {% if question.parameter == 'Read Script' %} selected {% endif %} value="Read Script">Read Script</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="question" class="form-label">Question/Action</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="question"
+                  name="question"
+                  required
+                  value="{{ question.question }}"
+                />
+              </div>
+              <div>
+              <input type="hidden" name="type" value="{{ question.type }}">
+              <div class="mb-3">
+                <select
+                  class="form-select"
+                  id="tname"
+                  name="type"
+                  onchange="checkSeletcted(this)"
+                >
+                   <option {% if question.type == 'text' %} selected {% endif %} value="text">Text</option>
+                                  <option {% if 'checkbox'  in question.type %} selected {% endif %} value="checkbox">Checkbox</option>
+                                  <option {% if 'radio'  in question.type %} selected {% endif %} value="radio">Radio</option>
+                                  <option {% if question.type == 'date' %} selected {% endif %} value="date">Date</option>
+                                  <option {% if question.type == 'email' %} selected {% endif %} value="email">Email</option>
+                                  <option {% if question.type == 'month' %} selected {% endif %} value="month">Month</option>
+                                  <option {% if question.type == 'number' %} selected {% endif %} value="number">Number</option>
+                                  <option {% if question.type == 'password' %} selected {% endif %} value="password">Password</option>
+                                  <option {% if question.type == 'time' %} selected {% endif %} value="time">Time</option>
+                                  <option {% if question.type == 'url' %} selected {% endif %} value="url">URL</option>
+                                  <option {% if 'dropdown' in question.type %} selected {% endif %} value="dropdown">Dropdown</option>
+                                </select>
+                                
+              </div>
+              {% if 'dropdown' in question.type or 'checkbox'  in question.type or 'radio'  in question.type %}
+                                {% with all_fields=question.type|firstsplit:',' %}
+                                {% with fields=all_fields.1|split:',' %}
+                                {% for option in fields %}
+                                <div class="my-3 row ms-3">
+                                  <input type="text" class="col-sm-2" placeholder="Option" name="dynamic_option" value="{{ option }}">
+                                  <a href="#" class="option add-option-btn col-sm-2" onclick="addOption(this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="text-success icon icon-tabler icon-tabler-plus" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                      <line x1="12" y1="5" x2="12" y2="19" />
+                                      <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                  </a>
+                                  <a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                      <path d="M4 7l16 0" />
+                                      <path d="M10 11l0 6" />
+                                      <path d="M14 11l0 6" />
+                                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                    </svg>
+                                  </a>
+                                </div>
+                                {% endfor %}
+                                {% endwith %}
+                                {% endwith %}
+                                {% endif %}
+            </div>
+              </div>
+              <button id="submitBtn" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %} {% block js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cdeleteButtons = document.querySelectorAll(".delete-product-btn");
+    cdeleteButtons.forEach((cbutton) => {
+      cbutton.addEventListener("click", function (event) {
+        event.preventDefault();
+        const productId = cbutton.getAttribute("data-product-id");
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this product?"
+        );
+
+        if (confirmDelete) {
+          window.location.href = `/remove_funding_route/${productId}`;
+        }
+      });
+    });
+  });
+
+  function checkSeletcted(e) {
+    let selected = e.value;
+    if (selected == "dropdown" || selected == "checkbox" || selected == "radio") {
+      const addOption = document.createElement("div");
+      addOption.classList.add("my-3", "row", "ms-3", "remove-option");
+      addOption.innerHTML = `
+      <input type="text" class="col-sm-2" placeholder="Option" name="dynamic_option">
+      <a href="#" class="option add-option-btn col-sm-2" onclick="addOption(this)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="text-success icon icon-tabler icon-tabler-plus" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </a>
+      <a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M4 7l16 0" />
+          <path d="M10 11l0 6" />
+          <path d="M14 11l0 6" />
+          <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+          <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+        </svg>
+      </a>
+    `;
+      e.parentElement.parentElement.appendChild(addOption);
+    } else{
+      const roptions =  e.parentElement.parentElement.querySelectorAll('.remove-option');
+      roptions.forEach((opt)=>{
+        opt.remove();
+      });
+    }
+  }
+
+  function addOption(e) {
+    const newOption = document.createElement("div");
+    newOption.classList.add("my-3", "row", "ms-3", "remove-option");
+    newOption.innerHTML = `
+    <input type="text" class="col-sm-2" placeholder="Option" name="dynamic_option">
+    <a href="#" class="option add-option-btn col-sm-2" onclick="addOption(this)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="text-success icon icon-tabler icon-tabler-plus" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+    </a>
+    <a href="#" class="delete-user-btn col-sm-2" onclick="deleteField(this)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 7l16 0" />
+        <path d="M10 11l0 6" />
+        <path d="M14 11l0 6" />
+        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+      </svg>
+    </a>
+  `;
+    e.parentElement.insertAdjacentElement("afterEnd", newOption);
+  }
+
+  function deleteField(e) {
+    e.parentElement.remove();
+  }
+
+  const form = document.querySelector("form");
+    form.addEventListener("submit", () => {
+      const options = form.querySelectorAll(".option");
+      console.log(options[0].parentElement.parentElement.children[1].children[0].value);
+      options[0].parentElement.parentElement.children[0].value = options[0].parentElement.parentElement.children[1].children[0].value;
+      options.forEach((option) => {
+
+        option.parentElement.parentElement.children[0].value =
+        option.parentElement.parentElement.children[0].value +
+        "," +
+        option.parentElement.children[0].value;
+        console.log(option.parentElement.parentElement.children[0]);
+      });
+      if (options.length > 0) {
+        form.querySelector('#tname').remove()
+      }
+    });
+</script>
+
+{% endblock %}

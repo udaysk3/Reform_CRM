@@ -17,7 +17,7 @@ from .models import (
     Postcode,
     CoverageAreas,
     Questions,
-    QAction,
+    Rule_Regulation,
 )
 
 admin.site.register(Action)
@@ -37,4 +37,4 @@ admin.site.register(Product)
 admin.site.register(Postcode)
 admin.site.register(CoverageAreas)
 admin.site.register(Questions)
-admin.site.register(QAction)
+admin.site.register(Rule_Regulation)
