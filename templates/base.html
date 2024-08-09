@@ -88,14 +88,14 @@
               </a>
             </li>
             {% endif %}
-            {% comment %} <li class="sidebar-item">
+            <li class="sidebar-item">
               <div class="sidebar-link customer-journey" aria-expanded="false">
                 <span>
                   <i class="ti ti-article"></i>
                 </span>
-                <span class="hide-menu">Customer Journey</span>
+                <span class="hide-menu">Global</span>
               </div>
-            </li> {% endcomment %}
+            </li>
             {% if request.user.admin %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url "app:admin" %}" aria-expanded="false">
@@ -126,42 +126,6 @@
               </a>
             </li>
             {% endif %}
-            {% if request.user.funding_route %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file-description"></i>
-                </span>
-                <span class="hide-menu">Funding Route</span>
-              </a>
-            </li>
-            {% endif %}
-            {% if request.user.funding_route %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:product" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file-description"></i>
-                </span>
-                <span class="hide-menu">Product</span>
-              </a>
-            </li>
-            {% endif %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:customer_journey" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file-description"></i>
-                </span>
-                <span class="hide-menu">Customer Journey</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:questions" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file-description"></i>
-                </span>
-                <span class="hide-menu">Question and Action</span>
-              </a>
-            </li>
         </nav>
         <!-- End Sidebar navigation -->
       </div>
@@ -295,11 +259,57 @@
     </script>
 
   
-  {% comment %} <script>
+  <script>
     const customerJourney = document.querySelector('.customer-journey');
     customerJourney.addEventListener('click',()=>{
-        {% if request.user.funding_route %}
-        if(document.querySelector('.funding_route')){
+
+      
+        if(document.querySelector('.questions')){
+          document.querySelector('.questions').remove()
+        } else{
+          
+        const a = document.createElement("li");
+        a.classList.add('sidebar-item','questions');
+        a.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:questions" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Question and Action</span>
+              </a>
+        `
+        customerJourney.parentNode.insertAdjacentElement("afterend", a);
+        
+      }
+
+
+      if(document.querySelector('.cj')){
+          document.querySelector('.cj').remove()
+        } else{
+          
+        const a = document.createElement("li");
+        a.classList.add('sidebar-item','cj');
+        a.innerHTML = `
+        <a class="sidebar-link" href="{% url "app:customer_journey" %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="ti ti-article" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Customer Journey</span>
+              </a>
+        `
+        customerJourney.parentNode.insertAdjacentElement("afterend", a);
+        
+      }
+
+      if(document.querySelector('.funding_route')){
           document.querySelector('.funding_route').remove()
         } else{
           
@@ -320,40 +330,14 @@
         customerJourney.parentNode.insertAdjacentElement("afterend", a);
         
       }
-      {% endif %}
 
-        {% if request.user.stage %}
-        if(document.querySelector('.stage')){
-          document.querySelector('.stage').remove()
-        } else{
-          
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','stage');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:create_stage" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="ti ti-article" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Stage</span>
-              </a>
-        `
-        customerJourney.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-      {% endif %}
-
-        {% if request.user.product %}
         if(document.querySelector('.product')){
           document.querySelector('.product').remove()
         } else{
           
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','product');
-        a1.innerHTML = `
+        const a = document.createElement("li");
+        a.classList.add('sidebar-item','product');
+        a.innerHTML = `
         <a class="sidebar-link" href="{% url "app:product" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
@@ -365,14 +349,15 @@
                 <span class="hide-menu">Product</span>
               </a>
         `
-        customerJourney.parentNode.insertAdjacentElement("afterend", a1);
+        customerJourney.parentNode.insertAdjacentElement("afterend", a);
         
       }
-      {% endif %}
+
+
       })
     
       
-    </script> {% endcomment %}
+    </script>
 
   {% block js %}
   

@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block content %}
 
 <div class="row container-fluid">
@@ -49,7 +50,7 @@
                   <div class="modal-body">
                     {% csrf_token %}
                     <select class="form-select" name="question" aria-label="Default select example">
-                      {% for question in questions %}
+                      {% for question in all_questions %}
                         <option value="{{ question.id }}">{{ question.question }}</option>
                       {% endfor %}
                     </select>
@@ -69,16 +70,17 @@
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Regulation</th>
+                <th>Requirments</th>
               </tr>
             </thead>
             <tbody>
-              {% if stage.question.all %} {% for question in stage.question.all %}
+              {% if questions %} {% for question, rule_regulation in questions %}
               <tr>
                 <td>{{ question.question }}</td>
-                {% if question.rules_regulations %}
+
+                {% if rule_regulation.rules_regulation %}
                   <td>
-                    {% with b=question.rules_regulations %}
+                    {% with b=rule_regulation.rules_regulation %}
                             {% with field=question.type|firstsplit:',' %}
                               {% if field.1 %}
                               {% with options=field.1|split:',' %}
@@ -104,12 +106,12 @@
                           {% endwith %}
                   </td>
                   <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRegulation{{ forloop.counter }}">
-                      Edit Regulation
+                      Edit Requirments
                     </button></td>
                 {% else %}
                   <td>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRegulation{{ forloop.counter }}">
-                      Add Regulation
+                      Add Requirments
                     </button>
                   
                   </td>
@@ -140,9 +142,9 @@
                   <div class="modal fade" id="addRegulation{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
                       <div class="modal-content">
-                        <form action="{% url 'app:add_stage_rule' route.id product.id stage.id question.id %}" method="post">
+                        <form action="/add_stage_rule/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}" method="post">
                         <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Regulation</h1>
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Requirments</h1>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -150,18 +152,21 @@
 
                           <div class="mb-3">
 
-                            {% with b=question.rules_regulations %}
+                            {% with b=rule_regulation.rules_regulation %}
                             {% with field=question.type|firstsplit:',' %}
                               {% if field.1 %}
                               {% with options=field.1|split:',' %}
                                 <div class="col-6 rules mt-3 ms-3">
-                                  <select class="form-select" id="name" name="dynamicRule">
-                                    <option value="nan"> Select a Rule </option>
+                                  <input type="hidden" class="cb" id="name" name="dynamicRule">
                                     {% for option in options %}
-                                      <option value="{{ option }}" {% if b == option %} selected {% endif %}> {{ option }} </option>
+                                      <div class="form-check">
+  <input class="form-check-input check-box" type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
+  <label class="form-check-label" for="check{{ forloop.counter }}">
+    {{option}}
+  </label>
+</div>
                                     
                                     {% endfor %}
-                                  </select>
                                 </div>
                               {% endwith %}
                               {% else %}
@@ -301,6 +306,23 @@
     const forms = document.querySelectorAll("form");
     forms.forEach((form)=>{
     form.addEventListener("submit", (e) => {
+
+      const cb = document.querySelector('.cb');
+    const checkBoxs = document.querySelectorAll('.check-box');
+
+    checkBoxs.forEach((checkBox)=>{
+      if (checkBox.checked){
+        if (cb.value == ''){
+
+          cb.value += checkBox.value;
+        } else{
+          cb.value += ',' + checkBox.value;
+
+        }
+      }
+    })
+
+    
       const checkboxinputs = document.querySelectorAll(".checkboxinput");
     if (checkboxinputs){
       checkboxinputs.forEach((checkboxinput) => {
@@ -318,8 +340,11 @@
         option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
     });
 
+    
+
     });
     });
+
     
     
     

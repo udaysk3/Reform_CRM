@@ -25,7 +25,7 @@ from .models import (
     Product,
     CoverageAreas,
     Questions,
-    QAction,
+    Rule_Regulation,
     Stage,
 )
 import re
@@ -3311,54 +3311,45 @@ def remove_doc(request,doc_id):
 
 def questions(request):
     questions = Questions.objects.all()
-    actions = QAction.objects.all()
-    return render(request, 'home/question_actions.html', {'questions':questions,'actions':actions})
+    return render(request, 'home/question_actions.html', {'questions':questions})
 
 def add_question(request):
     if request.method == 'POST':
+        print(request.POST.get("parameter"))
         question = request.POST.get('question')
         type = request.POST.get('type')
+        parameter = request.POST.get("parameter")
         new_question = Questions.objects.create(
             question=question,
             type=type,
+            parameter=parameter,
         )
-    messages.success(request, "Question is created successfully!")
-    return redirect("/questions")
+        messages.success(request, "Question is created successfully!")
+        return redirect("/questions")
+    return render(request, 'home/add_question.html')
 
-
-def add_action(request):
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        type = request.POST.get('type')
-        new_action = QAction.objects.create(
-            action=action,
-            script=type,
-        )
-    messages.success(request, "Action is created successfully!")
-    return redirect("/questions")
 
 def edit_question(request, question_id):
-    if request.method == 'POST':
-        qquestion = Questions.objects.get(pk=question_id)
-        question = request.POST.get('question')
-        type = request.POST.get('type')
-        qquestion.question=question
-        qquestion.type=type
-        qquestion.save()
-    messages.success(request, "Question is edited successfully!")
-    return redirect("/questions")
+    qquestion = Questions.objects.get(pk=question_id)
 
-
-def edit_action(request, action_id):
     if request.method == "POST":
-        qaction = QAction.objects.get(pk=action_id)
-        action = request.POST.get("action")
-        script = request.POST.get("script")
-        qaction.action = action
-        qaction.script = script
-        qaction.save()
-    messages.success(request, "Action is edited successfully!")
-    return redirect("/questions")
+        question = request.POST.get("question")
+        parameter = request.POST.get("parameter")
+        new_type = request.POST.get("type")
+
+        if qquestion.type != new_type:
+            for rule in qquestion.rules_regulation.all():
+                rule.delete()  
+
+        qquestion.question = question
+        qquestion.type = new_type
+        qquestion.parameter = parameter
+        qquestion.save()
+
+        messages.success(request, "Question is edited successfully!")
+        return redirect("/questions")
+
+    return render(request, "home/edit_question.html", {"question": qquestion})
 
 
 def delete_question(request, question_id):
@@ -3367,11 +3358,6 @@ def delete_question(request, question_id):
     messages.success(request, "Question is deleted successfully!")
     return redirect("/questions")
 
-def delete_action(request, action_id):
-    qaction = QAction.objects.get(pk=action_id)
-    qaction.delete()
-    messages.success(request, "Action is deleted successfully!")
-    return redirect("/questions")
 
 def add_new_product(request):
     if request.method == 'POST':
@@ -3482,24 +3468,71 @@ def cj_stage(request, route_id, product_id, stage_id):
     route = Route.objects.get(pk=route_id)
     product = Product.objects.get(pk=product_id)
     stage = Stage.objects.get(pk=stage_id)
-    questions = Questions.objects.all()
+    all_questions = Questions.objects.all()
+    questions_with_rules = [] 
+    questions = Questions.objects.all().filter(stage=stage)
+
+    for question in questions:
+        rule_regulation = (Rule_Regulation.objects.all()
+                           .filter(route=route)
+                           .filter(product=product)
+                           .filter(stage=stage)
+                           .filter(question=question))
+
+        if rule_regulation.exists():
+            questions_with_rules.append((question, rule_regulation[0]))
+        else:
+            questions_with_rules.append((question, None))
+
     if request.method == 'POST':
         question = Questions.objects.get(pk=request.POST.get('question'))
         stage.question.add(question)
         stage.save()
         messages.success(request, "Question added to stage successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
-    return render(request, 'home/cj_stage.html', {'stage':stage, 'questions':questions, 'route':route, 'product':product})
+
+    return render(
+        request,
+        "home/cj_stage.html",
+        {
+            "stage": stage,
+            "questions": questions_with_rules,
+            "route": route,
+            "product": product,
+            "all_questions": all_questions,
+            "json_questions": serialize('json', all_questions),
+        },
+    )
 
 
-def add_stage_rule(request, route_id, product_id, stage_id,question_id):
+def add_stage_rule(request, route_id, product_id, stage_id, question_id):
     question = Questions.objects.get(pk=question_id)
-    if request.method == 'POST':
-        dynamicRules = request.POST.getlist('dynamicRule')
-        question.rules_regulations = dynamicRules
-        question.save()
+    route = Route.objects.get(pk=route_id)
+    product = Product.objects.get(pk=product_id)
+    stage = Stage.objects.get(pk=stage_id)
+
+    if request.method == "POST":
+        dynamicRules = request.POST.getlist("dynamicRule")
+        print(dynamicRules)
+        rule_regulation = Rule_Regulation.objects.filter(
+            route=route, product=product, stage=stage, question=question
+        ).first()
+
+        if rule_regulation:
+            rule_regulation.rules_regulation = dynamicRules
+            rule_regulation.save()
+        else:
+            rule_regulation = Rule_Regulation.objects.create(
+                rules_regulation=dynamicRules,
+                route=route,
+                product=product,
+                stage=stage,
+                question=question,
+            )
+
         messages.success(request, "Rules and Regulations added successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
+
 
 def delete_stage(request, stage_id):
     stage = Stage.objects.get(pk=stage_id)
@@ -3519,7 +3552,7 @@ def delete_cj_stage_question(request, route_id, product_id, stage_id, question_i
     stage = Stage.objects.get(pk=stage_id)
     question = Questions.objects.get(pk=question_id)
     stage.question.remove(question)
-    question.rules_regulations = ''
+    question.rules_regulation = ''
     question.save()
     stage.save()
     messages.success(request, "Question removed successfully!")

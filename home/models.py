@@ -247,8 +247,35 @@ class Questions(models.Model):
     question = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     answer_frequency = models.IntegerField(blank=True, null=True)
-    rules_regulations = models.JSONField(blank=True, null=True)
+    parameter = models.CharField(max_length=255, blank=True, null=True)
 
-class QAction(models.Model):
-    action = models.CharField(max_length=255, blank=True, null=True)
-    script = models.TextField(max_length=255, blank=True, null=True)
+class Rule_Regulation(models.Model):
+    rules_regulation = models.JSONField(blank=True, null=True)
+    route = models.ForeignKey(
+        Route,
+        related_name="rules_regulation",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    product = models.ForeignKey(
+        Product,
+        related_name="rules_regulation",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    stage = models.ForeignKey(
+        Stage,
+        related_name="rules_regulation",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    question = models.ForeignKey(
+        Questions,
+        related_name="rules_regulation",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
