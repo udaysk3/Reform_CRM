@@ -1048,10 +1048,10 @@ table {
                     class="card-body p-3 m-0"
                     style="height: 200px; overflow-y: auto"
                   >
-                     <a href="/add_product/{{ client.id }}" class="btn btn-primary position-absolute" style="right:10px" >
+                    <button type="button" class="btn btn-primary position-absolute" style="right:10px" data-bs-toggle="modal" data-bs-target="#productManagement">
                       Add Product
-                    </a>
-                    {% comment %} <div class="modal fade" id="productManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    </button>
+                    <div class="modal fade" id="productManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
@@ -1062,7 +1062,7 @@ table {
                             <form action="{% url 'app:add_product_client' client.id %}" method="post">
                               {% csrf_token %}
                             <label for="product" class="form-label">Product</label>
-                            <select class="form-select client_input" id="product" name="product_id" aria-label="Default select example">
+                            <select class="form-select client_input" id="product" name="product" aria-label="Default select example">
                               <option value="nan">Select the product</option>
                               {% for product in all_products %}
                                 <option value="{{product.id}}">{{product.name}}</option>
@@ -1076,7 +1076,7 @@ table {
                           </form>
                         </div>
                       </div>
-                    </div> {% endcomment %}
+                    </div>
 
                     
 

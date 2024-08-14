@@ -77,6 +77,9 @@ class Clients(models.Model):
     route = models.ManyToManyField(
         "home.Route", related_name="client",
     )
+    product = models.ManyToManyField(
+        "home.Product", related_name="client",
+    )
     
 
     def add_action(
@@ -109,9 +112,13 @@ class Route(models.Model):
     sub_rules_regulations = models.JSONField(blank=True, null=True)
     council_route = models.ManyToManyField("self", related_name="+")
     client_route = models.ManyToManyField("self", related_name="+")
-    parent_route = models.BooleanField(blank=True, null=True)
-    main_route = models.BooleanField(blank=True, null=True)
+    is_parent = models.BooleanField(blank=True, null=True)
+    is_council = models.BooleanField(blank=True, null=True)
+    is_client = models.BooleanField(blank=True, null=True)
     product = models.ManyToManyField("home.Product", related_name="route")
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 class Document(models.Model):
@@ -143,8 +150,15 @@ class Product(models.Model):
     documents = models.ManyToManyField(
         "home.Document", related_name="product", 
     )
-    client = models.ManyToManyField(
-        Clients,
+    is_parent = models.BooleanField(blank=True, null=True)
+    is_council = models.BooleanField(default=False)
+    is_client = models.BooleanField(default=False)
+    council_product = models.ManyToManyField(
+        'self', related_name="+")
+    client_product = models.ManyToManyField(
+        'self', related_name="+")
+    council = models.ManyToManyField(
+        Councils,
         related_name="product",
     )
     stage = models.ManyToManyField("home.Stage", related_name="product")

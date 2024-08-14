@@ -397,7 +397,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
     stages = {}
 
     for stage in all_stages:
-        stages[stage.name] = json.loads(stage.fields)
+        if stage.fields is not None:
+            stages[stage.name] = json.loads(stage.fields)
+        else:
+            stages[stage.name] = {}
 
     if customer.stage_values:
         stage_values = json.loads(customer.stage_values)
@@ -769,7 +772,7 @@ def client_detail(request, client_id, s_client_id=None):
     all_products = Product.objects.all()
     products = Product.objects.all().filter(client=client).filter(archive=False)
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
-    all_routes = Route.objects.all().filter(main_route=True)
+    all_routes = Route.objects.all().filter(is_council=True)
     routes = Route.objects.all().filter(client=client).filter(archive=False)
     unroutes = Route.objects.all().filter(client=client).filter(archive=True)
     child_clients = Clients.objects.all().filter(parent_client=client)
@@ -907,8 +910,8 @@ def client_detail(request, client_id, s_client_id=None):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council).filter(main_route=True)
-    all_routes = Route.objects.all().filter(parent_route=True)
+    routes = Route.objects.all().filter(council=council).filter(is_council=True)
+    all_routes = Route.objects.all().filter(is_parent=True)
     prev = None
     next = None
     if len(all_councils) == 1:
@@ -2139,24 +2142,30 @@ def funding_route(request):
         route = Route.objects.get(pk=route_id)
         
         return render(request, "home/funding_routes.html", {"route": route,"products": products})
-    funding_routes = Route.objects.all().filter(parent_route=True)
+    funding_routes = Route.objects.all().filter(is_parent=True)
     return render(request, "home/funding_routes.html", {"funding_routes": funding_routes, "products": products})
 
 @login_required
 def add_new_funding_route(request):
+    products = Product.objects.all()
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
         documents = request.FILES.getlist("document")
-        
-        route = Route.objects.create(name=name, description=description,parent_route=True)
+
+        route = Route.objects.create(name=name, description=description,is_parent=True)
         for document in documents:
             doc = Document.objects.create(document=document)
             route.documents.add(doc)
+        for product in products:
+            if request.POST.get(product.name) == "true":
+                route.product.add(product)
+            else:
+                route.product.remove(product)
         route.save()
         messages.success(request, "Funding Route created successfully!")
         return redirect("app:funding_route")
-    return render(request, "home/add_new_funding_routes.html")
+    return render(request, "home/add_new_funding_routes.html",{'products':products})
 
 @login_required
 def edit_new_funding_route(request,route_id):
@@ -2228,7 +2237,11 @@ def edit_funding_route(request, funding_route_id):
         saved_rules_regulations = json.loads(funding_route.rules_regulations)
     if stages.exists():
         for stage in stages:
-            fields[stage.name] = json.loads(stage.fields)
+            if stage.fields is not None:
+                fields[stage.name] = json.loads(stage.fields)
+            else:
+                # Handle the None case if needed
+                fields[stage.name] = {}
     if request.method == "POST":
         dynamicStages = request.POST.getlist("dynamicStage")
         dynamicFields = request.POST.getlist("dynamicField")
@@ -2310,7 +2323,7 @@ def add_funding_route(request, council_id):
         council_route = Route.objects.create(
             name=route.name,
             description=route.description,
-            main_route=True,
+            is_council=True,
         )
         council_route.council.add(council)
         route.council_route.add(council_route)
@@ -2419,6 +2432,28 @@ def add_route_client(request, client_id):
         main_route.save()
         client.save()
         messages.success(request, "Funding Route added successfully to a Client!")
+        return redirect(f"/client-detail/{client_id}")
+
+def add_product_client(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(pk=client_id)
+        if request.POST.get("product") == "nan":
+            messages.error(request, "Product should be selected")
+            return redirect(f"/client-detail/{client_id}")
+        main_product = Product.objects.get(pk=request.POST.get("product"))
+        product = Product.objects.create(
+            name=main_product.name,
+            description=main_product.description,
+            rules_regulations=main_product.rules_regulations,
+        )
+        client.product.add(product)
+        for council in main_product.council.all():
+            product.council.add(council)
+        product.save()
+        main_product.client_product.add(product)
+        main_product.save()
+        client.save()
+        messages.success(request, "Product added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
 
 def add_council_funding_route(request, council_id):
@@ -3367,6 +3402,7 @@ def add_new_product(request):
         product = Product.objects.create(
             name=name,
             description=description,
+            is_parent=True,
         )
         for document in documents:
             doc = Document.objects.create(document=document)
@@ -3429,7 +3465,7 @@ def edit_route(request, route_id):
     return redirect("app:funding_route")
 
 def customer_journey(request):
-    routes = Route.objects.all()
+    routes = Route.objects.all().filter(is_parent=True)
     stages = Stage.objects.all()
     return render(request, "home/customer_journey.html", {"funding_routes": routes, "stages":stages})
 

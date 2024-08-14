@@ -248,6 +248,21 @@
                   </div>
               </div>
 
+              {% for product in products %}
+                <div class="my-3 form-check">
+                  <input
+                    type="checkbox"
+                    {% if product in route.product.all %}checked{% endif %}
+                    class="form-check-label"
+                    id="product{{ product.id }}"
+                    name="{{ product.name }}"
+                  />
+                  <label class="form-check-label" for="{{ product.name }}"
+                    >{{ product.name }}</label
+                  >
+                </div>
+              {% endfor %}
+
               <button id="submitBtn" type="submit" class="btn btn-primary">Submit</button>
             </form>
           </div>
@@ -395,10 +410,17 @@ document.querySelector("#submitBtn").addEventListener("click", (event) => {
     var allData = new FormData();
     allData.append("name", name);
     allData.append("description", description);
+    {% for product in products %}
+    var product{{forloop.counter}} = document.querySelector("#product{{ product.id }}").checked;
+    {% endfor %}
     
     queuedFiles.forEach((queuedFile) => {
         allData.append("document", queuedFile.file);
     });
+
+    {% for product in products %}
+    allData.append("{{ product.name }}", product{{forloop.counter}});
+    {% endfor %}
 
     var http = new XMLHttpRequest();
     http.onload = () => {
