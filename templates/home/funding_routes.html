@@ -212,9 +212,12 @@
             >
           </div>
           <div>
+            {% if request.GET.page == 'edit' %} 
+            {% else %}
             <a class="btn btn-primary fs-6" href="/add_new_funding_route">
               <i class="bi bi-plus-lg"></i> Add Route
             </a>
+            {% endif %}
           </div>
         </div>
         <div style="overflow-x: auto">
