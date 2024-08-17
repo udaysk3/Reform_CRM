@@ -14,7 +14,6 @@ from .models import (
     Countries,
     Signature,
     Product,
-    Postcode,
     CoverageAreas,
     Questions,
     Rule_Regulation,
@@ -34,7 +33,6 @@ admin.site.register(Countys)
 admin.site.register(Countries)
 admin.site.register(Signature)
 admin.site.register(Product)
-admin.site.register(Postcode)
 admin.site.register(CoverageAreas)
 admin.site.register(Questions)
 admin.site.register(Rule_Regulation)

@@ -64,6 +64,12 @@ class Clients(models.Model):
     postcode = models.CharField(max_length=255, blank=True, null=True)
     house_name = models.CharField(max_length=255, blank=True, null=True)
     street_name = models.TextField(max_length=999, blank=True, null=True)
+    address = models.TextField(max_length=999, blank=True, null=True)
+    district = models.CharField(max_length=255, blank=True, null=True)
+    energy_rating = models.CharField(max_length=2, blank=True, null=True)
+    energy_certificate_link = models.URLField(max_length=999, blank=True, null=True)
+    constituency = models.CharField(max_length=255, blank=True, null=True)
+    recommendations = models.TextField(max_length=999, blank=True, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
     county = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
@@ -80,7 +86,6 @@ class Clients(models.Model):
     product = models.ManyToManyField(
         "home.Product", related_name="client",
     )
-    
 
     def add_action(
         self,
@@ -129,7 +134,8 @@ class Councils(models.Model):
     name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
     agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    
+    postcodes = models.TextField(blank=True, null=True)
+
     def __str__(self):
         return f"{self.name}"
 
@@ -245,13 +251,6 @@ class Signature(models.Model):
     signature = models.TextField(max_length=999, blank=True, null=True)
     signature_img = models.FileField(upload_to="signatures", blank= True, null=True)
 
-class Postcode(models.Model):
-    postcode = models.CharField(max_length=255)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.postcode}"
 
 class CoverageAreas(models.Model):
     client = models.ForeignKey(Clients, related_name='coverage_areas', on_delete=models.CASCADE)
