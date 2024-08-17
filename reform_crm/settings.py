@@ -30,7 +30,11 @@ ALLOWED_HOSTS = ["*"]
 
 SITE_ID = 1
 # Application definition
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app','https://businesscardgenerator-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.railway.app",
+    "https://reformcrm.up.railway.app/",
+    "https://reformcrm-beta-0c709f5.kuberns.com",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -110,7 +114,6 @@ AUTHENTICATION_BACKENDS = [
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
-
 
 
 # Internationalization

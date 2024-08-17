@@ -4,6 +4,7 @@ from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.template.loader import render_to_string
+from django.db.models import Q
 from django.utils.html import strip_tags
 import ast
 from .models import (
@@ -769,10 +770,24 @@ def client_detail(request, client_id, s_client_id=None):
     stages = Stage.objects.all().filter(client=client).order_by('order')
     campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
     uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
-    all_products = Product.objects.all()
+    all_products = Product.objects.all().filter(is_parent=True)
     products = Product.objects.all().filter(client=client).filter(archive=False)
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
-    all_routes = Route.objects.all().filter(is_council=True)
+
+    # council_ids = client.coverage_areas.values_list('postcode__council', flat=True).distinct()
+    # all_routes = Route.objects.filter(is_council=True, council__in=council_ids)
+    coverage_a = client.coverage_areas.all()
+    all_routes=[]
+    for coverage in coverage_a:
+        x = requests.get(f'https://api.postcodes.io/postcodes/{coverage.postcode}')
+        result = x.json()
+        if result['result']:
+            council_name = result['result']['admin_district']
+            council,_ = Councils.objects.get_or_create(name=council_name)
+            rts = Route.objects.all().filter(is_council=True).filter(council=council)
+            print(rts,council)
+            all_routes.extend(rts)
+
     routes = Route.objects.all().filter(client=client).filter(archive=False)
     unroutes = Route.objects.all().filter(client=client).filter(archive=True)
     child_clients = Clients.objects.all().filter(parent_client=client)
@@ -1302,10 +1317,11 @@ def add_customer(request):
             street_name=street_name,
             city=city,
             house_name=house_name,
-            address=address,
             county=county,
             country=country,
             agent=agent,
+            address=address,
+            council=Councils.objects.get(name=district),
             district=district,
             constituency=constituency,
             campaign=Campaign.objects.get(id=campaign),
@@ -1455,13 +1471,32 @@ def add_client(request):
             messages.error(request, "Phone number already exists")
             return redirect("/client?page=add_client")
 
-
         postcode = re.sub(r'\s+', ' ', postcode)
+        district = getLA(postcode)
+        if district and not Councils.objects.filter(name=district).exists():
+            Councils.objects.create(name=district)
+        obj = getEPC(postcode, house_name, street_name)
+        energy_rating = None
+        energy_certificate_link = None
+        address = house_name + " " + street_name
+        constituency = None
+        if obj is not None:
+            energy_rating = obj["energy_rating"]
+            energy_certificate_link = obj["energy_certificate_link"]
+            county = obj["county"] if obj["county"] else county
+            district = obj["local_authority"] if obj["local_authority"] else district
+            city = obj["town"] if obj["town"] else city
+            constituency = obj["constituency"] if obj["constituency"] else None
+            address = (
+                obj["address"] if obj["address"] else house_name + " " + street_name
+            )
+            recommendations = obj["recommendations"] if obj["recommendations"] else None
+
         client = Clients.objects.create(
-            acc_number = acc_number,
-            sort_code = sort_code,
-            iban = iban,
-            bic_swift = bic_swift,
+            acc_number=acc_number,
+            sort_code=sort_code,
+            iban=iban,
+            bic_swift=bic_swift,
             company_name=company_name,
             company_phno=company_phno,
             first_name=first_name,
@@ -1477,6 +1512,13 @@ def add_client(request):
             agent=agent,
             created_at=datetime.now(pytz.timezone("Europe/London")),
             primary_client=True,
+            energy_rating=energy_rating,
+            energy_certificate_link=energy_certificate_link,
+            recommendations=recommendations,
+            address=address,
+            district=district,
+            council=Councils.objects.get(name=district),
+            constituency=constituency,
         )
         client.add_action(
                 agent=User.objects.get(email=request.user),
@@ -2136,7 +2178,7 @@ def product(request):
 
 @login_required
 def funding_route(request):
-    products = Product.objects.all()
+    products = Product.objects.all().filter(is_parent=True)
     if request.GET.get("page") == "edit":
         route_id = request.GET.get("route_id")
         route = Route.objects.get(pk=route_id)
@@ -3162,7 +3204,7 @@ def add_coverage_areas(request, client_id):
             client=client,
             postcode=re.sub(r"\s+", " ", request.POST.get("postcode")),
         )
-        
+
         messages.success(request, "Postcode Added Successfully")
         return redirect(r"/client-detail/" + str(client_id))
     return render(request, "home/admin.html")
