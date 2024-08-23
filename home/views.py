@@ -39,13 +39,13 @@ import pytz
 from user.models import User
 from pytz import timezone
 import json
+from .task import getLA
+from .epc import getEPC
 import os
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
-from .tasks import getLA
-from .epc import getEPC
 import base64 
 import requests
 import os.path
@@ -372,13 +372,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.text
                 ]
             )
-    if customer.district:
-        council= Councils.objects.get_or_create(name=customer.district)[0]
-        council_routes = Route.objects.all().filter(council=council)
-        print(Route.objects.all().filter(council=council))
-    else:
-        council = None
-        council_routes = None
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [
@@ -590,7 +583,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     "child_customers": child_customers,
                     "recommendations_list": processed_recommendations,
                     "routes": routes,
-                    "council_routes": council_routes,
                     "stages": stages,
                     "values": values,
                     "agents": agents,
@@ -619,7 +611,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
             "routes": routes,
-            "council_routes":council_routes,
             "stages": stages,
             "agents" : agents,
             "show_customer": show_customer,
@@ -722,7 +713,13 @@ def client_detail(request, client_id, s_client_id=None):
     next = None
     domain_name = request.build_absolute_uri("/")[:-1]
     signatures = Signature.objects.all()
-    coverage_area = CoverageAreas.objects.all().filter(client=Clients.objects.get(pk=client_id)) 
+    coverage_areas = CoverageAreas.objects.all().filter(client=Clients.objects.get(pk=client_id))
+    display_coverage_areas = {}
+    for coverage_area in coverage_areas:
+        if display_coverage_areas.get(coverage_area.council):
+            display_coverage_areas[coverage_area.council].append(coverage_area.postcode)
+        else:
+            display_coverage_areas[coverage_area.council] = [coverage_area.postcode]
     clients = (
         Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_client=None)
@@ -765,28 +762,17 @@ def client_detail(request, client_id, s_client_id=None):
         next = str(next.id)
     else:
         next = str(client_id)
-    # print(type(prev), next)
     client = Clients.objects.get(pk=client_id)
     stages = Stage.objects.all().filter(client=client).order_by('order')
     campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
     uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
-    all_products = Product.objects.all().filter(is_parent=True)
+    all_products = Product.objects.all()
     products = Product.objects.all().filter(client=client).filter(archive=False)
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
-
-    # council_ids = client.coverage_areas.values_list('postcode__council', flat=True).distinct()
-    # all_routes = Route.objects.filter(is_council=True, council__in=council_ids)
-    coverage_a = client.coverage_areas.all()
-    all_routes=[]
-    for coverage in coverage_a:
-        x = requests.get(f'https://api.postcodes.io/postcodes/{coverage.postcode}')
-        result = x.json()
-        if result['result']:
-            council_name = result['result']['admin_district']
-            council,_ = Councils.objects.get_or_create(name=council_name)
-            rts = Route.objects.all().filter(is_council=True).filter(council=council)
-            print(rts,council)
-            all_routes.extend(rts)
+    councils = Councils.objects.all()
+    coverage_area_client = CoverageAreas.objects.filter(client=client)
+    council_coverage_area = Councils.objects.filter(id__in=coverage_area_client.values_list('council_id', flat=True))
+    all_routes = Route.objects.filter(council__in=council_coverage_area)
 
     routes = Route.objects.all().filter(client=client).filter(archive=False)
     unroutes = Route.objects.all().filter(client=client).filter(archive=True)
@@ -863,6 +849,7 @@ def client_detail(request, client_id, s_client_id=None):
             request,
             "home/client-detail.html",
             {
+                "councils":councils,
                 "client": client,
                 "history": history,
                 "imported": imported,
@@ -880,7 +867,8 @@ def client_detail(request, client_id, s_client_id=None):
                 "uncampaigns": uncampaigns,
                 "products": products,
                 "unproducts": unproducts,
-                "coverage_areas": coverage_area,
+                "display_coverage_areas": display_coverage_areas,
+                "coverage_areas":coverage_area_client,
                 "all_products": all_products,
                 "all_routes": all_routes,
                 "routes":routes,
@@ -894,13 +882,14 @@ def client_detail(request, client_id, s_client_id=None):
         request,
         "home/client-detail.html",
         {
+            "councils": councils,
             "client": client,
             "history": history,
             "imported": imported,
             "prev": prev,
             "next": next,
             "child_clients": child_clients,
-            "agents" : agents,
+            "agents": agents,
             "show_client": show_client,
             "events": events,
             "reasons": reasons,
@@ -909,13 +898,14 @@ def client_detail(request, client_id, s_client_id=None):
             "domain_name": domain_name,
             "campaigns": campaigns,
             "uncampaigns": uncampaigns,
-            "products":products,
-            "unproducts":unproducts,
-            "coverage_areas": coverage_area,
-            "all_products":all_products,
-            "all_routes":all_routes,
-            "routes":routes,
-            "unroutes":unroutes,
+            "products": products,
+            "unproducts": unproducts,
+            "display_coverage_areas": display_coverage_areas,
+            "coverage_areas": coverage_area_client,
+            "all_products": all_products,
+            "all_routes": all_routes,
+            "routes": routes,
+            "unroutes": unroutes,
             "stages": stages,
         },
     )
@@ -925,8 +915,8 @@ def client_detail(request, client_id, s_client_id=None):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council).filter(is_council=True)
-    all_routes = Route.objects.all().filter(is_parent=True)
+    routes = Route.objects.all().filter(council=council)
+    all_routes = Route.objects.all()
     prev = None
     next = None
     if len(all_councils) == 1:
@@ -1169,6 +1159,11 @@ def council(request):
         request, "home/council.html", {"councils": councils, "campaigns": campaigns}
     )
 
+def delete_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    council.delete()
+    return redirect("/council")
+
 
 @login_required
 def Admin(request):
@@ -1290,8 +1285,6 @@ def add_customer(request):
 
         postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
-        if district and not Councils.objects.filter(name=district).exists():
-            Councils.objects.create(name=district)
         obj = getEPC(postcode, house_name, street_name)
         energy_rating = None
         energy_certificate_link = None
@@ -1384,8 +1377,6 @@ def edit_customer(request, customer_id):
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
         
         district = getLA(customer.postcode)
-        if district and not Councils.objects.filter(name=district).exists():
-            Councils.objects.create(name=district)
         obj = getEPC(customer.postcode, customer.house_name, customer.street_name)
         energy_rating = None
         energy_certificate_link = None
@@ -1473,8 +1464,6 @@ def add_client(request):
 
         postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
-        if district and not Councils.objects.filter(name=district).exists():
-            Councils.objects.create(name=district)
         obj = getEPC(postcode, house_name, street_name)
         energy_rating = None
         energy_certificate_link = None
@@ -1610,25 +1599,6 @@ def edit_client(request, client_id):
 
     context = {"client": client}
     return render(request, "home/client.html", context)
-
-
-@login_required
-def edit_council(request, council_id):
-    council = Councils.objects.get(pk=council_id)
-    if request.method == "POST":
-        council.name = request.POST.get("name")
-        # council.phone_number = request.POST.get("phone_number")
-        # council.email = request.POST.get("email")
-        # council.postcode = request.POST.get("postcode")
-        # council.street_name = request.POST.get("street_name")
-
-        council.save()
-
-        messages.success(request, "Council updated successfully!")
-        return redirect("app:council")
-
-    context = {"council": council}
-    return render(request, "home/council.html", context)
 
 
 @login_required
@@ -2178,13 +2148,17 @@ def product(request):
 
 @login_required
 def funding_route(request):
-    products = Product.objects.all().filter(is_parent=True)
+    products = Product.objects.all()
     if request.GET.get("page") == "edit":
         route_id = request.GET.get("route_id")
         route = Route.objects.get(pk=route_id)
+        documents = []
+        for doc in route.documents.all():
+            if doc.is_client == False and doc.is_council == False:
+                documents.append(doc)
         
-        return render(request, "home/funding_routes.html", {"route": route,"products": products})
-    funding_routes = Route.objects.all().filter(is_parent=True)
+        return render(request, "home/funding_routes.html", {"route": route,"products": products, "documents":documents})
+    funding_routes = Route.objects.all()
     return render(request, "home/funding_routes.html", {"funding_routes": funding_routes, "products": products})
 
 @login_required
@@ -2195,9 +2169,9 @@ def add_new_funding_route(request):
         description = request.POST.get("description")
         documents = request.FILES.getlist("document")
 
-        route = Route.objects.create(name=name, description=description,is_parent=True)
+        route = Route.objects.create(name=name, description=description)
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document,is_route=True)
             route.documents.add(doc)
         for product in products:
             if request.POST.get(product.name) == "true":
@@ -2217,14 +2191,9 @@ def edit_new_funding_route(request,route_id):
         route.description = request.POST.get("description")
         documents = request.FILES.getlist("document")
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document,is_route=True)
             route.documents.add(doc)
         route.save()
-        print(route.council_route.all())
-        for council_route in route.council_route.all():
-            council_route.name=route.name
-            council_route.description=route.description
-            council_route.save()
         messages.success(request, "Funding Route created successfully!")
         return redirect("app:funding_route")
     return render(request, "home/edit_new_funding_routes.html",{"route":route})
@@ -2362,14 +2331,7 @@ def add_funding_route(request, council_id):
             messages.error(request, "Route should be selected")
             return redirect(f"/council-detail/{council_id}")
         route = Route.objects.get(pk=request.POST.get("route"))
-        council_route = Route.objects.create(
-            name=route.name,
-            description=route.description,
-            is_council=True,
-        )
-        council_route.council.add(council)
-        route.council_route.add(council_route)
-        council_route.save()
+        route.council.add(council)
         route.save()
         messages.success(request, "Funding Route added successfully!")
         return redirect('/council-detail/'+str(council_id))
@@ -2483,17 +2445,7 @@ def add_product_client(request, client_id):
             messages.error(request, "Product should be selected")
             return redirect(f"/client-detail/{client_id}")
         main_product = Product.objects.get(pk=request.POST.get("product"))
-        product = Product.objects.create(
-            name=main_product.name,
-            description=main_product.description,
-            rules_regulations=main_product.rules_regulations,
-        )
-        client.product.add(product)
-        for council in main_product.council.all():
-            product.council.add(council)
-        product.save()
-        main_product.client_product.add(product)
-        main_product.save()
+        client.product.add(main_product)
         client.save()
         messages.success(request, "Product added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
@@ -2510,14 +2462,29 @@ def add_council_funding_route(request, council_id):
 def add_local_authority(request):
     if request.method == "POST":
         name = request.POST.get("name")
+        postcodes = request.POST.get("postcodes")
+        print(postcodes)
         council = Councils.objects.create(
             name=name,
+            postcodes=postcodes,
             created_at=datetime.now(pytz.timezone('Europe/London')),
             agent=User.objects.get(email=request.user),
         )
         messages.success(request, "Local Authority added successfully!")
         return redirect("app:council")
     return render(request, "home/council.html")
+
+
+def edit_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    if request.method == "POST":
+        council.name = request.POST.get("name")
+        council.postcodes = request.POST.get("postcodes")
+        council.save()
+        messages.success(request, "Local Authority updated successfully!")
+        return redirect(f"/council-detail/{council_id}")
+    return render(request, "home/edit_council.html", {"council": council})
+
 
 def remove_funding_route(request, route_id):
     route = Route.objects.get(pk=route_id)
@@ -2802,9 +2769,6 @@ def send_email(request, customer_id):
         text = request.POST.get("text")
         subject = request.POST.get("subject")
 
-    # body = re.sub(r"\r?\n", "\n", body)
-    # signature.signature = re.sub(r"\r?\n", "\n", signature.signature)
-
     context = {
         "body": body,
         "signature": signature,
@@ -2849,7 +2813,7 @@ def send_email(request, customer_id):
 
 
 def send_client_email(request, cclient_id):
-    cclient = Cclients.objects.get(pk=cclient_id)
+    cclient = Clients.objects.get(pk=cclient_id)
     email_id = request.POST.get("template")
     date_str = request.POST.get("date_field")
     time_str = request.POST.get("time_field")
@@ -3198,12 +3162,17 @@ def get_notifications(request):
 
 def add_coverage_areas(request, client_id):
     if request.method == "POST":
-
+        if request.POST.get("region") == 'nan':
+            messages.error(request, "Region should be selected")
+            return redirect(f"/client-detail/{client_id}")
         client = Clients.objects.get(pk=client_id)
-        coverage_area = CoverageAreas.objects.create(
-            client=client,
-            postcode=re.sub(r"\s+", " ", request.POST.get("postcode")),
-        )
+        print(request.POST.get("postcodes"), request.POST.get("region"))
+        for postcode in request.POST.get("postcodes").split(","):
+            coverage_area = CoverageAreas.objects.create(
+                client=client,
+                postcode=re.sub(r"\s+", " ", postcode),
+                council=Councils.objects.get(name=request.POST.get("region")),
+            )
 
         messages.success(request, "Postcode Added Successfully")
         return redirect(r"/client-detail/" + str(client_id))
@@ -3444,10 +3413,9 @@ def add_new_product(request):
         product = Product.objects.create(
             name=name,
             description=description,
-            is_parent=True,
         )
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document, is_product=True)
             product.documents.add(doc)
         product.save()
         messages.success(request, "Product added successfully!")
@@ -3456,6 +3424,10 @@ def add_new_product(request):
 
 def edit_new_product(request, product_id):
     product = Product.objects.get(pk=product_id)
+    docs = []
+    for doc in product.documents.all():
+        if doc.is_client == False and doc.is_route == False:
+            docs.append(doc)
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
@@ -3463,13 +3435,13 @@ def edit_new_product(request, product_id):
         product.description = description
         documents = request.FILES.getlist('document')
         for document in documents:
-            doc = Document.objects.create(document=document)
-            product.documents.add(doc)
+            docu = Document.objects.create(document=document)
+            product.documents.add(docu)
 
         product.save()
         messages.success(request, "Product updated successfully!")
         return redirect("app:product")
-    return render(request, 'home/edit_new_product.html', {'product':product})
+    return render(request, 'home/edit_new_product.html', {'product':product, "docs":docs})
 
 
 def delete_product(request, product_id):
@@ -3493,9 +3465,8 @@ def edit_route(request, route_id):
         route.description = request.POST.get("description")
         documents = request.FILES.getlist("document")
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document,is_route=True)
             route.documents.add(doc)
-
         for product in products:
             if request.POST.get(product.name) == 'true':
                 route.product.add(product)
@@ -3640,3 +3611,10 @@ def delete_cj_stage_question(request, route_id, product_id, stage_id, question_i
     stage.save()
     messages.success(request, "Question removed successfully!")
     return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
+
+def get_postcodes(request, region):
+    council = Councils.objects.get(name=region)
+    if council.postcodes:
+        postcodes = council.postcodes.split(",")
+        return JsonResponse({"postcodes": postcodes}, safe=False)
+    return JsonResponse({"postcodes": []}, safe=False)

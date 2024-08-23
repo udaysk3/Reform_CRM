@@ -1,6 +1,41 @@
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
+<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css">
 
 <style>
+    .bootstrap-tagsinput {
+	margin: 0;
+	width: 100%;
+	padding: 0.5rem 0.75rem 0;
+	font-size: 1rem;
+  line-height: 1.25;
+	transition: border-color 0.15s ease-in-out;
+	
+	&.has-focus {
+    background-color: #fff;
+    border-color: #5cb3fd;
+	}
+	
+	.label-info {
+		display: inline-block;
+		background-color: #636c72;
+		padding: 0 .4em .15em;
+		border-radius: .25rem;
+		margin-bottom: 0.4em;
+    color: #fff !important;
+    width: fit-content;
+	}
+	
+	input {
+		margin-bottom: 0.5em;
+	}
+}
+
+.bootstrap-tagsinput .tag [data-role="remove"]:after {
+	content: '\00d7';
+}
+  </style>
+<style>
+  
   #assigned_to{
     cursor: pointer;
   }
@@ -340,14 +375,24 @@ table {
       <div class="modal-body">
         <form method="post" action="{% url 'app:add_coverage_areas' client.id %}">
           {% csrf_token %}
-          <div class="form-floating">
-            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Postcode" name="postcode">
-            <label  for="floatingInput">Postcode</label>
-            {% for area in coverage_areas %}
-    <p class="ms-2">{{ area.postcode }}</p>
-{% endfor %}
+            <select class="form-select" onchange="getPostcodes(this)" name="region">
+              <option value="nan">Select a region</option>
+              {% for council in councils %}
+                <option value="{{ council.name }}">{{ council.name }}</option>
+              {% endfor %}
+            </select>
 
-          </div>
+            <ul>
+              {% for key,value in display_coverage_areas.items %}
+                <li>
+                  <b> {{key}} :</b>
+                  <ul>
+                    {% for i in value %}
+                      <li class="ms-3">{{i}}</li>
+                    {% endfor %}
+                </li>
+              {% endfor %}
+            </ul>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -1078,15 +1123,12 @@ table {
                       </div>
                     </div>
 
-                    
-
-        
 <div class="mt-5 row">
                      <div class="col-6">
     <h3>Unarchive</h3>
     {% if products %}
     {% for camp in products %}
-        <a href="/edit_product/{{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
+        <a href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
             {{ camp.name }}
         </a>
 
@@ -1318,7 +1360,60 @@ table {
 
 {% endblock %} {% block js %}
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+<script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
+
 <script>
+
+  
+
+
+  function getPostcodes(e) {
+    const region = e.value;
+    fetch('/get_postcodes/' + region)
+      .then(response => response.json())
+      .then(data => {
+        if (document.querySelector('.postcodes')) {
+        document.querySelector('.postcodes').remove();
+      }
+      const newField = document.createElement('div');
+      newField.classList.add('mb-3', 'postcodes');
+      var input = `
+        <label for="postcodes" class="form-label">Postcodes</label>
+        <input type="text" id="postcodes" class="form-control" placeholder="">
+        <input type="hidden" name="postcodes" id="hidden-postcodes">
+      `;
+      newField.innerHTML = input;
+      $(document).ready(function() {
+        
+    $('#postcodes').tagsinput({
+        trimValue: true,
+        confirmKeys: [13, 44, 32],
+        focusClass: 'my-focus-class'
+    });
+
+        data['postcodes'].forEach(function(tag) {
+                $('#postcodes').tagsinput('add', tag);
+        });
+
+    $('form').on('submit', function() {
+        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(','));
+    });
+
+    $('.bootstrap-tagsinput input').on('focus', function() {
+        $(this).closest('.bootstrap-tagsinput').addClass('has-focus');
+    }).on('blur', function() {
+        $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
+    });
+    
+});
+      
+      e.insertAdjacentElement('afterend', newField);
+      })    
+  }
+
   const drop2 = document.querySelector('.drop2');
   drop2.addEventListener('click',()=>{
     if(drop2.classList.contains('show')){
@@ -1359,7 +1454,6 @@ table {
       function geocodeNextPostcode() {
         if (index >= postcodes.length) return;
         var postcode = postcodes[index].innerHTML.trim();
-        console.log(`Geocoding postcode: ${postcode}`);
         if(postcode == 'BA8'){
           postcode = 'BA8 0JG'
         }

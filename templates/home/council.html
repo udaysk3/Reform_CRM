@@ -1,6 +1,41 @@
 
 {% extends "base.html" %}
 {% load static %}
+{% block css %}
+<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css">
+  <style>
+    .bootstrap-tagsinput {
+	margin: 0;
+	width: 100%;
+	padding: 0.5rem 0.75rem 0;
+	font-size: 1rem;
+  line-height: 1.25;
+	transition: border-color 0.15s ease-in-out;
+	
+	&.has-focus {
+    background-color: #fff;
+    border-color: #5cb3fd;
+	}
+	
+	.label-info {
+		display: inline-block;
+		background-color: #636c72;
+		padding: 0 .4em .15em;
+		border-radius: .25rem;
+		margin-bottom: 0.4em;
+	}
+	
+	input {
+		margin-bottom: 0.5em;
+	}
+}
+
+.bootstrap-tagsinput .tag [data-role="remove"]:after {
+	content: '\00d7';
+}
+  </style>
+
+{% endblock %}
 {% block search %}
 
 <input
@@ -34,8 +69,13 @@
             <div class="mb-3 mb-sm-0">
              <a href="{% url 'app:council' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Local Authority Management</h5></a>
             </div>
+            {% if request.GET.page == 'edit_council' %}
+            {% else %}
             <div class="mb-3 mb-sm-0">
               <!-- Button trigger modal -->
+            
+
+
                <button type="button" class="btn btn-primary position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
                 <i class="bi bi-plus-lg"></i> Local Authority
               </button>
@@ -55,8 +95,14 @@
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name='name'>
                       </div>
-                      
-                      
+
+                      <div class="mb-3">
+                        <label for="postcodes" class="form-label">Postcodes</label>
+                        <input type="text" id="postcodes" class="form-control" placeholder="">
+                        <input type="hidden" name="postcodes" id="hidden-postcodes">
+                      </div>
+                     
+
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -66,6 +112,7 @@
                   </div>
                 </div>
               </div>
+              {% endif %}
             </div>
           </div>
         <div>
@@ -82,22 +129,11 @@
                       <label for="name" class="form-label">Name</label>
                       <input type="text" class="form-control" name="name" id="name" value="{{ council.name }}" required>
                   </div>
-                  <div class="mb-3">
-                    <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number"  value="{{ council.phone_number }}">
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email"  value="{{ council.email }}">
-                </div>
-                <div class="mb-3">
-                    <label for="postcode" class="form-label">Postcode</label>
-                    <input type="text" class="form-control" id="postcode" name="postcode" value="{{ council.postcode }}">
-                </div>
-                <div class="mb-3">
-                    <label for="address" class="form-label">Address</label>
-                    <textarea class="form-control" id="address" name="address">{{ council.address }}</textarea>
-                </div>
+                      <div class="mb-3">
+                        <label for="postcodes" class="form-label">Postcodes</label>
+                        <input type="text" id="postcodes" class="form-control" placeholder="">
+                        <input type="hidden" name="postcodes" id="hidden-postcodes">
+                      </div>
                   <button type="submit" class="btn btn-primary">Update Funding Route</button>
               </form>
               {% else %}
@@ -140,6 +176,7 @@
   </div>
 </div>
 
+<p class="postcodes" style="color: transparent;">{{ council.postcodes }}</p>
 
 
 
@@ -150,10 +187,16 @@
 
 {% block js %}
 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+<script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
 <script>
 
 
   $(document).ready(function(){
+    
     $("#myInput").on("keyup", function() {
       var value = $(this).val().toLowerCase();
       $("#myTable tr").filter(function() {
@@ -161,176 +204,69 @@
       });
     });
   });
+
+  {% if request.GET.page == 'edit_council' %}
+
+  $(document).ready(function() {
+        
+    $('#postcodes').tagsinput({
+        trimValue: true,
+        confirmKeys: [13, 44, 32],
+        focusClass: 'my-focus-class'
+    });
+
+    let postcodesString = document.querySelector('.postcodes').innerHTML; 
+    console.log(postcodesString) // Remove any leading/trailing whitespace
+    if (postcodesString) {  // Check if the string is not empty
+        let initialTags = postcodesString.split(',').map(tag => tag.trim());  // Split and trim each tag
+        initialTags.forEach(function(tag) {
+            if (tag) {  // Add only non-empty tags
+                $('#postcodes').tagsinput('add', tag);
+            }
+        });
+    }
+
+    $('form').on('submit', function() {
+        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(','));
+    });
+
+    $('.bootstrap-tagsinput input').on('focus', function() {
+        $(this).closest('.bootstrap-tagsinput').addClass('has-focus');
+    }).on('blur', function() {
+        $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
+    });
+    
+});
+
+{% else %}
+
+  $(document).ready(function() {
+    $('#postcodes').tagsinput({
+        trimValue: true,
+        confirmKeys: [13, 44, 32],
+        focusClass: 'my-focus-class'
+    });
+
+    $('form').on('submit', function() {
+        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(','));
+    });
+
+    $('.bootstrap-tagsinput input').on('focus', function() {
+        $(this).closest('.bootstrap-tagsinput').addClass('has-focus');
+    }).on('blur', function() {
+        $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
+    });
+    
+});
+
+{% endif %} 
   
   
 
 </script>
 
-<script type="module" src="{% static 'js/ukcouncils.js' %}"></script>
-<script type="module">
-  import { ukGeography } from "{% static 'js/ukcouncils.js' %}";
-  console.log(ukGeography)
-  jQuery(document).ready(function ($) {
-    let councils = ukGeography;
-    comboTree1 = $("#justAnInputBox").comboTree({
-      source: councils,
-      isMultiple: true,
-      cascadeSelect: false,
-      collapse: true,
-      selectAll: true,
-    });
-  });
-</script>
 
 
-  
-<script type="text/javascript">
-  const SampleJSONData = [
-    {
-      id: 0,
-      title: "Horse",
-    },
-    {
-      id: 1,
-      title: "Birds",
-      subs: [
-        {
-          id: 10,
-          title: "Pigeon",
-        },
-        {
-          id: 11,
-          title: "Parrot",
-        },
-        {
-          id: 12,
-          title: "Owl",
-        },
-        {
-          id: 13,
-          title: "Falcon",
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "Rabbit",
-    },
-    {
-      id: 3,
-      title: "Fox",
-    },
-    {
-      id: 5,
-      title: "Cats",
-      subs: [
-        {
-          id: 50,
-          title: "Kitty",
-        },
-        {
-          id: 51,
-          title: "Bigs",
-          subs: [
-            {
-              id: 510,
-              title: "Cheetah",
-            },
-            {
-              id: 511,
-              title: "Jaguar",
-            },
-            {
-              id: 512,
-              title: "Leopard",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 6,
-      title: "Fish",
-    },
-  ];
-  const SampleJSONData2 = [
-    {
-      id: 1,
-      title: "Four Wheels",
-      subs: [
-        {
-          id: 10,
-          title: "Car",
-        },
-        {
-          id: 11,
-          title: "Truck",
-        },
-        {
-          id: 12,
-          title: "Transporter",
-        },
-        {
-          id: 13,
-          title: "Dozer",
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "Two Wheels",
-      subs: [
-        {
-          id: 20,
-          title: "Cycle",
-        },
-        {
-          id: 21,
-          title: "Motorbike",
-        },
-        {
-          id: 22,
-          title: "Scooter",
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "Van",
-    },
-    {
-      id: 3,
-      title: "Bus",
-    },
-  ];
 
-  var comboTree1, comboTree2, comboTree3;
-
-  jQuery(document).ready(function ($) {
-    comboTree1 = $("#justAnInputBox").comboTree({
-      source: councils,
-      isMultiple: true,
-      cascadeSelect: false,
-      collapse: false,
-      selectAll: true,
-    });
-
-    comboTree3 = $("#justAnInputBox1").comboTree({
-      source: SampleJSONData,
-      isMultiple: true,
-      cascadeSelect: true,
-      collapse: false,
-    });
-
-    // comboTree3.setSource(SampleJSONData2);
-
-    comboTree2 = $("#justAnotherInputBox").comboTree({
-      source: SampleJSONData,
-      isMultiple: false,
-    });
-
-    comboTree1.toggleDropDown();
-  });
-</script>
 
 {% endblock js %}

@@ -318,4 +318,10 @@ urlpatterns = [
         views.delete_cj_stage_question,
         name="delete_cj_stage_question",
     ),
+    path(
+        "delete_council/<int:council_id>",
+        views.delete_council,
+        name="delete_council",
+    ),
+    path("get_postcodes/<str:region>", views.get_postcodes, name="get_postcodes"),
 ]
