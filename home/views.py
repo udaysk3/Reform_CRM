@@ -1506,7 +1506,6 @@ def add_client(request):
             recommendations=recommendations,
             address=address,
             district=district,
-            council=Councils.objects.get(name=district),
             constituency=constituency,
         )
         client.add_action(
@@ -2423,16 +2422,7 @@ def add_route_client(request, client_id):
             messages.error(request, "Route should be selected")
             return redirect(f"/client-detail/{client_id}")
         main_route = Route.objects.get(pk=request.POST.get("route"))
-        funding_route = Route.objects.create(
-            name=main_route.name,
-            description=main_route.description,
-            rules_regulations=main_route.rules_regulations,
-        )
-        client.route.add(funding_route)
-        for council in main_route.council.all():
-            funding_route.council.add(council)
-        funding_route.save()
-        main_route.client_route.add(funding_route)
+        client.route.add(main_route)
         main_route.save()
         client.save()
         messages.success(request, "Funding Route added successfully to a Client!")
@@ -3167,7 +3157,7 @@ def add_coverage_areas(request, client_id):
             return redirect(f"/client-detail/{client_id}")
         client = Clients.objects.get(pk=client_id)
         for postcode in request.POST.get("postcodes").split(","):
-            if len(postcode) > 4:
+            if len(postcode) > 4 or len(postcode) <= 1:
                 messages.error(request, f"Postcode {postcode} is not valid")
             else:
                 coverage_area, created = CoverageAreas.objects.get_or_create(
@@ -3175,9 +3165,9 @@ def add_coverage_areas(request, client_id):
                     postcode=re.sub(r"\s+", " ", postcode),
                     council=Councils.objects.get(name=request.POST.get("region")),
                 )
-                if created:
-                    council=Councils.objects.get(name=request.POST.get("region"))
-                    new = ',' + re.sub(r"\s+", " ", postcode)
+                council=Councils.objects.get(name=request.POST.get("region"))
+                if postcode not in council.postcodes:
+                    new = ',' + postcode
                     council.postcodes += new
                     council.save()
 
