@@ -236,10 +236,10 @@ table {
   scrollbar-width: none;  /* Firefox */
 }
 
-#map{
+/*#map{
   width: 350px;
   height: 160px;
-}
+}*/
 
 </style>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
@@ -381,18 +381,6 @@ table {
                 <option value="{{ council.name }}">{{ council.name }}</option>
               {% endfor %}
             </select>
-
-            <ul>
-              {% for key,value in display_coverage_areas.items %}
-                <li>
-                  <b> {{key}} :</b>
-                  <ul>
-                    {% for i in value %}
-                      <li class="ms-3">{{i}}</li>
-                    {% endfor %}
-                </li>
-              {% endfor %}
-            </ul>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -404,7 +392,20 @@ table {
 </div>
 
 
-                <div id="map"></div>
+                {% comment %} <div id="map"></div> {% endcomment %}
+                <div style="width: 350px; height: 160px; overflow-y: scroll;">
+                  <ul>
+                    {% for key,value in display_coverage_areas.items %}
+                      <li>
+                        <b> {{key}} :</b>
+                        <ul>
+                          {% for i in value %}
+                            <li class="ms-3">{{i}}</li>
+                          {% endfor %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -1352,10 +1353,10 @@ table {
 </div>
 </div>
 </div>
-
+{% comment %} 
 {% for area in coverage_areas %}
     <p class="postcodes" style="display: none;">{{ area.postcode }}</p>
-{% endfor %}
+{% endfor %} {% endcomment %}
 
 
 {% endblock %} {% block js %}
@@ -1436,7 +1437,7 @@ table {
 <script src="{% static 'node_modules/jquery-clock-timepicker/jquery-clock-timepicker.min.js' %}"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-
+{% comment %} 
  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg&libraries=places&callback=initMap" async defer></script>
 
 <script>
@@ -1508,7 +1509,7 @@ table {
     }
     document.querySelector('.close_form').submit();
   }
-</script>
+</script> {% endcomment %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.js" integrity="sha512-3CuraBvy05nIgcoXjVN33mACRyI89ydVHg7y/HMN9wcTVbHeur0SeBzweSd/rxySapO7Tmfu68+JlKkLTnDFNg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script >

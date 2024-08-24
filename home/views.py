@@ -3169,6 +3169,8 @@ def add_coverage_areas(request, client_id):
         for postcode in request.POST.get("postcodes").split(","):
             if postcode not in Councils.objects.get(name=request.POST.get("region")).postcodes.split(","):
                 messages.error(request, f"Postcode {postcode} is not in the region")
+            elif len(postcode) > 4:
+                messages.error(request, f"Postcode {postcode} is not in the region")
             else:
                 coverage_area = CoverageAreas.objects.get_or_create(
                     client=client,
