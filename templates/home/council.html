@@ -67,7 +67,7 @@
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             
             <div class="mb-3 mb-sm-0">
-             <a href="{% url 'app:council' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Local Authority Management</h5></a>
+             <a href="{% url 'app:council' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Region Management</h5></a>
             </div>
             {% if request.GET.page == 'edit_council' %}
             {% else %}
@@ -77,7 +77,7 @@
 
 
                <button type="button" class="btn btn-primary position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
-                <i class="bi bi-plus-lg"></i> Local Authority
+                <i class="bi bi-plus-lg"></i> Region
               </button>
 
               <!-- Modal -->
@@ -85,7 +85,7 @@
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Local Authority</h1>
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Region</h1>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form method='post' action="{% url 'app:add_local_authority'  %}">
@@ -122,7 +122,7 @@
               <!-- Similar to the user edit form, create a form for editing a council -->
               <!-- Adjust the form action URL and method accordingly -->
               {% if council %}
-                <h3>Edit Council</h3>
+                <h3>Edit Region</h3>
                 <form id="editcouncilForm" method="post" action="{% url 'app:edit_council' council.id %}">
                   {% csrf_token %}
                   <div class="mb-3">
@@ -134,10 +134,10 @@
                         <input type="text" id="postcodes" class="form-control" placeholder="">
                         <input type="hidden" name="postcodes" id="hidden-postcodes">
                       </div>
-                  <button type="submit" class="btn btn-primary">Update Funding Route</button>
+                  <button type="submit" class="btn btn-primary">Update Region</button>
               </form>
               {% else %}
-                <p>council not found.</p>
+                <p>region not found.</p>
               {% endif %}
               
             {% else %}
@@ -146,7 +146,7 @@
                   <thead>
   <tr>
     <th >
-      Council  <span id="arrow0"></span>
+      Region  <span id="arrow0"></span>
     </th>
   </tr>
 </thead>
@@ -161,7 +161,7 @@
                     {% endfor %}
                   {% else %}
                     <tr class="text-center display-flex align-items-center justify-content-center">
-                      <td colspan="6" class="text-center">No Funding Route</td>
+                      <td colspan="6" class="text-center">No Region</td>
                     </tr>
                   {% endif %}
                   </tbody>

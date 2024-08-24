@@ -2470,7 +2470,7 @@ def add_local_authority(request):
             created_at=datetime.now(pytz.timezone('Europe/London')),
             agent=User.objects.get(email=request.user),
         )
-        messages.success(request, "Local Authority added successfully!")
+        messages.success(request, "Region added successfully!")
         return redirect("app:council")
     return render(request, "home/council.html")
 
@@ -2481,7 +2481,7 @@ def edit_council(request, council_id):
         council.name = request.POST.get("name")
         council.postcodes = request.POST.get("postcodes")
         council.save()
-        messages.success(request, "Local Authority updated successfully!")
+        messages.success(request, "Region updated successfully!")
         return redirect(f"/council-detail/{council_id}")
     return render(request, "home/edit_council.html", {"council": council})
 
@@ -3166,13 +3166,15 @@ def add_coverage_areas(request, client_id):
             messages.error(request, "Region should be selected")
             return redirect(f"/client-detail/{client_id}")
         client = Clients.objects.get(pk=client_id)
-        print(request.POST.get("postcodes"), request.POST.get("region"))
         for postcode in request.POST.get("postcodes").split(","):
-            coverage_area = CoverageAreas.objects.create(
-                client=client,
-                postcode=re.sub(r"\s+", " ", postcode),
-                council=Councils.objects.get(name=request.POST.get("region")),
-            )
+            if postcode not in Councils.objects.get(name=request.POST.get("region")).postcodes.split(","):
+                messages.error(request, f"Postcode {postcode} is not in the region")
+            else:
+                coverage_area = CoverageAreas.objects.get_or_create(
+                    client=client,
+                    postcode=re.sub(r"\s+", " ", postcode),
+                    council=Councils.objects.get(name=request.POST.get("region")),
+                )
 
         messages.success(request, "Postcode Added Successfully")
         return redirect(r"/client-detail/" + str(client_id))
@@ -3478,7 +3480,7 @@ def edit_route(request, route_id):
     return redirect("app:funding_route")
 
 def customer_journey(request):
-    routes = Route.objects.all().filter(is_parent=True)
+    routes = Route.objects.all()
     stages = Stage.objects.all()
     return render(request, "home/customer_journey.html", {"funding_routes": routes, "stages":stages})
 

@@ -171,8 +171,7 @@
         </nav>
       </header>
       
-      <!--  Header End -->
-      {% if request.GET.page != 'customer' or request.GET.page != 'product' %}
+      {% comment %} {% if request.GET.page != 'customer' or request.GET.page != 'product' or 'council_detail' in request.GET.page %}
       {% for message in messages %}
       <div class="container-fluid p-0 m-0">
         <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
@@ -183,7 +182,7 @@
         </div>
       </div>
       {% endfor %}
-      {% endif %}
+      {% endif %} {% endcomment %}
 
       {% block content %}{% endblock content %}
       </div>

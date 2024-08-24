@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load custom %} {% block content %}
 
 
 <div class="row container-fluid">
@@ -45,6 +45,19 @@
             <div class="col-sm-6 mb-3 mb-sm-0">
               <div class="card m-0">
                 <div class="card-body m-0">
+                  
+                  <h6 class="mt-3">Postcodes</h6>
+                  <div class="card p-0 m-0">
+                    <div class="card-body p-3 m-0" style="height: 150px; overflow-y: auto">
+                      <ul>
+                        {% with postcodes=council.postcodes|split:',' %}
+                          {% for postcode in postcodes %}
+                            <li>{{ postcode }}</li>
+                          {% endfor %}
+                        {% endwith %}
+                      </ul>
+                    </div>
+                  </div>
                   
                   <h6 class="mt-3">Key Events</h6>
                   <div class="card p-0 m-0">
