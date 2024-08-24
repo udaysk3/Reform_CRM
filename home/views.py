@@ -3167,16 +3167,19 @@ def add_coverage_areas(request, client_id):
             return redirect(f"/client-detail/{client_id}")
         client = Clients.objects.get(pk=client_id)
         for postcode in request.POST.get("postcodes").split(","):
-            if postcode not in Councils.objects.get(name=request.POST.get("region")).postcodes.split(","):
-                messages.error(request, f"Postcode {postcode} is not in the region")
-            elif len(postcode) > 4:
-                messages.error(request, f"Postcode {postcode} is not in the region")
+            if len(postcode) > 4:
+                messages.error(request, f"Postcode {postcode} is not valid")
             else:
-                coverage_area = CoverageAreas.objects.get_or_create(
+                coverage_area, created = CoverageAreas.objects.get_or_create(
                     client=client,
                     postcode=re.sub(r"\s+", " ", postcode),
                     council=Councils.objects.get(name=request.POST.get("region")),
                 )
+                if created:
+                    council=Councils.objects.get(name=request.POST.get("region"))
+                    new = ',' + re.sub(r"\s+", " ", postcode)
+                    council.postcodes += new
+                    council.save()
 
         messages.success(request, "Postcode Added Successfully")
         return redirect(r"/client-detail/" + str(client_id))
