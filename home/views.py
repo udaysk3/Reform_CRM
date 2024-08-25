@@ -304,6 +304,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
             next = str(customer_id)
     # print(type(prev), next)
     customer = Customers.objects.get(pk=customer_id)
+    display_regions =[]
+    regions = Councils.objects.all()
+    for region in regions:
+        if customer.postcode in region.postcodes.split(','):
+            display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
     show_customer = customer
@@ -597,6 +602,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     "true_routes": true_routes,
                     "clients": clients,
                     "campaigns": campaigns,
+                    "display_regions":display_regions,
                 },
             )
     return render(
@@ -622,6 +628,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "products": products,
             "clients": clients,
             "campaigns": campaigns,
+            "display_regions":display_regions,
         },
     )
 
@@ -715,32 +722,25 @@ def client_detail(request, client_id, s_client_id=None):
     coverage_areas = CoverageAreas.objects.all().filter(
         client=Clients.objects.get(pk=client_id)
     )
-    display_coverage_areas = {}
-    for coverage_area in coverage_areas:
-        if coverage_area.council.name in display_coverage_areas:
-            display_coverage_areas[coverage_area.council.name].append(
-                coverage_area.postcode
-            )
-        else:
-            display_coverage_areas[coverage_area.council.name] = [coverage_area.postcode]
     
     regions = Councils.objects.all()
     display_regions = {}
     
     for region in regions:
-        council_name = region.name
-        region_postcodes = region.postcodes.split(",")
-        coverage_postcodes = display_coverage_areas.get(council_name, [])
-    
-        if coverage_postcodes:
-            if sorted(region_postcodes) == sorted(coverage_postcodes):
-                display_regions[council_name] = "All"
-            elif len(coverage_postcodes) < len(region_postcodes):
-                display_regions[council_name] = "Partial"
-            else:
-                display_regions[council_name] = "None"
+        region_postcodes = region.postcodes.split(',')
+        covered_postcodes = []
+
+        for coverage_area in coverage_areas:
+            if coverage_area.postcode in region_postcodes:
+                covered_postcodes.append(coverage_area.postcode)
+
+        if len(covered_postcodes) == len(region_postcodes):
+            display_regions[region] = 'All'
+        elif len(covered_postcodes) > 0:
+            display_regions[region] = 'Partial'
         else:
-            display_regions[council_name] = "None"
+            display_regions[region] = 'None'
+
 
     clients = (
         Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
@@ -889,7 +889,6 @@ def client_detail(request, client_id, s_client_id=None):
                 "uncampaigns": uncampaigns,
                 "products": products,
                 "unproducts": unproducts,
-                "display_coverage_areas": display_coverage_areas,
                 "coverage_areas":coverage_area_client,
                 "all_products": all_products,
                 "all_routes": all_routes,
@@ -922,7 +921,6 @@ def client_detail(request, client_id, s_client_id=None):
             "uncampaigns": uncampaigns,
             "products": products,
             "unproducts": unproducts,
-            "display_coverage_areas": display_coverage_areas,
             "coverage_areas": coverage_area_client,
             "all_products": all_products,
             "all_routes": all_routes,
@@ -3186,26 +3184,28 @@ def get_notifications(request):
 
 def add_coverage_areas(request, client_id):
     if request.method == "POST":
-        if request.POST.get("region") == 'nan':
-            messages.error(request, "Region should be selected")
-            return redirect(f"/client-detail/{client_id}")
         client = Clients.objects.get(pk=client_id)
-        for postcode in request.POST.get("postcodes").split(","):
-            if len(postcode) > 4 and len(postcode) <= 1:
+        regions = Councils.objects.all()
+        postcodes = request.POST.get("postcodes").split(",")
+        regions = Councils.objects.all()
+        
+        for postcode in postcodes:
+            found = False
+            for region in regions:
+                if postcode in region.postcodes.split(','):
+                    CoverageAreas.objects.create(
+                        client=client,
+                        postcode=postcode,
+                    )
+                    found = True
+                    break 
+                
+            if not found:
                 messages.error(request, f"Postcode {postcode} is not valid")
             else:
-                coverage_area, created = CoverageAreas.objects.get_or_create(
-                    client=client,
-                    postcode=re.sub(r"\s+", " ", postcode),
-                    council=Councils.objects.get(name=request.POST.get("region")),
-                )
-                council=Councils.objects.get(name=request.POST.get("region"))
-                if postcode not in council.postcodes:
-                    new = ',' + postcode
-                    council.postcodes += new
-                    council.save()
+                messages.success(request, "Coverage Area added successfully!")
 
-        messages.success(request, "Postcode Added Successfully")
+                    
         return redirect(r"/client-detail/" + str(client_id))
     return render(request, "home/admin.html")
 

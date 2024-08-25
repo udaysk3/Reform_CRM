@@ -375,12 +375,11 @@ table {
       <div class="modal-body">
         <form method="post" action="{% url 'app:add_coverage_areas' client.id %}">
           {% csrf_token %}
-            <select class="form-select" onchange="getPostcodes(this)" name="region">
-              <option value="nan">Select a region</option>
-              {% for council in councils %}
-                <option value="{{ council.name }}">{{ council.name }}</option>
-              {% endfor %}
-            </select>
+            <div class="mb-3">
+              <label for="postcodes" class="form-label">Postcodes</label>
+              <input type="text" id="postcodes" class="form-control" placeholder="">
+              <input type="hidden" name="postcodes" id="hidden-postcodes">
+            </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -395,14 +394,8 @@ table {
                 {% comment %} <div id="map"></div> {% endcomment %}
                 <div style="width: 350px; height: 160px; overflow-y: scroll;">
                   <ul>
-                    {% for key,value in display_coverage_areas.items %}
-                      <li>
-                        <b> {{key}} :</b>
-                        <ul>
-                          {% for i in value %}
-                            <li class="ms-3">{{i}}</li>
-                          {% endfor %}
-                      </li>
+                    {% for value in coverage_areas %}
+                      <li class="ms-3">{{ value.postcode }}</li>
                     {% endfor %}
                   </ul>
                 </div>
@@ -858,6 +851,7 @@ table {
 
 
 
+              
 
                 <h6>History</h6>
                 <div class="card p-0 m-0">
@@ -924,7 +918,41 @@ table {
                     </ul>
                   </div>
                 </div>
-                <h6 class="mt-3">Key Events</h6>
+
+                <h6 class="mt-3">Region</h6>
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0 position-relative"
+                    style="height: 200px; overflow-y: auto"
+                  >
+                    <div class="mt-5 col">
+                    
+                      {% for key,value in display_regions.items %}
+                        <b class="btn
+                          {% if value == 'All' %} 
+                            btn-primary
+                          {% elif value == 'Partial' %}
+                            btn-outline-primary
+                          {% else %}
+                            btn-danger
+                          {% endif %}
+                        "> {{key}} - {{ value }}</b>
+                      {% endfor %}
+                    
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="card m-0">
+              <div class="card-body">
+                <div class="d-grid gap-2 d-md-block">
+
+                  <h6 class="mt-3">Key Events</h6>
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0"
@@ -955,38 +983,9 @@ table {
                     </ul>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="col-sm-6">
-            <div class="card m-0">
-              <div class="card-body">
-                <div class="d-grid gap-2 d-md-block">
 
-                <h6 class="mt-3">Region</h6>
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0 position-relative"
-                    style="height: 200px; overflow-y: auto"
-                  >
-                    <div class="mt-5 col">
-                    
-                      {% for key,value in display_regions.items %}
-                        <b class="btn
-                          {% if value == 'All' %} 
-                            btn-primary
-                          {% elif value == 'Partial' %}
-                            btn-outline-primary
-                          {% else %}
-                            btn-danger
-                          {% endif %}
-                        "> {{key}} </b>
-                      {% endfor %}
-                    
-                    </div>
-                  </div>
-                </div>
+                
 
                 <h6 class="mt-3">Campaign</h6>
                 <div class="card p-0 m-0">
@@ -1392,39 +1391,15 @@ table {
 
 <script>
 
-  
-
-
-  function getPostcodes(e) {
-    const region = e.value;
-    fetch('/get_postcodes/' + region)
-      .then(response => response.json())
-      .then(data => {
-        if (document.querySelector('.postcodes')) {
-        document.querySelector('.postcodes').remove();
-      }
-      const newField = document.createElement('div');
-      newField.classList.add('mb-3', 'postcodes');
-      var input = `
-        <label for="postcodes" class="form-label">Postcodes</label>
-        <input type="text" id="postcodes" class="form-control" placeholder="">
-        <input type="hidden" name="postcodes" id="hidden-postcodes">
-      `;
-      newField.innerHTML = input;
-      $(document).ready(function() {
-    
+  $(document).ready(function() {
     $('#postcodes').tagsinput({
         trimValue: true,
         confirmKeys: [13, 44, 32],
         focusClass: 'my-focus-class'
     });
 
-    data['postcodes'].forEach(function(tag) {
-        $('#postcodes').tagsinput('add', tag.toUpperCase());
-    });
-
     $('form').on('submit', function() {
-        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(',').toUpperCase());
+        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(','));
     });
 
     $('.bootstrap-tagsinput input').on('focus', function() {
@@ -1441,11 +1416,6 @@ table {
     });
     
 });
-
-      
-      e.insertAdjacentElement('afterend', newField);
-      })    
-  }
 
   const drop2 = document.querySelector('.drop2');
   drop2.addEventListener('click',()=>{
