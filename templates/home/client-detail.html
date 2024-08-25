@@ -963,9 +963,32 @@ table {
             <div class="card m-0">
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
-                    <!-- Modal -->
 
-                    <h6 class="mt-3">Campaign</h6>
+                <h6 class="mt-3">Region</h6>
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0 position-relative"
+                    style="height: 200px; overflow-y: auto"
+                  >
+                    <div class="mt-5 col">
+                    
+                      {% for key,value in display_regions.items %}
+                        <b class="btn
+                          {% if value == 'All' %} 
+                            btn-primary
+                          {% elif value == 'Partial' %}
+                            btn-outline-primary
+                          {% else %}
+                            btn-danger
+                          {% endif %}
+                        "> {{key}} </b>
+                      {% endfor %}
+                    
+                    </div>
+                  </div>
+                </div>
+
+                <h6 class="mt-3">Campaign</h6>
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0 position-relative"
@@ -1087,6 +1110,7 @@ table {
 </div>
 </div>
 </div>
+                
                                    
                 <h6>Products</h6>
                 <div class="card p-0 m-0">
@@ -1388,19 +1412,19 @@ table {
       `;
       newField.innerHTML = input;
       $(document).ready(function() {
-        
+    
     $('#postcodes').tagsinput({
         trimValue: true,
         confirmKeys: [13, 44, 32],
         focusClass: 'my-focus-class'
     });
 
-        data['postcodes'].forEach(function(tag) {
-                $('#postcodes').tagsinput('add', tag);
-        });
+    data['postcodes'].forEach(function(tag) {
+        $('#postcodes').tagsinput('add', tag.toUpperCase());
+    });
 
     $('form').on('submit', function() {
-        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(','));
+        $('#hidden-postcodes').val($('#postcodes').tagsinput('items').join(',').toUpperCase());
     });
 
     $('.bootstrap-tagsinput input').on('focus', function() {
@@ -1408,8 +1432,16 @@ table {
     }).on('blur', function() {
         $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
     });
+
+    $('.bootstrap-tagsinput input').on('keypress', function(e) {
+        if (e.which === 32) { // Space key
+            let currentValue = $(this).val().toUpperCase(); // Convert to uppercase
+            $(this).val(currentValue);
+        }
+    });
     
 });
+
       
       e.insertAdjacentElement('afterend', newField);
       })    

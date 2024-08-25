@@ -235,6 +235,13 @@
     }).on('blur', function() {
         $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
     });
+
+    $('.bootstrap-tagsinput input').on('keypress', function(e) {
+        if (e.which === 32) { // Space key
+            let currentValue = $(this).val().toUpperCase(); // Convert to uppercase
+            $(this).val(currentValue);
+        }
+    });
     
 });
 
@@ -255,6 +262,13 @@
         $(this).closest('.bootstrap-tagsinput').addClass('has-focus');
     }).on('blur', function() {
         $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
+    });
+
+    $('.bootstrap-tagsinput input').on('keypress', function(e) {
+        if (e.which === 32) { // Space key
+            let currentValue = $(this).val().toUpperCase(); // Convert to uppercase
+            $(this).val(currentValue);
+        }
     });
     
 });

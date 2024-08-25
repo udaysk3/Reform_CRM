@@ -708,18 +708,40 @@ def check_time(time_to_check, conditions):
 
 @login_required
 def client_detail(request, client_id, s_client_id=None):
-    all_clients = []
     prev = None
     next = None
     domain_name = request.build_absolute_uri("/")[:-1]
     signatures = Signature.objects.all()
-    coverage_areas = CoverageAreas.objects.all().filter(client=Clients.objects.get(pk=client_id))
+    coverage_areas = CoverageAreas.objects.all().filter(
+        client=Clients.objects.get(pk=client_id)
+    )
     display_coverage_areas = {}
     for coverage_area in coverage_areas:
-        if display_coverage_areas.get(coverage_area.council):
-            display_coverage_areas[coverage_area.council].append(coverage_area.postcode)
+        if coverage_area.council.name in display_coverage_areas:
+            display_coverage_areas[coverage_area.council.name].append(
+                coverage_area.postcode
+            )
         else:
-            display_coverage_areas[coverage_area.council] = [coverage_area.postcode]
+            display_coverage_areas[coverage_area.council.name] = [coverage_area.postcode]
+    
+    regions = Councils.objects.all()
+    display_regions = {}
+    
+    for region in regions:
+        council_name = region.name
+        region_postcodes = region.postcodes.split(",")
+        coverage_postcodes = display_coverage_areas.get(council_name, [])
+    
+        if coverage_postcodes:
+            if sorted(region_postcodes) == sorted(coverage_postcodes):
+                display_regions[council_name] = "All"
+            elif len(coverage_postcodes) < len(region_postcodes):
+                display_regions[council_name] = "Partial"
+            else:
+                display_regions[council_name] = "None"
+        else:
+            display_regions[council_name] = "None"
+
     clients = (
         Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_client=None)
@@ -874,7 +896,7 @@ def client_detail(request, client_id, s_client_id=None):
                 "routes":routes,
                 "unroutes":unroutes,
                 "stages": stages,
-                
+                "display_regions":display_regions,
             },
         )
 
@@ -907,6 +929,7 @@ def client_detail(request, client_id, s_client_id=None):
             "routes": routes,
             "unroutes": unroutes,
             "stages": stages,
+            "display_regions": display_regions,
         },
     )
 
@@ -2453,13 +2476,24 @@ def add_local_authority(request):
     if request.method == "POST":
         name = request.POST.get("name")
         postcodes = request.POST.get("postcodes")
-        print(postcodes)
+        main_postcodes = ''
+        for postcode in request.POST.get("postcodes").split(","):
+            postcode = postcode.strip()  # Trim any leading/trailing whitespace
+            if len(postcode) < 2 or len(postcode) > 4:  # Adjust this range as needed
+                messages.error(request, f"Postcode {postcode} is not valid")
+            else:
+                if main_postcodes == '':
+                    main_postcodes += postcode
+                else:
+                    main_postcodes += ',' + postcode
+        print(main_postcodes)
+
         council = Councils.objects.create(
             name=name,
-            postcodes=postcodes,
+            postcodes=main_postcodes,
             created_at=datetime.now(pytz.timezone('Europe/London')),
-            agent=User.objects.get(email=request.user),
         )
+
         messages.success(request, "Region added successfully!")
         return redirect("app:council")
     return render(request, "home/council.html")
@@ -3157,7 +3191,7 @@ def add_coverage_areas(request, client_id):
             return redirect(f"/client-detail/{client_id}")
         client = Clients.objects.get(pk=client_id)
         for postcode in request.POST.get("postcodes").split(","):
-            if len(postcode) > 4 or len(postcode) <= 1:
+            if len(postcode) > 4 and len(postcode) <= 1:
                 messages.error(request, f"Postcode {postcode} is not valid")
             else:
                 coverage_area, created = CoverageAreas.objects.get_or_create(
