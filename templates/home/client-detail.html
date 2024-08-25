@@ -1284,9 +1284,11 @@ table {
     <h3>Unarchive</h3>
     {% if routes %}
     {% for camp in routes %}
-        <a href="{% url 'app:edit_local_funding_route' camp.id %}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
+        {% comment %} <a href="{% url 'app:edit_local_funding_route' camp.id %}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
             {{ camp.name }}
-        </a>
+        </a> {% endcomment %}
+
+        <h1 class="btn btn-primary mb-3">{{ camp.name }}</h1>
 
         
     {% endfor %}

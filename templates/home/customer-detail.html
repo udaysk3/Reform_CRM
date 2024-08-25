@@ -403,6 +403,15 @@ table {
                 <h6><b>County</b> : {{customer.county}}</h6>
                 <h6><b>Postcode</b> : {{customer.postcode}}</h6>
                 <h6><b>Country</b> : {{customer.country}}</h6>
+                <h6><b>Region</b> : 
+                  {% for region in display_regions %}
+                    {% if forloop.counter == 1 %}
+                    {{region.name}} 
+                    {% else %}
+                    , {{region.name}}
+                    {% endif %}
+                  {% endfor %}
+                </h6>
               </div>
             </div>
           </div>
@@ -997,32 +1006,7 @@ table {
                   </div>
                 </div>
 
-                
-                <h6 class="mt-3">Region</h6>
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0 position-relative"
-                    style="height: 200px; overflow-y: auto"
-                  >
-                    <div class="mt-5 col">
-                    
-                      {% for region in display_regions %}
-                        <b class="btn btn-primary"> {{region.name}} </b>
-                      {% endfor %}
-                    
-                    </div>
-                  </div>
-                </div>
-                
-              </div>
-            </div>
-          </div>
 
-          
-
-          <div class="col-sm-6">
-            <div class="card m-0">
-              <div class="card-body">
                 <h6 class="mt-3">Key Events</h6>
                 <div class="card p-0 m-0">
                   <div
@@ -1054,6 +1038,18 @@ table {
                     </ul>
                   </div>
                 </div>
+
+                
+              </div>
+            </div>
+          </div>
+
+          
+
+          <div class="col-sm-6">
+            <div class="card m-0">
+              <div class="card-body">
+                
 
 
                 <h6>Available Funding Routes</h6>

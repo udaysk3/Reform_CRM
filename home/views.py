@@ -307,7 +307,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
     display_regions =[]
     regions = Councils.objects.all()
     for region in regions:
-        if customer.postcode in region.postcodes.split(','):
+        if customer.postcode.split(' ')[0] in region.postcodes.split(','):
             display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
@@ -793,7 +793,11 @@ def client_detail(request, client_id, s_client_id=None):
     unproducts = Product.objects.all().filter(client=client).filter(archive=True)
     councils = Councils.objects.all()
     coverage_area_client = CoverageAreas.objects.filter(client=client)
-    council_coverage_area = Councils.objects.filter(id__in=coverage_area_client.values_list('council_id', flat=True))
+    council_coverage_area = []
+    for coun in councils:
+        for ca in coverage_area_client:
+            if ca.postcode in coun.postcodes.split(','):
+                council_coverage_area.append(coun)
     all_routes = Route.objects.filter(council__in=council_coverage_area)
 
     routes = Route.objects.all().filter(client=client).filter(archive=False)
@@ -1304,7 +1308,6 @@ def add_customer(request):
 
             return redirect("/customer?page=add_customer")
 
-        postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
         obj = getEPC(postcode, house_name, street_name)
         energy_rating = None
@@ -3333,21 +3336,21 @@ def edit_local_funding_route(request, funding_route_id):
     clients = funding_route.client.all()
     if clients.exists():
         client_id = clients.first().id
-    stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
-    fields = {}
-    saved_rules_regulations = {}
-    if funding_route.rules_regulations:
-        saved_rules_regulations = json.loads(funding_route.rules_regulations)
-    if stages.exists():
-        for stage in stages:
-            fields[stage.name] = json.loads(stage.fields)
-    if funding_route.sub_rules_regulations:
-        sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
-    else:
-        sub_rules_regulations = None
-    if stages.exists():
-        for stage in stages:
-            fields[stage.name] = json.loads(stage.fields)
+    # stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
+    # fields = {}
+    # saved_rules_regulations = {}
+    # if funding_route.rules_regulations:
+    #     saved_rules_regulations = json.loads(funding_route.rules_regulations)
+    # if stages.exists():
+    #     for stage in stages:
+    #         fields[stage.name] = json.loads(stage.fields)
+    # if funding_route.sub_rules_regulations:
+    #     sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
+    # else:
+    #     sub_rules_regulations = None
+    # if stages.exists():
+    #     for stage in stages:
+    #         fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
         dynamicStages = request.POST.getlist("subDynamicStage")
         dynamicFields = request.POST.getlist("subDynamicField")
@@ -3367,9 +3370,9 @@ def edit_local_funding_route(request, funding_route_id):
         "home/edit_local_funding_routes.html",
         {
             "funding_route": funding_route,
-            "fields": fields,
-            "saved_rules_regulations": saved_rules_regulations,
-            "sub_rules_regulations": sub_rules_regulations,
+            # "fields": fields,
+            # "saved_rules_regulations": saved_rules_regulations,
+            # "sub_rules_regulations": sub_rules_regulations,
         },
     )
 
