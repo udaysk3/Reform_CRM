@@ -242,6 +242,18 @@
             $(this).val(currentValue);
         }
     });
+
+    $('.bootstrap-tagsinput input').on('paste', function(e) {
+        let pastedData = e.originalEvent.clipboardData.getData('text');
+        e.preventDefault(); 
+
+        let postcodes = pastedData.split(/\s+/); 
+        for (let i = 0; i < postcodes.length; i++) {
+            $('#postcodes').tagsinput('add', postcodes[i].toUpperCase());
+        }
+        
+        $(this).val(''); 
+    });
     
 });
 
@@ -270,8 +282,20 @@
             $(this).val(currentValue);
         }
     });
-    
+
+    $('.bootstrap-tagsinput input').on('paste', function(e) {
+        let pastedData = e.originalEvent.clipboardData.getData('text');
+        e.preventDefault(); 
+
+        let postcodes = pastedData.split(/\s+/); 
+        for (let i = 0; i < postcodes.length; i++) {
+            $('#postcodes').tagsinput('add', postcodes[i].toUpperCase());
+        }
+        
+        $(this).val(''); 
+    });
 });
+
 
 {% endif %} 
   

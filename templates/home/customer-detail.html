@@ -226,7 +226,7 @@ table {
   </div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Campaign</b> - </span>
-    <div class="mt-1 link-primary" id="change_campaign">
+    <div class="mt-1" >
     {% if customer.campaign %}
      {{ customer.campaign.name }}
     {% else %}
@@ -284,7 +284,7 @@ table {
 
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Client</b> - </span>
-    <div class="mt-1 link-primary" id="change_client">
+    <div class="mt-1">
     {% if customer.client %}
      {{ customer.client.company_name }}
     {% else %}
@@ -1119,7 +1119,7 @@ table {
                 </div>
                   </div>
                 </div>
-                <h6>Stage</h6>
+                {% comment %} <h6>Stage</h6>
                 {% if values %}
                               
                               
@@ -1237,7 +1237,7 @@ table {
                 {% endif %}
                               
 
-                  
+                   {% endcomment %}
                   </div>
                 </div>
               </div>

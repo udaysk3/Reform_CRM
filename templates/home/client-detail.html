@@ -423,9 +423,10 @@ table {
     <div class="card p-0">
       <div class="card-body p-3 m-0">
         <div class="row">
-          <div class="col-sm-6 mb-3 mb-sm-0">
+          <div class="col mb-3 mb-sm-0">
             <div class="card m-0">
-              <div class="card-body m-0">
+              <div class="card-body row m-0">
+              <div class="col">
                 <h6 class="fs-6">
                   <b>Next Action</b>: {% with latest_action=client.get_created_at_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
@@ -876,26 +877,26 @@ table {
                           {% if v.5 == 'Email Received' %}
                           - <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#Email_data{{forloop.counter}}">
                             View Email
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Email</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        {{ v.8 }}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Understood</button>
-      </div>
-    </div>
-  </div>
-</div>
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Email</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                {{ v.8 }}
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Understood</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                           {% else %}
                           - {{ v.8 }} 
                           {% endif %}
@@ -918,76 +919,82 @@ table {
                     </ul>
                   </div>
                 </div>
-
-                <h6 class="mt-3">Region</h6>
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0 position-relative"
-                    style="height: 200px; overflow-y: auto"
-                  >
-                    <div class="mt-5 col">
-                    
-                      {% for key,value in display_regions.items %}
-                        <b class="btn
-                          {% if value == 'All' %} 
-                            btn-primary
-                          {% elif value == 'Partial' %}
-                            btn-outline-primary
-                          {% else %}
-                            btn-danger
-                          {% endif %}
-                        "> {{key}} - {{ value }}</b>
-                      {% endfor %}
-                    
+              </div>
+              
+                <div class="col">
+                  <h6 class="fs-6"> <b> Key Events </b></h6>
+                  <div class="card p-0 m-0">
+                    <div
+                      class="card-body p-3 m-0"
+                      style="height: 150px; overflow-y: auto"
+                    >
+                      <ul class="ps-3">
+                        {% for key,value in events.items %}
+                        <li><b>{{ key }}</b></li>
+                        <ul class="ps-3">
+                          {% for v in value %}
+                          <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} - {{ v.2 }} <b>{{ v.3 }} {{ v.4 }}</b> - <b> {{ v.5 }} </b>
+                            {% if v.5 == 'CB' %}
+                            {{ v.6 }}
+                            {% endif %}
+                            {% if v.7 %}
+                             spoke to <b> {{ v.7 }}</b> 
+                            {% endif %}
+                            {% if v.8 %}
+                            - {{ v.8 }} 
+                            {% endif %}
+                          </li>
+                            {% endfor %}
+                        </ul>
+                        {% endfor %}
+                        {% if client.imported %}
+                          <li class="mb-2"> <b>{{ client.created_at }}</b> - {{ client.house_name }} - {{ client.postcode }} - Imported/Added by {{ client.agent.first_name }} {{ client.agent.last_name }} </li>
+                        {% endif %}
+                      </ul>
                     </div>
                   </div>
                 </div>
-                
+
               </div>
             </div>
           </div>
+          </div>
 
-          <div class="col-sm-6">
-            <div class="card m-0">
-              <div class="card-body">
-                <div class="d-grid gap-2 d-md-block">
-
-                  <h6 class="mt-3">Key Events</h6>
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 150px; overflow-y: auto"
-                  >
-                    <ul class="ps-3">
-                      {% for key,value in events.items %}
-                      <li><b>{{ key }}</b></li>
-                      <ul class="ps-3">
-                        {% for v in value %}
-                        <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} - {{ v.2 }} <b>{{ v.3 }} {{ v.4 }}</b> - <b> {{ v.5 }} </b>
-                          {% if v.5 == 'CB' %}
-                          {{ v.6 }}
-                          {% endif %}
-                          {% if v.7 %}
-                           spoke to <b> {{ v.7 }}</b> 
-                          {% endif %}
-                          {% if v.8 %}
-                          - {{ v.8 }} 
-                          {% endif %}
-                        </li>
-                          {% endfor %}
-                      </ul>
-                      {% endfor %}
-                      {% if client.imported %}
-                        <li class="mb-2"> <b>{{ client.created_at }}</b> - {{ client.house_name }} - {{ client.postcode }} - Imported/Added by {{ client.agent.first_name }} {{ client.agent.last_name }} </li>
-                      {% endif %}
-                    </ul>
+          <div class="row">
+            <div class="card m-3">
+              <div class="card-body row">
+                <div class="col">
+                  <h6 class="fs-6"> <b> Region </b></h6>
+                  <div class="card p-0 m-0">
+                    <div
+                      class="card-body p-3 m-0 position-relative"
+                      style="height: 200px; overflow-y: auto"
+                    >
+                      <div class="mt-5 col">
+                      
+                        {% for key,value in display_regions.items %}
+                          <b class="btn
+                            {% if value == 'All' %} 
+                              btn-primary
+                            {% elif value == 'Partial' %}
+                              btn-outline-primary
+                            {% else %}
+                              btn-danger
+                            {% endif %}
+                          "> {{key}} - {{ value }}</b>
+                        {% endfor %}
+                      
+                      </div>
+                    </div>
                   </div>
                 </div>
-
+                <div class="col">
 
                 
 
-                <h6 class="mt-3">Campaign</h6>
+                
+
+                <h6 class="fs-6"> <b> Campaign </b></h6>                
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0 position-relative"
@@ -1111,7 +1118,7 @@ table {
 </div>
                 
                                    
-                <h6>Products</h6>
+                <h6 class="fs-6"> <b> Products </b></h6>                
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0"
@@ -1149,98 +1156,91 @@ table {
 
 <div class="mt-5 row">
                      <div class="col-6">
-    <h3>Unarchive</h3>
-    {% if products %}
-    {% for camp in products %}
-        <a href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
-            {{ camp.name }}
-        </a>
+                      <h3>Unarchive</h3>
+                      {% if products %}
+                      {% for camp in products %}
+                          <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#product{{forloop.counter}}">
+                              {{ camp.name }}
+                          </button>
+                        
+                          <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                          <h1 class="modal-title fs-5" id="staticBackdropLabel"> Product</h1>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                          <div class="form-floating">
+                                              <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
+                                              <label for="floatingInput">Product Name</label>
+                                          </div>
+                                          <div class="form-floating">
+                                              <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
+                                              <label for="floatingInput">Product Description</label>
+                                          </div>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
+                                          {% csrf_token %}
+                                        <button class="btn btn-primary">Archive</button>
+                                        </form>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      {% endfor %}
+                      {% endif %}
+                      </div>
 
-        {% comment %} <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Product</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
-                            <label for="floatingInput">Product Name</label>
+
+                    <div class="col-6">
+                    <h3>Archive</h3>
+                    {% if unproducts %}
+                    {% for camp in unproducts %}
+                        <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unproduct{{forloop.counter}}">
+                              {{ camp.name }}
+                          </button>
+                      
+                        <div class="modal fade" id="unproduct{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Product</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Name" name="name" value="{{ camp.name }}" disabled>
+                                            <label for="floatingInput">Product Name</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Description" name="description" value="{{ camp.description }}" disabled>
+                                            <label for="floatingInput">Product Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                      <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
+                                        {% csrf_token %}
+                                      <button class="btn btn-primary">Unarchive</button>
+                                      </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
-                            <label for="floatingInput">Product Description</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="rules_regulations" placeholder="Rules & Regulations" name="rules_regulations" value="{{ camp.rules_regulations }}" disabled>
-                            <label for="floatingInput">Rules & Regulations</label>
-                        </div>
+                    {% endfor %}
+                    {% endif %}
                     </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
-                        {% csrf_token %}
-                      <button class="btn btn-primary">Archive</button>
-                      </form>
-                    </div>
+                  
+                  
+                                  </div>
+                                </div>
+
                 </div>
-            </div>
-        </div> {% endcomment %}
-    {% endfor %}
-    {% endif %}
-    </div>
+                <h6 class="fs-6"> <b> Funding Routes </b></h6>                
 
-
-    <div class="col-6">
-    <h3>Archive</h3>
-    {% if unproducts %}
-    {% for camp in unproducts %}
-        <a href="/edit_product/{{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
-            {{ camp.name }}
-        </a>
-
-        {% comment %} <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Product</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Name" name="name" value="{{ camp.name }}" disabled>
-                            <label for="floatingInput">Product Name</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Description" name="description" value="{{ camp.description }}" disabled>
-                            <label for="floatingInput">Product Description</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="rules_regulations" placeholder="Rules & Regulations" name="rules_regulations" value="{{ camp.rules_regulations }}" disabled>
-                            <label for="floatingInput">Rules & Regulations</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
-                        {% csrf_token %}
-                      <button class="btn btn-primary">Unarchive</button>
-                      </form>
-                    </div>
-                </div>
-            </div>
-        </div> {% endcomment %}
-    {% endfor %}
-    {% endif %}
-    </div>
-
-
-                  </div>
-                </div>
-                
-</div>
-                <h6>Funding Routes</h6>
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0"
@@ -1263,7 +1263,7 @@ table {
                             <select class="form-select client_input" id="product" name="route" aria-label="Default select example">
                               <option value="nan">Select the route</option>
                               {% for product in all_routes %}
-                                <option value="{{product.id}}">{{product.name}} - {{ product.council.all.0 }}</option>
+                                <option value="{{product.id}}">{{product.name}} - {{product.council.all.0 }}</option>
                               {% endfor %}
                             </select>
                           </div>
@@ -1279,61 +1279,116 @@ table {
                     
 
         
-<div class="mt-5 row">
-                     <div class="col-6">
-    <h3>Unarchive</h3>
-    {% if routes %}
-    {% for camp in routes %}
-        {% comment %} <a href="{% url 'app:edit_local_funding_route' camp.id %}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
-            {{ camp.name }}
-        </a> {% endcomment %}
+                    <div class="mt-5 row">
+                                         <div class="col-6">
+                        <h3>Unarchive</h3>
+                        {% if routes %}
+                        {% for camp in routes %}
+                            <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#route{{forloop.counter}}">
+                              {{ camp.name }}
+                          </button>
+                      
+                        <div class="modal fade" id="route{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Route Name" name="name" value="{{ camp.name }}" disabled>
+                                            <label for="floatingInput">Route Name</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Route Description" name="description" value="{{ camp.description }}" disabled>
+                                            <label for="floatingInput">Route Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                      <form method="post" action="{% url 'app:archive_route' client.id camp.id %}">
+                                        {% csrf_token %}
+                                      <button class="btn btn-primary">Unarchive</button>
+                                      </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                          
 
-        <h1 class="btn btn-primary mb-3">{{ camp.name }}</h1>
+                        {% endfor %}
+                        {% endif %}
+                        </div>
+                      
+                      
+                        <div class="col-6">
+                        <h3>Archive</h3>
+                        {% if unroutes %}
+                        {% for camp in unroutes %}
+                            <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unroute{{forloop.counter}}">
+                              {{ camp.name }}
+                          </button>
+                      
+                        <div class="modal fade" id="unroute{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Route Name" name="name" value="{{ camp.name }}" disabled>
+                                            <label for="floatingInput">Route Name</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Route Description" name="description" value="{{ camp.description }}" disabled>
+                                            <label for="floatingInput">Route Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                      <form method="post" action="{% url 'app:archive_route' client.id camp.id %}">
+                                        {% csrf_token %}
+                                      <button class="btn btn-primary">Unarchive</button>
+                                      </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                          
+                        {% endfor %}
+                        {% endif %}
+                        </div>
+                      
+                      
+                                      </div>
+                                    </div>
 
-        
-    {% endfor %}
-    {% endif %}
-    </div>
-
-
-    <div class="col-6">
-    <h3>Archive</h3>
-    {% if unroutes %}
-    {% for camp in unroutes %}
-        <a href="{% url 'app:edit_local_funding_route' camp.id %}" class="btn btn-primary d-block  mb-3" style="width: fit-content;" >
-            {{ camp.name }}
-        </a>
-
-    {% endfor %}
-    {% endif %}
-    </div>
-
-
-                  </div>
-                </div>
-                
-</div>
+                    </div>
 
 
 
 
-                <h6>Stage</h6>
+                <h6 class="fs-6"> <b> Stage </b></h6>                
+
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0"
                     style="height: 200px; overflow-y: auto"
                   >
-                     <a href="/stages/{{ client.id }}?page=add_stage" class="btn btn-primary position-absolute" style="right:10px">
-                      Add Stage
-                    </a>
+                     
                     
 <div class="mt-5 row">
                      <div >
     {% if stages %}
     {% for camp in stages %}
-        <a href="/stages/{{ client.id }}?page=edit_page&stage_id={{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
+        {% comment %} <a href="/stages/{{ client.id }}?page=edit_page&stage_id={{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
             {{ camp.name }}
-        </a>
+        </a> {% endcomment %}
+
+        <h6 class="btn btn-primary"> {{ camp.name }} </h6>
 
         {% comment %} <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -1366,18 +1421,11 @@ table {
                   </div>
                 </div>
                 
-</div>
+                </div>
+              </div>
+            </div>
 
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+          
 {% comment %} 
 {% for area in coverage_areas %}
     <p class="postcodes" style="display: none;">{{ area.postcode }}</p>
@@ -1417,6 +1465,17 @@ table {
         }
     });
     
+    $('.bootstrap-tagsinput input').on('paste', function(e) {
+        let pastedData = e.originalEvent.clipboardData.getData('text');
+        e.preventDefault(); 
+
+        let postcodes = pastedData.split(/\s+/); 
+        for (let i = 0; i < postcodes.length; i++) {
+            $('#postcodes').tagsinput('add', postcodes[i].toUpperCase());
+        }
+        
+        $(this).val(''); 
+    });
 });
 
   const drop2 = document.querySelector('.drop2');

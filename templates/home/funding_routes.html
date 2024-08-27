@@ -196,10 +196,7 @@
   </div>
   {% endfor %}
 
-  <div class="container-fluid pt-4">
-    <div class="card p-0">
-      <div class="card-body p-3 m-0">
-        <div
+  <div
           class="d-sm-flex d-block align-items-center justify-content-between mb-9"
         >
           <div class="mb-3 mb-sm-0">
@@ -220,6 +217,11 @@
             {% endif %}
           </div>
         </div>
+
+  <div class="container-fluid pt-4">
+    <div class="card p-0">
+      <div class="card-body p-3 m-0">
+        
         <div style="overflow-x: auto">
           {% if request.GET.page == 'edit' %} {% if route %}
 
@@ -376,10 +378,92 @@
                       <path d="M13.5 6.5l4 4" />
                     </svg>
                   </a>
-                  <a href="/delete_route/{{route.id}}">
+                  <a class="btn btn-primary" href="/archive_global_funding_route/{{route.id}}">
+                    {% if route.global_archive %}
+                      Unarchive
+                    {% else %}
+                      Archive
+                    {% endif %}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %} {% else %}
+              <tr
+                class="text-center display-flex align-items-center justify-content-center"
+              >
+                <td colspan="9" class="text-center">No Routes</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table> 
+        </div>
+      </div>
+    </div>
+    <div class="card p-0">
+      <div class="card-body p-3 m-0">
+        
+        <div style="overflow-x: auto">
+
+          <table class="table" style="overflow-x: auto">
+            <thead>
+              <tr>
+                <th>Archive Funding Route</th>
+                {% for product in products %}
+                <th>{{ product }}</th>
+                {% endfor %}
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if archived_funding_routes %} {% for route in archived_funding_routes %}
+              <tr>
+                <td>{{ route.name }}</td>
+
+                {% for product in products %}
+                 {% if product in route.product.all %}
+                <td>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-check text-primary"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l5 5l10 -10" />
+                  </svg>
+                </td>
+                {% else %}
+                <td>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-x text-danger"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M18 6l-12 12" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </td>
+                {% endif %} {% endfor %}
+
+                <td>
+                  <a href="?page=edit&route_id={{ route.id }}">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      class="text-danger icon icon-tabler icon-tabler-trash"
+                      class="text-warning icon icon-tabler icon-tabler-pencil"
                       width="24"
                       height="24"
                       viewBox="0 0 24 24"
@@ -390,14 +474,18 @@
                       stroke-linejoin="round"
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M4 7l16 0" />
-                      <path d="M10 11l0 6" />
-                      <path d="M14 11l0 6" />
                       <path
-                        d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"
+                        d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"
                       />
-                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                      <path d="M13.5 6.5l4 4" />
                     </svg>
+                  </a>
+                  <a class="btn btn-primary" href="/archive_global_funding_route/{{route.id}}">
+                    {% if route.global_archive %}
+                      Unarchive
+                    {% else %}
+                      Archive
+                    {% endif %}
                   </a>
                 </td>
               </tr>

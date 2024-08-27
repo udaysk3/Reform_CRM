@@ -112,7 +112,7 @@ class Route(models.Model):
     council = models.ManyToManyField('home.Councils',related_name='routes')
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route')
-    archive = models.BooleanField(default=False)
+    global_archive = models.BooleanField(default=False)
     product = models.ManyToManyField("home.Product", related_name="route")
     # rules_regulations = models.JSONField(blank=True, null=True)
     # sub_rules_regulations = models.JSONField(blank=True, null=True)
@@ -155,7 +155,7 @@ class Campaign(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
-    archive = models.BooleanField(default=False)
+    global_archive = models.BooleanField(default=False)
     documents = models.ManyToManyField("home.Document", related_name="product",)
     council = models.ManyToManyField(Councils, related_name="product",)
     stage = models.ManyToManyField("home.Stage", related_name="product")
@@ -214,6 +214,8 @@ class Stage(models.Model):
     description = models.CharField(max_length=999, blank=True, null=True)
     fields = models.JSONField(blank= True, null=True)
     client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
+    global_archive = models.BooleanField(default=False)
+
     documents = models.ManyToManyField(
         "home.Document", related_name="stage",
     )
@@ -290,3 +292,8 @@ class Rule_Regulation(models.Model):
         blank=True,
         null=True,
     )
+class ClientArchive(models.Model):
+    client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
