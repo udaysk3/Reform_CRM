@@ -1282,88 +1282,88 @@ table {
 
         
                     <div class="mt-5 row">
-    <div class="col-6">
-        <h3>Unarchive</h3>
-        {% if routes %}
-            {% for council, routes_list in routes.items %}
-                {% for camp in routes_list %}
-                    <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unarchiveRoute{{ camp.id }}{{ council.id }}">
-                        {{ camp.name }} - {{ council.name }}
-                    </button>
+                        <div class="col-6">
+                            <h3>Unarchive</h3>
+                            {% if routes %}
+                                {% for council, routes_list in routes.items %}
+                                    {% for camp in routes_list %}
+                                        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unarchiveRoute{{ camp.id }}{{ council.id }}">
+                                            {{ camp.name }} - {{ council.name }}
+                                        </button>
+                                      
+                                        <div class="modal fade" id="unarchiveRoute{{ camp.id }}{{ council.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Name" value="{{ camp.name }}" disabled>
+                                                            <label>Route Name</label>
+                                                        </div>
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Description" value="{{ camp.description }}" disabled>
+                                                            <label>Route Description</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <form method="post" action="{% url 'app:archive_route' client.id camp.id council.id %}">
+                                                            {% csrf_token %}
+                                                            <button class="btn btn-primary">Archive</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
 
-                    <div class="modal fade" id="unarchiveRoute{{ camp.id }}{{ council.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control mb-3" placeholder="Route Name" value="{{ camp.name }}" disabled>
-                                        <label>Route Name</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control mb-3" placeholder="Route Description" value="{{ camp.description }}" disabled>
-                                        <label>Route Description</label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <form method="post" action="{% url 'app:archive_route' client.id camp.id council.id %}">
-                                        {% csrf_token %}
-                                        <button class="btn btn-primary">Unarchive</button>
-                                    </form>
-                                </div>
-                            </div>
+                        <div class="col-6">
+                            <h3>Archive</h3>
+                            {% if unroutes %}
+                                {% for council, routes_list in unroutes.items %}
+                                    {% for camp in routes_list %}
+                                        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#archiveRoute{{ camp.id }}{{ council.id }}">
+                                            {{ camp.name }} - {{ council.name }}
+                                        </button>
+                                      
+                                        <div class="modal fade" id="archiveRoute{{ camp.id }}{{ council.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Name" value="{{ camp.name }}" disabled>
+                                                            <label>Route Name</label>
+                                                        </div>
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Description" value="{{ camp.description }}" disabled>
+                                                            <label>Route Description</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <form method="post" action="{% url 'app:archive_route' client.id camp.id council.id %}">
+                                                            {% csrf_token %}
+                                                            <button class="btn btn-primary">Unarchive</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
-                {% endfor %}
-            {% endfor %}
-        {% endif %}
-    </div>
-    
-    <div class="col-6">
-        <h3>Archive</h3>
-        {% if unroutes %}
-            {% for council, routes_list in unroutes.items %}
-                {% for camp in routes_list %}
-                    <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#archiveRoute{{ camp.id }}{{ council.id }}">
-                        {{ camp.name }} - {{ council.name }}
-                    </button>
-
-                    <div class="modal fade" id="archiveRoute{{ camp.id }}{{ council.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control mb-3" placeholder="Route Name" value="{{ camp.name }}" disabled>
-                                        <label>Route Name</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control mb-3" placeholder="Route Description" value="{{ camp.description }}" disabled>
-                                        <label>Route Description</label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <form method="post" action="{% url 'app:archive_route' client.id camp.id council.id %}">
-                                        {% csrf_token %}
-                                        <button class="btn btn-primary">Archive</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        {% endif %}
-    </div>
-</div>
 
 
                     </div>
