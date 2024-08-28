@@ -230,7 +230,7 @@ urlpatterns = [
         name="archive_product",
     ),
     path(
-        "archive_route/<int:client_id>/<int:route_id>",
+        "archive_route/<int:client_id>/<int:route_id>/<int:council_id>",
         views.archive_route,
         name="archive_route",
     ),

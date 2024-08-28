@@ -29,6 +29,7 @@ from .models import (
     Rule_Regulation,
     Stage,
     ClientArchive,
+    Client_Council_Route,
 )
 import re
 from datetime import datetime, timedelta
@@ -800,17 +801,34 @@ def client_detail(request, client_id, s_client_id=None):
     council_coverage_area = []
     for coun in councils:
         for ca in coverage_area_client:
-            if ca.postcode in coun.postcodes.split(','):
+            if ca.postcode in coun.postcodes.split(',') and coun not in council_coverage_area:
                 council_coverage_area.append(coun)
-    all_routes = Route.objects.filter(council__in=council_coverage_area).filter(global_archive=False)
+    all_routes = {}
+    for council in council_coverage_area:
+        for route in council.routes.all():
+            if all_routes.get(council):
+                all_routes[council].append(route)
+            else:
+                all_routes[council] = [route]
 
-    routes = list(Route.objects.all().filter(client=client).filter(global_archive=False))
-    unroutes = []
-    for rout in routes:
-        if ClientArchive.objects.all().filter(client=client).filter(route=rout).exists():
-            unroutes.append(rout)
-            routes.remove(rout)
-            
+    routes = {}
+    unroutes = {}
+
+    for route_obj in Client_Council_Route.objects.filter(client=client):
+        council = route_obj.council
+        route = route_obj.route
+
+        if ClientArchive.objects.filter(
+            client=client, route=route, councils=council
+        ).exists():
+            if council not in unroutes:
+                unroutes[council] = []
+            unroutes[council].append(route)
+        else:
+            if council not in routes:
+                routes[council] = []
+            routes[council].append(route)
+
     stages=[]
     for stage in list(Stage.objects.all()):
         for prod in products:
@@ -890,7 +908,7 @@ def client_detail(request, client_id, s_client_id=None):
             request,
             "home/client-detail.html",
             {
-                "councils":councils,
+                "councils": councils,
                 "client": client,
                 "history": history,
                 "imported": imported,
@@ -908,13 +926,13 @@ def client_detail(request, client_id, s_client_id=None):
                 "uncampaigns": uncampaigns,
                 "products": products,
                 "unproducts": unproducts,
-                "coverage_areas":coverage_area_client,
+                "coverage_areas": coverage_area_client,
                 "all_products": all_products,
                 "all_routes": all_routes,
-                "routes":routes,
-                "unroutes":unroutes,
+                "routes": routes,
+                "unroutes": unroutes,
                 "stages": stages,
-                "display_regions":display_regions,
+                "display_regions": display_regions,
             },
         )
 
@@ -2496,10 +2514,14 @@ def add_route_client(request, client_id):
         if request.POST.get("route") == "nan":
             messages.error(request, "Route should be selected")
             return redirect(f"/client-detail/{client_id}")
-        main_route = Route.objects.get(pk=request.POST.get("route"))
-        client.route.add(main_route)
-        main_route.save()
-        client.save()
+        route_council_id = request.POST.get("route").split('-')
+        route = Route.objects.get(pk=route_council_id[0])
+        council = Councils.objects.get(pk=route_council_id[1])
+        Client_Council_Route.objects.create(
+            client=client,
+            route=route,
+            council=council,
+        )
         messages.success(request, "Funding Route added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
 
@@ -3306,20 +3328,27 @@ def archive_product(request,client_id, product_id):
         messages.success(request, "Archive Successfully")
         return redirect(r"/client-detail/" + str(client_id))
 
-def archive_route(request,client_id, route_id):
+def archive_route(request,client_id, route_id, council_id):
     route = Route.objects.get(pk=route_id)
     client = Clients.objects.get(pk=client_id)
-    if ClientArchive.objects.filter(client=client).filter(route=route).exists():
-        ClientArchive.objects.filter(client=client).filter(route=route).first().delete()
-        messages.success(request, "Unarchive Successfully")
-        return redirect(r"/client-detail/" + str(client_id))
+    council = Councils.objects.get(pk=council_id)
+
+    # Check if the archive already exists for this specific client, council, and route
+    archive = ClientArchive.objects.filter(
+        client=client, councils=council, route=route
+    ).first()
+
+    if archive:
+        # If it exists, delete it to unarchive
+        archive.delete()
+        messages.success(request, "Unarchived Successfully")
     else:
-        ClientArchive.objects.create(
-            client=client,
-            route=route
-        )
-        messages.success(request, "Archive Successfully")
-        return redirect(r"/client-detail/" + str(client_id))
+        # Otherwise, create a new archive
+        ClientArchive.objects.create(client=client, route=route, councils=council)
+        messages.success(request, "Archived Successfully")
+
+    # Redirect to the client detail page
+    return redirect(f"/client-detail/{client_id}")
 
 def change_customer_client(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
