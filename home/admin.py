@@ -17,6 +17,8 @@ from .models import (
     CoverageAreas,
     Questions,
     Rule_Regulation,
+    ClientArchive,
+    Client_Council_Route,
 )
 
 admin.site.register(Action)
@@ -36,3 +38,5 @@ admin.site.register(Product)
 admin.site.register(CoverageAreas)
 admin.site.register(Questions)
 admin.site.register(Rule_Regulation)
+admin.site.register(ClientArchive)
+admin.site.register(Client_Council_Route)
