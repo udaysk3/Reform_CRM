@@ -309,7 +309,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
     display_regions =[]
     regions = Councils.objects.all()
     for region in regions:
-        if customer.postcode.split(' ')[0] in region.postcodes.split(','):
+        if customer.postcode.split(' ')[0] in region.postcodes:
             display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
@@ -1344,10 +1344,10 @@ def add_customer(request):
             postcode = postcode[:-3] + " " + postcode[-3:]
         uk = Councils.objects.get(name='UK')
         if postcode[:-3] not in uk.postcodes.split(','):
-            uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+            uk_postcodes = os.path.join(os.path.dirname(__file__), './uk_postcodes.txt')
             with open(uk_postcodes, 'a') as f:
-                f.write(',' + postcode[:-3])
-            uk.postcodes += ',' + postcode[:-3]
+                f.write(',' + postcode[:-3].strip())
+            uk.postcodes += ',' + postcode[:-3].strip()
             uk.save()
             
         district = getLA(postcode)
@@ -1445,10 +1445,10 @@ def edit_customer(request, customer_id):
             postcode = postcode[:-3] + " " + postcode[-3:]
         uk = Councils.objects.get(name='UK')
         if postcode[:-3] not in uk.postcodes.split(','):
-            uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+            uk_postcodes = os.path.join(os.path.dirname(__file__), './uk_postcodes.txt')
             with open(uk_postcodes, 'a') as f:
-                f.write(',' + postcode[:-3])
-            uk.postcodes += ',' + postcode[:-3]
+                f.write(',' + postcode[:-3].strip())
+            uk.postcodes += ',' + postcode[:-3].strip()
             uk.save()
         district = getLA(customer.postcode)
         obj = getEPC(customer.postcode, customer.house_name, customer.street_name)
@@ -1542,13 +1542,13 @@ def add_client(request):
         uk = Councils.objects.get(name="UK")
         if postcode[:-3] not in uk.postcodes.split(","):
             uk_postcodes = os.path.join(
-                os.path.dirname(__file__), "../uk_postcodes.txt"
+                os.path.dirname(__file__), "./uk_postcodes.txt"
             )
             
             with open(uk_postcodes, "a") as f:
                 print(f)
-                f.write("," + postcode[:-3])
-            uk.postcodes += "," + postcode[:-3]
+                f.write("," + postcode[:-3].strip())
+            uk.postcodes += "," + postcode[:-3].strip()
             uk.save()
         postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
@@ -1667,14 +1667,14 @@ def edit_client(request, client_id):
         uk = Councils.objects.get(name="UK")
         if client.postcode[:-3] not in uk.postcodes.split(","):
             uk_postcodes = os.path.join(
-                os.path.dirname(__file__), "../uk_postcodes.txt"
+                os.path.dirname(__file__), "./uk_postcodes.txt"
             )
             with open(uk_postcodes, "a") as f:
-                f.write("," + client.postcode[:-3])
-            uk.postcodes += "," + client.postcode[:-3]
+                f.write("," + client.postcode[:-3].strip())
+            uk.postcodes += "," + client.postcode[:-3].strip()
             uk.save()
         client.save()
-        client.add_action(
+        client.add_action( 
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
