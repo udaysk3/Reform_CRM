@@ -1342,6 +1342,14 @@ def add_customer(request):
             return redirect("/customer?page=add_customer")
         if ' ' not in postcode:
             postcode = postcode[:-3] + " " + postcode[-3:]
+        uk = Councils.objects.get(name='UK')
+        if postcode[:-3] not in uk.postcodes.split(','):
+            uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+            with open(uk_postcodes, 'a') as f:
+                f.write(',' + postcode[:-3])
+            uk.postcodes += ',' + postcode[:-3]
+            uk.save()
+            
         district = getLA(postcode)
         obj = getEPC(postcode, house_name, street_name)
         energy_rating = None
@@ -1435,6 +1443,13 @@ def edit_customer(request, customer_id):
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
         if " " not in postcode:
             postcode = postcode[:-3] + " " + postcode[-3:]
+        uk = Councils.objects.get(name='UK')
+        if postcode[:-3] not in uk.postcodes.split(','):
+            uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+            with open(uk_postcodes, 'a') as f:
+                f.write(',' + postcode[:-3])
+            uk.postcodes += ',' + postcode[:-3]
+            uk.save()
         district = getLA(customer.postcode)
         obj = getEPC(customer.postcode, customer.house_name, customer.street_name)
         energy_rating = None
@@ -1524,6 +1539,17 @@ def add_client(request):
 
         if " " not in postcode:
             postcode = postcode[:-3] + " " + postcode[-3:]
+        uk = Councils.objects.get(name="UK")
+        if postcode[:-3] not in uk.postcodes.split(","):
+            uk_postcodes = os.path.join(
+                os.path.dirname(__file__), "../uk_postcodes.txt"
+            )
+            
+            with open(uk_postcodes, "a") as f:
+                print(f)
+                f.write("," + postcode[:-3])
+            uk.postcodes += "," + postcode[:-3]
+            uk.save()
         postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
         obj = getEPC(postcode, house_name, street_name)
@@ -1638,6 +1664,15 @@ def edit_client(request, client_id):
             return redirect(f"/client?page=edit_client&id={client_id}")
         if " " not in client.postcode:
             client.postcode = client.postcode[:-3] + " " + client.postcode[-3:]
+        uk = Councils.objects.get(name="UK")
+        if client.postcode[:-3] not in uk.postcodes.split(","):
+            uk_postcodes = os.path.join(
+                os.path.dirname(__file__), "../uk_postcodes.txt"
+            )
+            with open(uk_postcodes, "a") as f:
+                f.write("," + client.postcode[:-3])
+            uk.postcodes += "," + client.postcode[:-3]
+            uk.save()
         client.save()
         client.add_action(
             agent=User.objects.get(email=request.user),
@@ -2560,6 +2595,9 @@ def add_local_authority(request):
                 if postcode not in uk_council.postcodes:
                     uk_council.postcodes += ',' + postcode
                     uk_council.save()
+                    uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                    with open(uk_postcodes, 'a') as f:
+                        f.write(',' + postcode)
                 if main_postcodes == '':
                     main_postcodes += postcode
                 else:
@@ -2590,6 +2628,9 @@ def edit_council(request, council_id):
                 if postcode not in uk_council.postcodes:
                     uk_council.postcodes += "," + postcode
                     uk_council.save()
+                    uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                    with open(uk_postcodes, 'a') as f:
+                        f.write(',' + postcode)
                 if main_postcodes == "":
                     main_postcodes += postcode
                 else:
@@ -3285,6 +3326,9 @@ def add_coverage_areas(request, client_id):
         for postcode in postcodes:
             if postcode not in region.postcodes.split(','):
                 region.postcodes += ',' + postcode
+                uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                with open(uk_postcodes, 'a') as f:
+                    f.write(',' + postcode)
                 region.save()    
             CoverageAreas.objects.create(
                 client=client,
@@ -3332,22 +3376,16 @@ def archive_route(request,client_id, route_id, council_id):
     route = Route.objects.get(pk=route_id)
     client = Clients.objects.get(pk=client_id)
     council = Councils.objects.get(pk=council_id)
-
-    # Check if the archive already exists for this specific client, council, and route
     archive = ClientArchive.objects.filter(
         client=client, councils=council, route=route
     ).first()
-
     if archive:
-        # If it exists, delete it to unarchive
         archive.delete()
         messages.success(request, "Unarchived Successfully")
     else:
-        # Otherwise, create a new archive
         ClientArchive.objects.create(client=client, route=route, councils=council)
         messages.success(request, "Archived Successfully")
 
-    # Redirect to the client detail page
     return redirect(f"/client-detail/{client_id}")
 
 def change_customer_client(request, customer_id):
