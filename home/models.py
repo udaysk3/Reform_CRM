@@ -112,15 +112,15 @@ class Route(models.Model):
     council = models.ManyToManyField('home.Councils',related_name='routes')
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route')
-    archive = models.BooleanField(default=False)
-    rules_regulations = models.JSONField(blank=True, null=True)
-    sub_rules_regulations = models.JSONField(blank=True, null=True)
-    council_route = models.ManyToManyField("self", related_name="+")
-    client_route = models.ManyToManyField("self", related_name="+")
-    is_parent = models.BooleanField(blank=True, null=True)
-    is_council = models.BooleanField(blank=True, null=True)
-    is_client = models.BooleanField(blank=True, null=True)
+    global_archive = models.BooleanField(default=False)
     product = models.ManyToManyField("home.Product", related_name="route")
+    # rules_regulations = models.JSONField(blank=True, null=True)
+    # sub_rules_regulations = models.JSONField(blank=True, null=True)
+    # council_route = models.ManyToManyField("self", related_name="+")
+    # client_route = models.ManyToManyField("self", related_name="+")
+    # is_parent = models.BooleanField(blank=True, null=True)
+    # is_council = models.BooleanField(blank=True, null=True)
+    # is_client = models.BooleanField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -128,6 +128,10 @@ class Route(models.Model):
 
 class Document(models.Model):
     document = models.FileField(upload_to="documents", blank= True, null=True)
+    is_product = models.BooleanField(default=False,blank=True,null=True)
+    is_route = models.BooleanField(default=False,blank=True,null=True)
+    is_council = models.BooleanField(default=False,blank=True,null=True)
+    is_client = models.BooleanField(default=False,blank=True,null=True)
 
 
 class Councils(models.Model):
@@ -151,23 +155,16 @@ class Campaign(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True,)
     description = models.CharField(max_length=999, blank=True, null=True,)
-    archive = models.BooleanField(default=False)
-    rules_regulations = models.JSONField(blank= True, null=True)
-    documents = models.ManyToManyField(
-        "home.Document", related_name="product", 
-    )
-    is_parent = models.BooleanField(blank=True, null=True)
-    is_council = models.BooleanField(default=False)
-    is_client = models.BooleanField(default=False)
-    council_product = models.ManyToManyField(
-        'self', related_name="+")
-    client_product = models.ManyToManyField(
-        'self', related_name="+")
-    council = models.ManyToManyField(
-        Councils,
-        related_name="product",
-    )
+    global_archive = models.BooleanField(default=False)
+    documents = models.ManyToManyField("home.Document", related_name="product",)
+    council = models.ManyToManyField(Councils, related_name="product",)
     stage = models.ManyToManyField("home.Stage", related_name="product")
+    # rules_regulations = models.JSONField(blank= True, null=True)
+    # is_parent = models.BooleanField(blank=True, null=True)
+    # is_council = models.BooleanField(default=False)
+    # is_client = models.BooleanField(default=False)
+    # council_product = models.ManyToManyField('self', related_name="+")
+    # client_product = models.ManyToManyField('self', related_name="+")
 
     def __str__(self):
         return f"{self.name}"
@@ -217,6 +214,8 @@ class Stage(models.Model):
     description = models.CharField(max_length=999, blank=True, null=True)
     fields = models.JSONField(blank= True, null=True)
     client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
+    global_archive = models.BooleanField(default=False)
+
     documents = models.ManyToManyField(
         "home.Document", related_name="stage",
     )
@@ -255,6 +254,7 @@ class Signature(models.Model):
 class CoverageAreas(models.Model):
     client = models.ForeignKey(Clients, related_name='coverage_areas', on_delete=models.CASCADE)
     postcode = models.CharField(max_length=255, blank=True, null=True)
+    council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True)
 
 class Questions(models.Model):
     question = models.CharField(max_length=255, blank=True, null=True)
@@ -292,3 +292,14 @@ class Rule_Regulation(models.Model):
         blank=True,
         null=True,
     )
+class ClientArchive(models.Model):
+    client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    councils = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    
+class Client_Council_Route(models.Model):
+    client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
+    council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')

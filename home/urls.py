@@ -230,7 +230,7 @@ urlpatterns = [
         name="archive_product",
     ),
     path(
-        "archive_route/<int:client_id>/<int:route_id>",
+        "archive_route/<int:client_id>/<int:route_id>/<int:council_id>",
         views.archive_route,
         name="archive_route",
     ),
@@ -318,4 +318,21 @@ urlpatterns = [
         views.delete_cj_stage_question,
         name="delete_cj_stage_question",
     ),
+    path(
+        "delete_council/<int:council_id>",
+        views.delete_council,
+        name="delete_council",
+    ),
+    path("get_postcodes/<str:region>", views.get_postcodes, name="get_postcodes"),
+    path(
+        "archive_global_product/<int:product_id>",
+        views.archive_global_product,
+        name="archive_global_product",
+    ),
+    path(
+        "archive_global_funding_route/<int:funding_route_id>",
+        views.archive_global_funding_route,
+        name="archive_global_funding_route",
+    ),
+    path("archive_global_stage/<int:stage_id>", views.archive_global_stage, name="archive_global_stage"),
 ]

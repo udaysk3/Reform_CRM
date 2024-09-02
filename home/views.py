@@ -28,6 +28,8 @@ from .models import (
     Questions,
     Rule_Regulation,
     Stage,
+    ClientArchive,
+    Client_Council_Route,
 )
 import re
 from datetime import datetime, timedelta
@@ -39,13 +41,13 @@ import pytz
 from user.models import User
 from pytz import timezone
 import json
+from .task import getLA
+from .epc import getEPC
 import os
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
-from .tasks import getLA
-from .epc import getEPC
 import base64 
 import requests
 import os.path
@@ -304,6 +306,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
             next = str(customer_id)
     # print(type(prev), next)
     customer = Customers.objects.get(pk=customer_id)
+    display_regions =[]
+    regions = Councils.objects.all()
+    for region in regions:
+        if customer.postcode.split(' ')[0] in region.postcodes:
+            display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False)
     show_customer = customer
@@ -372,13 +379,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                     i.text
                 ]
             )
-    if customer.district:
-        council= Councils.objects.get_or_create(name=customer.district)[0]
-        council_routes = Route.objects.all().filter(council=council)
-        print(Route.objects.all().filter(council=council))
-    else:
-        council = None
-        council_routes = None
     recommendations_list = []
     if customer.recommendations:
         recommendations_list = [
@@ -397,216 +397,216 @@ def customer_detail(request, customer_id, s_customer_id=None):
     true_routes = [True] * len(routes)
     stages = {}
 
-    for stage in all_stages:
-        if stage.fields is not None:
-            stages[stage.name] = json.loads(stage.fields)
-        else:
-            stages[stage.name] = {}
+    # for stage in all_stages:
+    #     if stage.fields is not None:
+    #         stages[stage.name] = json.loads(stage.fields)
+    #     else:
+    #         stages[stage.name] = {}
 
-    if customer.stage_values:
-        stage_values = json.loads(customer.stage_values)
-        values = {}
-        for name, s_fields in stages.items():
-            fields = {}
-            for field in s_fields:
-                fields[field] = [s_fields[field], '']
-            values[name] = fields
+    # if customer.stage_values:
+    #     stage_values = json.loads(customer.stage_values)
+    #     values = {}
+    #     for name, s_fields in stages.items():
+    #         fields = {}
+    #         for field in s_fields:
+    #             fields[field] = [s_fields[field], '']
+    #         values[name] = fields
 
-        for key, fields in values.items():
-            if key in stage_values:
-                for field in fields:
-                    if field in stage_values[key]:
-                        fields[field][1] = stage_values[key][field]
+    #     for key, fields in values.items():
+    #         if key in stage_values:
+    #             for field in fields:
+    #                 if field in stage_values[key]:
+    #                     fields[field][1] = stage_values[key][field]
 
-        i = 0
-        for product in products:
-            product_rules = {}
-            for key, value in ast.literal_eval(product.rules_regulations).items():
-                rule_key = value[0].split(",")[0]
-                rule_value = value[1].split(',')[0]
-                rule_additional_value = value[2]
+        # i = 0
+        # for product in products:
+        #     product_rules = {}
+        #     for key, value in ast.literal_eval(product.rules_regulations).items():
+        #         rule_key = value[0].split(",")[0]
+        #         rule_value = value[1].split(',')[0]
+        #         rule_additional_value = value[2]
 
-                if rule_key not in product_rules:
-                    product_rules[rule_key] = {rule_value: [rule_additional_value]}
-                else:
-                    if rule_value not in product_rules[rule_key]:
-                        product_rules[rule_key][rule_value] = [rule_additional_value]
-                    else:
-                        product_rules[rule_key][rule_value].append(rule_additional_value)
+        #         if rule_key not in product_rules:
+        #             product_rules[rule_key] = {rule_value: [rule_additional_value]}
+        #         else:
+        #             if rule_value not in product_rules[rule_key]:
+        #                 product_rules[rule_key][rule_value] = [rule_additional_value]
+        #             else:
+        #                 product_rules[rule_key][rule_value].append(rule_additional_value)
 
-            for stage, rules in product_rules.items():
-                if stage in values:
-                    for field, rule in rules.items():
-                        for key, value in values[stage].items():
-                            if ',' in key:
-                                key = key.split(',')[0]
-                            if field == key:
-                                if value[0] in ['time', 'date', 'number', 'month']:
-                                    if value[0] == 'date':
-                                        if check_date(value[1], rule):
-                                            pass
-                                        else:
-                                            true_products[i] = False
-                                    elif value[0] == 'time':
-                                        if check_time(value[1], rule):
-                                            pass
-                                        else:
-                                            true_products[i] = False
-                                    elif value[0] == 'number':
-                                        if check_number(value[1], rule):
-                                            pass
-                                        else:
-                                            true_products[i] = False
-                                    elif value[0] == 'month':
-                                        if check_month(value[1], rule):
-                                            pass
-                                        else:
-                                            true_products[i] = False
-                                else:
-                                    if value[1] in rule or value[1] == '':
-                                        pass
-                                    else:
-                                        true_products[i] = False
+        #     for stage, rules in product_rules.items():
+        #         if stage in values:
+        #             for field, rule in rules.items():
+        #                 for key, value in values[stage].items():
+        #                     if ',' in key:
+        #                         key = key.split(',')[0]
+        #                     if field == key:
+        #                         if value[0] in ['time', 'date', 'number', 'month']:
+        #                             if value[0] == 'date':
+        #                                 if check_date(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_products[i] = False
+        #                             elif value[0] == 'time':
+        #                                 if check_time(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_products[i] = False
+        #                             elif value[0] == 'number':
+        #                                 if check_number(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_products[i] = False
+        #                             elif value[0] == 'month':
+        #                                 if check_month(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_products[i] = False
+        #                         else:
+        #                             if value[1] in rule or value[1] == '':
+        #                                 pass
+        #                             else:
+        #                                 true_products[i] = False
 
-            i += 1
+        #     i += 1
 
-        j = 0
-        for route in routes:
-            route_rules = {}
-            for key, value in ast.literal_eval(route.rules_regulations).items():
-                rule_key = value[0].split(",")[0]
-                rule_value = value[1].split(",")[0]
-                rule_additional_value = value[2]
+        # j = 0
+        # for route in routes:
+        #     route_rules = {}
+        #     for key, value in ast.literal_eval(route.rules_regulations).items():
+        #         rule_key = value[0].split(",")[0]
+        #         rule_value = value[1].split(",")[0]
+        #         rule_additional_value = value[2]
 
-                if rule_key not in route_rules:
-                    route_rules[rule_key] = {rule_value: [rule_additional_value]}
-                else:
-                    if rule_value not in route_rules[rule_key]:
-                        route_rules[rule_key][rule_value] = [rule_additional_value]
-                    else:
-                        route_rules[rule_key][rule_value].append(rule_additional_value)
+        #         if rule_key not in route_rules:
+        #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
+        #         else:
+        #             if rule_value not in route_rules[rule_key]:
+        #                 route_rules[rule_key][rule_value] = [rule_additional_value]
+        #             else:
+        #                 route_rules[rule_key][rule_value].append(rule_additional_value)
 
-            for stage, rules in route_rules.items():
-                if stage in values:
-                    for field, rule in rules.items():
-                        for key, value in values[stage].items():
-                            if "," in key:
-                                key = key.split(",")[0]
-                            if field == key:
-                                if value[0] in ["time", "date", "number", "month"]:
-                                    if value[0] == "date":
-                                        if check_date(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                    elif value[0] == "time":
-                                        if check_time(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                    elif value[0] == "number":
-                                        if check_number(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                    elif value[0] == "month":
-                                        if check_month(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                else:
-                                    if value[1] in rule or value[1] == "":
-                                        pass
-                                    else:
-                                        true_routes[j] = False
-                                print("route",true_routes)
+        #     for stage, rules in route_rules.items():
+        #         if stage in values:
+        #             for field, rule in rules.items():
+        #                 for key, value in values[stage].items():
+        #                     if "," in key:
+        #                         key = key.split(",")[0]
+        #                     if field == key:
+        #                         if value[0] in ["time", "date", "number", "month"]:
+        #                             if value[0] == "date":
+        #                                 if check_date(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                             elif value[0] == "time":
+        #                                 if check_time(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                             elif value[0] == "number":
+        #                                 if check_number(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                             elif value[0] == "month":
+        #                                 if check_month(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                         else:
+        #                             if value[1] in rule or value[1] == "":
+        #                                 pass
+        #                             else:
+        #                                 true_routes[j] = False
+        #                         print("route",true_routes)
 
-            j += 1
+        #     j += 1
 
-        j = 0
-        for route in routes:
-            route_rules = {}
-            if route.sub_rules_regulations == None:
-                continue
-            for key, value in ast.literal_eval(route.sub_rules_regulations).items():
-                rule_key = value[0].split(",")[0]
-                rule_value = value[1].split(',')[0]
-                rule_additional_value = value[2]
+        # j = 0
+        # for route in routes:
+        #     route_rules = {}
+        #     if route.sub_rules_regulations == None:
+        #         continue
+        #     for key, value in ast.literal_eval(route.sub_rules_regulations).items():
+        #         rule_key = value[0].split(",")[0]
+        #         rule_value = value[1].split(',')[0]
+        #         rule_additional_value = value[2]
 
-                if rule_key not in route_rules:
-                    route_rules[rule_key] = {rule_value: [rule_additional_value]}
-                else:
-                    if rule_value not in route_rules[rule_key]:
-                        route_rules[rule_key][rule_value] = [rule_additional_value]
-                    else:
-                        route_rules[rule_key][rule_value].append(rule_additional_value)
+        #         if rule_key not in route_rules:
+        #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
+        #         else:
+        #             if rule_value not in route_rules[rule_key]:
+        #                 route_rules[rule_key][rule_value] = [rule_additional_value]
+        #             else:
+        #                 route_rules[rule_key][rule_value].append(rule_additional_value)
 
-            for stage, rules in route_rules.items():
-                if stage in values:
-                    for field, rule in rules.items():
-                        for key, value in values[stage].items():
-                            if ',' in key:
-                                key = key.split(',')[0]
-                            if field == key:
-                                if value[0] in ['time', 'date', 'number', 'month']:
-                                    if value[0] == 'date':
-                                        if check_date(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                    elif value[0] == 'time':
-                                        if check_time(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                    elif value[0] == 'number':
-                                        if check_number(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                    elif value[0] == 'month':
-                                        if check_month(value[1], rule):
-                                            pass
-                                        else:
-                                            true_routes[j] = False
-                                else:
-                                    if value[1] in rule or value[1] == '':
-                                        pass
-                                    else:
-                                        true_routes[j] = False
-                                print(true_routes)
+        #     for stage, rules in route_rules.items():
+        #         if stage in values:
+        #             for field, rule in rules.items():
+        #                 for key, value in values[stage].items():
+        #                     if ',' in key:
+        #                         key = key.split(',')[0]
+        #                     if field == key:
+        #                         if value[0] in ['time', 'date', 'number', 'month']:
+        #                             if value[0] == 'date':
+        #                                 if check_date(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                             elif value[0] == 'time':
+        #                                 if check_time(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                             elif value[0] == 'number':
+        #                                 if check_number(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                             elif value[0] == 'month':
+        #                                 if check_month(value[1], rule):
+        #                                     pass
+        #                                 else:
+        #                                     true_routes[j] = False
+        #                         else:
+        #                             if value[1] in rule or value[1] == '':
+        #                                 pass
+        #                             else:
+        #                                 true_routes[j] = False
+        #                         print(true_routes)
 
-            j += 1
+        #     j += 1
 
-        return render(
-                request,
-                "home/customer-detail.html",
-                {
-                    "customer": customer,
-                    "history": history,
-                    "imported": imported,
-                    "prev": prev,
-                    "next": next,
-                    "child_customers": child_customers,
-                    "recommendations_list": processed_recommendations,
-                    "routes": routes,
-                    "council_routes": council_routes,
-                    "stages": stages,
-                    "values": values,
-                    "agents": agents,
-                    "show_customer": show_customer,
-                    "events": events,
-                    "reasons": reasons,
-                    "templates": templates,
-                    "signatures": signatures,
-                    "domain_name": domain_name,
-                    "products": products,
-                    "true_products": true_products,
-                    "true_routes": true_routes,
-                    "clients": clients,
-                    "campaigns": campaigns,
-                },
-            )
+        # return render(
+        #         request,
+        #         "home/customer-detail.html",
+        #         {
+        #             "customer": customer,
+        #             "history": history,
+        #             "imported": imported,
+        #             "prev": prev,
+        #             "next": next,
+        #             "child_customers": child_customers,
+        #             "recommendations_list": processed_recommendations,
+        #             "routes": routes,
+        #             "stages": stages,
+        #             "values": values,
+        #             "agents": agents,
+        #             "show_customer": show_customer,
+        #             "events": events,
+        #             "reasons": reasons,
+        #             "templates": templates,
+        #             "signatures": signatures,
+        #             "domain_name": domain_name,
+        #             "products": products,
+        #             "true_products": true_products,
+        #             "true_routes": true_routes,
+        #             "clients": clients,
+        #             "campaigns": campaigns,
+        #             "display_regions":display_regions,
+        #         },
+        #     )
     return render(
         request,
         "home/customer-detail.html",
@@ -619,7 +619,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
             "routes": routes,
-            "council_routes":council_routes,
             "stages": stages,
             "agents" : agents,
             "show_customer": show_customer,
@@ -631,6 +630,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "products": products,
             "clients": clients,
             "campaigns": campaigns,
+            "display_regions":display_regions,
         },
     )
 
@@ -717,12 +717,32 @@ def check_time(time_to_check, conditions):
 
 @login_required
 def client_detail(request, client_id, s_client_id=None):
-    all_clients = []
     prev = None
     next = None
     domain_name = request.build_absolute_uri("/")[:-1]
     signatures = Signature.objects.all()
-    coverage_area = CoverageAreas.objects.all().filter(client=Clients.objects.get(pk=client_id)) 
+    coverage_areas = CoverageAreas.objects.all().filter(
+        client=Clients.objects.get(pk=client_id)
+    )
+
+    regions = Councils.objects.all()
+    display_regions = {}
+
+    for region in regions:
+        region_postcodes = region.postcodes.split(',')
+        covered_postcodes = []
+
+        for coverage_area in coverage_areas:
+            if coverage_area.postcode in region_postcodes:
+                covered_postcodes.append(coverage_area.postcode)
+
+        if len(covered_postcodes) == len(region_postcodes):
+            display_regions[region] = 'All'
+        elif len(covered_postcodes) > 0:
+            display_regions[region] = 'Partial'
+        else:
+            display_regions[region] = 'None'
+
     clients = (
         Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
         .filter(parent_client=None)
@@ -765,31 +785,56 @@ def client_detail(request, client_id, s_client_id=None):
         next = str(next.id)
     else:
         next = str(client_id)
-    # print(type(prev), next)
     client = Clients.objects.get(pk=client_id)
-    stages = Stage.objects.all().filter(client=client).order_by('order')
     campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
     uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
-    all_products = Product.objects.all().filter(is_parent=True)
-    products = Product.objects.all().filter(client=client).filter(archive=False)
-    unproducts = Product.objects.all().filter(client=client).filter(archive=True)
+    all_products = Product.objects.all().filter(global_archive=False)
+    products = list(Product.objects.all().filter(client=client).filter(global_archive=False))
+    unproducts = []
+    for prod in products[:]:  # Iterate over a copy of the list
+        if ClientArchive.objects.all().filter(client=client).filter(product=prod).exists():
+            unproducts.append(prod)
+            products.remove(prod)
 
-    # council_ids = client.coverage_areas.values_list('postcode__council', flat=True).distinct()
-    # all_routes = Route.objects.filter(is_council=True, council__in=council_ids)
-    coverage_a = client.coverage_areas.all()
-    all_routes=[]
-    for coverage in coverage_a:
-        x = requests.get(f'https://api.postcodes.io/postcodes/{coverage.postcode}')
-        result = x.json()
-        if result['result']:
-            council_name = result['result']['admin_district']
-            council,_ = Councils.objects.get_or_create(name=council_name)
-            rts = Route.objects.all().filter(is_council=True).filter(council=council)
-            print(rts,council)
-            all_routes.extend(rts)
+    councils = Councils.objects.all()
+    coverage_area_client = CoverageAreas.objects.filter(client=client)
+    council_coverage_area = []
+    for coun in councils:
+        for ca in coverage_area_client:
+            if ca.postcode in coun.postcodes.split(',') and coun not in council_coverage_area:
+                council_coverage_area.append(coun)
+    all_routes = {}
+    for council in council_coverage_area:
+        for route in council.routes.all():
+            if all_routes.get(council):
+                all_routes[council].append(route)
+            else:
+                all_routes[council] = [route]
 
-    routes = Route.objects.all().filter(client=client).filter(archive=False)
-    unroutes = Route.objects.all().filter(client=client).filter(archive=True)
+    routes = {}
+    unroutes = {}
+
+    for route_obj in Client_Council_Route.objects.filter(client=client):
+        council = route_obj.council
+        route = route_obj.route
+
+        if ClientArchive.objects.filter(
+            client=client, route=route, councils=council
+        ).exists():
+            if council not in unroutes:
+                unroutes[council] = []
+            unroutes[council].append(route)
+        else:
+            if council not in routes:
+                routes[council] = []
+            routes[council].append(route)
+
+    stages=[]
+    for stage in list(Stage.objects.all()):
+        for prod in products:
+            if stage in prod.stage.all():
+                stages.append(stage)
+
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
     show_client = client
@@ -863,6 +908,7 @@ def client_detail(request, client_id, s_client_id=None):
             request,
             "home/client-detail.html",
             {
+                "councils": councils,
                 "client": client,
                 "history": history,
                 "imported": imported,
@@ -880,13 +926,13 @@ def client_detail(request, client_id, s_client_id=None):
                 "uncampaigns": uncampaigns,
                 "products": products,
                 "unproducts": unproducts,
-                "coverage_areas": coverage_area,
+                "coverage_areas": coverage_area_client,
                 "all_products": all_products,
                 "all_routes": all_routes,
-                "routes":routes,
-                "unroutes":unroutes,
+                "routes": routes,
+                "unroutes": unroutes,
                 "stages": stages,
-                
+                "display_regions": display_regions,
             },
         )
 
@@ -894,13 +940,14 @@ def client_detail(request, client_id, s_client_id=None):
         request,
         "home/client-detail.html",
         {
+            "councils": councils,
             "client": client,
             "history": history,
             "imported": imported,
             "prev": prev,
             "next": next,
             "child_clients": child_clients,
-            "agents" : agents,
+            "agents": agents,
             "show_client": show_client,
             "events": events,
             "reasons": reasons,
@@ -909,14 +956,15 @@ def client_detail(request, client_id, s_client_id=None):
             "domain_name": domain_name,
             "campaigns": campaigns,
             "uncampaigns": uncampaigns,
-            "products":products,
-            "unproducts":unproducts,
-            "coverage_areas": coverage_area,
-            "all_products":all_products,
-            "all_routes":all_routes,
-            "routes":routes,
-            "unroutes":unroutes,
+            "products": products,
+            "unproducts": unproducts,
+            "coverage_areas": coverage_area_client,
+            "all_products": all_products,
+            "all_routes": all_routes,
+            "routes": routes,
+            "unroutes": unroutes,
             "stages": stages,
+            "display_regions": display_regions,
         },
     )
 
@@ -925,8 +973,8 @@ def client_detail(request, client_id, s_client_id=None):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council).filter(is_council=True)
-    all_routes = Route.objects.all().filter(is_parent=True)
+    routes = Route.objects.all().filter(council=council)
+    all_routes = Route.objects.all()
     prev = None
     next = None
     if len(all_councils) == 1:
@@ -1169,6 +1217,11 @@ def council(request):
         request, "home/council.html", {"councils": councils, "campaigns": campaigns}
     )
 
+def delete_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    council.delete()
+    return redirect("/council")
+
 
 @login_required
 def Admin(request):
@@ -1222,7 +1275,7 @@ def add_customer(request):
         last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
-        postcode = request.POST.get("postcode")
+        postcode = request.POST.get("postcode").upper()
         street_name = request.POST.get("street_name")
         house_name = request.POST.get("house_name")
         city = request.POST.get("city")
@@ -1287,11 +1340,17 @@ def add_customer(request):
             request.session["client"] = (client,)
 
             return redirect("/customer?page=add_customer")
-
-        postcode = re.sub(r'\s+', ' ', postcode)
+        if ' ' not in postcode:
+            postcode = postcode[:-3] + " " + postcode[-3:]
+        uk = Councils.objects.get(name='UK')
+        if postcode[:-3] not in uk.postcodes.split(','):
+            uk_postcodes = os.path.join(os.path.dirname(__file__), './uk_postcodes.txt')
+            with open(uk_postcodes, 'a') as f:
+                f.write(',' + postcode[:-3].strip())
+            uk.postcodes += ',' + postcode[:-3].strip()
+            uk.save()
+            
         district = getLA(postcode)
-        if district and not Councils.objects.filter(name=district).exists():
-            Councils.objects.create(name=district)
         obj = getEPC(postcode, house_name, street_name)
         energy_rating = None
         energy_certificate_link = None
@@ -1321,7 +1380,7 @@ def add_customer(request):
             country=country,
             agent=agent,
             address=address,
-            council=Councils.objects.get(name=district),
+            council=Councils.objects.get(name='UK'),
             district=district,
             constituency=constituency,
             campaign=Campaign.objects.get(id=campaign),
@@ -1372,7 +1431,7 @@ def edit_customer(request, customer_id):
         customer.last_name = request.POST.get("last_name").upper()
         customer.phone_number = request.POST.get("phone_number")
         customer.email = request.POST.get("email")
-        customer.postcode = re.sub(r'\s+', ' ', request.POST.get("postcode"))
+        postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         customer.street_name = request.POST.get("street_name")
         customer.city = request.POST.get("city")
         customer.house_name = request.POST.get("house_name")
@@ -1382,10 +1441,16 @@ def edit_customer(request, customer_id):
         if customer.campaign == "nan" or customer.city == "nan" or customer.county == "nan" or customer.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
-        
+        if " " not in postcode:
+            postcode = postcode[:-3] + " " + postcode[-3:]
+        uk = Councils.objects.get(name='UK')
+        if postcode[:-3] not in uk.postcodes.split(','):
+            uk_postcodes = os.path.join(os.path.dirname(__file__), './uk_postcodes.txt')
+            with open(uk_postcodes, 'a') as f:
+                f.write(',' + postcode[:-3].strip())
+            uk.postcodes += ',' + postcode[:-3].strip()
+            uk.save()
         district = getLA(customer.postcode)
-        if district and not Councils.objects.filter(name=district).exists():
-            Councils.objects.create(name=district)
         obj = getEPC(customer.postcode, customer.house_name, customer.street_name)
         energy_rating = None
         energy_certificate_link = None
@@ -1402,6 +1467,7 @@ def edit_customer(request, customer_id):
                 obj["address"] if obj["address"] else customer.house_name + " " + customer.street_name
             )
             recommendations = obj["recommendations"] if obj["recommendations"] else None
+        customer.postcode = postcode
         customer.energy_rating = energy_rating
         customer.energy_certificate_link = energy_certificate_link
         customer.address = address
@@ -1447,7 +1513,7 @@ def add_client(request):
         last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
-        postcode = request.POST.get("postcode")
+        postcode = request.POST.get("postcode").upper()
         street_name = request.POST.get("street_name")
         house_name = request.POST.get("house_name")
         city = request.POST.get("city")
@@ -1471,10 +1537,21 @@ def add_client(request):
             messages.error(request, "Phone number already exists")
             return redirect("/client?page=add_client")
 
+        if " " not in postcode:
+            postcode = postcode[:-3] + " " + postcode[-3:]
+        uk = Councils.objects.get(name="UK")
+        if postcode[:-3] not in uk.postcodes.split(","):
+            uk_postcodes = os.path.join(
+                os.path.dirname(__file__), "./uk_postcodes.txt"
+            )
+            
+            with open(uk_postcodes, "a") as f:
+                print(f)
+                f.write("," + postcode[:-3].strip())
+            uk.postcodes += "," + postcode[:-3].strip()
+            uk.save()
         postcode = re.sub(r'\s+', ' ', postcode)
         district = getLA(postcode)
-        if district and not Councils.objects.filter(name=district).exists():
-            Councils.objects.create(name=district)
         obj = getEPC(postcode, house_name, street_name)
         energy_rating = None
         energy_certificate_link = None
@@ -1517,7 +1594,6 @@ def add_client(request):
             recommendations=recommendations,
             address=address,
             district=district,
-            council=Councils.objects.get(name=district),
             constituency=constituency,
         )
         client.add_action(
@@ -1576,7 +1652,7 @@ def edit_client(request, client_id):
         client.last_name = request.POST.get("last_name").upper()
         client.phone_number = request.POST.get("phone_number")
         client.email = request.POST.get("email")
-        client.postcode = re.sub(r'\s+', ' ', request.POST.get("postcode"))
+        client.postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         client.street_name = request.POST.get("street_name")
         client.city = request.POST.get("city")
         client.house_name = request.POST.get("house_name")
@@ -1586,9 +1662,19 @@ def edit_client(request, client_id):
         if client.city == "nan" or client.county == "nan" or client.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/client?page=edit_client&id={client_id}")
-
+        if " " not in client.postcode:
+            client.postcode = client.postcode[:-3] + " " + client.postcode[-3:]
+        uk = Councils.objects.get(name="UK")
+        if client.postcode[:-3] not in uk.postcodes.split(","):
+            uk_postcodes = os.path.join(
+                os.path.dirname(__file__), "./uk_postcodes.txt"
+            )
+            with open(uk_postcodes, "a") as f:
+                f.write("," + client.postcode[:-3].strip())
+            uk.postcodes += "," + client.postcode[:-3].strip()
+            uk.save()
         client.save()
-        client.add_action(
+        client.add_action( 
             agent=User.objects.get(email=request.user),
             date_time=datetime.now(pytz.timezone("Europe/London")),
             created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -1610,25 +1696,6 @@ def edit_client(request, client_id):
 
     context = {"client": client}
     return render(request, "home/client.html", context)
-
-
-@login_required
-def edit_council(request, council_id):
-    council = Councils.objects.get(pk=council_id)
-    if request.method == "POST":
-        council.name = request.POST.get("name")
-        # council.phone_number = request.POST.get("phone_number")
-        # council.email = request.POST.get("email")
-        # council.postcode = request.POST.get("postcode")
-        # council.street_name = request.POST.get("street_name")
-
-        council.save()
-
-        messages.success(request, "Council updated successfully!")
-        return redirect("app:council")
-
-    context = {"council": council}
-    return render(request, "home/council.html", context)
 
 
 @login_required
@@ -2173,31 +2240,65 @@ def add_product_client(request,client_id):
 
 @login_required
 def product(request):
-    products = Product.objects.all()
-    return render(request, "home/products.html", {"products": products})
+    products = Product.objects.all().filter(global_archive=False)
+    archived_products = Product.objects.all().filter(global_archive=True)
+    return render(request, "home/products.html", {"products": products, "archived_products": archived_products})
+
+def archive_global_product(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    if product.global_archive == False:
+        product.global_archive = True
+    else:
+        product.global_archive = False
+        
+    product.save()
+    if product.global_archive == True:
+        messages.success(request, "Product archived successfully!")
+    else:
+        messages.success(request, "Product unarchived successfully!")
+    return redirect("app:product")
 
 @login_required
 def funding_route(request):
-    products = Product.objects.all().filter(is_parent=True)
+    products = Product.objects.all().filter(global_archive=False)
     if request.GET.get("page") == "edit":
         route_id = request.GET.get("route_id")
         route = Route.objects.get(pk=route_id)
+        documents = []
+        for doc in route.documents.all():
+            if doc.is_client == False and doc.is_council == False:
+                documents.append(doc)
         
-        return render(request, "home/funding_routes.html", {"route": route,"products": products})
-    funding_routes = Route.objects.all().filter(is_parent=True)
-    return render(request, "home/funding_routes.html", {"funding_routes": funding_routes, "products": products})
+        return render(request, "home/funding_routes.html", {"route": route,"products": products, "documents":documents})
+    funding_routes = Route.objects.all().filter(global_archive=False)
+    archived_funding_routes = Route.objects.all().filter(global_archive=True)
+    return render(request, "home/funding_routes.html", {"funding_routes": funding_routes, "products": products, "archived_funding_routes": archived_funding_routes})
+
+def archive_global_funding_route(request, funding_route_id):
+    funding_route = Route.objects.get(pk=funding_route_id)
+    if funding_route.global_archive == False:
+        funding_route.global_archive = True
+    else:
+        funding_route.global_archive = False
+    
+    funding_route.save()
+    if funding_route.global_archive == True:
+        messages.success(request, "Funding Route archived successfully!")
+    else:
+        messages.success(request, "Funding Route unarchived successfully!")
+    return redirect("app:funding_route")
 
 @login_required
 def add_new_funding_route(request):
-    products = Product.objects.all()
+    products = Product.objects.all().filter(global_archive=False)
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
         documents = request.FILES.getlist("document")
 
-        route = Route.objects.create(name=name, description=description,is_parent=True)
+        route = Route.objects.create(name=name, description=description)
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document,is_route=True)
             route.documents.add(doc)
         for product in products:
             if request.POST.get(product.name) == "true":
@@ -2217,14 +2318,9 @@ def edit_new_funding_route(request,route_id):
         route.description = request.POST.get("description")
         documents = request.FILES.getlist("document")
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document,is_route=True)
             route.documents.add(doc)
         route.save()
-        print(route.council_route.all())
-        for council_route in route.council_route.all():
-            council_route.name=route.name
-            council_route.description=route.description
-            council_route.save()
         messages.success(request, "Funding Route created successfully!")
         return redirect("app:funding_route")
     return render(request, "home/edit_new_funding_routes.html",{"route":route})
@@ -2362,14 +2458,7 @@ def add_funding_route(request, council_id):
             messages.error(request, "Route should be selected")
             return redirect(f"/council-detail/{council_id}")
         route = Route.objects.get(pk=request.POST.get("route"))
-        council_route = Route.objects.create(
-            name=route.name,
-            description=route.description,
-            is_council=True,
-        )
-        council_route.council.add(council)
-        route.council_route.add(council_route)
-        council_route.save()
+        route.council.add(council)
         route.save()
         messages.success(request, "Funding Route added successfully!")
         return redirect('/council-detail/'+str(council_id))
@@ -2460,19 +2549,14 @@ def add_route_client(request, client_id):
         if request.POST.get("route") == "nan":
             messages.error(request, "Route should be selected")
             return redirect(f"/client-detail/{client_id}")
-        main_route = Route.objects.get(pk=request.POST.get("route"))
-        funding_route = Route.objects.create(
-            name=main_route.name,
-            description=main_route.description,
-            rules_regulations=main_route.rules_regulations,
+        route_council_id = request.POST.get("route").split('-')
+        route = Route.objects.get(pk=route_council_id[0])
+        council = Councils.objects.get(pk=route_council_id[1])
+        Client_Council_Route.objects.create(
+            client=client,
+            route=route,
+            council=council,
         )
-        client.route.add(funding_route)
-        for council in main_route.council.all():
-            funding_route.council.add(council)
-        funding_route.save()
-        main_route.client_route.add(funding_route)
-        main_route.save()
-        client.save()
         messages.success(request, "Funding Route added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
 
@@ -2483,17 +2567,7 @@ def add_product_client(request, client_id):
             messages.error(request, "Product should be selected")
             return redirect(f"/client-detail/{client_id}")
         main_product = Product.objects.get(pk=request.POST.get("product"))
-        product = Product.objects.create(
-            name=main_product.name,
-            description=main_product.description,
-            rules_regulations=main_product.rules_regulations,
-        )
-        client.product.add(product)
-        for council in main_product.council.all():
-            product.council.add(council)
-        product.save()
-        main_product.client_product.add(product)
-        main_product.save()
+        client.product.add(main_product)
         client.save()
         messages.success(request, "Product added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
@@ -2510,14 +2584,64 @@ def add_council_funding_route(request, council_id):
 def add_local_authority(request):
     if request.method == "POST":
         name = request.POST.get("name")
+        postcodes = request.POST.get("postcodes")
+        main_postcodes = ''
+        for postcode in request.POST.get("postcodes").split(","):
+            postcode = postcode.strip()  # Trim any leading/trailing whitespace
+            if len(postcode) < 2 or len(postcode) > 4:  # Adjust this range as needed
+                messages.error(request, f"Postcode {postcode} is not valid")
+            else:
+                uk_council = Councils.objects.get(name='UK')
+                if postcode not in uk_council.postcodes:
+                    uk_council.postcodes += ',' + postcode
+                    uk_council.save()
+                    uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                    with open(uk_postcodes, 'a') as f:
+                        f.write(',' + postcode)
+                if main_postcodes == '':
+                    main_postcodes += postcode
+                else:
+                    main_postcodes += ',' + postcode
+                print(uk_council.postcodes)
+
         council = Councils.objects.create(
             name=name,
+            postcodes=main_postcodes,
             created_at=datetime.now(pytz.timezone('Europe/London')),
-            agent=User.objects.get(email=request.user),
         )
-        messages.success(request, "Local Authority added successfully!")
+
+        messages.success(request, "Region added successfully!")
         return redirect("app:council")
     return render(request, "home/council.html")
+
+
+def edit_council(request, council_id):
+    council = Councils.objects.get(pk=council_id)
+    if request.method == "POST":
+        main_postcodes = ""
+        for postcode in request.POST.get("postcodes").split(","):
+            postcode = postcode.strip()  # Trim any leading/trailing whitespace
+            if len(postcode) < 2 or len(postcode) > 4:  # Adjust this range as needed
+                messages.error(request, f"Postcode {postcode} is not valid")
+            else:
+                uk_council = Councils.objects.get(name="UK")
+                if postcode not in uk_council.postcodes:
+                    uk_council.postcodes += "," + postcode
+                    uk_council.save()
+                    uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                    with open(uk_postcodes, 'a') as f:
+                        f.write(',' + postcode)
+                if main_postcodes == "":
+                    main_postcodes += postcode
+                else:
+                    main_postcodes += "," + postcode
+        council.name = request.POST.get('name')
+        council.postcodes = main_postcodes
+        council.save()
+        messages.success(request, "Region updated successfully!")
+        return redirect(f"/council-detail/{council_id}")
+    return render(request, "home/edit_council.html", {"council": council})
+
 
 def remove_funding_route(request, route_id):
     route = Route.objects.get(pk=route_id)
@@ -2802,9 +2926,6 @@ def send_email(request, customer_id):
         text = request.POST.get("text")
         subject = request.POST.get("subject")
 
-    # body = re.sub(r"\r?\n", "\n", body)
-    # signature.signature = re.sub(r"\r?\n", "\n", signature.signature)
-
     context = {
         "body": body,
         "signature": signature,
@@ -2849,7 +2970,7 @@ def send_email(request, customer_id):
 
 
 def send_client_email(request, cclient_id):
-    cclient = Cclients.objects.get(pk=cclient_id)
+    cclient = Clients.objects.get(pk=cclient_id)
     email_id = request.POST.get("template")
     date_str = request.POST.get("date_field")
     time_str = request.POST.get("time_field")
@@ -3198,14 +3319,23 @@ def get_notifications(request):
 
 def add_coverage_areas(request, client_id):
     if request.method == "POST":
-
         client = Clients.objects.get(pk=client_id)
-        coverage_area = CoverageAreas.objects.create(
-            client=client,
-            postcode=re.sub(r"\s+", " ", request.POST.get("postcode")),
-        )
-
-        messages.success(request, "Postcode Added Successfully")
+        postcodes = request.POST.get("postcodes").split(",")
+        region = Councils.objects.get(name='UK')
+        
+        for postcode in postcodes:
+            if postcode not in region.postcodes.split(','):
+                region.postcodes += ',' + postcode
+                uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                with open(uk_postcodes, 'a') as f:
+                    f.write(',' + postcode)
+                region.save()    
+            CoverageAreas.objects.create(
+                client=client,
+                postcode=postcode,
+            )
+            messages.success(request, "Coverage Area added successfully!")
+                    
         return redirect(r"/client-detail/" + str(client_id))
     return render(request, "home/admin.html")
 
@@ -3229,29 +3359,34 @@ def get_campaign(request, client_id):
 
 def archive_product(request,client_id, product_id):
     product = Product.objects.get(pk=product_id)
-    if product.archive == False:
-        product.archive = True
-        product.save()
-        messages.success(request, "Archived successfully!")
+    client = Clients.objects.get(pk=client_id)
+    if ClientArchive.objects.filter(client=client).filter(product=product).exists():
+        ClientArchive.objects.filter(client=client).filter(product=product).first().delete()
+        messages.success(request, "Unarchive Successfully")
         return redirect(r"/client-detail/" + str(client_id))
     else:
-        product.archive = False
-        product.save()
-        messages.success(request, "Unarchived successfully!")
+        ClientArchive.objects.create(
+            client=client,
+            product=product
+        )
+        messages.success(request, "Archive Successfully")
         return redirect(r"/client-detail/" + str(client_id))
 
-def archive_route(request,client_id, route_id):
+def archive_route(request,client_id, route_id, council_id):
     route = Route.objects.get(pk=route_id)
-    if route.archive == False:
-        route.archive = True
-        route.save()
-        messages.success(request, "Archived successfully!")
-        return redirect(r"/client-detail/" + str(client_id))
+    client = Clients.objects.get(pk=client_id)
+    council = Councils.objects.get(pk=council_id)
+    archive = ClientArchive.objects.filter(
+        client=client, councils=council, route=route
+    ).first()
+    if archive:
+        archive.delete()
+        messages.success(request, "Unarchived Successfully")
     else:
-        route.archive = False
-        route.save()
-        messages.success(request, "Unarchived successfully!")
-        return redirect(r"/client-detail/" + str(client_id))
+        ClientArchive.objects.create(client=client, route=route, councils=council)
+        messages.success(request, "Archived Successfully")
+
+    return redirect(f"/client-detail/{client_id}")
 
 def change_customer_client(request, customer_id):
     customer = Customers.objects.get(pk=customer_id)
@@ -3333,21 +3468,21 @@ def edit_local_funding_route(request, funding_route_id):
     clients = funding_route.client.all()
     if clients.exists():
         client_id = clients.first().id
-    stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
-    fields = {}
-    saved_rules_regulations = {}
-    if funding_route.rules_regulations:
-        saved_rules_regulations = json.loads(funding_route.rules_regulations)
-    if stages.exists():
-        for stage in stages:
-            fields[stage.name] = json.loads(stage.fields)
-    if funding_route.sub_rules_regulations:
-        sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
-    else:
-        sub_rules_regulations = None
-    if stages.exists():
-        for stage in stages:
-            fields[stage.name] = json.loads(stage.fields)
+    # stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
+    # fields = {}
+    # saved_rules_regulations = {}
+    # if funding_route.rules_regulations:
+    #     saved_rules_regulations = json.loads(funding_route.rules_regulations)
+    # if stages.exists():
+    #     for stage in stages:
+    #         fields[stage.name] = json.loads(stage.fields)
+    # if funding_route.sub_rules_regulations:
+    #     sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
+    # else:
+    #     sub_rules_regulations = None
+    # if stages.exists():
+    #     for stage in stages:
+    #         fields[stage.name] = json.loads(stage.fields)
     if request.method == "POST":
         dynamicStages = request.POST.getlist("subDynamicStage")
         dynamicFields = request.POST.getlist("subDynamicField")
@@ -3367,9 +3502,9 @@ def edit_local_funding_route(request, funding_route_id):
         "home/edit_local_funding_routes.html",
         {
             "funding_route": funding_route,
-            "fields": fields,
-            "saved_rules_regulations": saved_rules_regulations,
-            "sub_rules_regulations": sub_rules_regulations,
+            # "fields": fields,
+            # "saved_rules_regulations": saved_rules_regulations,
+            # "sub_rules_regulations": sub_rules_regulations,
         },
     )
 
@@ -3444,10 +3579,9 @@ def add_new_product(request):
         product = Product.objects.create(
             name=name,
             description=description,
-            is_parent=True,
         )
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document, is_product=True)
             product.documents.add(doc)
         product.save()
         messages.success(request, "Product added successfully!")
@@ -3456,6 +3590,10 @@ def add_new_product(request):
 
 def edit_new_product(request, product_id):
     product = Product.objects.get(pk=product_id)
+    docs = []
+    for doc in product.documents.all():
+        if doc.is_client == False and doc.is_route == False:
+            docs.append(doc)
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
@@ -3463,13 +3601,13 @@ def edit_new_product(request, product_id):
         product.description = description
         documents = request.FILES.getlist('document')
         for document in documents:
-            doc = Document.objects.create(document=document)
-            product.documents.add(doc)
+            docu = Document.objects.create(document=document)
+            product.documents.add(docu)
 
         product.save()
         messages.success(request, "Product updated successfully!")
         return redirect("app:product")
-    return render(request, 'home/edit_new_product.html', {'product':product})
+    return render(request, 'home/edit_new_product.html', {'product':product, "docs":docs})
 
 
 def delete_product(request, product_id):
@@ -3493,9 +3631,8 @@ def edit_route(request, route_id):
         route.description = request.POST.get("description")
         documents = request.FILES.getlist("document")
         for document in documents:
-            doc = Document.objects.create(document=document)
+            doc = Document.objects.create(document=document,is_route=True)
             route.documents.add(doc)
-
         for product in products:
             if request.POST.get(product.name) == 'true':
                 route.product.add(product)
@@ -3507,9 +3644,10 @@ def edit_route(request, route_id):
     return redirect("app:funding_route")
 
 def customer_journey(request):
-    routes = Route.objects.all().filter(is_parent=True)
-    stages = Stage.objects.all()
-    return render(request, "home/customer_journey.html", {"funding_routes": routes, "stages":stages})
+    routes = Route.objects.all().filter(global_archive=False)
+    stages = Stage.objects.all().filter(global_archive=False)
+    archived_stages = Stage.objects.all().filter(global_archive=True)
+    return render(request, "home/customer_journey.html", {"funding_routes": routes, "stages":stages, "archived_stages":archived_stages})
 
 def add_stage(request):
     if request.method == "POST":
@@ -3523,6 +3661,19 @@ def add_stage(request):
         return redirect("app:customer_journey")
     return render(request, "home/add_stage.html")
 
+def archive_global_stage(request, stage_id):
+    stage = Stage.objects.get(pk=stage_id)
+    if stage.global_archive == False:
+        stage.global_archive = True
+        stage.save()
+        messages.success(request, "Archived successfully!")
+        return redirect("app:customer_journey")
+    else:
+        stage.global_archive = False
+        stage.save()
+        messages.success(request, "Unarchived successfully!")
+        return redirect("app:customer_journey")
+
 def cj_route(request, route_id):
     route = Route.objects.get(pk=route_id)
     return render(request, 'home/cj_route.html', {'route':route})
@@ -3530,7 +3681,7 @@ def cj_route(request, route_id):
 def cj_product(request ,route_id ,product_id):
     route = Route.objects.get(pk=route_id)
     product = Product.objects.get(pk=product_id)
-    stages = Stage.objects.all()
+    stages = Stage.objects.all().filter(global_archive=False)
     if request.method == 'POST':
         stage = Stage.objects.get(pk=request.POST.get('stage'))
         product.stage.add(stage)
@@ -3640,3 +3791,10 @@ def delete_cj_stage_question(request, route_id, product_id, stage_id, question_i
     stage.save()
     messages.success(request, "Question removed successfully!")
     return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
+
+def get_postcodes(request, region):
+    council = Councils.objects.get(name=region)
+    if council.postcodes:
+        postcodes = council.postcodes.split(",")
+        return JsonResponse({"postcodes": postcodes}, safe=False)
+    return JsonResponse({"postcodes": []}, safe=False)

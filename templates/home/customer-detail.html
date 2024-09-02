@@ -226,7 +226,7 @@ table {
   </div>
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Campaign</b> - </span>
-    <div class="mt-1 link-primary" id="change_campaign">
+    <div class="mt-1" >
     {% if customer.campaign %}
      {{ customer.campaign.name }}
     {% else %}
@@ -284,7 +284,7 @@ table {
 
   <div class="cnav-item fs-6 col-2">
     <span class="col"> <b>Client</b> - </span>
-    <div class="mt-1 link-primary" id="change_client">
+    <div class="mt-1">
     {% if customer.client %}
      {{ customer.client.company_name }}
     {% else %}
@@ -403,6 +403,15 @@ table {
                 <h6><b>County</b> : {{customer.county}}</h6>
                 <h6><b>Postcode</b> : {{customer.postcode}}</h6>
                 <h6><b>Country</b> : {{customer.country}}</h6>
+                <h6><b>Region</b> : 
+                  {% for region in display_regions %}
+                    {% if forloop.counter == 1 %}
+                    {{region.name}} 
+                    {% else %}
+                    , {{region.name}}
+                    {% endif %}
+                  {% endfor %}
+                </h6>
               </div>
             </div>
           </div>
@@ -927,6 +936,8 @@ table {
               </div>
 
 
+              
+
 
 
                 <h6>History</h6>
@@ -994,6 +1005,8 @@ table {
                     </ul>
                   </div>
                 </div>
+
+
                 <h6 class="mt-3">Key Events</h6>
                 <div class="card p-0 m-0">
                   <div
@@ -1025,13 +1038,20 @@ table {
                     </ul>
                   </div>
                 </div>
+
+                
               </div>
             </div>
           </div>
 
+          
+
           <div class="col-sm-6">
             <div class="card m-0">
               <div class="card-body">
+                
+
+
                 <h6>Available Funding Routes</h6>
                 
                 <div class="card p-0 m-0">
@@ -1040,7 +1060,7 @@ table {
                   >
                     <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
                       {% for route in routes %}
-                      {% with i=forloop.counter0 %}    
+                      {% comment %} {% with i=forloop.counter0 %}    
                           <button  class="btn btn-primary me-2" style="width: fit-content; display: flex;"
                           {% if route not in council_routes or  council_routes == None %}
                           disabled
@@ -1062,10 +1082,10 @@ table {
                           {% endif %}
                           
                             {{ route.name }}  </button>
-                      {% endwith %}
+                      {% endwith %} {% endcomment %}
+                      <h6 class="btn btn-primary">{{ route.name }}</h6>
                       {% endfor %}
-                      
-                      
+
                 </div>
                   </div>
                 </div>
@@ -1076,8 +1096,8 @@ table {
                     class="card-body p-3 m-0"
                   >
                     <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
-                      {% for product in products %}
-                      {% with i=forloop.counter0 %}                        
+                    {% for product in products %}
+                      {% comment %} {% with i=forloop.counter0 %}                        
                         <button class="btn btn-primary me-2" style="width: fit-content; display: flex;"
                             {% if true_products and true_products|index:i %}
                             {% else %}
@@ -1091,7 +1111,8 @@ table {
                             {% endif %}
                             {{ product.name }}
                         </button>
-                      {% endwith %}
+                      {% endwith %} {% endcomment %}
+                      <h6 class="btn btn-primary">{{ product.name }}</h6>
                   {% endfor %}
 
                       
@@ -1099,7 +1120,7 @@ table {
                 </div>
                   </div>
                 </div>
-                <h6>Stage</h6>
+                {% comment %} <h6>Stage</h6>
                 {% if values %}
                               
                               
@@ -1161,7 +1182,7 @@ table {
                 
                 {% else %}
                 <div class="card p-0 m-0 accordion-container">
-                <div class="card-body p-3 m-0" style="height: 390px">
+                <div class="card-body p-3 m-0" style="">
                                   
                                     {% for name, field in stages.items %}
                                     
@@ -1217,7 +1238,7 @@ table {
                 {% endif %}
                               
 
-                  
+                   {% endcomment %}
                   </div>
                 </div>
               </div>
