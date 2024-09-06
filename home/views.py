@@ -390,12 +390,43 @@ def customer_detail(request, customer_id, s_customer_id=None):
         processed_recommendations.append(
             {"improvement": improvement, "indicative_cost": indicative_cost[:-1]}
         )
-    routes = Route.objects.all().filter(client=customer.client)
+    client_routes = []
+    routes = []
+    for route_obj in Client_Council_Route.objects.filter(client=customer.client):
+        council = route_obj.council
+        route = route_obj.route
+
+        if (
+            ClientArchive.objects.filter(
+                client=customer.client, route=route, councils=council
+            ).exists()
+            and route.global_archive == False
+        ):
+            pass
+        else:
+            if route.global_archive == False:
+                client_routes.append(route)
+
+    for region in display_regions:
+        council_routes_in_region = region.routes.filter(global_archive=False)
+        for council_route in council_routes_in_region:
+            if council_route in client_routes:
+                if not ClientArchive.objects.filter(
+                    client=customer.client, route=council_route, councils=region
+                ).exists():
+                    routes.append(council_route)
     all_stages = Stage.objects.all()    
     products = Product.objects.all().filter(client=customer.client)
     true_products = [True] * len(products)
     true_routes = [True] * len(routes)
-    stages = {}
+    stages = []
+    
+    for product in products:
+        for stage in product.stage.all():
+            if stage not in stages:
+                stages.append(stage)
+    
+    stages = sorted(stages, key=lambda x: x.order)
 
     # for stage in all_stages:
     #     if stage.fields is not None:
@@ -418,195 +449,195 @@ def customer_detail(request, customer_id, s_customer_id=None):
     #                 if field in stage_values[key]:
     #                     fields[field][1] = stage_values[key][field]
 
-        # i = 0
-        # for product in products:
-        #     product_rules = {}
-        #     for key, value in ast.literal_eval(product.rules_regulations).items():
-        #         rule_key = value[0].split(",")[0]
-        #         rule_value = value[1].split(',')[0]
-        #         rule_additional_value = value[2]
+    # i = 0
+    # for product in products:
+    #     product_rules = {}
+    #     for key, value in ast.literal_eval(product.rules_regulations).items():
+    #         rule_key = value[0].split(",")[0]
+    #         rule_value = value[1].split(',')[0]
+    #         rule_additional_value = value[2]
 
-        #         if rule_key not in product_rules:
-        #             product_rules[rule_key] = {rule_value: [rule_additional_value]}
-        #         else:
-        #             if rule_value not in product_rules[rule_key]:
-        #                 product_rules[rule_key][rule_value] = [rule_additional_value]
-        #             else:
-        #                 product_rules[rule_key][rule_value].append(rule_additional_value)
+    #         if rule_key not in product_rules:
+    #             product_rules[rule_key] = {rule_value: [rule_additional_value]}
+    #         else:
+    #             if rule_value not in product_rules[rule_key]:
+    #                 product_rules[rule_key][rule_value] = [rule_additional_value]
+    #             else:
+    #                 product_rules[rule_key][rule_value].append(rule_additional_value)
 
-        #     for stage, rules in product_rules.items():
-        #         if stage in values:
-        #             for field, rule in rules.items():
-        #                 for key, value in values[stage].items():
-        #                     if ',' in key:
-        #                         key = key.split(',')[0]
-        #                     if field == key:
-        #                         if value[0] in ['time', 'date', 'number', 'month']:
-        #                             if value[0] == 'date':
-        #                                 if check_date(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_products[i] = False
-        #                             elif value[0] == 'time':
-        #                                 if check_time(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_products[i] = False
-        #                             elif value[0] == 'number':
-        #                                 if check_number(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_products[i] = False
-        #                             elif value[0] == 'month':
-        #                                 if check_month(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_products[i] = False
-        #                         else:
-        #                             if value[1] in rule or value[1] == '':
-        #                                 pass
-        #                             else:
-        #                                 true_products[i] = False
+    #     for stage, rules in product_rules.items():
+    #         if stage in values:
+    #             for field, rule in rules.items():
+    #                 for key, value in values[stage].items():
+    #                     if ',' in key:
+    #                         key = key.split(',')[0]
+    #                     if field == key:
+    #                         if value[0] in ['time', 'date', 'number', 'month']:
+    #                             if value[0] == 'date':
+    #                                 if check_date(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_products[i] = False
+    #                             elif value[0] == 'time':
+    #                                 if check_time(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_products[i] = False
+    #                             elif value[0] == 'number':
+    #                                 if check_number(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_products[i] = False
+    #                             elif value[0] == 'month':
+    #                                 if check_month(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_products[i] = False
+    #                         else:
+    #                             if value[1] in rule or value[1] == '':
+    #                                 pass
+    #                             else:
+    #                                 true_products[i] = False
 
-        #     i += 1
+    #     i += 1
 
-        # j = 0
-        # for route in routes:
-        #     route_rules = {}
-        #     for key, value in ast.literal_eval(route.rules_regulations).items():
-        #         rule_key = value[0].split(",")[0]
-        #         rule_value = value[1].split(",")[0]
-        #         rule_additional_value = value[2]
+    # j = 0
+    # for route in routes:
+    #     route_rules = {}
+    #     for key, value in ast.literal_eval(route.rules_regulations).items():
+    #         rule_key = value[0].split(",")[0]
+    #         rule_value = value[1].split(",")[0]
+    #         rule_additional_value = value[2]
 
-        #         if rule_key not in route_rules:
-        #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
-        #         else:
-        #             if rule_value not in route_rules[rule_key]:
-        #                 route_rules[rule_key][rule_value] = [rule_additional_value]
-        #             else:
-        #                 route_rules[rule_key][rule_value].append(rule_additional_value)
+    #         if rule_key not in route_rules:
+    #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
+    #         else:
+    #             if rule_value not in route_rules[rule_key]:
+    #                 route_rules[rule_key][rule_value] = [rule_additional_value]
+    #             else:
+    #                 route_rules[rule_key][rule_value].append(rule_additional_value)
 
-        #     for stage, rules in route_rules.items():
-        #         if stage in values:
-        #             for field, rule in rules.items():
-        #                 for key, value in values[stage].items():
-        #                     if "," in key:
-        #                         key = key.split(",")[0]
-        #                     if field == key:
-        #                         if value[0] in ["time", "date", "number", "month"]:
-        #                             if value[0] == "date":
-        #                                 if check_date(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                             elif value[0] == "time":
-        #                                 if check_time(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                             elif value[0] == "number":
-        #                                 if check_number(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                             elif value[0] == "month":
-        #                                 if check_month(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                         else:
-        #                             if value[1] in rule or value[1] == "":
-        #                                 pass
-        #                             else:
-        #                                 true_routes[j] = False
-        #                         print("route",true_routes)
+    #     for stage, rules in route_rules.items():
+    #         if stage in values:
+    #             for field, rule in rules.items():
+    #                 for key, value in values[stage].items():
+    #                     if "," in key:
+    #                         key = key.split(",")[0]
+    #                     if field == key:
+    #                         if value[0] in ["time", "date", "number", "month"]:
+    #                             if value[0] == "date":
+    #                                 if check_date(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                             elif value[0] == "time":
+    #                                 if check_time(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                             elif value[0] == "number":
+    #                                 if check_number(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                             elif value[0] == "month":
+    #                                 if check_month(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                         else:
+    #                             if value[1] in rule or value[1] == "":
+    #                                 pass
+    #                             else:
+    #                                 true_routes[j] = False
+    #                         print("route",true_routes)
 
-        #     j += 1
+    #     j += 1
 
-        # j = 0
-        # for route in routes:
-        #     route_rules = {}
-        #     if route.sub_rules_regulations == None:
-        #         continue
-        #     for key, value in ast.literal_eval(route.sub_rules_regulations).items():
-        #         rule_key = value[0].split(",")[0]
-        #         rule_value = value[1].split(',')[0]
-        #         rule_additional_value = value[2]
+    # j = 0
+    # for route in routes:
+    #     route_rules = {}
+    #     if route.sub_rules_regulations == None:
+    #         continue
+    #     for key, value in ast.literal_eval(route.sub_rules_regulations).items():
+    #         rule_key = value[0].split(",")[0]
+    #         rule_value = value[1].split(',')[0]
+    #         rule_additional_value = value[2]
 
-        #         if rule_key not in route_rules:
-        #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
-        #         else:
-        #             if rule_value not in route_rules[rule_key]:
-        #                 route_rules[rule_key][rule_value] = [rule_additional_value]
-        #             else:
-        #                 route_rules[rule_key][rule_value].append(rule_additional_value)
+    #         if rule_key not in route_rules:
+    #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
+    #         else:
+    #             if rule_value not in route_rules[rule_key]:
+    #                 route_rules[rule_key][rule_value] = [rule_additional_value]
+    #             else:
+    #                 route_rules[rule_key][rule_value].append(rule_additional_value)
 
-        #     for stage, rules in route_rules.items():
-        #         if stage in values:
-        #             for field, rule in rules.items():
-        #                 for key, value in values[stage].items():
-        #                     if ',' in key:
-        #                         key = key.split(',')[0]
-        #                     if field == key:
-        #                         if value[0] in ['time', 'date', 'number', 'month']:
-        #                             if value[0] == 'date':
-        #                                 if check_date(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                             elif value[0] == 'time':
-        #                                 if check_time(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                             elif value[0] == 'number':
-        #                                 if check_number(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                             elif value[0] == 'month':
-        #                                 if check_month(value[1], rule):
-        #                                     pass
-        #                                 else:
-        #                                     true_routes[j] = False
-        #                         else:
-        #                             if value[1] in rule or value[1] == '':
-        #                                 pass
-        #                             else:
-        #                                 true_routes[j] = False
-        #                         print(true_routes)
+    #     for stage, rules in route_rules.items():
+    #         if stage in values:
+    #             for field, rule in rules.items():
+    #                 for key, value in values[stage].items():
+    #                     if ',' in key:
+    #                         key = key.split(',')[0]
+    #                     if field == key:
+    #                         if value[0] in ['time', 'date', 'number', 'month']:
+    #                             if value[0] == 'date':
+    #                                 if check_date(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                             elif value[0] == 'time':
+    #                                 if check_time(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                             elif value[0] == 'number':
+    #                                 if check_number(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                             elif value[0] == 'month':
+    #                                 if check_month(value[1], rule):
+    #                                     pass
+    #                                 else:
+    #                                     true_routes[j] = False
+    #                         else:
+    #                             if value[1] in rule or value[1] == '':
+    #                                 pass
+    #                             else:
+    #                                 true_routes[j] = False
+    #                         print(true_routes)
 
-        #     j += 1
+    #     j += 1
 
-        # return render(
-        #         request,
-        #         "home/customer-detail.html",
-        #         {
-        #             "customer": customer,
-        #             "history": history,
-        #             "imported": imported,
-        #             "prev": prev,
-        #             "next": next,
-        #             "child_customers": child_customers,
-        #             "recommendations_list": processed_recommendations,
-        #             "routes": routes,
-        #             "stages": stages,
-        #             "values": values,
-        #             "agents": agents,
-        #             "show_customer": show_customer,
-        #             "events": events,
-        #             "reasons": reasons,
-        #             "templates": templates,
-        #             "signatures": signatures,
-        #             "domain_name": domain_name,
-        #             "products": products,
-        #             "true_products": true_products,
-        #             "true_routes": true_routes,
-        #             "clients": clients,
-        #             "campaigns": campaigns,
-        #             "display_regions":display_regions,
-        #         },
-        #     )
+    # return render(
+    #         request,
+    #         "home/customer-detail.html",
+    #         {
+    #             "customer": customer,
+    #             "history": history,
+    #             "imported": imported,
+    #             "prev": prev,
+    #             "next": next,
+    #             "child_customers": child_customers,
+    #             "recommendations_list": processed_recommendations,
+    #             "routes": routes,
+    #             "stages": stages,
+    #             "values": values,
+    #             "agents": agents,
+    #             "show_customer": show_customer,
+    #             "events": events,
+    #             "reasons": reasons,
+    #             "templates": templates,
+    #             "signatures": signatures,
+    #             "domain_name": domain_name,
+    #             "products": products,
+    #             "true_products": true_products,
+    #             "true_routes": true_routes,
+    #             "clients": clients,
+    #             "campaigns": campaigns,
+    #             "display_regions":display_regions,
+    #         },
+    #     )
     return render(
         request,
         "home/customer-detail.html",
@@ -806,10 +837,11 @@ def client_detail(request, client_id, s_client_id=None):
     all_routes = {}
     for council in council_coverage_area:
         for route in council.routes.all():
-            if all_routes.get(council):
+            if all_routes.get(council) and route.global_archive == False:
                 all_routes[council].append(route)
             else:
-                all_routes[council] = [route]
+                if route.global_archive == False:
+                    all_routes[council] = [route]
 
     routes = {}
     unroutes = {}
@@ -818,16 +850,20 @@ def client_detail(request, client_id, s_client_id=None):
         council = route_obj.council
         route = route_obj.route
 
-        if ClientArchive.objects.filter(
-            client=client, route=route, councils=council
-        ).exists():
+        if (
+            ClientArchive.objects.filter(
+                client=client, route=route, councils=council
+            ).exists()
+            and route.global_archive == False
+        ):
             if council not in unroutes:
                 unroutes[council] = []
             unroutes[council].append(route)
         else:
-            if council not in routes:
-                routes[council] = []
-            routes[council].append(route)
+            if route.global_archive == False:
+                if council not in routes:
+                    routes[council] = []
+                routes[council].append(route)
 
     stages=[]
     for stage in list(Stage.objects.all()):
@@ -973,8 +1009,8 @@ def client_detail(request, client_id, s_client_id=None):
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council)
-    all_routes = Route.objects.all()
+    routes = Route.objects.all().filter(council=council).filter(global_archive=False)
+    all_routes = Route.objects.all().filter(global_archive=False)
     prev = None
     next = None
     if len(all_councils) == 1:
@@ -3798,3 +3834,12 @@ def get_postcodes(request, region):
         postcodes = council.postcodes.split(",")
         return JsonResponse({"postcodes": postcodes}, safe=False)
     return JsonResponse({"postcodes": []}, safe=False)
+
+def add_priority(request, stage_id, client_id):
+    stage = Stage.objects.get(pk=stage_id)
+    if request.method == 'POST':
+        order = request.POST.get('order')
+        stage.order = order
+        stage.save()
+        messages.success(request, "Priority added successfully!")
+        return redirect("/client-detail/"+ str(client_id))

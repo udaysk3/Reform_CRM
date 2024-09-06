@@ -215,7 +215,6 @@ class Stage(models.Model):
     fields = models.JSONField(blank= True, null=True)
     client = models.ForeignKey(Clients, related_name='stage', on_delete=models.CASCADE, null=True)
     global_archive = models.BooleanField(default=False)
-
     documents = models.ManyToManyField(
         "home.Document", related_name="stage",
     )

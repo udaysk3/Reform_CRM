@@ -505,13 +505,13 @@ table {
       ></button>
     </div>
     {% endfor %}
-
-    <div class="card p-0">
+<div class="card p-0">
       <div class="card-body p-3 m-0">
         <div class="row">
-          <div class="col-sm-6 mb-3 mb-sm-0">
+          <div class="col mb-3 mb-sm-0">
             <div class="card m-0">
-              <div class="card-body m-0">
+              <div class="card-body row m-0">
+              <div class="col">
                 <h6 class="fs-6">
                   <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
@@ -1005,9 +1005,10 @@ table {
                     </ul>
                   </div>
                 </div>
-
-
-                <h6 class="mt-3">Key Events</h6>
+              </div>
+              
+                <div class="col">
+                  <h6 class="mt-3">Key Events</h6>
                 <div class="card p-0 m-0">
                   <div
                     class="card-body p-3 m-0"
@@ -1038,21 +1039,21 @@ table {
                     </ul>
                   </div>
                 </div>
+                </div>
 
-                
               </div>
             </div>
           </div>
+          </div>
 
-          
-
-          <div class="col-sm-6">
-            <div class="card m-0">
-              <div class="card-body">
-                
+          <div class="row">
+            <div class="card m-3">
+              <div class="card-body row">
+                <div class="col">
 
 
-                <h6>Available Funding Routes</h6>
+
+                  <h6>Available Funding Routes</h6>
                 
                 <div class="card p-0 m-0">
                   <div
@@ -1089,6 +1090,8 @@ table {
                 </div>
                   </div>
                 </div>
+
+                  
                 <h6>Available Products</h6>
                 
                 <div class="card p-0 m-0">
@@ -1120,8 +1123,18 @@ table {
                 </div>
                   </div>
                 </div>
-                {% comment %} <h6>Stage</h6>
-                {% if values %}
+
+
+
+                
+
+                
+                </div>
+                <div class="col">
+
+
+                  <h6>Stage</h6>
+                {% comment %} {% if values %}
                               
                               
                               
@@ -1235,20 +1248,19 @@ table {
                                   </div>
                                 </div>
                               
-                {% endif %}
-                              
+                {% endif %} {% endcomment %}
+                
 
-                   {% endcomment %}
-                  </div>
+
+                {% for stage in stages %}
+
+                  <h6 class="btn btn-primary">{{ stage.name }}</h6>
+
+                {% endfor %}
+                                
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
 {% endblock %} {% block js %}

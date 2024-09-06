@@ -987,6 +987,193 @@ table {
                       </div>
                     </div>
                   </div>
+                  <h6 class="fs-6"> <b> Products </b></h6>                
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style="height: 200px; overflow-y: auto"
+                  >
+                    <button type="button" class="btn btn-primary position-absolute" style="right:10px" data-bs-toggle="modal" data-bs-target="#productManagement">
+                      Add Product
+                    </button>
+                    <div class="modal fade" id="productManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Product</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form action="{% url 'app:add_product_client' client.id %}" method="post">
+                              {% csrf_token %}
+                            <label for="product" class="form-label">Product</label>
+                            <select class="form-select client_input" id="product" name="product" aria-label="Default select example">
+                              <option value="nan">Select the product</option>
+                              {% for product in all_products %}
+                                <option value="{{product.id}}">{{product.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                          </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+
+<div class="mt-5 row">
+                     <div class="col-6">
+                      <h3>Unarchive</h3>
+                      {% if products %}
+                      {% for camp in products %}
+                          <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#product{{forloop.counter}}">
+                              {{ camp.name }}
+                          </button>
+                        
+                          <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                          <h1 class="modal-title fs-5" id="staticBackdropLabel"> Product</h1>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                          <div class="form-floating">
+                                              <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
+                                              <label for="floatingInput">Product Name</label>
+                                          </div>
+                                          <div class="form-floating">
+                                              <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
+                                              <label for="floatingInput">Product Description</label>
+                                          </div>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
+                                          {% csrf_token %}
+                                        <button class="btn btn-primary">Archive</button>
+                                        </form>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      {% endfor %}
+                      {% endif %}
+                      </div>
+
+
+                    <div class="col-6">
+                    <h3>Archive</h3>
+                    {% if unproducts %}
+                    {% for camp in unproducts %}
+                        <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unproduct{{forloop.counter}}">
+                              {{ camp.name }}
+                          </button>
+                      
+                        <div class="modal fade" id="unproduct{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Product</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Name" name="name" value="{{ camp.name }}" disabled>
+                                            <label for="floatingInput">Product Name</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Description" name="description" value="{{ camp.description }}" disabled>
+                                            <label for="floatingInput">Product Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                      <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
+                                        {% csrf_token %}
+                                      <button class="btn btn-primary">Unarchive</button>
+                                      </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% endif %}
+                    </div>
+                  
+                  
+                                  </div>
+                                </div>
+
+                </div>
+
+
+                <h6 class="fs-6"> <b> Customer Journey </b></h6>                
+
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style="height: 200px; overflow-y: auto"
+                  >
+                     
+                    
+<div class="mt-5 row">
+                     <div >
+    {% if stages %}
+    {% for camp in stages %}
+        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#stage{{forloop.counter}}">
+            {{ camp.name }}
+        </button>
+
+        <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Stages</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url "app:add_priority" camp.id client.id %}">
+                      {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-floating">
+                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
+                            <label for="floatingInput">Name</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
+                            <label for="floatingInput"> Description</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="number" class="form-control mb-3" id="floatingInput" value="{{ camp.order }}" placeholder="Priority" min="0" max="10" name="order" >
+                            <label for="floatingInput">Priority</label>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button  class="btn btn-primary">Submit</button>
+                      </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% endif %}
+    </div>
+
+
+
+
+                  </div>
+                </div>
+                </div>
+
+
+
+
+                
+
+                
                 </div>
                 <div class="col">
 
@@ -1118,127 +1305,7 @@ table {
 </div>
                 
                                    
-                <h6 class="fs-6"> <b> Products </b></h6>                
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 200px; overflow-y: auto"
-                  >
-                    <button type="button" class="btn btn-primary position-absolute" style="right:10px" data-bs-toggle="modal" data-bs-target="#productManagement">
-                      Add Product
-                    </button>
-                    <div class="modal fade" id="productManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Product</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            <form action="{% url 'app:add_product_client' client.id %}" method="post">
-                              {% csrf_token %}
-                            <label for="product" class="form-label">Product</label>
-                            <select class="form-select client_input" id="product" name="product" aria-label="Default select example">
-                              <option value="nan">Select the product</option>
-                              {% for product in all_products %}
-                                <option value="{{product.id}}">{{product.name}}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                          </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-
-<div class="mt-5 row">
-                     <div class="col-6">
-                      <h3>Unarchive</h3>
-                      {% if products %}
-                      {% for camp in products %}
-                          <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#product{{forloop.counter}}">
-                              {{ camp.name }}
-                          </button>
-                        
-                          <div class="modal fade" id="product{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                              <div class="modal-dialog">
-                                  <div class="modal-content">
-                                      <div class="modal-header">
-                                          <h1 class="modal-title fs-5" id="staticBackdropLabel"> Product</h1>
-                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      </div>
-                                      <div class="modal-body">
-                                          <div class="form-floating">
-                                              <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
-                                              <label for="floatingInput">Product Name</label>
-                                          </div>
-                                          <div class="form-floating">
-                                              <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
-                                              <label for="floatingInput">Product Description</label>
-                                          </div>
-                                      </div>
-                                      <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
-                                          {% csrf_token %}
-                                        <button class="btn btn-primary">Archive</button>
-                                        </form>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      {% endfor %}
-                      {% endif %}
-                      </div>
-
-
-                    <div class="col-6">
-                    <h3>Archive</h3>
-                    {% if unproducts %}
-                    {% for camp in unproducts %}
-                        <button href="#" class="btn btn-primary d-block  mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unproduct{{forloop.counter}}">
-                              {{ camp.name }}
-                          </button>
-                      
-                        <div class="modal fade" id="unproduct{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Product</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Name" name="name" value="{{ camp.name }}" disabled>
-                                            <label for="floatingInput">Product Name</label>
-                                        </div>
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Product Description" name="description" value="{{ camp.description }}" disabled>
-                                            <label for="floatingInput">Product Description</label>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                      <form method="post" action="{% url 'app:archive_product' client.id camp.id %}">
-                                        {% csrf_token %}
-                                      <button class="btn btn-primary">Unarchive</button>
-                                      </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                    {% endif %}
-                    </div>
-                  
-                  
-                                  </div>
-                                </div>
-
-                </div>
+                
                 <h6 class="fs-6"> <b> Funding Routes </b></h6>                
 
                 <div class="card p-0 m-0">
@@ -1372,56 +1439,7 @@ table {
 
 
 
-                <h6 class="fs-6"> <b> Stage </b></h6>                
-
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 200px; overflow-y: auto"
-                  >
-                     
-                    
-<div class="mt-5 row">
-                     <div >
-    {% if stages %}
-    {% for camp in stages %}
-        {% comment %} <a href="/stages/{{ client.id }}?page=edit_page&stage_id={{ camp.id }}" class="btn btn-primary d-block  mb-3" style="width: fit-content;">
-            {{ camp.name }}
-        </a> {% endcomment %}
-
-        <h6 class="btn btn-primary"> {{ camp.name }} </h6>
-
-        {% comment %} <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Stages</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
-                            <label for="floatingInput">Name</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
-                            <label for="floatingInput"> Description</label>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-        </div> {% endcomment %}
-    {% endfor %}
-    {% endif %}
-    </div>
-
-
-
-
-                  </div>
-                </div>
-                
+                                
                 </div>
               </div>
             </div>
