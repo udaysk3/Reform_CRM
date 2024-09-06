@@ -291,13 +291,37 @@ class Rule_Regulation(models.Model):
         blank=True,
         null=True,
     )
+
+class CJStage(models.Model):
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="CJStage",
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="CJStage",
+    )
+    stage = models.ForeignKey(
+        Stage,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="CJStage",
+    )
+
 class ClientArchive(models.Model):
     client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     councils = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-    
+
 class Client_Council_Route(models.Model):
     client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
     council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')

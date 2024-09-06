@@ -30,6 +30,7 @@ from .models import (
     Stage,
     ClientArchive,
     Client_Council_Route,
+    CJStage,
 )
 import re
 from datetime import datetime, timedelta
@@ -864,6 +865,10 @@ def client_detail(request, client_id, s_client_id=None):
                 if council not in routes:
                     routes[council] = []
                 routes[council].append(route)
+            else:
+                if council not in unroutes:
+                    unroutes[council] = []
+                unroutes[council].append(route)
 
     stages=[]
     for stage in list(Stage.objects.all()):
@@ -1010,6 +1015,7 @@ def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
     routes = Route.objects.all().filter(council=council).filter(global_archive=False)
+    unroutes = Route.objects.all().filter(council=council).filter(global_archive=True)
     all_routes = Route.objects.all().filter(global_archive=False)
     prev = None
     next = None
@@ -1037,6 +1043,7 @@ def council_detail(request, council_id):
             "prev": prev,
             "next": next,
             "routes": routes,
+            "unroutes":unroutes,
             "all_routes" : all_routes,
         },
     )
@@ -3718,14 +3725,18 @@ def cj_product(request ,route_id ,product_id):
     route = Route.objects.get(pk=route_id)
     product = Product.objects.get(pk=product_id)
     stages = Stage.objects.all().filter(global_archive=False)
+    cjstages = CJStage.objects.all().filter(route=route,product=product)
+    
+    
     if request.method == 'POST':
         stage = Stage.objects.get(pk=request.POST.get('stage'))
+        CJStage.objects.create(route=route, product=product,stage=stage)
         product.stage.add(stage)
         product.save()
         messages.success(request, "Stage added to product successfully!")
         return redirect(f"/cj_product/{route_id}/{product_id}")
     return render(
-        request, "home/cj_product.html", {"product": product, "stages": stages, "route":route}
+        request, "home/cj_product.html", {"product": product, "stages": stages, "route":route, "cjstages":cjstages}
     )
 
 

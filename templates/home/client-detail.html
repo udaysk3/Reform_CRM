@@ -1420,7 +1420,7 @@ table {
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                         <form method="post" action="{% url 'app:archive_route' client.id camp.id council.id %}">
                                                             {% csrf_token %}
-                                                            <button class="btn btn-primary">Unarchive</button>
+                                                            <button class="btn btn-primary" {% if camp.global_archive %} disabled {% endif %}>Unarchive</button>
                                                         </form>
                                                     </div>
                                                 </div>
