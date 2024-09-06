@@ -336,4 +336,5 @@ urlpatterns = [
     ),
     path("archive_global_stage/<int:stage_id>", views.archive_global_stage, name="archive_global_stage"),
     path("add_priority/<int:stage_id>/<int:client_id>", views.add_priority, name="add_priority"),
+    path("region_archive/<int:council_id>/<int:route_id>", views.region_archive, name="region_archive"),
 ]

@@ -31,6 +31,7 @@ from .models import (
     ClientArchive,
     Client_Council_Route,
     CJStage,
+    RegionArchive,
 )
 import re
 from datetime import datetime, timedelta
@@ -844,8 +845,8 @@ def client_detail(request, client_id, s_client_id=None):
                 if route.global_archive == False:
                     all_routes[council] = [route]
 
-    routes = {}
-    unroutes = {}
+    d_routes = {}
+    d_unroutes = {}
 
     for route_obj in Client_Council_Route.objects.filter(client=client):
         council = route_obj.council
@@ -857,24 +858,42 @@ def client_detail(request, client_id, s_client_id=None):
             ).exists()
             and route.global_archive == False
         ):
-            if council not in unroutes:
-                unroutes[council] = []
-            unroutes[council].append(route)
+            if council not in d_unroutes:
+                d_unroutes[council] = []
+            d_unroutes[council].append(route)
         else:
             if route.global_archive == False:
-                if council not in routes:
-                    routes[council] = []
-                routes[council].append(route)
+                if council not in d_routes:
+                    d_routes[council] = []
+                d_routes[council].append(route)
             else:
+                if council not in d_unroutes:
+                    d_unroutes[council] = []
+                d_unroutes[council].append(route)
+
+    routes = {}
+    unroutes = d_unroutes
+    
+    for council, routes_list in d_routes.items():
+        for route in routes_list:
+            if (
+                RegionArchive.objects.filter(council=council, route=route).exists()
+            ):
                 if council not in unroutes:
                     unroutes[council] = []
                 unroutes[council].append(route)
-
+            else:
+                if council not in routes:
+                    routes[council] = []
+                routes[council].append(route)
+    
     stages=[]
-    for stage in list(Stage.objects.all()):
-        for prod in products:
-            if stage in prod.stage.all():
-                stages.append(stage)
+    for council,council_routes in routes.items():
+        for route in council_routes:
+            for product in products:
+                cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
+                for cjstage in cjstages:
+                    stages.append({'route':route,'product':product,'stage':cjstage.stage})
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
@@ -1007,15 +1026,26 @@ def client_detail(request, client_id, s_client_id=None):
             "stages": stages,
             "display_regions": display_regions,
         },
-    )
+    ) 
 
 
 @login_required
 def council_detail(request, council_id):
     all_councils = Councils.objects.all()
     council = Councils.objects.get(pk=council_id)
-    routes = Route.objects.all().filter(council=council).filter(global_archive=False)
-    unroutes = Route.objects.all().filter(council=council).filter(global_archive=True)
+    routes = []
+    unroutes = []
+
+    for route in Route.objects.all().filter(council=council):
+
+
+        if (
+            RegionArchive.objects.filter(council=council, route=route).exists()
+        ) or route.global_archive == True:
+            unroutes.append(route)
+        else:
+            if route.global_archive == False:
+                routes.append(route)
     all_routes = Route.objects.all().filter(global_archive=False)
     prev = None
     next = None
@@ -3854,3 +3884,13 @@ def add_priority(request, stage_id, client_id):
         stage.save()
         messages.success(request, "Priority added successfully!")
         return redirect("/client-detail/"+ str(client_id))
+
+def region_archive(request, council_id, route_id):
+    council = Councils.objects.get(pk=council_id)
+    route = Route.objects.get(pk=route_id)
+    if RegionArchive.objects.all().filter(council=council).filter(route=route).exists():
+        RegionArchive.objects.all().filter(council=council).filter(route=route).first().delete()
+    else:
+        RegionArchive.objects.create(council=council,route=route)
+    messages.success(request, "Archive successfully!")
+    return redirect("/council-detail/"+ str(council_id))

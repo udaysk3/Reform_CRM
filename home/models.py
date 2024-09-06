@@ -321,7 +321,11 @@ class ClientArchive(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     councils = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-
+    
+class RegionArchive(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='region_archive')
+    council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='region_archive')
+    
 class Client_Council_Route(models.Model):
     client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
     council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')

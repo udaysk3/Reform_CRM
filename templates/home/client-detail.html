@@ -1124,7 +1124,7 @@ table {
     {% if stages %}
     {% for camp in stages %}
         <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#stage{{forloop.counter}}">
-            {{ camp.name }}
+            {{ camp.route.name }} - {{ camp.product.name }} - {{ camp.stage.name }}
         </button>
 
         <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -1134,7 +1134,7 @@ table {
                         <h1 class="modal-title fs-5" id="staticBackdropLabel"> Stages</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url "app:add_priority" camp.id client.id %}">
+                    <form method="post" action="{% url "app:add_priority" camp.stage.id client.id %}">
                       {% csrf_token %}
                     <div class="modal-body">
                         <div class="form-floating">
@@ -1379,7 +1379,7 @@ table {
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                         <form method="post" action="{% url 'app:archive_route' client.id camp.id council.id %}">
                                                             {% csrf_token %}
-                                                            <button class="btn btn-primary">Archive</button>
+                                                            <button class="btn btn-primary" {% if camp.global_archive %} disabled {% endif %}>Archive</button>
                                                         </form>
                                                     </div>
                                                 </div>
