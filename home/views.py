@@ -428,7 +428,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             if stage not in stages:
                 stages.append(stage)
     
-    stages = sorted(stages, key=lambda x: x.order)
+    stages = sorted(stages, key=lambda x: x.order if x.order is not None else float('inf'))
+    
 
     # for stage in all_stages:
     #     if stage.fields is not None:
