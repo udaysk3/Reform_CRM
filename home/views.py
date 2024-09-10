@@ -825,7 +825,7 @@ def client_detail(request, client_id, s_client_id=None):
     all_products = Product.objects.all().filter(global_archive=False)
     products = list(Product.objects.all().filter(client=client).filter(global_archive=False))
     unproducts = []
-    for prod in products[:]:  # Iterate over a copy of the list
+    for prod in products[:]: 
         if ClientArchive.objects.all().filter(client=client).filter(product=prod).exists():
             unproducts.append(prod)
             products.remove(prod)
@@ -874,7 +874,7 @@ def client_detail(request, client_id, s_client_id=None):
 
     routes = {}
     unroutes = d_unroutes
-    
+
     for council, routes_list in d_routes.items():
         for route in routes_list:
             if (
@@ -887,7 +887,7 @@ def client_detail(request, client_id, s_client_id=None):
                 if council not in routes:
                     routes[council] = []
                 routes[council].append(route)
-    
+
     stages=[]
     for council,council_routes in routes.items():
         for route in council_routes:
@@ -895,6 +895,14 @@ def client_detail(request, client_id, s_client_id=None):
                 cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
                 for cjstage in cjstages:
                     stages.append({'route':route,'product':product,'stage':cjstage.stage})
+    display_stages={}
+    for stage in stages:
+        if display_stages.get(stage['route']):
+            display_stages[stage["route"]].append(
+                {"product": stage["product"], "stage": stage["stage"]}
+            )
+        else:
+            display_stages[stage["route"]] = [{"product": stage["product"], "stage": stage["stage"]}]
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
@@ -994,6 +1002,7 @@ def client_detail(request, client_id, s_client_id=None):
                 "unroutes": unroutes,
                 "stages": stages,
                 "display_regions": display_regions,
+                "display_stages":display_stages,
             },
         )
 
@@ -1026,6 +1035,7 @@ def client_detail(request, client_id, s_client_id=None):
             "unroutes": unroutes,
             "stages": stages,
             "display_regions": display_regions,
+            "display_stages":display_stages,
         },
     ) 
 
@@ -1799,6 +1809,33 @@ def remove_council(request, council_id):
     return redirect("app:council")
 
 
+def note_submit(request, customer_id):
+    if request.method == "POST":
+        customer = Customers.objects.get(id=customer_id)
+        talked_with = request.POST.get("talked_customer")
+        date_str = request.POST.get("date_field")
+        date_time_str = f"{date_str} 00:00"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = request.POST.get("text")
+
+        if talked_with == "nan":
+            messages.error(request, "Customer field should be mapped")
+            return redirect(f"/customer-detail/{customer_id}")
+
+        customer.add_action(
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            talked_with=talked_with,
+            date_time=date_time,
+            action_type="Note",
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/customer-detail/" + str(customer_id))
+
+
 def action_submit(request, customer_id):
     if request.method == "POST":
         customer = Customers.objects.get(id=customer_id)
@@ -1909,6 +1946,32 @@ def client_action_submit(request, client_id):
             talked_with=talked_with,
             date_time=date_time,
             action_type="CB",
+        )
+        messages.success(request, "Action added successfully!")
+        return HttpResponseRedirect("/client-detail/" + str(client_id))
+
+def client_note_submit(request, client_id):
+    if request.method == "POST":
+        client = Clients.objects.get(id=client_id)
+        talked_with = request.POST.get("talked_client")
+        date_str = request.POST.get("date_field")
+        date_time_str = f"{date_str} 00:00"
+        date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+        text = request.POST.get("text")
+
+        if talked_with == "nan":
+            messages.error(request, "Client field should be mapped")
+            return redirect(f"/client-detail/{client_id}")
+
+        client.add_action(
+            text=text,
+            agent=User.objects.get(email=request.user),
+            closed=False,
+            imported=False,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            talked_with=talked_with,
+            date_time=date_time,
+            action_type="Note",
         )
         messages.success(request, "Action added successfully!")
         return HttpResponseRedirect("/client-detail/" + str(client_id))
@@ -3777,7 +3840,10 @@ def cj_stage(request, route_id, product_id, stage_id):
     stage = Stage.objects.get(pk=stage_id)
     all_questions = Questions.objects.all()
     questions_with_rules = [] 
-    questions = Questions.objects.all().filter(stage=stage)
+    questions = []
+    
+    for rule in Rule_Regulation.objects.all().filter(route=route,product=product,stage=stage):
+        questions.append(rule.question)
 
     for question in questions:
         rule_regulation = (Rule_Regulation.objects.all()
@@ -3794,6 +3860,7 @@ def cj_stage(request, route_id, product_id, stage_id):
     if request.method == 'POST':
         question = Questions.objects.get(pk=request.POST.get('question'))
         stage.question.add(question)
+        Rule_Regulation.objects.create(route=route,product=product,stage=stage,question=question)
         stage.save()
         messages.success(request, "Question added to stage successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
@@ -3825,17 +3892,8 @@ def add_stage_rule(request, route_id, product_id, stage_id, question_id):
             route=route, product=product, stage=stage, question=question
         ).first()
 
-        if rule_regulation:
-            rule_regulation.rules_regulation = dynamicRules
-            rule_regulation.save()
-        else:
-            rule_regulation = Rule_Regulation.objects.create(
-                rules_regulation=dynamicRules,
-                route=route,
-                product=product,
-                stage=stage,
-                question=question,
-            )
+        rule_regulation.rules_regulation = dynamicRules
+        rule_regulation.save()
 
         messages.success(request, "Rules and Regulations added successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
@@ -3883,6 +3941,15 @@ def add_priority(request, stage_id, client_id):
         order = request.POST.get('order')
         stage.order = order
         stage.save()
+        messages.success(request, "Priority added successfully!")
+        return redirect("/client-detail/"+ str(client_id))
+
+def add_route_priority(request, route_id, client_id):
+    route = Route.objects.get(pk=route_id)
+    if request.method == 'POST':
+        order = request.POST.get('order')
+        route.order = order
+        route.save()
         messages.success(request, "Priority added successfully!")
         return redirect("/client-detail/"+ str(client_id))
 

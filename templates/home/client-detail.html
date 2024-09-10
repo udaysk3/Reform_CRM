@@ -2,6 +2,11 @@
 <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css">
 
 <style>
+
+  .proute:hover{
+    cursor: pointer;
+  }
+
     .bootstrap-tagsinput {
 	margin: 0;
 	width: 100%;
@@ -426,15 +431,107 @@ table {
           <div class="col mb-3 mb-sm-0">
             <div class="card m-0">
               <div class="card-body row m-0">
-              <div class="col">
                 <h6 class="fs-6">
                   <b>Next Action</b>: {% with latest_action=client.get_created_at_action_history.first %}
                   {{latest_action.date_time }} {% endwith %}
                 </h6>
 
-
-
                 <div class="row">
+
+                  
+                <form
+                  id="note_submit_form"
+                  method="post"
+                  name="note_submit_form"
+                  action="{% url 'app:client_note_submit' client.id %}"
+                  onSubmit="DoSubmit(this);"
+                  class="col"
+                >
+                  {% csrf_token %}
+                  
+
+                  <!-- Button trigger modal -->
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary my-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#staticBackdropnote"
+                  >
+                    Note
+                  </button>
+
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="staticBackdropnote"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    tabindex="-1"
+                    aria-labelledby="staticBackdropLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Note</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row">
+                          <div class="col">
+                          <div class="form-floating">
+                            <div class="wrapper">
+                              <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
+                              <label class="label" for="date_field">
+                                <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
+                              </label>	
+                            </div>
+                          </div>
+                        </div>
+
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Client</label>
+                            <select id="select" class="form-select"  name="talked_client">
+                              <option
+                              {% if client.primary_client %}
+                              selected
+                              {% endif %}
+                               value="{{ client.first_name }} {{ client.last_name }}"> {{ client.first_name }} {{ client.last_name }} </option>
+                              {% for i in child_clients %}
+                              <option
+                              {% if i.primary_client %}
+                              selected
+                              {% endif %}
+                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="form-floating">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
+                            name="text"></textarea>
+                            <label for="floatingTextarea">Comments</label>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                          <button class="btn btn-primary" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+
+
+
                 <div class="d-grid gap-2 d-md-block mt-3 col">
                   <form
                     method="post"
@@ -850,6 +947,12 @@ table {
                 </form>
               </div>
 
+              <div class="col">
+
+
+
+                
+
 
 
               
@@ -1121,32 +1224,31 @@ table {
                     
 <div class="mt-5 row">
                      <div >
-    {% if stages %}
-    {% for camp in stages %}
-        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#stage{{forloop.counter}}">
-            {{ camp.route.name }} - {{ camp.product.name }} - {{ camp.stage.name }}
-        </button>
+    {% if display_stages %}
+    {% for route, values in display_stages.items %}
 
-        <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <h6 class="proute" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#stage{{forloop.counter}}"><b>{{ route }} -</b></h6>
+
+    <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Stages</h1>
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Route</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url "app:add_priority" camp.stage.id client.id %}">
+                    <form method="post" action="{% url 'app:add_route_priority' route.id client.id %}">
                       {% csrf_token %}
                     <div class="modal-body">
                         <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ camp.name }}" disabled>
+                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ route.name }}" disabled>
                             <label for="floatingInput">Name</label>
                         </div>
                         <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ camp.description }}" disabled>
+                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ route.description }}" disabled>
                             <label for="floatingInput"> Description</label>
                         </div>
                         <div class="form-floating">
-                            <input type="number" class="form-control mb-3" id="floatingInput" value="{{ camp.order }}" placeholder="Priority" min="0" max="10" name="order" >
+                            <input type="number" class="form-control mb-3" id="floatingInput" value="{{ route.order }}" placeholder="Priority" min="0" max="10" name="order" >
                             <label for="floatingInput">Priority</label>
                         </div>
                       </div>
@@ -1157,6 +1259,16 @@ table {
                 </div>
             </div>
         </div>
+    {% for camp in values %}
+
+
+        <h6 class="ms-3" >
+            {{ camp.product.name }} - {{ camp.stage.name }}
+        </h6>
+
+        
+
+      {% endfor %}
     {% endfor %}
     {% endif %}
     </div>

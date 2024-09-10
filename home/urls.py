@@ -23,6 +23,7 @@ urlpatterns = [
     ),
     path("bulk_remove_clients/", views.bulk_remove_clients, name="bulk_remove_clients"),
     path("action_submit/<int:customer_id>/", views.action_submit, name="action_submit"),
+    path("note_submit/<int:customer_id>/", views.note_submit, name="note_submit"),
     path(
         "close_action_submit/<int:customer_id>/",
         views.close_action_submit,
@@ -42,6 +43,11 @@ urlpatterns = [
         "client_action_submit/<int:client_id>/",
         views.client_action_submit,
         name="client_action_submit",
+    ),
+    path(
+        "client_note_submit/<int:client_id>/",
+        views.client_note_submit,
+        name="client_note_submit",
     ),
     path(
         "close_client_action_submit/<int:customer_id>/",
@@ -336,5 +342,6 @@ urlpatterns = [
     ),
     path("archive_global_stage/<int:stage_id>", views.archive_global_stage, name="archive_global_stage"),
     path("add_priority/<int:stage_id>/<int:client_id>", views.add_priority, name="add_priority"),
+    path("add__route_priority/<int:route_id>/<int:client_id>", views.add_route_priority, name="add_route_priority"),
     path("region_archive/<int:council_id>/<int:route_id>", views.region_archive, name="region_archive"),
 ]

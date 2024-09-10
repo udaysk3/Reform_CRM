@@ -112,6 +112,7 @@ class Route(models.Model):
     council = models.ManyToManyField('home.Councils',related_name='routes')
     description = models.CharField(max_length=999, blank= True, null=True)
     documents = models.ManyToManyField('home.Document',related_name='route')
+    order = models.IntegerField(blank=True, null=True)
     global_archive = models.BooleanField(default=False)
     product = models.ManyToManyField("home.Product", related_name="route")
     # rules_regulations = models.JSONField(blank=True, null=True)
@@ -321,11 +322,11 @@ class ClientArchive(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     councils = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-    
+
 class RegionArchive(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, null=True, blank=True, related_name='region_archive')
     council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='region_archive')
-    
+
 class Client_Council_Route(models.Model):
     client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
     council = models.ForeignKey(Councils, on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
