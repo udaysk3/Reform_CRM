@@ -3,9 +3,23 @@
 
 <style>
 
-  .proute:hover{
-    cursor: pointer;
-  }
+.routedrag{
+  position: relative;
+  z-index: 1;
+}
+
+.productdrag{
+  position: relative;
+  z-index: 10;
+}  
+
+.productdrag, .routedrag {
+  cursor: move;
+}
+
+.productdrag.dragging, .routeddrag.dragging {
+  opacity: .5;
+}
 
     .bootstrap-tagsinput {
 	margin: 0;
@@ -1025,7 +1039,7 @@ table {
               </div>
               
                 <div class="col">
-                  <h6 style="margin-top: 90px;"> <b> Key Events </b></h6>
+                  <h6 > <b> Key Events </b></h6>
                   <div class="card p-0 m-0">
                     <div
                       class="card-body p-3 m-0"
@@ -1213,72 +1227,6 @@ table {
                 </div>
 
 
-                <h6 class="fs-6 mt-3"> <b> Customer Journey </b></h6>                
-
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 200px; overflow-y: auto"
-                  >
-                     
-                    
-<div class="mt-5 row">
-                     <div >
-    {% if display_stages %}
-    {% for route, values in display_stages.items %}
-
-    <h6 class="proute" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#stage{{forloop.counter}}"><b>{{ route }} -</b></h6>
-
-    <div class="modal fade" id="stage{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel"> Route</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form method="post" action="{% url 'app:add_route_priority' route.id client.id %}">
-                      {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Name" name="name" value="{{ route.name }}" disabled>
-                            <label for="floatingInput">Name</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Campaign Description" name="description" value="{{ route.description }}" disabled>
-                            <label for="floatingInput"> Description</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="number" class="form-control mb-3" id="floatingInput" value="{{ route.order }}" placeholder="Priority" min="0" max="10" name="order" >
-                            <label for="floatingInput">Priority</label>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button  class="btn btn-primary">Submit</button>
-                      </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    {% for camp in values %}
-
-
-        <h6 class="ms-3" >
-            {{ camp.product.name }} - {{ camp.stage.name }}
-        </h6>
-
-        
-
-      {% endfor %}
-    {% endfor %}
-    {% endif %}
-    </div>
-
-
-
-
-                  </div>
-                </div>
-                </div>
 
 
 
@@ -1553,6 +1501,64 @@ table {
 
                                 
                 </div>
+
+
+                <div class="row">
+
+                  
+                <h6 class="fs-6 mt-3"> <b> Customer Journey </b></h6>                
+
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style=""
+                  >
+                     
+                    
+<div class="mt-5 row">
+                     <div >
+                       <div class="route-container">
+                      {% if display_stages %}
+                      {% for route, values in display_stages.items %}
+                      <div class="routedrag card p-3 " style=" margin: 10px;" draggable="true">
+
+                      <h6 ><b>{{ route }} -</b></h6>
+
+                     
+                      <div class="product-pcontainer{{ forloop.counter }} ">
+                      {% for product, stages in values.items %}
+                        <div class="productdrag card p-0 " style=" margin: 10px;" draggable="true">
+                        <div class="card-body p-3 ">
+                          <h6 class="ms-3" >
+                              {{ product.name }} - 
+                          </h6>
+                          <div class=" stage-container{{ forloop.parentloop.counter }}{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
+                            {% for stage in stages %}
+                            <h6 draggable="true" class="ms-3 stagedrag" >
+                                {{ stage.name }}  
+                            </h6>
+                            {% endfor %}
+                          </div>
+                        </div>
+                        </div>
+                      {% endfor %}
+                      </div>
+                      </div>
+                      {% endfor %}
+                      {% endif %}
+                      </div>
+                      </div>
+
+
+
+
+                  </div>
+                </div>
+                </div>
+
+                </div>
+
+                
               </div>
             </div>
 
@@ -1569,8 +1575,141 @@ table {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
 <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 
 <script>
+// Route Draggable (routedrag)
+const rcontainer = document.querySelectorAll('.route-container')[0];
+const rdraggables = rcontainer.querySelectorAll('.routedrag');
+rdraggables.forEach(draggable => {
+  draggable.addEventListener('dragstart', () => {
+    draggable.classList.add('dragging');
+  });
+
+  draggable.addEventListener('dragend', () => {
+    draggable.classList.remove('dragging');
+  });
+});
+
+rcontainer.addEventListener('dragover', e => {
+  e.preventDefault();
+  const afterElement = getDragAfterElementRoute(rcontainer, e.clientY);
+  const draggable = document.querySelector('.dragging');
+  if (Array.from(rdraggables).includes(draggable)) {
+    if (afterElement == null) {
+      rcontainer.appendChild(draggable);
+    } else {
+      rcontainer.insertBefore(draggable, afterElement);
+    }
+  }
+});
+
+function getDragAfterElementRoute(container, y) {
+  const draggableElements = [...container.querySelectorAll('.routedrag:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// Product Draggable (productdrag)
+{% if display_stages %}
+  {% for route, values in display_stages.items %}
+    const pcontainer{{ forloop.counter }} = document.querySelectorAll('.product-pcontainer{{ forloop.counter }}')[0];
+    const pdraggables{{ forloop.counter }} = pcontainer{{ forloop.counter }}.querySelectorAll('.productdrag');
+    
+    pdraggables{{ forloop.counter }}.forEach(draggable => {
+      draggable.addEventListener('dragstart', (e) => {
+        e.stopPropagation(); // Prevent route dragging event
+        draggable.classList.add('dragging');
+      });
+
+      draggable.addEventListener('dragend', (e) => {
+        e.stopPropagation(); // Prevent route dragging event
+        draggable.classList.remove('dragging');
+      });
+    });
+
+    pcontainer{{ forloop.counter }}.addEventListener('dragover', e => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(pcontainer{{ forloop.counter }}, e.clientY);
+      const draggable = document.querySelector('.dragging');
+      if (Array.from(pdraggables{{ forloop.counter }}).includes(draggable)) {
+        if (afterElement == null) {
+          pcontainer{{ forloop.counter }}.appendChild(draggable);
+        } else {
+          pcontainer{{ forloop.counter }}.insertBefore(draggable, afterElement);
+        }
+      }
+    });
+
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.productdrag:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+
+    {% for product, stages in values.items %}
+      let scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }} = document.querySelectorAll('.stage-container{{ forloop.parentloop.counter }}{{ forloop.counter }}')[0];
+    let sdraggables{{ forloop.parentloop.counter }}{{ forloop.counter }} = scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.querySelectorAll('.stagedrag');
+    
+    sdraggables{{ forloop.parentloop.counter }}{{ forloop.counter }}.forEach(draggable => {
+      draggable.addEventListener('dragstart', (e) => {
+        e.stopPropagation(); // Prevent product dragging event
+        draggable.classList.add('dragging');
+      });
+
+      draggable.addEventListener('dragend', (e) => {
+        e.stopPropagation(); // Prevent product dragging event
+        draggable.classList.remove('dragging');
+      });
+    });
+
+    scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.addEventListener('dragover', e => {
+      e.preventDefault();
+      const afterElement = getDragAfterElementStage(scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}, e.clientX);
+      const draggable = document.querySelector('.dragging');
+      if (Array.from(sdraggables{{ forloop.parentloop.counter }}{{ forloop.counter }}).includes(draggable)) {
+        if (afterElement == null) {
+          scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.appendChild(draggable);
+        } else {
+          scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.insertBefore(draggable, afterElement);
+        }
+      }
+    });
+
+    function getDragAfterElementStage(container, x) {
+      const draggableElements = [...container.querySelectorAll('.stagedrag:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+    {% endfor %}
+
+  {% endfor %}
+{% endif %}
+
 
   $(document).ready(function() {
     $('#postcodes').tagsinput({

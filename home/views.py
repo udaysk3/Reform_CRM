@@ -898,11 +898,12 @@ def client_detail(request, client_id, s_client_id=None):
     display_stages={}
     for stage in stages:
         if display_stages.get(stage['route']):
-            display_stages[stage["route"]].append(
-                {"product": stage["product"], "stage": stage["stage"]}
-            )
+            if display_stages[stage["route"]].get(stage["product"]):
+                display_stages[stage["route"]][stage["product"]].append(stage["stage"])
+            else:
+                display_stages[stage["route"]][stage["product"]] = [stage["stage"]]
         else:
-            display_stages[stage["route"]] = [{"product": stage["product"], "stage": stage["stage"]}]
+            display_stages[stage["route"]] = {stage["product"]: [stage["stage"]]}
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
