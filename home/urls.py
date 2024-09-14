@@ -344,4 +344,5 @@ urlpatterns = [
     path("add_priority/<int:stage_id>/<int:client_id>", views.add_priority, name="add_priority"),
     path("add__route_priority/<int:route_id>/<int:client_id>", views.add_route_priority, name="add_route_priority"),
     path("region_archive/<int:council_id>/<int:route_id>", views.region_archive, name="region_archive"),
+    path("customer_jr_order/<int:client_id>", views.customer_jr_order, name="customer_jr_order"),
 ]

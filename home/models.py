@@ -222,6 +222,9 @@ class Stage(models.Model):
     templateable = models.BooleanField(default=False)
     question = models.ManyToManyField("home.Questions", related_name="stage")
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Email(models.Model):
     name = models.CharField(max_length=255)
@@ -315,6 +318,7 @@ class CJStage(models.Model):
         blank=True,
         related_name="CJStage",
     )
+    order = models.IntegerField(blank=True, null=True)
 
 class ClientArchive(models.Model):
     client = models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')

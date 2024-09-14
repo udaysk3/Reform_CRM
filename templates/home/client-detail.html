@@ -17,7 +17,7 @@
   cursor: move;
 }
 
-.productdrag.dragging, .routeddrag.dragging {
+.productdrag.dragging, .routeddrag.dragging, .stagedrag.dragging {
   opacity: .5;
 }
 
@@ -1522,7 +1522,7 @@ table {
                       {% for route, values in display_stages.items %}
                       <div class="routedrag card p-3 " style=" margin: 10px;" draggable="true">
 
-                      <h6 ><b>{{ route }} -</b></h6>
+                      <h6 ><b class="orderRoutes">{{ route }}</b> -</h6>
 
                      
                       <div class="product-pcontainer{{ forloop.counter }} ">
@@ -1530,11 +1530,11 @@ table {
                         <div class="productdrag card p-0 " style=" margin: 10px;" draggable="true">
                         <div class="card-body p-3 ">
                           <h6 class="ms-3" >
-                              {{ product.name }} - 
+                              <spam class="orderProducts">{{ product.name }}</spam> - 
                           </h6>
                           <div class=" stage-container{{ forloop.parentloop.counter }}{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
                             {% for stage in stages %}
-                            <h6 draggable="true" class="ms-3 stagedrag" >
+                            <h6 draggable="true" class="ms-3 stagedrag orderStages" >
                                 {{ stage.name }}  
                             </h6>
                             {% endfor %}
@@ -1590,6 +1590,30 @@ rdraggables.forEach(draggable => {
 
   draggable.addEventListener('dragend', () => {
     draggable.classList.remove('dragging');
+    let orderRoutes;
+    let orderProducts;
+    const orderStages = document.querySelectorAll('.orderStages');
+    const cjstages = [];
+    orderStages.forEach((stage,i) => {
+      orderRoutes = stage.closest('.routedrag').querySelector('.orderRoutes').innerText;
+      orderProducts = stage.closest('.productdrag').querySelector('.orderProducts').innerText;
+      cjstages.push({
+        route: orderRoutes,
+        product: orderProducts,
+        stage: stage.innerText,
+        order: i
+      });
+    })
+    fetch('/customer_jr_order/{{ client.id }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({
+        'cjstages': cjstages
+      })
+    });
   });
 });
 
@@ -1634,6 +1658,30 @@ function getDragAfterElementRoute(container, y) {
       draggable.addEventListener('dragend', (e) => {
         e.stopPropagation(); // Prevent route dragging event
         draggable.classList.remove('dragging');
+        let orderRoutes{{ forloop.counter }};
+        let orderProducts{{ forloop.counter }};
+        const orderStages = document.querySelectorAll('.orderStages');
+        const cjstages = [];
+        orderStages.forEach((stage,i) => {
+          orderRoutes{{ forloop.counter }} = stage.closest('.routedrag').querySelector('.orderRoutes').innerText;
+          orderProducts{{ forloop.counter }} = stage.closest('.productdrag').querySelector('.orderProducts').innerText;
+          cjstages.push({
+            route: orderRoutes{{ forloop.counter }},
+            product: orderProducts{{ forloop.counter }},
+            stage: stage.innerText,
+            order: i
+          });
+        })
+        fetch('/customer_jr_order/{{ client.id }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            'cjstages': cjstages
+          })
+        });
       });
     });
 
@@ -1677,6 +1725,30 @@ function getDragAfterElementRoute(container, y) {
       draggable.addEventListener('dragend', (e) => {
         e.stopPropagation(); // Prevent product dragging event
         draggable.classList.remove('dragging');
+        let orderRoutes{{ forloop.counter }}{{ forloop.parentloop.counter }};
+        let orderProducts{{ forloop.counter }}{{ forloop.parentloop.counter }};
+        const orderStages = document.querySelectorAll('.orderStages');
+        const cjstages = [];
+        orderStages.forEach((stage,i) => {
+          orderRoutes{{ forloop.counter }}{{ forloop.parentloop.counter }} = stage.closest('.routedrag').querySelector('.orderRoutes').innerText;
+          orderProducts{{ forloop.counter }}{{ forloop.parentloop.counter }} = stage.closest('.productdrag').querySelector('.orderProducts').innerText;
+          cjstages.push({
+            route: orderRoutes{{ forloop.counter }}{{ forloop.parentloop.counter }},
+            product: orderProducts{{ forloop.counter }}{{ forloop.parentloop.counter }},
+            stage: stage.innerText,
+            order: i
+          });
+        })
+        fetch('/customer_jr_order/{{ client.id }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            'cjstages': cjstages
+          })
+        });
       });
     });
 

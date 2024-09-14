@@ -423,12 +423,13 @@ def customer_detail(request, customer_id, s_customer_id=None):
     true_routes = [True] * len(routes)
     stages = []
     
-    for product in products:
-        for stage in product.stage.all():
-            if stage not in stages:
-                stages.append(stage)
+    for route in routes:
+        for product in products:
+            cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
+            for cjstage in cjstages:
+                stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order})
     
-    stages = sorted(stages, key=lambda x: x.order if x.order is not None else float('inf'))
+    stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
     
 
     # for stage in all_stages:
@@ -894,7 +895,8 @@ def client_detail(request, client_id, s_client_id=None):
             for product in products:
                 cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
                 for cjstage in cjstages:
-                    stages.append({'route':route,'product':product,'stage':cjstage.stage})
+                    stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order})
+    stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
     display_stages={}
     for stage in stages:
         if display_stages.get(stage['route']):
@@ -3963,3 +3965,15 @@ def region_archive(request, council_id, route_id):
         RegionArchive.objects.create(council=council,route=route)
     messages.success(request, "Archive successfully!")
     return redirect("/council-detail/"+ str(council_id))
+
+def customer_jr_order(request,client_id):
+    client = Clients.objects.get(pk=client_id)
+    if request.method == 'POST':
+        body = request.body
+        response = json.loads(body)
+        cjstages = response['cjstages']
+        for i in cjstages:
+            cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).first()
+            cjstage.order = i['order']
+            cjstage.save()
+    return HttpResponse(200)
