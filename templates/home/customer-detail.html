@@ -1221,17 +1221,55 @@ table {
                   
                 </div>
 
+                <div class="row">
 
-                 <h6>Customer Journey</h6>
-              
-                
+                  
+                <h6 class="fs-6 mt-3"> <b> Customer Journey </b></h6>                
 
+                <div class="card p-0 m-0">
+                  <div
+                    class="card-body p-3 m-0"
+                    style=""
+                  >
+                     
+                    
+<div class="mt-5 row">
+                       <div class="route-container">
+                      {% if display_stages %}
+                      {% for route, values in display_stages.items %}
+                      <div class="routedrag card p-3 " style=" margin: 10px;" >
 
-                {% for stage in stages %}
+                      <h6 ><b class="orderRoutes">{{ route }}</b> -</h6>
 
-                  <h6 class="btn btn-primary">{{ stage.route }} - {{ stage.product }} - {{ stage.stage }}</h6>
+                     
+                      <div class="product-pcontainer{{ forloop.counter }} ">
+                      {% for product, stages in values.items %}
+                        <div class="productdrag card p-0 " style=" margin: 10px;" >
+                        <div class="card-body p-3 ">
+                          <h6 class="ms-3" >
+                              <spam class="orderProducts">{{ product.name }}</spam> - 
+                          </h6>
+                          <div class=" stage-container{{ forloop.parentloop.counter }}{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
+                            {% for stage in stages %}
+                            <h6  class="ms-3 stagedrag orderStages" >
+                                {{ stage.name }}  
+                            </h6>
+                            {% endfor %}
+                          </div>
+                        </div>
+                        </div>
+                      {% endfor %}
+                      </div>
+                      </div>
+                      {% endfor %}
+                      {% endif %}
+                      </div>
 
-                {% endfor %}
+                  </div>
+                </div>
+                </div>
+
+                </div>
 
               </div>
             </div>

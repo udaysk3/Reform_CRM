@@ -422,15 +422,24 @@ def customer_detail(request, customer_id, s_customer_id=None):
     true_products = [True] * len(products)
     true_routes = [True] * len(routes)
     stages = []
-    
+
     for route in routes:
         for product in products:
             cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
             for cjstage in cjstages:
                 stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order})
-    
+
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
-    
+
+    display_stages = {}
+    for stage in stages:
+        if display_stages.get(stage["route"]):
+            if display_stages[stage["route"]].get(stage["product"]):
+                display_stages[stage["route"]][stage["product"]].append(stage["stage"])
+            else:
+                display_stages[stage["route"]][stage["product"]] = [stage["stage"]]
+        else:
+            display_stages[stage["route"]] = {stage["product"]: [stage["stage"]]}
 
     # for stage in all_stages:
     #     if stage.fields is not None:
@@ -666,6 +675,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "clients": clients,
             "campaigns": campaigns,
             "display_regions":display_regions,
+            "display_stages":display_stages,
         },
     )
 
