@@ -102,26 +102,81 @@
                         </div>
                       </div>
                     </div>
-                  <div class="card p-0 m-0">
-                    <div class="card-body p-3 m-0" style="height: 390px; overflow-y: auto">
-
-                      {% for route in routes %}
-
-                       <div class="col-sm-4 mt-3" style="width: 100%">
-                        <div class="card m-0 ">
-                          <div class="card-body row">
-                            <a href="/edit_funding_route/{{ route.id }}" class="col-10">
-                            <h6><b>Name : </b> {{route.name}}</h6>
-                            <h6><b>Email</b> : {{route.email}}</h6>
-                            <h6><b>Telephone</b> : {{route.telephone}}</h6>
-                            </a>
-                          </div>
+                  <div class="mt-5 row">
+                        <div class="col-6">
+                            <h3>Unarchive</h3>
+                            {% if routes %}
+                                {% for route in routes %}
+                                        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unarchiveRoute{{ route.id }}">
+                                            {{ route.name }} 
+                                        </button>
+                                        <div class="modal fade" id="unarchiveRoute{{ route.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Name" value="{{ route.name }}" disabled>
+                                                            <label>Route Name</label>
+                                                        </div>
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Description" value="{{ route.description }}" disabled>
+                                                            <label>Route Description</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <form action="{% url 'app:region_archive' council.id route.id %}">
+                                                            <button class="btn btn-primary" {% if route.global_archive %} disabled {% endif %}>Archive</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
-                      </div> 
-                      {% endfor %}
 
+                        <div class="col-6">
+                            <h3>Archive</h3>
+                            {% if unroutes %}
+                                {% for route in unroutes %}
+                                        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#archiveRoute{{ route.id }}">
+                                            {{ route.name }}
+                                        </button>
+                                        <div class="modal fade" id="archiveRoute{{ route.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Route</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Name" value="{{ route.name }}" disabled>
+                                                            <label>Route Name</label>
+                                                        </div>
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control mb-3" placeholder="Route Description" value="{{ route.description }}" disabled>
+                                                            <label>Route Description</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <form action="{% url 'app:region_archive' council.id route.id %}">
+                                                            <button class="btn btn-primary" {% if route.global_archive %} disabled {% endif %}>UnArchive</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>

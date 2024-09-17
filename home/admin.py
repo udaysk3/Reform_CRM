@@ -19,6 +19,7 @@ from .models import (
     Rule_Regulation,
     ClientArchive,
     Client_Council_Route,
+    CJStage,
 )
 
 admin.site.register(Action)
@@ -40,3 +41,4 @@ admin.site.register(Questions)
 admin.site.register(Rule_Regulation)
 admin.site.register(ClientArchive)
 admin.site.register(Client_Council_Route)
+admin.site.register(CJStage)
