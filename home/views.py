@@ -3,6 +3,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from collections import OrderedDict
 from django.template.loader import render_to_string
 from django.db.models import Q
 from django.utils.html import strip_tags
@@ -909,13 +910,12 @@ def client_detail(request, client_id, s_client_id=None):
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
     display_stages={}
     for stage in stages:
-        if display_stages.get(stage['route']):
-            if display_stages[stage["route"]].get(stage["product"]):
-                display_stages[stage["route"]][stage["product"]].append(stage["stage"])
-            else:
-                display_stages[stage["route"]][stage["product"]] = [stage["stage"]]
+        
+        if display_stages.get(f'{stage['route'].name} - {stage['product'].name}'):
+            display_stages[f'{stage['route'].name} - {stage['product'].name}'].append(stage['stage'])
         else:
-            display_stages[stage["route"]] = {stage["product"]: [stage["stage"]]}
+            display_stages[f'{stage['route'].name} - {stage['product'].name}'] = [stage['stage']]
+    print(display_stages)
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
@@ -3983,6 +3983,7 @@ def customer_jr_order(request,client_id):
         response = json.loads(body)
         cjstages = response['cjstages']
         for i in cjstages:
+            print(i['route'],i['product'],i['stage'])
             cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).first()
             cjstage.order = i['order']
             cjstage.save()
