@@ -3,15 +3,7 @@
 
 <style>
 
-.routedrag{
-  position: relative;
-  z-index: 1;
-}
 
-.productdrag{
-  position: relative;
-  z-index: 10;
-}  
 
 .productdrag, .routedrag {
   cursor: move;
@@ -1519,9 +1511,11 @@ table {
             </h6>
             <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
               {% for stage in stages %}
-                <h6 draggable="true" class="mx-2 stagedrag orderStages">
-                  {{ stage }}
+                <h6 draggable="true" class="btn btn-primary mx-2 stagedrag orderStages orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}" >
+                  {{ stage.0 }}
                 </h6>
+
+                
               {% endfor %}
             </div>
           </div>
@@ -1542,6 +1536,41 @@ table {
 {% endfor %} {% endcomment %}
 
 
+{% for k,v in display_stages.items %}
+    {% for i in v %}
+      <div class="modal fade" id="orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}" tabindex="-1" aria-labelledby="exampleModalLabel" draggable="false" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ i.0 }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        {% for question, rules_regulations in i.1 %}
+                          <div class="col">
+                            <div class="row">
+                              {{ question.question }}
+                            </div>
+                            <div class="row">
+
+                            </div>
+                          </div>
+
+                        {% endfor %}
+                        
+
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+    {% endfor %}
+  {% endfor %}
+
+
 {% endblock %} {% block js %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -1550,6 +1579,19 @@ table {
 <script src="https://cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
 
 <script>
+
+
+
+  {% for k,v in display_stages.items %}
+    {% for i in v %}
+      document.querySelector('.orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}').addEventListener('click',()=>{
+      let assigned_to_modal = new bootstrap.Modal(document.querySelector('#orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}'), {});
+
+      assigned_to_modal.show();
+      });
+    {% endfor %}
+  {% endfor %}
+
 
   const pcontainer = document.querySelector('.product-pcontainer');
 
@@ -1638,9 +1680,13 @@ table {
         draggable.addEventListener('dragend', (e) => {
           e.stopPropagation();
           draggable.classList.remove('dragging');
+          const cjstages = [];
 
           if (!sentStage) {
-            const orderRoutes = draggable.closest('.productdrag').querySelector('.orderRoutes').innerText;
+            const orderStages = document.querySelectorAll('.orderStages');
+          const cjstages = [];
+          orderStages.forEach((stage, i) => {
+            const orderRoutes = stage.closest('.productdrag').querySelector('.orderRoutes').innerText;
             const orderRoute = orderRoutes.split(' - ')[0];
             const orderProduct = orderRoutes.split(' - ')[1];
             cjstages.push({
@@ -1649,6 +1695,7 @@ table {
               stage: stage.innerText,
               order: i + 1
             });
+          });
 
             fetch('/customer_jr_order/{{ client.id }}', {
               method: 'POST',

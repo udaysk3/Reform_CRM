@@ -434,13 +434,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
     display_stages = {}
     for stage in stages:
-        if display_stages.get(stage["route"]):
-            if display_stages[stage["route"]].get(stage["product"]):
-                display_stages[stage["route"]][stage["product"]].append(stage["stage"])
-            else:
-                display_stages[stage["route"]][stage["product"]] = [stage["stage"]]
+        if display_stages.get(f'{stage['route'].name} - {stage['product'].name}'):
+            display_stages[f'{stage['route'].name} - {stage['product'].name}'].append(stage['stage'])
         else:
-            display_stages[stage["route"]] = {stage["product"]: [stage["stage"]]}
+            display_stages[f'{stage['route'].name} - {stage['product'].name}'] = [stage['stage']]
 
     # for stage in all_stages:
     #     if stage.fields is not None:
@@ -899,23 +896,56 @@ def client_detail(request, client_id, s_client_id=None):
                 if council not in routes:
                     routes[council] = []
                 routes[council].append(route)
-
-    stages=[]
-    for council,council_routes in routes.items():
+    stages = []
+    for council, council_routes in routes.items():
         for route in council_routes:
             for product in products:
-                cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
+                cjstages = CJStage.objects.filter(route=route, product=product)
                 for cjstage in cjstages:
-                    stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order})
+                    questions = []
+                    questions_with_rules = []  # List to maintain order
+                    added_questions = set()  # Set to track duplicates
+                    
+                    # Loop through the rules for the specific route, product, and stage
+                    for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage):
+                        questions.append(rule.question)
+                        
+                    # Loop through the questions to associate them with rules
+                    for question in questions:
+                        rule_regulation = (Rule_Regulation.objects
+                                           .filter(route=route)
+                                           .filter(product=product)
+                                           .filter(stage=cjstage.stage)
+                                           .filter(question=question))
+                        
+                        # Only add the (question, rule) pair if it's not a duplicate
+                        if question not in added_questions:
+                            if rule_regulation.exists():
+                                questions_with_rules.append((question, rule_regulation[0]))
+                            else:
+                                questions_with_rules.append((question, None))
+                            
+                            # Mark this question as added to avoid duplicates
+                            added_questions.add(question)
+                    
+                    # Append the stage with its associated questions and rules
+                    stages.append({
+                        'route': route,
+                        'product': product,
+                        'stage': cjstage.stage, 
+                        'order': cjstage.order, 
+                        'questions': questions_with_rules
+                    })
+    
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
+    
     display_stages={}
     for stage in stages:
         
         if display_stages.get(f'{stage['route'].name} - {stage['product'].name}'):
-            display_stages[f'{stage['route'].name} - {stage['product'].name}'].append(stage['stage'])
+            display_stages[f'{stage['route'].name} - {stage['product'].name}'].append([stage['stage'],stage['questions']])
         else:
-            display_stages[f'{stage['route'].name} - {stage['product'].name}'] = [stage['stage']]
-    print(display_stages)
+            display_stages[f'{stage['route'].name} - {stage['product'].name}'] = [[stage['stage'],stage['questions']]]
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
@@ -3837,9 +3867,7 @@ def cj_product(request ,route_id ,product_id):
     
     if request.method == 'POST':
         stage = Stage.objects.get(pk=request.POST.get('stage'))
-        CJStage.objects.create(route=route, product=product,stage=stage)
-        product.stage.add(stage)
-        product.save()
+        CJStage.objects.get_or_create(route=route, product=product,stage=stage)
         messages.success(request, "Stage added to product successfully!")
         return redirect(f"/cj_product/{route_id}/{product_id}")
     return render(
@@ -3855,7 +3883,7 @@ def cj_stage(request, route_id, product_id, stage_id):
     questions_with_rules = [] 
     questions = []
     
-    for rule in Rule_Regulation.objects.all().filter(route=route,product=product,stage=stage):
+    for rule in Rule_Regulation.objects.all().filter(route=route,product=product,stage=stage,is_client=False):
         questions.append(rule.question)
 
     for question in questions:
@@ -3863,7 +3891,8 @@ def cj_stage(request, route_id, product_id, stage_id):
                            .filter(route=route)
                            .filter(product=product)
                            .filter(stage=stage)
-                           .filter(question=question))
+                           .filter(question=question)
+                           .filter(is_client=False))
 
         if rule_regulation.exists():
             questions_with_rules.append((question, rule_regulation[0]))
@@ -3921,8 +3950,8 @@ def delete_stage(request, stage_id):
 def delete_cj_stage(request, route_id ,product_id, stage_id):
     product = Product.objects.get(pk=product_id)
     stage = Stage.objects.get(pk=stage_id)
-    product.stage.remove(stage)
-    product.save()
+    route = Route.objects.get(pk=route_id)
+    CJStage.objects.get(route=route, product=product, stage=stage).delete()
     messages.success(request, "Stage deleted successfully!")
     return redirect(f"/cj_product/{route_id}/{product_id}")
 

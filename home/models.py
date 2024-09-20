@@ -267,6 +267,7 @@ class Questions(models.Model):
 
 class Rule_Regulation(models.Model):
     rules_regulation = models.JSONField(blank=True, null=True)
+    is_client = models.BooleanField(default=False)
     route = models.ForeignKey(
         Route,
         related_name="rules_regulation",
