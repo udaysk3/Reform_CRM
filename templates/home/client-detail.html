@@ -1548,21 +1548,66 @@ table {
                       <div class="modal-body">
                         {% for question, rules_regulations in i.1 %}
                           <div class="col">
-                            <div class="row">
+                            <div class="row ms-3">
                               {{ question.question }}
                             </div>
-                            <div class="row">
-
+                            <div class="row mb-3">
+                              <form action="/add_client_stage_rule/{{rules_regulations.route.id}}/{{rules_regulations.product.id}}/{{rules_regulations.stage.id}}/{{question.id}}/{{client.id}}" method="post">
+                                {% csrf_token %}
+                              {% with b=rules_regulations.rules_regulation %}
+                              {% with field=question.type|firstsplit:',' %}
+                                {% if field.1 %}
+                                {% with options=field.1|split:',' %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <input type="hidden" class="cb" id="name" name="dynamicRule">
+                                      {% for option in options %}
+                                        <div class="form-check">
+                                          <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
+                                          <label class="form-check-label" for="check{{ forloop.counter }}">
+                                            {{option}}
+                                          </label>
+                                        </div>
+                                      
+                                      {% endfor %}
+                                  </div>
+                                {% endwith %}
+                                {% else %}
+                                  {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                                    </div>
+                                  {% elif field.0 == "checkbox" %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                    </div>
+                                  {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                                  {% with options=b.0|split:',' %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <div class="form-check">
+                                      <input {% if options.1 == 'Less Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Less" class="form-check-input " placeholder="Enter The Value" value="Less Than"> <label for="{{ forloop.counter }}Less">Less Than</label>
+                                    </div>
+                                    <div class="form-check">
+                                      <input {% if options.1 == 'Greater Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Greater" class="form-check-input " placeholder="Enter The Value" value="Greater Than"> <label for="{{ forloop.counter }}Greater">Greater Than</label>
+                                    </div>
+                                    <div class="form-check">
+                                      <input {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
+                                    </div>
+                                    <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
+                                    <input name="dynamicRule" type="hidden">
+                                  </div>
+                                  {% endwith %}
+                                  {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                            {% endwith %}
+                            <button class="btn btn-primary mt-2 ms-3">Submit</button>
+                            </form>
                             </div>
                           </div>
 
                         {% endfor %}
                         
 
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
                       </div>
                     </div>
                   </div>
@@ -2096,6 +2141,7 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     return confirm(date);
   }
 </script>
+
 
 
 {% endblock %}

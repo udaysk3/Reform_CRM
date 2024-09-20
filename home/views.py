@@ -3929,7 +3929,6 @@ def add_stage_rule(request, route_id, product_id, stage_id, question_id):
 
     if request.method == "POST":
         dynamicRules = request.POST.getlist("dynamicRule")
-        print(dynamicRules)
         rule_regulation = Rule_Regulation.objects.filter(
             route=route, product=product, stage=stage, question=question
         ).first()
@@ -4012,8 +4011,25 @@ def customer_jr_order(request,client_id):
         response = json.loads(body)
         cjstages = response['cjstages']
         for i in cjstages:
-            print(i['route'],i['product'],i['stage'])
             cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).first()
             cjstage.order = i['order']
             cjstage.save()
     return HttpResponse(200)
+
+def add_client_stage_rule(request, route_id, product_id, stage_id, question_id, client_id):
+    question = Questions.objects.get(pk=question_id)
+    route = Route.objects.get(pk=route_id)
+    product = Product.objects.get(pk=product_id)
+    stage = Stage.objects.get(pk=stage_id)
+
+    if request.method == "POST":
+        dynamicRules = request.POST.getlist("dynamicRule")
+        rule_regulation = Rule_Regulation.objects.filter(
+            route=route, product=product, stage=stage, question=question
+        ).first()
+
+        rule_regulation.rules_regulation = dynamicRules
+        rule_regulation.save()
+
+    messages.success(request, "Rule added successfully!")
+    return redirect("/council-detail/"+ str(client_id))
