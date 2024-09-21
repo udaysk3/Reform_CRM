@@ -1237,8 +1237,14 @@ table {
               <span class="orderRoutes">{{ route_product }}</span>
             </h6>
             <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
-              {% for stage, question_answer in stages %}
-                <button class="btn btn-primary mx-2 stagedrag orderStages" data-bs-toggle="modal" data-bs-target="#exampleModal{{ forloop.parentloop.counter }}{{ forloop.counter }}">
+              {% for stage, question_answer, can_ans in stages %}
+                <button class="btn btn-primary mx-2 stagedrag orderStages" 
+                {% if can_ans %}
+                {% else %}
+                disabled
+                {% endif %}
+
+                data-bs-toggle="modal" data-bs-target="#exampleModal{{ forloop.parentloop.counter }}{{ forloop.counter }}">
                   {{ stage }}
                 </button>
                 <div class="modal fade" id="exampleModal{{ forloop.parentloop.counter }}{{ forloop.counter }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

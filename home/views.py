@@ -429,36 +429,63 @@ def customer_detail(request, customer_id, s_customer_id=None):
         for product in products:
             cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
             for cjstage in cjstages:
-                
+                all_answered = True
+            
                 questions = []
                 questions_with_ans = []
                 added_ans = set()
-                
+            
                 for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage):
                     questions.append(rule.question)
-                
+            
                 for question in questions:
-                    ans = (Answer.objects.filter(route=route).filter(product=product).filter(stage=cjstage.stage).filter(question=question).filter(customer=customer))
-                    
+                    ans = (Answer.objects.filter(route=route)
+                                         .filter(product=product)
+                                         .filter(stage=cjstage.stage)
+                                         .filter(question=question)
+                                         .filter(customer=customer))
+                
                     if question not in added_ans:
                         if ans.exists():
                             questions_with_ans.append((question, ans[0], route, product, cjstage.stage))
                         else:
                             questions_with_ans.append((question, None, route, product, cjstage.stage))
-                        
+                            all_answered = False
                         added_ans.add(question)
 
-                
-                stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order, 'questions': questions_with_ans})
+                stages.append({
+                    'route': route,
+                    'product': product,
+                    'stage': cjstage.stage,
+                    'order': cjstage.order,
+                    'questions': questions_with_ans,
+                    'all_answered': all_answered
+                })
 
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
 
+    previous_all_answered = True
+    for i, stage in enumerate(stages):
+        if i == 0:
+            stage['all_answered'] = True
+        else:
+            if previous_all_answered:
+                stage['all_answered'] = all([answer is not None for question, answer, *_ in stage['questions']])
+            else:
+                stage['all_answered'] = False
+
+        previous_all_answered = stage['all_answered']
+
     display_stages = {}
     for stage in stages:
-        if display_stages.get(f'{stage['route'].name} - {stage['product'].name}'):
-            display_stages[f'{stage['route'].name} - {stage['product'].name}'].append([stage['stage'],stage['questions']])
+        key = f'{stage["route"].name} - {stage["product"].name}'
+        if key in display_stages:
+            display_stages[key].append([stage['stage'], stage['questions'], stage['all_answered']])
         else:
-            display_stages[f'{stage['route'].name} - {stage['product'].name}'] = [[stage['stage'],stage['questions']]]
+            display_stages[key] = [[stage['stage'], stage['questions'], stage['all_answered']]]
+
+
+    
 
     
     return render(
