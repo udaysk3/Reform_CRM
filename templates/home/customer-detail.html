@@ -1239,7 +1239,7 @@ table {
             <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
               {% for stage, question_answer, can_ans in stages %}
                 <button class="btn btn-primary mx-2 stagedrag orderStages" 
-                {% if can_ans %}
+                {% if can_ans and question_answer %}
                 {% else %}
                 disabled
                 {% endif %}

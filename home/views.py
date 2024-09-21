@@ -466,15 +466,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
     previous_all_answered = True
     for i, stage in enumerate(stages):
-        if i == 0:
-            stage['all_answered'] = True
-        else:
-            if previous_all_answered:
-                stage['all_answered'] = all([answer is not None for question, answer, *_ in stage['questions']])
-            else:
-                stage['all_answered'] = False
-
-        previous_all_answered = stage['all_answered']
+        stage['all_answered'], previous_all_answered = previous_all_answered, stage['all_answered']
+        
 
     display_stages = {}
     for stage in stages:
