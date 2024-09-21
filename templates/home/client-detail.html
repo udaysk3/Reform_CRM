@@ -1546,13 +1546,14 @@ table {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
-                        {% for question, rules_regulations in i.1 %}
+                        {% if i.1 %}
+                        {% for question, rules_regulations, route, product, stage in i.1 %}
                           <div class="col">
                             <div class="row ms-3">
                               {{ question.question }}
                             </div>
                             <div class="row mb-3">
-                              <form action="/add_client_stage_rule/{{rules_regulations.route.id}}/{{rules_regulations.product.id}}/{{rules_regulations.stage.id}}/{{question.id}}/{{client.id}}" method="post">
+                              <form class="client_form" action="/add_client_stage_rule/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{client.id}}" method="post">
                                 {% csrf_token %}
                               {% with b=rules_regulations.rules_regulation %}
                               {% with field=question.type|firstsplit:',' %}
@@ -1606,8 +1607,10 @@ table {
                           </div>
 
                         {% endfor %}
-                        
+                        {% else %}
 
+                          <h4> Questions are not allocated </h4>
+                        {% endif %}
                       </div>
                     </div>
                   </div>
@@ -1625,6 +1628,47 @@ table {
 
 <script>
 
+   const forms = document.querySelectorAll(".client_form");
+    forms.forEach((form)=>{
+    form.addEventListener("submit", (e) => {
+
+      const cb = form.parentElement.querySelector('.cb');
+    const checkBoxs = form.parentElement.querySelectorAll('.check-box');
+
+    checkBoxs.forEach((checkBox)=>{
+      if (checkBox.checked){
+        if (cb.value == ''){
+
+          cb.value += checkBox.value;
+        } else{
+          cb.value += ',' + checkBox.value;
+
+        }
+      }
+    })
+
+    
+      const checkboxinputs = document.querySelectorAll(".checkboxinput");
+    if (checkboxinputs){
+      checkboxinputs.forEach((checkboxinput) => {
+        const checkboxdiv = checkboxinput.parentElement;
+        const radios = checkboxdiv.querySelectorAll("input[type='radio']");
+        radios.forEach((radio) => {
+          if (radio.checked) {
+            checkboxdiv.querySelector("input[name='dynamicRule']").value = `${checkboxinput.value},${radio.value}`;
+          }
+        });
+      });
+    }
+      const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
+    });
+
+    
+
+    });
+    });
 
 
   {% for k,v in display_stages.items %}
