@@ -161,11 +161,11 @@
                                   <input type="hidden" class="cb" id="name" name="dynamicRule">
                                     {% for option in options %}
                                       <div class="form-check">
-  <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
-  <label class="form-check-label" for="check{{ forloop.counter }}">
-    {{option}}
-  </label>
-</div>
+                                        <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
+                                        <label class="form-check-label" for="check{{ forloop.counter }}">
+                                          {{option}}
+                                        </label>
+                                      </div>
                                     
                                     {% endfor %}
                                 </div>

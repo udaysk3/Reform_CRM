@@ -3,6 +3,7 @@ from user.models import User
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from collections import OrderedDict
 from django.template.loader import render_to_string
 from django.db.models import Q
 from django.utils.html import strip_tags
@@ -32,6 +33,7 @@ from .models import (
     Client_Council_Route,
     CJStage,
     RegionArchive,
+    Answer,
 )
 import re
 from datetime import datetime, timedelta
@@ -427,230 +429,58 @@ def customer_detail(request, customer_id, s_customer_id=None):
         for product in products:
             cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
             for cjstage in cjstages:
-                stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order})
+                all_answered = True
+            
+                questions = []
+                questions_with_ans = []
+                added_ans = set()
+            
+                for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage):
+                    questions.append(rule.question)
+            
+                for question in questions:
+                    ans = (Answer.objects.filter(route=route)
+                                         .filter(product=product)
+                                         .filter(stage=cjstage.stage)
+                                         .filter(question=question)
+                                         .filter(customer=customer))
+                
+                    if question not in added_ans:
+                        if ans.exists():
+                            questions_with_ans.append((question, ans[0], route, product, cjstage.stage))
+                        else:
+                            questions_with_ans.append((question, None, route, product, cjstage.stage))
+                            all_answered = False
+                        added_ans.add(question)
+
+                stages.append({
+                    'route': route,
+                    'product': product,
+                    'stage': cjstage.stage,
+                    'order': cjstage.order,
+                    'questions': questions_with_ans,
+                    'all_answered': all_answered
+                })
 
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
 
+    previous_all_answered = True
+    for i, stage in enumerate(stages):
+        stage['all_answered'], previous_all_answered = previous_all_answered, stage['all_answered']
+        
+
     display_stages = {}
     for stage in stages:
-        if display_stages.get(stage["route"]):
-            if display_stages[stage["route"]].get(stage["product"]):
-                display_stages[stage["route"]][stage["product"]].append(stage["stage"])
-            else:
-                display_stages[stage["route"]][stage["product"]] = [stage["stage"]]
+        key = f'{stage["route"].name} - {stage["product"].name}'
+        if key in display_stages:
+            display_stages[key].append([stage['stage'], stage['questions'], stage['all_answered']])
         else:
-            display_stages[stage["route"]] = {stage["product"]: [stage["stage"]]}
+            display_stages[key] = [[stage['stage'], stage['questions'], stage['all_answered']]]
 
-    # for stage in all_stages:
-    #     if stage.fields is not None:
-    #         stages[stage.name] = json.loads(stage.fields)
-    #     else:
-    #         stages[stage.name] = {}
 
-    # if customer.stage_values:
-    #     stage_values = json.loads(customer.stage_values)
-    #     values = {}
-    #     for name, s_fields in stages.items():
-    #         fields = {}
-    #         for field in s_fields:
-    #             fields[field] = [s_fields[field], '']
-    #         values[name] = fields
+    
 
-    #     for key, fields in values.items():
-    #         if key in stage_values:
-    #             for field in fields:
-    #                 if field in stage_values[key]:
-    #                     fields[field][1] = stage_values[key][field]
-
-    # i = 0
-    # for product in products:
-    #     product_rules = {}
-    #     for key, value in ast.literal_eval(product.rules_regulations).items():
-    #         rule_key = value[0].split(",")[0]
-    #         rule_value = value[1].split(',')[0]
-    #         rule_additional_value = value[2]
-
-    #         if rule_key not in product_rules:
-    #             product_rules[rule_key] = {rule_value: [rule_additional_value]}
-    #         else:
-    #             if rule_value not in product_rules[rule_key]:
-    #                 product_rules[rule_key][rule_value] = [rule_additional_value]
-    #             else:
-    #                 product_rules[rule_key][rule_value].append(rule_additional_value)
-
-    #     for stage, rules in product_rules.items():
-    #         if stage in values:
-    #             for field, rule in rules.items():
-    #                 for key, value in values[stage].items():
-    #                     if ',' in key:
-    #                         key = key.split(',')[0]
-    #                     if field == key:
-    #                         if value[0] in ['time', 'date', 'number', 'month']:
-    #                             if value[0] == 'date':
-    #                                 if check_date(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_products[i] = False
-    #                             elif value[0] == 'time':
-    #                                 if check_time(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_products[i] = False
-    #                             elif value[0] == 'number':
-    #                                 if check_number(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_products[i] = False
-    #                             elif value[0] == 'month':
-    #                                 if check_month(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_products[i] = False
-    #                         else:
-    #                             if value[1] in rule or value[1] == '':
-    #                                 pass
-    #                             else:
-    #                                 true_products[i] = False
-
-    #     i += 1
-
-    # j = 0
-    # for route in routes:
-    #     route_rules = {}
-    #     for key, value in ast.literal_eval(route.rules_regulations).items():
-    #         rule_key = value[0].split(",")[0]
-    #         rule_value = value[1].split(",")[0]
-    #         rule_additional_value = value[2]
-
-    #         if rule_key not in route_rules:
-    #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
-    #         else:
-    #             if rule_value not in route_rules[rule_key]:
-    #                 route_rules[rule_key][rule_value] = [rule_additional_value]
-    #             else:
-    #                 route_rules[rule_key][rule_value].append(rule_additional_value)
-
-    #     for stage, rules in route_rules.items():
-    #         if stage in values:
-    #             for field, rule in rules.items():
-    #                 for key, value in values[stage].items():
-    #                     if "," in key:
-    #                         key = key.split(",")[0]
-    #                     if field == key:
-    #                         if value[0] in ["time", "date", "number", "month"]:
-    #                             if value[0] == "date":
-    #                                 if check_date(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                             elif value[0] == "time":
-    #                                 if check_time(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                             elif value[0] == "number":
-    #                                 if check_number(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                             elif value[0] == "month":
-    #                                 if check_month(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                         else:
-    #                             if value[1] in rule or value[1] == "":
-    #                                 pass
-    #                             else:
-    #                                 true_routes[j] = False
-    #                         print("route",true_routes)
-
-    #     j += 1
-
-    # j = 0
-    # for route in routes:
-    #     route_rules = {}
-    #     if route.sub_rules_regulations == None:
-    #         continue
-    #     for key, value in ast.literal_eval(route.sub_rules_regulations).items():
-    #         rule_key = value[0].split(",")[0]
-    #         rule_value = value[1].split(',')[0]
-    #         rule_additional_value = value[2]
-
-    #         if rule_key not in route_rules:
-    #             route_rules[rule_key] = {rule_value: [rule_additional_value]}
-    #         else:
-    #             if rule_value not in route_rules[rule_key]:
-    #                 route_rules[rule_key][rule_value] = [rule_additional_value]
-    #             else:
-    #                 route_rules[rule_key][rule_value].append(rule_additional_value)
-
-    #     for stage, rules in route_rules.items():
-    #         if stage in values:
-    #             for field, rule in rules.items():
-    #                 for key, value in values[stage].items():
-    #                     if ',' in key:
-    #                         key = key.split(',')[0]
-    #                     if field == key:
-    #                         if value[0] in ['time', 'date', 'number', 'month']:
-    #                             if value[0] == 'date':
-    #                                 if check_date(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                             elif value[0] == 'time':
-    #                                 if check_time(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                             elif value[0] == 'number':
-    #                                 if check_number(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                             elif value[0] == 'month':
-    #                                 if check_month(value[1], rule):
-    #                                     pass
-    #                                 else:
-    #                                     true_routes[j] = False
-    #                         else:
-    #                             if value[1] in rule or value[1] == '':
-    #                                 pass
-    #                             else:
-    #                                 true_routes[j] = False
-    #                         print(true_routes)
-
-    #     j += 1
-
-    # return render(
-    #         request,
-    #         "home/customer-detail.html",
-    #         {
-    #             "customer": customer,
-    #             "history": history,
-    #             "imported": imported,
-    #             "prev": prev,
-    #             "next": next,
-    #             "child_customers": child_customers,
-    #             "recommendations_list": processed_recommendations,
-    #             "routes": routes,
-    #             "stages": stages,
-    #             "values": values,
-    #             "agents": agents,
-    #             "show_customer": show_customer,
-    #             "events": events,
-    #             "reasons": reasons,
-    #             "templates": templates,
-    #             "signatures": signatures,
-    #             "domain_name": domain_name,
-    #             "products": products,
-    #             "true_products": true_products,
-    #             "true_routes": true_routes,
-    #             "clients": clients,
-    #             "campaigns": campaigns,
-    #             "display_regions":display_regions,
-    #         },
-    #     )
+    
     return render(
         request,
         "home/customer-detail.html",
@@ -898,24 +728,55 @@ def client_detail(request, client_id, s_client_id=None):
                 if council not in routes:
                     routes[council] = []
                 routes[council].append(route)
-
-    stages=[]
-    for council,council_routes in routes.items():
+    stages = []
+    for council, council_routes in routes.items():
         for route in council_routes:
             for product in products:
-                cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
+                cjstages = CJStage.objects.filter(route=route, product=product)
                 for cjstage in cjstages:
-                    stages.append({'route':route,'product':product,'stage':cjstage.stage, 'order':cjstage.order})
+                    questions = []
+                    questions_with_rules = []
+                    added_questions = set()
+                    
+                    for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage,is_client=False):
+                        questions.append(rule.question)
+                        
+                    
+                    for question in questions:
+                        rule_regulation = (Rule_Regulation.objects
+                                           .filter(route=route)
+                                           .filter(product=product)
+                                           .filter(stage=cjstage.stage)
+                                           .filter(question=question)
+                                           .filter(is_client=True))
+                       
+                        if question not in added_questions:
+                            if rule_regulation.exists():
+                                questions_with_rules.append((question, rule_regulation[0], route, product, cjstage.stage))
+                            else:
+                                questions_with_rules.append((question, None, route, product, cjstage.stage))
+                            
+                            added_questions.add(question)
+                    
+                    stages.append({
+                        'route': route,
+                        'product': product,
+                        'stage': cjstage.stage, 
+                        'order': cjstage.order, 
+                        'questions': questions_with_rules
+                    })
+    
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
-    display_stages={}
+    
+    display_stages = {}
     for stage in stages:
-        if display_stages.get(stage['route']):
-            if display_stages[stage["route"]].get(stage["product"]):
-                display_stages[stage["route"]][stage["product"]].append(stage["stage"])
-            else:
-                display_stages[stage["route"]][stage["product"]] = [stage["stage"]]
+        key = f"{stage['route'].name} - {stage['product'].name}"
+    
+        if key in display_stages:
+            display_stages[key].append([stage['stage'], stage['questions']])
         else:
-            display_stages[stage["route"]] = {stage["product"]: [stage["stage"]]}
+            display_stages[key] = [[stage['stage'], stage['questions']]]
+
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
@@ -3837,9 +3698,7 @@ def cj_product(request ,route_id ,product_id):
     
     if request.method == 'POST':
         stage = Stage.objects.get(pk=request.POST.get('stage'))
-        CJStage.objects.create(route=route, product=product,stage=stage)
-        product.stage.add(stage)
-        product.save()
+        CJStage.objects.get_or_create(route=route, product=product,stage=stage)
         messages.success(request, "Stage added to product successfully!")
         return redirect(f"/cj_product/{route_id}/{product_id}")
     return render(
@@ -3855,7 +3714,7 @@ def cj_stage(request, route_id, product_id, stage_id):
     questions_with_rules = [] 
     questions = []
     
-    for rule in Rule_Regulation.objects.all().filter(route=route,product=product,stage=stage):
+    for rule in Rule_Regulation.objects.all().filter(route=route,product=product,stage=stage,is_client=False):
         questions.append(rule.question)
 
     for question in questions:
@@ -3863,7 +3722,8 @@ def cj_stage(request, route_id, product_id, stage_id):
                            .filter(route=route)
                            .filter(product=product)
                            .filter(stage=stage)
-                           .filter(question=question))
+                           .filter(question=question)
+                           .filter(is_client=False))
 
         if rule_regulation.exists():
             questions_with_rules.append((question, rule_regulation[0]))
@@ -3900,7 +3760,6 @@ def add_stage_rule(request, route_id, product_id, stage_id, question_id):
 
     if request.method == "POST":
         dynamicRules = request.POST.getlist("dynamicRule")
-        print(dynamicRules)
         rule_regulation = Rule_Regulation.objects.filter(
             route=route, product=product, stage=stage, question=question
         ).first()
@@ -3921,8 +3780,8 @@ def delete_stage(request, stage_id):
 def delete_cj_stage(request, route_id ,product_id, stage_id):
     product = Product.objects.get(pk=product_id)
     stage = Stage.objects.get(pk=stage_id)
-    product.stage.remove(stage)
-    product.save()
+    route = Route.objects.get(pk=route_id)
+    CJStage.objects.get(route=route, product=product, stage=stage).delete()
     messages.success(request, "Stage deleted successfully!")
     return redirect(f"/cj_product/{route_id}/{product_id}")
 
@@ -3987,3 +3846,63 @@ def customer_jr_order(request,client_id):
             cjstage.order = i['order']
             cjstage.save()
     return HttpResponse(200)
+
+def add_client_stage_rule(request, route_id, product_id, stage_id, question_id, client_id):
+    question = Questions.objects.get(pk=question_id)
+    route = Route.objects.get(pk=route_id)
+    product = Product.objects.get(pk=product_id)
+    stage = Stage.objects.get(pk=stage_id)
+
+    if request.method == "POST":
+        dynamicRules = request.POST.getlist("dynamicRule")
+        
+        rule_regulation = Rule_Regulation.objects.filter(
+            route=route, product=product, stage=stage, question=question, is_client=True
+        ).first()
+        
+        if rule_regulation:
+            rule_regulation.rules_regulation = dynamicRules
+            rule_regulation.save()
+        else:
+            rule_regulation = Rule_Regulation.objects.create(
+                route=route,
+                product=product,
+                stage=stage,
+                question=question,
+                rules_regulation=dynamicRules,
+                is_client=True,
+            )
+
+    messages.success(request, "Rule added successfully!")
+    return redirect("/client-detail/"+ str(client_id))
+
+def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer_id):
+    question = Questions.objects.get(pk=question_id)
+    customer = Customers.objects.get(pk=customer_id)
+
+    if request.method == "POST":
+        dynamicAns = request.POST.getlist("dynamicRule")
+        
+        rules = Rule_Regulation.objects.all().filter(question=question, is_client=False)
+        
+        for rule in rules:
+        
+            answer = Answer.objects.filter(
+                route=rule.route, product=rule.product, stage=rule.stage, question=question, customer=customer
+            ).first()
+
+            if answer:
+                answer.answer = dynamicAns
+                answer.save()
+            else:
+                answer = Answer.objects.create(
+                    route=rule.route,
+                    product=rule.product,
+                    stage=rule.stage,
+                    question=question,
+                    customer=customer,
+                    answer=dynamicAns,
+                )
+
+    messages.success(request, "Rule added successfully!")
+    return redirect("/customer-detail/"+ str(customer_id))

@@ -310,6 +310,16 @@ urlpatterns = [
         name="add_stage_rule",
     ),
     path(
+        "add_client_stage_rule/<int:route_id>/<int:product_id>/<int:stage_id>/<int:question_id>/<int:client_id>",
+        views.add_client_stage_rule,
+        name="add_client_stage_rule",
+    ),
+    path(
+        "add_stage_ans/<int:route_id>/<int:product_id>/<int:stage_id>/<int:question_id>/<int:customer_id>",
+        views.add_stage_ans,
+        name="add_stage_ans",
+    ),
+    path(
         "delete_stage/<int:stage_id>",
         views.delete_stage,
         name="delete_stage",

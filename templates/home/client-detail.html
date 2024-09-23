@@ -3,15 +3,7 @@
 
 <style>
 
-.routedrag{
-  position: relative;
-  z-index: 1;
-}
 
-.productdrag{
-  position: relative;
-  z-index: 10;
-}  
 
 .productdrag, .routedrag {
   cursor: move;
@@ -1508,55 +1500,35 @@ table {
                   
                 <h6 class="fs-6 mt-3"> <b> Customer Journey </b></h6>                
 
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style=""
-                  >
-                     
-                    
-<div class="mt-5 row">
-                       <div class="route-container">
-                      {% if display_stages %}
-                      {% for route, values in display_stages.items %}
-                      <div class="routedrag card p-3 " style=" margin: 10px;" draggable="true">
+            <div class="mt-3 row">
+  <div class="product-pcontainer">
+    {% if display_stages %}
+      {% for route_product, stages in display_stages.items %}
+        <div class="productdrag card p-0" style="margin: 10px;" draggable="true">
+          <div class="card-body p-3">
+            <h6>
+              <span class="orderRoutes">{{ route_product }}</span>
+            </h6>
+            <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
+              {% for stage in stages %}
+                <h6 draggable="true" class="btn btn-primary mx-2 stagedrag orderStages orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}" >
+                  {{ stage.0 }}
+                </h6>
 
-                      <h6 ><b class="orderRoutes">{{ route }}</b> -</h6>
-
-                     
-                      <div class="product-pcontainer{{ forloop.counter }} ">
-                      {% for product, stages in values.items %}
-                        <div class="productdrag card p-0 " style=" margin: 10px;" draggable="true">
-                        <div class="card-body p-3 ">
-                          <h6 class="ms-3" >
-                              <spam class="orderProducts">{{ product.name }}</spam> - 
-                          </h6>
-                          <div class=" stage-container{{ forloop.parentloop.counter }}{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
-                            {% for stage in stages %}
-                            <h6 draggable="true" class="ms-3 stagedrag orderStages" >
-                                {{ stage.name }}  
-                            </h6>
-                            {% endfor %}
-                          </div>
-                        </div>
-                        </div>
-                      {% endfor %}
-                      </div>
-                      </div>
-                      {% endfor %}
-                      {% endif %}
-                      </div>
-
-                  </div>
-                </div>
-                </div>
-
+                
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
                 </div>
 
                 
               </div>
             </div>
-
           
 {% comment %} 
 {% for area in coverage_areas %}
@@ -1564,130 +1536,207 @@ table {
 {% endfor %} {% endcomment %}
 
 
+{% for k,v in display_stages.items %}
+    {% for i in v %}
+      <div class="modal fade" id="orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}" tabindex="-1" aria-labelledby="exampleModalLabel" draggable="false" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ i.0 }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        {% if i.1 %}
+                        {% for question, rules_regulations, route, product, stage in i.1 %}
+                          <div class="col">
+                            <div class="row ms-3">
+                              {{ question.question }}
+                            </div>
+                            <div class="row mb-3">
+                              <form class="client_form" action="/add_client_stage_rule/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{client.id}}" method="post">
+                                {% csrf_token %}
+                              {% with b=rules_regulations.rules_regulation %}
+                              {% with field=question.type|firstsplit:',' %}
+                                {% if field.1 %}
+                                {% with options=field.1|split:',' %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <input type="hidden" class="cb" id="name" name="dynamicRule">
+                                      {% for option in options %}
+                                        <div class="form-check">
+                                          <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
+                                          <label class="form-check-label" for="check{{ forloop.counter }}">
+                                            {{option}}
+                                          </label>
+                                        </div>
+                                      
+                                      {% endfor %}
+                                  </div>
+                                {% endwith %}
+                                {% else %}
+                                  {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                                    </div>
+                                  {% elif field.0 == "checkbox" %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                    </div>
+                                  {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                                  {% with options=b.0|split:',' %}
+                                  <div class="col-6 rules mt-3 ms-3">
+                                    <div class="form-check">
+                                      <input {% if options.1 == 'Less Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Less" class="form-check-input " placeholder="Enter The Value" value="Less Than"> <label for="{{ forloop.counter }}Less">Less Than</label>
+                                    </div>
+                                    <div class="form-check">
+                                      <input {% if options.1 == 'Greater Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Greater" class="form-check-input " placeholder="Enter The Value" value="Greater Than"> <label for="{{ forloop.counter }}Greater">Greater Than</label>
+                                    </div>
+                                    <div class="form-check">
+                                      <input {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
+                                    </div>
+                                    <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
+                                    <input name="dynamicRule" type="hidden">
+                                  </div>
+                                  {% endwith %}
+                                  {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                            {% endwith %}
+                            <button class="btn btn-primary mt-2 ms-3">Submit</button>
+                            </form>
+                            </div>
+                          </div>
+
+                        {% endfor %}
+                        {% else %}
+
+                          <h4> Questions are not allocated </h4>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+    {% endfor %}
+  {% endfor %}
+
+
 {% endblock %} {% block js %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
-<script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
 
 <script>
 
+   const forms = document.querySelectorAll(".client_form");
+    forms.forEach((form)=>{
+    form.addEventListener("submit", (e) => {
 
-  // Route Draggable (routedrag)
-const rcontainer = document.querySelectorAll('.route-container')[0];
-const rdraggables = rcontainer.querySelectorAll('.routedrag');
-rdraggables.forEach(draggable => {
-  draggable.addEventListener('dragstart', () => {
-    draggable.classList.add('dragging');
-  });
+      const cb = form.parentElement.querySelector('.cb');
+    const checkBoxs = form.parentElement.querySelectorAll('.check-box');
 
-  draggable.addEventListener('dragend', () => {
-    draggable.classList.remove('dragging');
-    let orderRoutes;
-    let orderProducts;
-    const orderStages = document.querySelectorAll('.orderStages');
-    const cjstages = [];
-    orderStages.forEach((stage,i) => {
-      orderRoutes = stage.closest('.routedrag').querySelector('.orderRoutes').innerText;
-      orderProducts = stage.closest('.productdrag').querySelector('.orderProducts').innerText;
-      cjstages.push({
-        route: orderRoutes,
-        product: orderProducts,
-        stage: stage.innerText,
-        order: i
-      });
+    checkBoxs.forEach((checkBox)=>{
+      if (checkBox.checked){
+        if (cb.value == ''){
+
+          cb.value += checkBox.value;
+        } else{
+          cb.value += ',' + checkBox.value;
+
+        }
+      }
     })
-    fetch('/customer_jr_order/{{ client.id }}', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}'
-      },
-      body: JSON.stringify({
-        'cjstages': cjstages
-      })
-    });
-  });
-});
 
-rcontainer.addEventListener('dragover', e => {
-  e.preventDefault();
-  const afterElement = getDragAfterElementRoute(rcontainer, e.clientY);
-  const draggable = document.querySelector('.dragging');
-  if (Array.from(rdraggables).includes(draggable)) {
-    if (afterElement == null) {
-      rcontainer.appendChild(draggable);
-    } else {
-      rcontainer.insertBefore(draggable, afterElement);
-    }
-  }
-});
-
-function getDragAfterElementRoute(container, y) {
-  const draggableElements = [...container.querySelectorAll('.routedrag:not(.dragging)')];
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-// Product Draggable (productdrag)
-{% if display_stages %}
-  {% for route, values in display_stages.items %}
-    const pcontainer{{ forloop.counter }} = document.querySelectorAll('.product-pcontainer{{ forloop.counter }}')[0];
-    const pdraggables{{ forloop.counter }} = pcontainer{{ forloop.counter }}.querySelectorAll('.productdrag');
     
-    pdraggables{{ forloop.counter }}.forEach(draggable => {
+      const checkboxinputs = document.querySelectorAll(".checkboxinput");
+    if (checkboxinputs){
+      checkboxinputs.forEach((checkboxinput) => {
+        const checkboxdiv = checkboxinput.parentElement;
+        const radios = checkboxdiv.querySelectorAll("input[type='radio']");
+        radios.forEach((radio) => {
+          if (radio.checked) {
+            checkboxdiv.querySelector("input[name='dynamicRule']").value = `${checkboxinput.value},${radio.value}`;
+          }
+        });
+      });
+    }
+      const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
+    });
+
+    
+
+    });
+    });
+
+
+  {% for k,v in display_stages.items %}
+    {% for i in v %}
+      document.querySelector('.orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}').addEventListener('click',()=>{
+      let assigned_to_modal = new bootstrap.Modal(document.querySelector('#orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}'), {});
+
+      assigned_to_modal.show();
+      });
+    {% endfor %}
+  {% endfor %}
+
+
+  const pcontainer = document.querySelector('.product-pcontainer');
+
+
+    const pdraggables = document.querySelectorAll('.productdrag');
+
+    pdraggables.forEach(draggable => {
+      let sent = false; // Reset sent for each draggable
+
       draggable.addEventListener('dragstart', (e) => {
-        e.stopPropagation(); // Prevent route dragging event
+        e.stopPropagation();
         draggable.classList.add('dragging');
       });
 
       draggable.addEventListener('dragend', (e) => {
-        e.stopPropagation(); // Prevent route dragging event
+        e.stopPropagation();
         draggable.classList.remove('dragging');
-        let orderRoutes{{ forloop.counter }};
-        let orderProducts{{ forloop.counter }};
-        const orderStages = document.querySelectorAll('.orderStages');
-        const cjstages = [];
-        orderStages.forEach((stage,i) => {
-          orderRoutes{{ forloop.counter }} = stage.closest('.routedrag').querySelector('.orderRoutes').innerText;
-          orderProducts{{ forloop.counter }} = stage.closest('.productdrag').querySelector('.orderProducts').innerText;
-          cjstages.push({
-            route: orderRoutes{{ forloop.counter }},
-            product: orderProducts{{ forloop.counter }},
-            stage: stage.innerText,
-            order: i
+
+        if (!sent) {
+          const orderStages = document.querySelectorAll('.orderStages');
+          const cjstages = [];
+          orderStages.forEach((stage, i) => {
+            const orderRoutes = stage.closest('.productdrag').querySelector('.orderRoutes').innerText;
+            const orderRoute = orderRoutes.split(' - ')[0];
+            const orderProduct = orderRoutes.split(' - ')[1];
+            cjstages.push({
+              route: orderRoute,
+              product: orderProduct,
+              stage: stage.innerText,
+              order: i + 1
+            });
           });
-        })
-        fetch('/customer_jr_order/{{ client.id }}', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-          },
-          body: JSON.stringify({
-            'cjstages': cjstages
-          })
-        });
+
+          fetch('/customer_jr_order/{{ client.id }}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ 'cjstages': cjstages })
+          });
+
+          sent = true; // Mark as sent
+        }
       });
     });
 
-    pcontainer{{ forloop.counter }}.addEventListener('dragover', e => {
+    pcontainer.addEventListener('dragover', e => {
       e.preventDefault();
-      const afterElement = getDragAfterElement(pcontainer{{ forloop.counter }}, e.clientY);
+      const afterElement = getDragAfterElement(pcontainer, e.clientY);
       const draggable = document.querySelector('.dragging');
-      if (Array.from(pdraggables{{ forloop.counter }}).includes(draggable)) {
+      if (draggable && Array.from(pdraggables).includes(draggable)) {
         if (afterElement == null) {
-          pcontainer{{ forloop.counter }}.appendChild(draggable);
+          pcontainer.appendChild(draggable);
         } else {
-          pcontainer{{ forloop.counter }}.insertBefore(draggable, afterElement);
+          pcontainer.insertBefore(draggable, afterElement);
         }
       }
     });
@@ -1704,77 +1753,82 @@ function getDragAfterElementRoute(container, y) {
         }
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
+{% if display_stages %}
+  {% for route_product, stages in display_stages.items %}
+      let scontainer{{ forloop.counter }} = document.querySelector('.stage-container{{ forloop.counter }}');
+      let sdraggables{{ forloop.counter }} = scontainer{{ forloop.counter }}.querySelectorAll('.stagedrag');
 
+      sdraggables{{ forloop.counter }}.forEach(draggable => {
+        let sentStage = false; // Reset for each stage
 
-    {% for product, stages in values.items %}
-      let scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }} = document.querySelectorAll('.stage-container{{ forloop.parentloop.counter }}{{ forloop.counter }}')[0];
-    let sdraggables{{ forloop.parentloop.counter }}{{ forloop.counter }} = scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.querySelectorAll('.stagedrag');
-    
-    sdraggables{{ forloop.parentloop.counter }}{{ forloop.counter }}.forEach(draggable => {
-      draggable.addEventListener('dragstart', (e) => {
-        e.stopPropagation(); // Prevent product dragging event
-        draggable.classList.add('dragging');
-      });
+        draggable.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          draggable.classList.add('dragging');
+        });
 
-      draggable.addEventListener('dragend', (e) => {
-        e.stopPropagation(); // Prevent product dragging event
-        draggable.classList.remove('dragging');
-        let orderRoutes{{ forloop.counter }}{{ forloop.parentloop.counter }};
-        let orderProducts{{ forloop.counter }}{{ forloop.parentloop.counter }};
-        const orderStages = document.querySelectorAll('.orderStages');
-        const cjstages = [];
-        orderStages.forEach((stage,i) => {
-          orderRoutes{{ forloop.counter }}{{ forloop.parentloop.counter }} = stage.closest('.routedrag').querySelector('.orderRoutes').innerText;
-          orderProducts{{ forloop.counter }}{{ forloop.parentloop.counter }} = stage.closest('.productdrag').querySelector('.orderProducts').innerText;
-          cjstages.push({
-            route: orderRoutes{{ forloop.counter }}{{ forloop.parentloop.counter }},
-            product: orderProducts{{ forloop.counter }}{{ forloop.parentloop.counter }},
-            stage: stage.innerText,
-            order: i
+        draggable.addEventListener('dragend', (e) => {
+          e.stopPropagation();
+          draggable.classList.remove('dragging');
+          const cjstages = [];
+
+          if (!sentStage) {
+            const orderStages = document.querySelectorAll('.orderStages');
+          const cjstages = [];
+          orderStages.forEach((stage, i) => {
+            const orderRoutes = stage.closest('.productdrag').querySelector('.orderRoutes').innerText;
+            const orderRoute = orderRoutes.split(' - ')[0];
+            const orderProduct = orderRoutes.split(' - ')[1];
+            cjstages.push({
+              route: orderRoute,
+              product: orderProduct,
+              stage: stage.innerText,
+              order: i + 1
+            });
           });
-        })
-        fetch('/customer_jr_order/{{ client.id }}', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-          },
-          body: JSON.stringify({
-            'cjstages': cjstages
-          })
+
+            fetch('/customer_jr_order/{{ client.id }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+              },
+              body: JSON.stringify({ 'cjstages': cjstages })
+            });
+
+            sentStage = true; // Mark as sent for this stage
+          }
         });
       });
-    });
 
-    scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.addEventListener('dragover', e => {
-      e.preventDefault();
-      const afterElement = getDragAfterElementStage(scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}, e.clientX);
-      const draggable = document.querySelector('.dragging');
-      if (Array.from(sdraggables{{ forloop.parentloop.counter }}{{ forloop.counter }}).includes(draggable)) {
-        if (afterElement == null) {
-          scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.appendChild(draggable);
-        } else {
-          scontainer{{ forloop.parentloop.counter }}{{ forloop.counter }}.insertBefore(draggable, afterElement);
+      scontainer{{ forloop.counter }}.addEventListener('dragover', e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElementStage(scontainer{{ forloop.counter }}, e.clientX);
+        const draggable = document.querySelector('.dragging');
+        if (draggable && Array.from(sdraggables{{ forloop.counter }}).includes(draggable)) {
+          if (afterElement == null) {
+            scontainer{{ forloop.counter }}.appendChild(draggable);
+          } else {
+            scontainer{{ forloop.counter }}.insertBefore(draggable, afterElement);
+          }
         }
+      });
+
+      function getDragAfterElementStage(container, x) {
+        const draggableElements = [...container.querySelectorAll('.stagedrag:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = x - box.left - box.width / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
+          }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
       }
-    });
-
-    function getDragAfterElementStage(container, x) {
-      const draggableElements = [...container.querySelectorAll('.stagedrag:not(.dragging)')];
-      return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = x - box.left - box.width / 2;
-        if (offset < 0 && offset > closest.offset) {
-          return { offset: offset, element: child };
-        } else {
-          return closest;
-        }
-      }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
-    {% endfor %}
-
   {% endfor %}
 {% endif %}
+
+
 
 
   $(document).ready(function() {
@@ -2131,6 +2185,7 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     return confirm(date);
   }
 </script>
+
 
 
 {% endblock %}

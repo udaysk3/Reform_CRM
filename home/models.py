@@ -267,6 +267,7 @@ class Questions(models.Model):
 
 class Rule_Regulation(models.Model):
     rules_regulation = models.JSONField(blank=True, null=True)
+    is_client = models.BooleanField(default=False)
     route = models.ForeignKey(
         Route,
         related_name="rules_regulation",
@@ -291,6 +292,44 @@ class Rule_Regulation(models.Model):
     question = models.ForeignKey(
         Questions,
         related_name="rules_regulation",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+
+class Answer(models.Model):
+    answer = models.JSONField(blank=True, null=True)
+    route = models.ForeignKey(
+        Route,
+        related_name="answer",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    product = models.ForeignKey(
+        Product,
+        related_name="answer",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    stage = models.ForeignKey(
+        Stage,
+        related_name="answer",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    question = models.ForeignKey(
+        Questions,
+        related_name="answer",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    customer = models.ForeignKey(
+        Customers,
+        related_name="answer",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
