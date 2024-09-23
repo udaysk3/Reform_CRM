@@ -768,13 +768,15 @@ def client_detail(request, client_id, s_client_id=None):
     
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
     
-    display_stages={}
+    display_stages = {}
     for stage in stages:
-        
-        if display_stages.get(f'{stage['route'].name} - {stage['product'].name}'):
-            display_stages[f'{stage['route'].name} - {stage['product'].name}'].append([stage['stage'],stage['questions']])
+        key = f"{stage['route'].name} - {stage['product'].name}"
+    
+        if key in display_stages:
+            display_stages[key].append([stage['stage'], stage['questions']])
         else:
-            display_stages[f'{stage['route'].name} - {stage['product'].name}'] = [[stage['stage'],stage['questions']]]
+            display_stages[key] = [[stage['stage'], stage['questions']]]
+
 
     child_clients = Clients.objects.all().filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
