@@ -493,7 +493,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
                             type = question.type.split(',')
                             if len(type) > 1:
                                 rule_values = rule.rules_regulation[0].split(',')
-                                correct_ans = all(elem in rule_values for elem in ans.answer[0].split(','))
+                                correct_ans = False
+                                for el in ans.answer[0].split(','):
+                                    if el in rule_values:
+                                        correct_ans = True
+                                        break
                             if type[0] in ['text', 'email', 'password', 'phone']:
                                 correct_ans = ans.answer == rule.rules_regulation
                             if type[0] == 'checkbox':
