@@ -447,9 +447,9 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 
                     if question not in added_ans:
                         if ans.exists():
-                            questions_with_ans.append((question, ans[0], route, product, cjstage.stage))
+                            questions_with_ans.append([question, ans[0], route, product, cjstage.stage])
                         else:
-                            questions_with_ans.append((question, None, route, product, cjstage.stage))
+                            questions_with_ans.append([question, None, route, product, cjstage.stage])
                             all_answered = False
                         added_ans.add(question)
 
@@ -478,9 +478,72 @@ def customer_detail(request, customer_id, s_customer_id=None):
             display_stages[key] = [[stage['stage'], stage['questions'], stage['all_answered']]]
 
 
-    
+    for route_product, stages in display_stages.items():
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            route = route_product.split(' - ')[0]
+            product = route_product.split(' - ')[1]
+            correct_stage = True
+            for question, ans, route, product, stage in question_ans:
+                correct_ans = True
+                if ans:
+                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
+                    if rule_requirements:
+                        if rule_requirements[0].rules_regulation:
+                            rule = rule_requirements[0]
+                            type = question.type.split(',')
+                            if len(type) > 1:
+                                rule_values = rule.rules_regulation[0].split(',')
+                                correct_ans = all(elem in rule_values for elem in ans.answer[0].split(','))
+                            if type[0] in ['text', 'email', 'password', 'phone']:
+                                correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] == 'checkbox':
+                                correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] in ['date', 'month', 'time', 'number']:
+                                if type[0] == 'date' or type[0] == 'month':
+                                    answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
+                                    rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
+                                    if 'Less Than' in rule.rules_regulation[0]:
+                                        correct_ans = answer_date < rule_date
+                                    elif 'Greater Than' in rule.rules_regulation[0]:
+                                        correct_ans = answer_date > rule_date
+                                    elif 'Equal' in rule.rules_regulation[0]:
+                                        correct_ans = answer_date == rule_date
 
+                                elif type[0] == 'time':
+                                    answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
+                                    rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
+                                    if 'Less Than' in rule.rules_regulation[0]:
+                                        correct_ans = answer_time < rule_time
+                                    elif 'Greater Than' in rule.rules_regulation[0]:
+                                        correct_ans = answer_time > rule_time
+                                    elif 'Equal' in rule.rules_regulation[0]:
+                                        correct_ans = answer_time == rule_time
+
+                                elif type[0] == 'number':
+                                    answer_number = int(ans.answer[0])
+                                    rule_number = int(rule.rules_regulation[0].split(',')[0])
+
+                                    if 'Less Than' in rule.rules_regulation[0]:
+                                        correct_ans = answer_number < rule_number
+                                    elif 'Greater Than' in rule.rules_regulation[0]:
+                                        correct_ans = answer_number > rule_number
+                                    elif 'Equal' in rule.rules_regulation[0]:
+                                        correct_ans = answer_number == rule_number
+                # Accumulate the result
+                correct_stage = correct_stage and correct_ans
+
+            # Update all_ans based on correct_stage
+            stages[i] = (stage, question_ans, correct_stage)
+            
     
+    for route_product, stages in display_stages.items():
+        prev_all_correct = True
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            print(all_ans, prev_all_correct)
+            all_ans, prev_all_correct = prev_all_correct, all_ans
+            stages[i] = (stage, question_ans, all_ans)
+
+
     return render(
         request,
         "home/customer-detail.html",
@@ -3904,5 +3967,4 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
                     answer=dynamicAns,
                 )
 
-    messages.success(request, "Rule added successfully!")
-    return redirect("/customer-detail/"+ str(customer_id))
+    return HttpResponse(200)

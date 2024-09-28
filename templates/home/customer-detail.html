@@ -1239,8 +1239,7 @@ table {
             <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
               {% for stage, question_answer, can_ans in stages %}
                 <button class="btn btn-primary mx-2 stagedrag orderStages" 
-                {% if can_ans and question_answer %}
-                {% else %}
+                {% if not can_ans %}
                 disabled
                 {% endif %}
 
@@ -1277,7 +1276,6 @@ table {
                                             {{option}}
                                           </label>
                                         </div>
-                                      
                                       {% endfor %}
                                   </div>
                                 {% endwith %}
@@ -1291,26 +1289,11 @@ table {
                                       <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
                                     </div>
                                   {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
-                                  {% with options=b.0|split:',' %}
-                                  <div class="col-6 rules mt-3 ms-3">
-                                    <div class="form-check">
-                                      <input {% if options.1 == 'Less Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Less" class="form-check-input " placeholder="Enter The Value" value="Less Than"> <label for="{{ forloop.counter }}Less">Less Than</label>
-                                    </div>
-                                    <div class="form-check">
-                                      <input {% if options.1 == 'Greater Than' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Greater" class="form-check-input " placeholder="Enter The Value" value="Greater Than"> <label for="{{ forloop.counter }}Greater">Greater Than</label>
-                                    </div>
-                                    <div class="form-check">
-                                      <input {% if options.1 == 'Equal' %} checked {% endif %} name="{{ forloop.counter }}checkboxinput" type="radio" id="{{ forloop.counter }}Equal" class="form-check-input " placeholder="Enter The Value" value="Equal"> <label for="{{ forloop.counter }}Equal">Equal</label>
-                                    </div>
-                                    <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
-                                    <input name="dynamicRule" type="hidden">
-                                  </div>
-                                  {% endwith %}
+                                  <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
                                   {% endif %}
                                 {% endif %}
                             {% endwith %}
                             {% endwith %}
-                            <button class="btn btn-primary mt-2 ms-3">Submit</button>
                             </form>
                             </div>
                           </div>
@@ -1320,6 +1303,9 @@ table {
 
                           <h4> Questions are not allocated </h4>
                         {% endif %}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onClick="onFormsSubmit(event);">Submit</button>
                       </div>
                     </div>
                   </div>
@@ -1343,47 +1329,73 @@ table {
 
 <script>
 
-  const forms = document.querySelectorAll(".ans_form");
-    forms.forEach((form)=>{
-    form.addEventListener("submit", (e) => {
-
-      const cb = form.parentElement.querySelector('.cb');
-    const checkBoxs = form.parentElement.querySelectorAll('.check-box');
-
-    checkBoxs.forEach((checkBox)=>{
-      if (checkBox.checked){
-        if (cb.value == ''){
-
-          cb.value += checkBox.value;
-        } else{
-          cb.value += ',' + checkBox.value;
-
-        }
-      }
-    })
-
+function onFormsSubmit(e) {
+    e.preventDefault();
     
-      const checkboxinputs = document.querySelectorAll(".checkboxinput");
-    if (checkboxinputs){
-      checkboxinputs.forEach((checkboxinput) => {
-        const checkboxdiv = checkboxinput.parentElement;
-        const radios = checkboxdiv.querySelectorAll("input[type='radio']");
-        radios.forEach((radio) => {
-          if (radio.checked) {
-            checkboxdiv.querySelector("input[name='dynamicRule']").value = `${checkboxinput.value},${radio.value}`;
-          }
-        });
-      });
+    const modalContent = e.target.closest('.modal-content');
+    if (!modalContent) {
+        console.error('No modal content found');
+        return;
     }
-      const options = document.querySelectorAll('.option');
-    options.forEach(option => {
-        option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
-    });
 
-    
+    const forms = modalContent.querySelectorAll('.ans_form');
+    forms.forEach((form) => {
 
+        const cb = form.querySelector('.cb');
+        const checkBoxs = form.querySelectorAll('.check-box');
+
+        checkBoxs.forEach((checkBox) => {
+            if (checkBox.checked) {
+                if (cb.value === '') {
+                    cb.value += checkBox.value;
+                } else {
+                    cb.value += ',' + checkBox.value;
+                }
+            }
+        });
+
+        const checkboxinputs = form.querySelectorAll(".checkboxinput"); // Scope within form
+        if (checkboxinputs) {
+            checkboxinputs.forEach((checkboxinput) => {
+                const checkboxdiv = checkboxinput.closest('.form-check');
+                const radios = checkboxdiv.querySelectorAll("input[type='radio']");
+                radios.forEach((radio) => {
+                    if (radio.checked) {
+                        checkboxdiv.querySelector("input[name='dynamicRule']").value = `${checkboxinput.value},${radio.value}`;
+                    }
+                });
+            });
+        }
+
+        const options = form.querySelectorAll('.option');
+        options.forEach(option => {
+            option.parentElement.parentElement.children[0].value += ',' + option.parentElement.children[0].value;
+        });
+
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok.');
+        }).catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
     });
-    });
+    window.location.reload();
+}
+
+    //const forms = document.querySelectorAll(".ans_form");
+    //forms.forEach((form)=>{
+    //form.addEventListener("submit", (e) => {
+//
+    //});
+    //});
 
   const stage_submit_form = document.querySelector('.stage_submit_form')
   stage_submit_form.addEventListener('submit', () => {

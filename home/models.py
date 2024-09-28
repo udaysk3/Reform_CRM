@@ -264,6 +264,8 @@ class Questions(models.Model):
     type = models.CharField(max_length=255, blank=True, null=True)
     answer_frequency = models.IntegerField(blank=True, null=True)
     parameter = models.CharField(max_length=255, blank=True, null=True)
+    def __str__(self):
+        return f"{self.question}"
 
 class Rule_Regulation(models.Model):
     rules_regulation = models.JSONField(blank=True, null=True)
@@ -296,6 +298,8 @@ class Rule_Regulation(models.Model):
         blank=True,
         null=True,
     )
+    def __str__(self):
+        return f"{self.route} {self.product} {self.stage} {self.question}"
 
 class Answer(models.Model):
     answer = models.JSONField(blank=True, null=True)
@@ -334,6 +338,9 @@ class Answer(models.Model):
         blank=True,
         null=True,
     )
+    def __str__(self):
+        return f"{self.route} {self.product} {self.stage} {self.question} {self.customer}"
+
 
 class CJStage(models.Model):
     route = models.ForeignKey(
