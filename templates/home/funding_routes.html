@@ -211,7 +211,7 @@
           <div>
             {% if request.GET.page == 'edit' %} 
             {% else %}
-            <a class="btn btn-primary fs-6" href="/add_new_funding_route">
+            <a class="reform_btn fs-6" href="/add_new_funding_route">
               <i class="bi bi-plus-lg"></i> Add Route
             </a>
             {% endif %}
@@ -296,7 +296,7 @@
               >
             </div>
             {% endfor %}
-            <button type="submit" id="submitBtn" class="btn btn-primary">Update Route</button>
+            <button type="submit" id="submitBtn" class="reform_btn">Update Route</button>
           </form>
 
           {% else %}
@@ -378,7 +378,7 @@
                       <path d="M13.5 6.5l4 4" />
                     </svg>
                   </a>
-                  <a class="btn btn-primary" href="/archive_global_funding_route/{{route.id}}">
+                  <a class="reform_btn" href="/archive_global_funding_route/{{route.id}}">
                     {% if route.global_archive %}
                       Unarchive
                     {% else %}
@@ -480,7 +480,7 @@
                       <path d="M13.5 6.5l4 4" />
                     </svg>
                   </a>
-                  <a class="btn btn-primary" href="/archive_global_funding_route/{{route.id}}">
+                  <a class="reform_btn" href="/archive_global_funding_route/{{route.id}}">
                     {% if route.global_archive %}
                       Unarchive
                     {% else %}

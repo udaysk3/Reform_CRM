@@ -1,6 +1,9 @@
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
 
 <style>
+
+
+
   #assigned_to, #change_client, #change_campaign {
     cursor: pointer;
   }
@@ -270,8 +273,8 @@ table {
                           
                         </div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button class="btn btn-primary" >Submit</button>
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                          <button class="reform_btn" >Submit</button>
                         </div>
                       </form>
           </div>
@@ -325,8 +328,8 @@ table {
                 </select>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="reform_btn">Submit</button>
               </div>
             </form>
           </div>
@@ -366,9 +369,9 @@ table {
             <div class="card pb-3">
               <div class="card-body py-0 contacts-container" style="overflow:hidden; height: 185px;">
                 <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
-                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="btn {% if customer.primary_customer %} btn-primary {% else %} btn-outline-secondary {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {% endif %} </a>
+                  <a href="{% url 'app:customer_detail' customer.id customer.id %}" type="button" class="{% if customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {% endif %} </a>
                   {% for c_customer in child_customers %}
-                  <a href="{% url 'app:customer_detail' customer.id c_customer.id %}" type="button" class="btn  {% if c_customer.primary_customer %} btn-primary {% else %} btn-outline-secondary {% endif %}" style="margin-left:-3px">
+                  <a href="{% url 'app:customer_detail' customer.id c_customer.id %}" type="button" class="{% if c_customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}" style="margin-left:-3px">
                     {% if c_customer == show_customer %}{{ c_customer.first_name }} {% else %} {{ c_customer.first_name|truncatechars:5 }} {% endif %}
                   </a>
                   {% endfor %}
@@ -473,7 +476,7 @@ table {
                       </div>
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
                       </div>
                     </div>
                   </div>
@@ -535,7 +538,7 @@ table {
 
                   <button
                     type="button"
-                    class="btn btn-outline-primary my-3"
+                    class="secondary_reform_btn my-3"
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdropnote"
                   >
@@ -597,12 +600,12 @@ table {
                         <div class="modal-footer">
                           <button
                             type="button"
-                            class="btn btn-secondary"
+                            class="secondary_reform_btn"
                             data-bs-dismiss="modal"
                           >
                             Close
                           </button>
-                          <button class="btn btn-primary" type="submit">
+                          <button class="reform_btn" type="submit">
                             Submit
                           </button>
                         </div>
@@ -621,7 +624,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-outline-primary" type="submit">NA</button>
+                    <button class="secondary_reform_btn" type="submit">NA</button>
                   </form>
                 </div>
 
@@ -636,7 +639,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-outline-primary" type="submit">LM</button>
+                    <button class="secondary_reform_btn" type="submit">LM</button>
                   </form>
                 </div>
 
@@ -658,7 +661,7 @@ table {
 
                   <button
                     type="button"
-                    class="btn btn-outline-primary my-3"
+                    class="secondary_reform_btn my-3"
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdrop1"
                   >
@@ -719,22 +722,22 @@ table {
                           </div>
                           <div class="row">
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 minutes" type="button">Minutes</button>
+                            <button class="reform_btn my-3 minutes" type="button">Minutes</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 hour" type="button">Hour</button>
+                            <button class="reform_btn my-3 hour" type="button">Hour</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 day" type="button">Day</button>
+                            <button class="reform_btn my-3 day" type="button">Day</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 week" type="button">Week</button>
+                            <button class="reform_btn my-3 week" type="button">Week</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 month" type="button">Month</button>
+                            <button class="reform_btn my-3 month" type="button">Month</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 year" type="button">Year</button>
+                            <button class="reform_btn my-3 year" type="button">Year</button>
                           </div>  
                           </div>
                           <div class="form-floating">
@@ -746,12 +749,12 @@ table {
                         <div class="modal-footer">
                           <button
                             type="button"
-                            class="btn btn-secondary"
+                            class="secondary_reform_btn"
                             data-bs-dismiss="modal"
                           >
                             Close
                           </button>
-                          <button class="btn btn-primary" type="submit">
+                          <button class="reform_btn" type="submit">
                             Submit
                           </button>
                         </div>
@@ -778,7 +781,7 @@ table {
 
                   <button
                     type="button"
-                    class="btn btn-outline-primary my-3"
+                    class="secondary_reform_btn my-3"
                     data-bs-toggle="modal"
                     data-bs-target="#Email"
                   >
@@ -840,22 +843,22 @@ table {
                           </div>
                           <div class="row">
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 minutes" type="button">Minutes</button>
+                            <button class="reform_btn my-3 minutes" type="button">Minutes</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 hour" style=" margin-left: 40px; width: 85px;" type="button">Hour</button>
+                            <button class="reform_btn my-3 hour" style=" margin-left: 40px; width: 85px;" type="button">Hour</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 day" style=" margin-left: 70px; width: 87px;" type="button">Day</button>
+                            <button class="reform_btn my-3 day" style=" margin-left: 70px; width: 87px;" type="button">Day</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 week" style="width: 85px;" type="button">Week</button>
+                            <button class="reform_btn my-3 week" style="width: 85px;" type="button">Week</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 month" style=" margin-left: 40px; width: 85px;" type="button">Month</button>
+                            <button class="reform_btn my-3 month" style=" margin-left: 40px; width: 85px;" type="button">Month</button>
                             </div>
                             <div class="col-4">
-                            <button class="btn btn-primary my-3 year position-relative" style=" margin-left: 70px; width: 87px;" type="button">Year</button>
+                            <button class="reform_btn my-3 year position-relative" style=" margin-left: 70px; width: 87px;" type="button">Year</button>
                           </div>  
                           </div>
 
@@ -882,12 +885,12 @@ table {
                         <div class="modal-footer">
                           <button
                             type="button"
-                            class="btn btn-secondary"
+                            class="secondary_reform_btn"
                             data-bs-dismiss="modal"
                           >
                             Close
                           </button>
-                          <button class="btn btn-primary" type="submit">
+                          <button class="reform_btn" type="submit">
                             Submit
                           </button>
                         </div>
@@ -908,7 +911,7 @@ table {
                     
                   >
                     {% csrf_token %}
-                    <button class="btn btn-outline-primary" type="button">SMS</button>
+                    <button class="secondary_reform_btn" type="button">SMS</button>
                   </form>
                 </div>
 
@@ -932,7 +935,7 @@ table {
 
                   <button
                     type="button"
-                    class="btn btn-outline-primary my-3"
+                    class="secondary_reform_btn my-3"
                     data-bs-toggle="modal"
                     data-bs-target="#staticBackdrop2"
                   >
@@ -1013,12 +1016,12 @@ table {
                         <div class="modal-footer">
                           <button
                             type="button"
-                            class="btn btn-secondary"
+                            class="secondary_reform_btn"
                             data-bs-dismiss="modal"
                           >
                             Close
                           </button>
-                          <button class="btn btn-primary" onclick="SubmitClose(this);" type="button">
+                          <button class="reform_btn" onclick="SubmitClose(this);" type="button">
                             Submit
                           </button>
                         </div>
@@ -1069,8 +1072,8 @@ table {
         {{ v.8 }}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Understood</button>
+        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="reform_btn">Understood</button>
       </div>
     </div>
   </div>
@@ -1153,53 +1156,15 @@ table {
                   >
                     <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
                       {% for route in routes %}
-                      {% comment %} {% with i=forloop.counter0 %}    
-                          <button  class="btn btn-primary me-2" style="width: fit-content; display: flex;"
-                          {% if route not in council_routes or  council_routes == None %}
-                          disabled
-                          {% else %}
-                            {% if true_routes and true_routes|index:i %}
-                            {% else %}
-                            disabled
-                            {% endif %}
-                          {% endif %}
-                           >
-                           {% if route not in council_routes or  council_routes == None %}
-                           <i class="bi bi-x-square me-1"></i>
-                           {% else %}
-                           {% if true_routes and true_routes|index:i %}
-                            <i class="bi-check-square me-1"></i>
-                            {% else %}
-                            <i class="bi bi-x-square me-1"></i>
-                            {% endif %}
-                          {% endif %}
-                          
-                            {{ route.name }}  </button>
-                      {% endwith %} {% endcomment %}
-                      <h6 class="btn btn-primary">{{ route.name }}</h6>
+                        <h6 class="reform_btn me-3">{{ route.name }}</h6>
                       {% endfor %}
 
                 </div>
                   </div>
                 </div>
 
-                
-
-
-
-                
-
-
-
-               
-                                
-
-                
                 </div>
                 <div class="col">
-
-
-                    
                 <h6 class="">Available Products</h6>
                 
                 <div class="card p-0 m-0">
@@ -1208,9 +1173,8 @@ table {
                   >
                     <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
                     {% for product in products %}
-                      
-                      <h6 class="btn btn-primary">{{ product.name }}</h6>
-                  {% endfor %}
+                      <h6 class="reform_btn me-3">{{ product.name }}</h6>
+                    {% endfor %}
 
                       
                       
@@ -1238,7 +1202,9 @@ table {
             </h6>
             <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
               {% for stage, question_answer, can_ans in stages %}
-                <button class="btn btn-primary mx-2 stagedrag orderStages" 
+                <button class="reform_btn mx-2 stagedrag orderStages  {% if not can_ans %}
+                disabled
+                {% endif %}" 
                 {% if not can_ans %}
                 disabled
                 {% endif %}
@@ -1305,7 +1271,7 @@ table {
                         {% endif %}
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onClick="onFormsSubmit(event);">Submit</button>
+                        <button type="button" class="reform_btn" onClick="onFormsSubmit(event);">Submit</button>
                       </div>
                     </div>
                   </div>

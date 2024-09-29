@@ -22,7 +22,7 @@
              <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">User Management</h5></a>
             </div>
             <div>
-              <a href="?page=add" class="btn btn-primary">Add User</a>
+              <a href="?page=add" class="reform_btn">Add User</a>
             </div>
           </div>
           <div style="overflow-x: auto;">
@@ -93,7 +93,7 @@
                             <input type="checkbox" class="form-check-input" id="hr" name="hr">
                             <label class="form-check-label" for="hr">HR</label>
                           </div>
-                          <button onclick="loadBtn()" type="submit" class="btn btn-primary">Add User</button>
+                          <button onclick="loadBtn()" type="submit" class="reform_btn">Add User</button>
                         </form>
                         <!-- End User Addition Form -->
                         {% elif request.GET.page == 'edit' %}
@@ -154,7 +154,7 @@
                               <input type="checkbox" {% if user.hr %}checked{% endif %} class="form-check-input" id="editHr" name="hr">
                               <label class="form-check-label" for="editHr">HR</label>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update User</button>
+                            <button type="submit" class="reform_btn">Update User</button>
                           </form>
                       <!-- End User Edit Form -->
                       {% else %}
@@ -339,7 +339,7 @@
              <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Client Management</h5></a>
             </div>
             <div>
-              <a href="?page=add_client" class="btn btn-primary">Add Client</a>
+              <a href="?page=add_client" class="reform_btn">Add Client</a>
             </div>
           </div>
           <div>
@@ -366,7 +366,7 @@
                             <label for="tel" class="form-label">Telephone</label>
                             <input type="text" class="form-control" id="tel" name="telephone" required>
                           </div>
-                          <button type="submit" class="btn btn-primary">Add Client</button>
+                          <button type="submit" class="reform_btn">Add Client</button>
                         </form>
                         <!-- End User Addition Form -->
                         {% elif request.GET.page == 'edit_client' %}
@@ -399,7 +399,7 @@
                                   </li>
                                 {% endfor %}
                               </ul>
-                            <button type="submit" class="btn btn-primary">Update Client</button>
+                            <button type="submit" class="reform_btn">Update Client</button>
                           </form>
                       <!-- End User Edit Form -->
                       {% else %}
@@ -458,7 +458,7 @@
                                     <label for="campaignName" class="form-label">Campaign Name</label>
                                     <input type="text" class="form-control" id="campaignName" name="name" required>
                                   </div>
-                                  <button type="submit" class="btn btn-primary">Add Campaign</button>
+                                  <button type="submit" class="reform_btn">Add Campaign</button>
                                 </form>
                               </div>
                             </div>
@@ -496,7 +496,7 @@
              <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Email Management</h5></a>
             </div>
             <div>
-              <a href="?page=add_template" class="btn btn-primary">Add Template</a>
+              <a href="?page=add_template" class="reform_btn">Add Template</a>
             </div>
           </div>
           <div>
@@ -519,7 +519,7 @@
                             <label for="body" class="form-label">Body</label>
                             <textarea class="form-control" id="body" rows="3" name="body" required></textarea>
                           </div>
-                          <button type="submit" class="btn btn-primary">Add Template</button>
+                          <button type="submit" class="reform_btn">Add Template</button>
                         </form>
                         <!-- End User Addition Form -->
                         {% elif request.GET.page == 'edit_template' %}
@@ -539,7 +539,7 @@
                               <label for="body" class="form-label">Body</label>
                               <textarea class="form-control" id="body" rows="3" name="body" required>{{email.body}}</textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Template</button>
+                            <button type="submit" class="reform_btn">Update Template</button>
                           </form>
                       <!-- End User Edit Form -->
                       {% else %}
@@ -609,7 +609,7 @@
              <a href="{% url "app:admin" %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Reason Management</h5></a>
             </div>
             <div>
-              <a href="?page=add_reason" class="btn btn-primary">Add Reason</a>
+              <a href="?page=add_reason" class="reform_btn">Add Reason</a>
             </div>
           </div>
           <div>
@@ -628,7 +628,7 @@
                             <label for="reason" class="form-label">Reason</label>
                             <textarea class="form-control" id="reason" rows="3" name="reason" required></textarea>
                           </div>
-                          <button type="submit" class="btn btn-primary">Add Reason</button>
+                          <button type="submit" class="reform_btn">Add Reason</button>
                         </form>
                         <!-- End User Addition Form -->
                         {% elif request.GET.page == 'edit_reason' %}
@@ -644,7 +644,7 @@
                               <label for="reason" class="form-label">Reason</label>
                               <textarea class="form-control" id="reason" rows="3" name="reason" required>{{reason.reason}}</textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Reason</button>
+                            <button type="submit" class="reform_btn">Update Reason</button>
                           </form>
                       <!-- End User Edit Form -->
                       {% else %}
@@ -710,7 +710,7 @@
              <a href="{% url 'app:admin' %}"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Signature Management</h5></a>
             </div>
             <div>
-              <a href="?page=add_signature" class="btn btn-primary">Add Signature</a>
+              <a href="?page=add_signature" class="reform_btn">Add Signature</a>
             </div>
           </div>
           <div>
@@ -729,7 +729,7 @@
                               <label for="formFile" class="form-label">Signature Image</label>
                               <input type="file" id="formFile" name="signature_img" class="form-control" >
                             </div>
-                          <button type="submit" class="btn btn-primary">Add Signature</button>
+                          <button type="submit" class="reform_btn">Add Signature</button>
                         </form>
                         <!-- End User Addition Form -->
                         {% elif request.GET.page == 'edit_signature' %}
@@ -745,7 +745,7 @@
                               <label for="formFile" class="form-label">Signature Image</label>
                               <input type="file" id="formFile" name="signature_img" class="form-control" >
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Signature</button>
+                            <button type="submit" class="reform_btn">Update Signature</button>
                           </form>
                       <!-- End User Edit Form -->
                       {% else %}

@@ -34,6 +34,39 @@
             width: 100%;
             bottom: 0;
         }
+        
+  .disabled{
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .secondary_reform_btn{
+    width: fit-content;
+  padding: 10px 15px;
+  border: none;
+  background-color: #7ad1a1;
+  color: black;
+  clip-path: polygon(85% 1%, 100% 40%, 100% 100%, 0 99%, 0 0);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+  .reform_btn{
+    width: fit-content;
+  padding: 10px 15px;
+  border: none;
+  background-color: #024753;
+  color: white;
+  clip-path: polygon(85% 1%, 100% 40%, 100% 100%, 0 99%, 0 0);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
     </style>
 </head>
 <body>
@@ -90,7 +123,7 @@
                   </div>
                   <a class="text-primary fw-bold" href="./index.html">Forgot Password ?</a>
                 </div> -->
-                <button class="btn btn-primary" type="submit">Sign In</button>
+                <button class="reform_btn" type="submit">Sign In</button>
                 <div class="d-flex align-items-center justify-content-center">
                   {% comment %} <p class="fs-4 mb-0 fw-bold">New to Modernize?</p>
                   <a class="text-primary fw-bold ms-2" href="./authentication-register.html">Create an account</a> {% endcomment %}

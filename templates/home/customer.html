@@ -44,11 +44,11 @@
 
             {% if request.GET.page == None %}
             <div>
-              <a href="?page=add_customer" class="btn btn-primary">Add Customer</a>
+              <a href="?page=add_customer" class="reform_btn">Add Customer</a>
             </div>
             <div>
 
-                <button type="button" class="btn btn-primary position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+                <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
                   <i class="bi bi-arrow-bar-right"></i> Assign to Agent
                 </button>
   
@@ -83,8 +83,8 @@
                            </div>
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="reform_btn">Submit</button>
                       </div>
                     </form>
                     </div>
@@ -96,17 +96,17 @@
             
 
             <div class="">
-              <a href="{% url 'app:import_customers' %}" class="btn btn-primary">Import Customers</a>
+              <a href="{% url 'app:import_customers' %}" class="reform_btn">Import Customers</a>
             </div>
             {% elif request.GET.page == 'edit_customer' %}
 
             <div>
-              <button class="btn btn-primary edit-user-btn" data-user-id="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </button>
+              <button class="reform_btn edit-user-btn" data-user-id="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </button>
             </div>
 
             {% for c_customer in customers %}
               <div>
-                <button class="btn btn-primary edit-user-btn" data-user-id="{{ c_customer.id }}"> {{ c_customer.first_name }} {{ c_customer.last_name }} </button>
+                <button class="reform_btn edit-user-btn" data-user-id="{{ c_customer.id }}"> {{ c_customer.first_name }} {{ c_customer.last_name }} </button>
               </div>
             {% endfor %}
 
@@ -114,7 +114,7 @@
             
          
   <div>
-    <button data-bs-toggle="modal" data-bs-target="#add_child_customer" class="btn btn-primary">Add Customer</button>
+    <button data-bs-toggle="modal" data-bs-target="#add_child_customer" class="reform_btn">Add Customer</button>
   </div> 
 
 <!-- Modal -->
@@ -146,8 +146,8 @@
 </div>
 </div>
 <div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-<button type="submit" class="btn btn-primary">Submit</button>
+<button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+<button type="submit" class="reform_btn">Submit</button>
 </div>
 </div>
 </div>
@@ -194,7 +194,7 @@
                     <input type="text" value="{{ request.session.postcode.0 }}" class="form-control" id="postcode" name="postcode"  required>
                   </div>
                   <div class="col-6 d-flex align-items-end">
-                    <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                    <button class="reform_btn find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
                   </div>
                 </div>
 
@@ -220,7 +220,7 @@
             </div>
 
                 <!-- Button trigger modal -->
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                     Add Customer
                   </button>
 
@@ -246,8 +246,8 @@
                           
                         </div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="reform_btn" onclick="loadBtn(this)">Submit</button>
                         </div>
                       </div>
                     </div>
@@ -293,7 +293,7 @@
                   <input type="text" class="form-control" id="postcode" name="postcode" value="{% if edit_customer.postcode != 'None' %}{{ edit_customer.postcode }}{% endif %}" required>
                   </div>
                   <div class="col-6 d-flex align-items-end">
-                    <button class="btn btn-primary editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                    <button class="reform_btn editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
                   </div>
               </div>
                   <div class="mb-3 input-row">
@@ -317,7 +317,7 @@
                   <div id="country_from" class="places_box">
                   </div>
             </div>
-                  <button  class="btn btn-primary">Update Customer</button>
+                  <button  class="reform_btn">Update Customer</button>
               </form>
               {% else %}
                 <p>Customer not found.</p>

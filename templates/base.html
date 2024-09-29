@@ -15,6 +15,41 @@
   <link rel="stylesheet" href="https://rawgit.com/enyo/dropzone/master/dist/dropzone.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{% static 'css/layout_style.css' %}">
+  <style>
+    
+  .disabled{
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .secondary_reform_btn{
+    width: fit-content;
+  padding: 10px 15px;
+  border: none;
+  background-color: #7ad1a1;
+  color: black;
+  clip-path: polygon(85% 1%, 100% 40%, 100% 100%, 0 99%, 0 0);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+  .reform_btn{
+    width: fit-content;
+  padding: 10px 15px;
+  border: none;
+  background-color: #024753;
+  color: white;
+  clip-path: polygon(85% 1%, 100% 40%, 100% 100%, 0 99%, 0 0);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  </style>
   {% block css %}
   {% endblock %}
 </head>

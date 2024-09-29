@@ -3,7 +3,7 @@
 
 <div class="row container-fluid">
   <div class="cnav-item fs-6 col-1">
-    <a class="btn btn-primary fs-6 " href="/council-detail/{{prev.id}}"><svg xmlns="http://www.w3.org/2000/svg"
+    <a class="reform_btn fs-6 " href="/council-detail/{{prev.id}}"><svg xmlns="http://www.w3.org/2000/svg"
         width="20" height="20" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
         <path fill-rule="evenodd"
           d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
@@ -14,7 +14,7 @@
     <span class="col"> <b>Local Authority</b> - </span> {{ council.name }}
   </div>
   <div class="cnav-item fs-6 col-1">
-    <a class="btn btn-primary fs-6" href="/council-detail/{{next.id}}"><svg xmlns="http://www.w3.org/2000/svg"
+    <a class="reform_btn fs-6" href="/council-detail/{{next.id}}"><svg xmlns="http://www.w3.org/2000/svg"
         width="20" height="20" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
         <path fill-rule="evenodd"
           d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
@@ -73,7 +73,7 @@
             <div class="col-sm-6">
               <div class="card m-0">
                 <div class="card-body">
-                  <button type="button" class="btn btn-primary position-relative" style="left:330px" data-bs-toggle="modal" data-bs-target="#fundingManagement">
+                  <button type="button" class="reform_btn position-relative" style="left:330px" data-bs-toggle="modal" data-bs-target="#fundingManagement">
                       Add Funding Route
                     </button>
                     <div class="modal fade" id="fundingManagement" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -95,8 +95,8 @@
                             </select>
                           </div>
                           <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="reform_btn">Submit</button>
                           </div>
                           </form>
                         </div>
@@ -107,7 +107,7 @@
                             <h3>Unarchive</h3>
                             {% if routes %}
                                 {% for route in routes %}
-                                        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unarchiveRoute{{ route.id }}">
+                                        <button class="reform_btn d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#unarchiveRoute{{ route.id }}">
                                             {{ route.name }} 
                                         </button>
                                         <div class="modal fade" id="unarchiveRoute{{ route.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -128,9 +128,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
                                                         <form action="{% url 'app:region_archive' council.id route.id %}">
-                                                            <button class="btn btn-primary" {% if route.global_archive %} disabled {% endif %}>Archive</button>
+                                                            <button class="reform_btn" {% if route.global_archive %} disabled {% endif %}>Archive</button>
                                                         </form>
                                                     </div>
                                                 </div>
@@ -144,7 +144,7 @@
                             <h3>Archive</h3>
                             {% if unroutes %}
                                 {% for route in unroutes %}
-                                        <button class="btn btn-primary d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#archiveRoute{{ route.id }}">
+                                        <button class="reform_btn d-block mb-3" style="width: fit-content;" data-bs-toggle="modal" data-bs-target="#archiveRoute{{ route.id }}">
                                             {{ route.name }}
                                         </button>
                                         <div class="modal fade" id="archiveRoute{{ route.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -165,9 +165,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
                                                         <form action="{% url 'app:region_archive' council.id route.id %}">
-                                                            <button class="btn btn-primary" {% if route.global_archive %} disabled {% endif %}>UnArchive</button>
+                                                            <button class="reform_btn" {% if route.global_archive %} disabled {% endif %}>UnArchive</button>
                                                         </form>
                                                     </div>
                                                 </div>

@@ -96,7 +96,7 @@
             </div>
 
                 <!-- Button trigger modal -->
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                     Add Customer
                   </button>
 
@@ -119,8 +119,8 @@
                         </div>
                         </div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="reform_btn" onclick="loadBtn(this)">Submit</button>
                         </div>
                       </div>
                     </div>
@@ -177,7 +177,7 @@
                 <label for="country" class="form-label">Country</label>
                 <input type="text" class="form-control" id="country" name="country" value="{{ customer.country }}"">
             </div>
-                  <button type="submit" class="btn btn-primary">Update Customer</button>
+                  <button type="submit" class="reform_btn">Update Customer</button>
               </form>
               {% else %}
                 <p>Customer not found.</p>

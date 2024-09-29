@@ -44,11 +44,11 @@
 
             {% if request.GET.page == None %}
             <div>
-              <a href="?page=add_client" class="btn btn-primary">Add Client</a>
+              <a href="?page=add_client" class="reform_btn">Add Client</a>
             </div>
             
             {% comment %} 
-                <button type="button" class="btn btn-primary position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+                <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
                   <i class="bi bi-arrow-bar-right"></i> Assign to Agent
                 </button>
   
@@ -96,7 +96,7 @@
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="reform_btn">Submit</button>
                       </div>
                     </form>
                     </div>
@@ -109,17 +109,17 @@
             
 
             {% comment %} <div class="">
-              <a href="{% url 'app:import_client' %}" class="btn btn-primary">Import Client</a>
+              <a href="{% url 'app:import_client' %}" class="reform_btn">Import Client</a>
             </div> {% endcomment %}
             {% elif request.GET.page == 'edit_client' %}
 {% comment %} 
             <div>
-              <button class="btn btn-primary edit-user-btn" data-user-id="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </button>
+              <button class="reform_btn edit-user-btn" data-user-id="{{ customer.id }}"> {{ customer.first_name }} {{ customer.last_name }} </button>
             </div>
 
             {% for c_customer in customers %}
               <div>
-                <button class="btn btn-primary edit-user-btn" data-user-id="{{ c_customer.id }}"> {{ c_customer.first_name }} {{ c_customer.last_name }} </button>
+                <button class="reform_btn edit-user-btn" data-user-id="{{ c_customer.id }}"> {{ c_customer.first_name }} {{ c_customer.last_name }} </button>
               </div>
             {% endfor %} {% endcomment %}
 
@@ -127,7 +127,7 @@
             
          
   {% comment %} <div>
-    <button data-bs-toggle="modal" data-bs-target="#add_child_customer" class="btn btn-primary">Add Customer</button>
+    <button data-bs-toggle="modal" data-bs-target="#add_child_customer" class="reform_btn">Add Customer</button>
   </div> 
 
 <!-- Modal -->
@@ -160,7 +160,7 @@
 </div>
 <div class="modal-footer">
 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-<button type="submit" class="btn btn-primary">Submit</button>
+<button type="submit" class="reform_btn">Submit</button>
 </div>
 </div>
 </div>
@@ -174,8 +174,8 @@
             {% if request.GET.page == 'add_client' %}
               <div class="row">
                 <h3 class="col-2">Add Client</h3>
-                <button class="btn btn-primary bank_details" style="width: fit-content !important;">Bank Details</button>
-                <button class="btn btn-primary add_details" style="width: fit-content !important; display: none;">Add Details</button>
+                <button class="reform_btn bank_details" style="width: fit-content !important;">Bank Details</button>
+                <button class="reform_btn add_details" style="width: fit-content !important; display: none;">Add Details</button>
               </div>
               <form name="addClientForm" id="addClientForm" method="post" action="{% url 'app:add_client' %}" onsubmit="return validateAddForm()">
                 {% csrf_token %}
@@ -220,7 +220,7 @@
                       <input type="text" class="form-control" id="postcode" name="postcode"  required>
                     </div>
                     <div class="col-6 d-flex align-items-end">
-                      <button class="btn btn-primary find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                      <button class="reform_btn find-address" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
                     </div>
                   </div>
 
@@ -265,7 +265,7 @@
                 </div>
                 
 
-            <button type="button" class="btn btn-primary" onclick="loadBtn(this)">Submit</button>
+            <button type="button" class="reform_btn" onclick="loadBtn(this)">Submit</button>
 
             </form>
               
@@ -275,8 +275,8 @@
               {% if client %}
                 <div class="row">
                 <h3 class="col-2">Edit Client</h3>
-                <button class="btn btn-primary bank_details" style="width: fit-content !important;">Bank Details</button>
-                <button class="btn btn-primary add_details" style="width: fit-content !important; display: none;">Bank Details</button>
+                <button class="reform_btn bank_details" style="width: fit-content !important;">Bank Details</button>
+                <button class="reform_btn add_details" style="width: fit-content !important; display: none;">Bank Details</button>
               </div>
                 <form name="editClientForm" id="editClientForm" method="post" action="{% url 'app:edit_client' edit_client.id %}" onsubmit="return validateForm()">
                   {% csrf_token %}
@@ -319,7 +319,7 @@
                   <input type="text" class="form-control" id="postcode" name="postcode" value="{% if edit_client.postcode != 'None' %}{{ edit_client.postcode }}{% endif %}" required>
                   </div>
                   <div class="col-6 d-flex align-items-end">
-                    <button class="btn btn-primary editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
+                    <button class="reform_btn editAddressBtn" style="height: fit-content; width: fit-content;" type="button">Find Address</button>
                   </div>
               </div>
                   <div class="mb-3 input-row">
@@ -362,7 +362,7 @@
                       <input type="text" class="form-control" id="bic_swift" name="bic_swift" value="{% if edit_client.bic_swift != 'None' %}{{ edit_client.bic_swift }}{% endif %}" ></input>
                   </div>
                 </div>
-                  <button type="submit" class="btn btn-primary">Update Client</button>
+                  <button type="submit" class="reform_btn">Update Client</button>
               </form>
               {% else %}
                 <p>Client not found.</p>
