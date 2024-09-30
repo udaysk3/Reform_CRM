@@ -71,13 +71,13 @@
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-      <a class="navbar-brand" href="/">Reform</a>
-      <div class="ml-auto">
-          <a class="btn btn-outline-primary" href="/">Go Back</a>
-      </div>
-  </nav>
+  
+  <nav class="navbar navbar-expand-lg bg-white-700">
+        <div class="container">
+            <a class="navbar-brand " style="color:#024753" href="/">Reform</a>
+            <a class="reform_btn" href="/">Go Back</a>
+        </div>
+    </nav>
 
 <div class="page-wrapper mt-5" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
   data-sidebar-position="fixed" data-header-position="fixed">
@@ -88,7 +88,7 @@
         <div class="col-md-8 col-lg-6 col-xxl-3">
           <div class="card mb-0">
            
-            <div class="card-body">
+            <div class="card-body ">
               {% for message in messages %}
               <div class="container-fluid p-0 m-0">
                 <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
@@ -123,7 +123,7 @@
                   </div>
                   <a class="text-primary fw-bold" href="./index.html">Forgot Password ?</a>
                 </div> -->
-                <button class="reform_btn" type="submit">Sign In</button>
+                <button class="reform_btn" style="position: relative; left:615px;" type="submit">Sign In</button>
                 <div class="d-flex align-items-center justify-content-center">
                   {% comment %} <p class="fs-4 mb-0 fw-bold">New to Modernize?</p>
                   <a class="text-primary fw-bold ms-2" href="./authentication-register.html">Create an account</a> {% endcomment %}

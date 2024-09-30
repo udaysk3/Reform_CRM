@@ -16,7 +16,37 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{% static 'css/layout_style.css' %}">
   <style>
-    
+    .sidebar-link:hover{
+      color: #024753 !important;
+    }
+
+    .active .page-link{
+      color: white !important;
+      background-color: #024753 !important;
+      border-color: #024753 !important;
+    }
+
+
+
+    .sidebar-nav ul .sidebar-item.selected>.sidebar-link, .sidebar-nav ul .sidebar-item.selected>.sidebar-link.active, .sidebar-nav ul .sidebar-item>.sidebar-link.active {
+      background-color: #024753 !important;
+      color: white !important;
+    }
+
+    sidebar-link .active:hover, sidebar-link .active:focus {
+      background-color: #024753 !important;
+      color: white !important;
+    }
+
+    .nav-link{
+      color: #024753 !important;
+    }
+    .text-primary{
+      color: #024753 !important;
+    }
+
+  
+
   .disabled{
     opacity: 0.5;
     pointer-events: none;
@@ -173,13 +203,8 @@
       <header class="app-header">
         <nav class="navbar navbar-expand-lg navbar-light">
           <ul class="navbar-nav">
-            <li class="nav-item d-block d-xl-none">
-              <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
-                <i class="ti ti-menu-2"></i>
-              </a>
-            </li>
             <li class="nav-item">
-              <a class="nav-link nav-icon-hover" href="javascript:void(0)" onclick="window.history.back();">
+              <a class="nav-link " href="javascript:void(0)" onclick="window.history.back();">
                 <i class="ti ti-arrow-left"></i>
               </a>
             </li>
@@ -195,8 +220,8 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up drop3" aria-labelledby="drop2">
                   <div class="message-body">
-                    <a href="#" class="btn btn-primary mx-3 mt-2 d-block">Profile</a>
-                    <a href="{% url "user:logout" %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                    <a href="#" class=" text-center reform_btn mx-3 mt-2 d-block" style="width:200px">Profile</a>
+                    <a href="{% url "user:logout" %}" class=" text-center secondary_reform_btn mx-3 mt-2 d-block" style="width:200px">Logout</a>
                   </div>
                 </div>
               </li>

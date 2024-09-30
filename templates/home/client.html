@@ -414,7 +414,7 @@
                       {% endif %}
                       
                         <td style="width: 20%;">{{ client.created_at }}</td>
-                        <td class="text-underlined" style="width: 20%;"><a href="/client-detail/{{client.id}}">{{ client.company_name }}</a></td>
+                        <td class="text-underlined" style="width: 20%;"><a class="text-primary" href="/client-detail/{{client.id}}">{{ client.company_name }}</a></td>
                         {% comment %} {% if client.route %}
                         <td style="width: 20%;">{{ client.route.name }}</td>
                         {% else %}

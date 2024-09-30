@@ -250,7 +250,7 @@
             </div>
             {% endif %}
 
-<h5 style="color:#5d87ff;text-decoration:underline"> Customers Assigned to you</h5>
+<h5 class="text-primary"> Customers Assigned to you</h5>
                 <table class="table">
                   
                   <thead>
@@ -294,7 +294,7 @@
                       {% endif %}
                       
                         <td style="width: 20%;">{{ customer.created_at }}</td>
-                        <td class="text-underlined" style="width: 20%;"><a href="/customer-detail/{{customer.id}}?previous=dashboard">{{ customer.first_name }} {{ customer.last_name }}</a></td>
+                        <td class="text-underlined" style="width: 20%;"><a class="text-primary" href="/customer-detail/{{customer.id}}?previous=dashboard">{{ customer.first_name }} {{ customer.last_name }}</a></td>
                         {% if customer.route %}
                         <td style="width: 20%;">{{ customer.route.name }}</td>
                         {% else %}

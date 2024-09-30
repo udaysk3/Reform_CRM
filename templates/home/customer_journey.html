@@ -48,7 +48,7 @@
               <tbody>
                 {% if funding_routes %} {% for route in funding_routes %}
                 <tr>
-                  <td><a href="{% url 'app:cj_route' route.id %}">{{ route.name }}</a></td>
+                  <td><a class="text-primary" href="{% url 'app:cj_route' route.id %}">{{ route.name }}</a></td>
                 </tr>
                 {% endfor %} {% else %}
                 <tr
@@ -72,7 +72,7 @@
                 {% if stages %} {% for stage in stages %}
                 <tr>
                   <td>{{ stage.name }}</td>
-                  <td><a class="reform_btn" href="/archive_global_stage/{{stage.id}}">
+                  <td><a class="reform_btn " href="/archive_global_stage/{{stage.id}}">
                     {% if stage.global_archive %}
                       Unarchive
                     {% else %}

@@ -45,7 +45,7 @@
               {% if route.product.all %} {% for product in route.product.all %}
               <tr>
                 <td>
-                  <a href="{% url 'app:cj_product' route.id product.id %}">
+                  <a class="text-primary" href="{% url 'app:cj_product' route.id product.id %}">
                   {{ product.name }}
                   </a>
                 </td>
