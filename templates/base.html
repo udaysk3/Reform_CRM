@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{% static 'css/layout_style.css' %}">
   <style>
+    
     .sidebar-link:hover{
       color: #024753 !important;
     }
@@ -79,6 +80,9 @@
   align-items: center;
   justify-content: center;
 }
+  body{
+    background-color: #d4f6fc;
+  }
   </style>
   {% block css %}
   {% endblock %}
@@ -93,9 +97,10 @@
       <!-- Sidebar scroll-->
       <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
-          <a href="/dashboard" class="text-nowrap logo-img">
+          <a href="/dashboard" class="text-nowrap logo-img" style="position:relative; left:10px;">
             {% comment %} <img src="{% static "images/logos/dark-logo.svg" %}" width="180" alt="" /> {% endcomment %}
-            <h1> Reform CRM</h1>
+            {% comment %} <h1> Reform CRM</h1> {% endcomment %}
+            <img width="170px" src="{% static 'images/logos/logo.png' %}" alt="">
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
