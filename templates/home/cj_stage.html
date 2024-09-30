@@ -296,11 +296,12 @@
                                         </div>
                                       {% endfor %}
                                       {% if field.0 == 'dropdown' %}
-                                        <div class="checkbox-wrapper-10">
-                                          <input {% if 'all_value' in b.0 %} checked {% endif %} type="checkbox" id="cb5" value="all_value" class="tgl tgl-flip">
-                                          <label for="cb5" data-tg-on="All!" data-tg-off="Any" class="tgl-btn"></label>
-                                        </div>
-                                      {% endif %}
+  <div class="checkbox-wrapper-10">
+    <input {% if 'all_value' in b %} checked {% endif %} type="checkbox" id="cb5" name="dynamicRule" value="all_value" class="tgl tgl-flip">
+    <label for="cb5" data-tg-on="All!" data-tg-off="Any" class="tgl-btn"></label>
+  </div>
+{% endif %}
+
                                   </div>
                                 {% endwith %}
                               {% else %}
@@ -469,6 +470,12 @@
         });
       });
     }
+const tglFlip = form.querySelector(".tgl-flip");
+  if (tglFlip && tglFlip.checked) {
+    const cbValue = tglFlip.value;
+    form.querySelector("input[name='dynamicRule']").value = cbValue;
+  }
+
       const options = document.querySelectorAll('.option');
     options.forEach(option => {
         option.parentElement.parentElement.children[0].value = option.parentElement.parentElement.children[0].value + ',' + option.parentElement.children[0].value;
