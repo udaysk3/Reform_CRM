@@ -636,7 +636,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             
 
 
-
+    update_stages = {}
     
     for route_product, stages in display_stages.items():
         prev_all_correct = True
@@ -647,9 +647,9 @@ def customer_detail(request, customer_id, s_customer_id=None):
             if not all_ans:
                 all_true = False
         if all_true:
-            display_stages[route_product+' - Available'] = display_stages.pop(route_product)
+            update_stages[route_product+' - Available'] = display_stages[route_product]
         else:
-            display_stages[route_product+' - Not Available'] = display_stages.pop(route_product)
+            update_stages[route_product+' - Not Available'] = display_stages[route_product]
 
 
     return render(
@@ -676,7 +676,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "clients": clients,
             "campaigns": campaigns,
             "display_regions":display_regions,
-            "display_stages":display_stages,
+            "display_stages":update_stages,
         },
     )
 
