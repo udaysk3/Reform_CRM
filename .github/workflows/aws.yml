@@ -35,7 +35,7 @@ env:
   ECR_REPOSITORY: 'reform_crm'  # set this to your Amazon ECR repository name
   ECS_SERVICE: 'Reform_CRM_PROD'                 # set this to your Amazon ECS service name
   ECS_CLUSTER: 'ReformCRMCluster'                # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: 'Reform_CRM' # set this to the path to your Amazon ECS task definition                                          # file, e.g. .aws/task-definition.json
+  ECS_TASK_DEFINITION: 'Reform_CRM:1' # set this to the path to your Amazon ECS task definition                                          # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: 'reform_crm_prod' 
   ECR_REGISTRY: '954976307163.dkr.ecr.eu-west-2.amazonaws.com'
 
