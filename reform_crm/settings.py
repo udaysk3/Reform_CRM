@@ -101,9 +101,21 @@ WSGI_APPLICATION = "reform_crm.wsgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'prod': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'ASFQ8Yo1CwH91Uwqufy3',
+        'HOST': 'database-1.c9imq0uacosm.eu-west-2.rds.amazonaws.com',
+        'PORT': 5432,
+    },
+    # For Development
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'TEST': {
+        'NAME': 'mytestdatabase', 
+    }
     }
 }
 
