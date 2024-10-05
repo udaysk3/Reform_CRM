@@ -1,156 +1,61 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  {% load static %}
     <meta charset="UTF-8">
+    <title>Login</title>
+    <!-- Meta viewport tag for mobile responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Page</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
-    <!-- Custom styles -->
-    <style>
-      body{
-    background-color: #EBF8F1;
-  }
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-           
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .navbar {
-            background-color: #fff;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-        }
-
-        .footer {
-            background-color: #333;
-            color: #fff;
-            padding: 20px 0;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-        
-  .disabled{
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .secondary_reform_btn{
-    width: fit-content;
-  padding: 10px 15px;
-  border: none;
-  background-color: #7ad1a1;
-  color: black;
-  clip-path: polygon(85% 1%, 100% 40%, 100% 100%, 0 99%, 0 0);
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-  .reform_btn{
-    width: fit-content;
-  padding: 10px 15px;
-  border: none;
-  background-color: #024753;
-  color: white;
-  clip-path: polygon(85% 1%, 100% 40%, 100% 100%, 0 99%, 0 0);
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-    </style>
+    <!-- Link to Google Fonts with specific font weights -->
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,300;0,400;0,600;0,900;1,300&display=swap" rel="stylesheet">
+    <!-- Link to login-specific styles -->
+    <link rel="stylesheet" href="{% static '/css/login.css' %}">
 </head>
 <body>
+    
+    <!-- Logo Section -->
+    <div class="logo-container">
+        <img src="{% static '/images/logos/reform_full_logo_white.png' %}" alt="Reform Logo" class="logo-image">
+    </div>
 
-  
-  <nav class="navbar navbar-expand-lg bg-white-700">
-        <div class="container">
-            <a class="navbar-brand " style="color:#024753" href="/"><img width="170px" src="{% static 'images/logos/logo.png' %}" /></a>
-            <a class="secondary_reform_btn" href="/">Go Back</a>
-        </div>
-    </nav>
-
-<div style="width:1000px; left:15%; position:relative;" class="page-wrapper mt-5" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-  data-sidebar-position="fixed" data-header-position="fixed">
-  <div
-    class="align-items-center justify-content-center">
-    <div class="d-flex align-items-center justify-content-center w-100">
-      <div class="row justify-content-center w-100">
-        <div class="col-md-8 col-lg-6 col-xxl-3">
-          <div class="card mb-0">
-           
-            <div class="card-body" >
-              {% for message in messages %}
-              <div class="container-fluid p-0 m-0">
-                <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
-                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="True">&times;</span>
-                  </button>
-                 {{ message }}
-                </div>
-              </div>
-              {% endfor %}
-              <a href="/" class="text-nowrap logo-img text-center d-block py-3 w-100">
-                <img src="{% static 'images/logos/icon.png' %}" width="40" alt="">
-              </a>
-             
-              <p class="text-center">Login Here!</p>
-              <form action="{% url "user:login" %}" method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                  <label for="email" class="form-label">Email</label>
-                  <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required>
-                </div>
-                <div class="mb-4">
-                  <label for="exampleInputPassword1" class="form-label">Password</label>
-                  <input type="password" name="password" class="form-control" id="exampleInputPassword1" required>
-                </div>
-                <!-- <div class="d-flex align-items-center justify-content-between mb-4">
-                  <div class="form-check">
-                    <input class="form-check-input primary" type="checkbox" value="" id="flexCheckChecked" checked>
-                    <label class="form-check-label text-dark" for="flexCheckChecked">
-                      Remeber this Device
-                    </label>
-                  </div>
-                  <a class="text-primary fw-bold" href="./index.html">Forgot Password ?</a>
-                </div> -->
-                <button class="reform_btn" style="position: relative; left:338px;" type="submit">Sign In</button>
-                <div class="d-flex align-items-center justify-content-center">
-                  {% comment %} <p class="fs-4 mb-0 fw-bold">New to Modernize?</p>
-                  <a class="text-primary fw-bold ms-2" href="./authentication-register.html">Create an account</a> {% endcomment %}
-                </div>
-              </form>
+    <!-- Login Form Container -->
+    <div class="login-container" id="login-form" aria-hidden="false">
+        <h2 class="login-title">Login {{ message}}</h2>
+        <!-- Error Message Container (optional) -->
+        <div class="error-message" aria-live="assertive"></div>
+        <form class="login-form" action="{% url 'user:login' %}" method="POST">
+            {% csrf_token %}
+            <input type="text" id="username" name="email" class="login-input" placeholder="Username" required>
+            <input type="password" id="password" name="password" class="login-input" placeholder="Password" required>
+            <div class="login-actions">
+                <button class="login-button">LOGIN</button>
+                <a href="#" class="forgot-password">Forgot password?</a>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-    <!-- Footer -->
-    <div class="footer text-center">
-        <p>&copy; 2024 Reform. All rights reserved.</p>
+        </form>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{% static "libs/jquery/dist/jquery.min.js" %}"></script>
-    <script src="{% static "libs/bootstrap/dist/js/bootstrap.bundle.min.js" %}"></script>
+    <!-- Password Reset Form Container -->
+    <div class="password-reset-container" id="password-reset-form" style="display: none;" aria-hidden="true">
+        <h2 class="login-title">Reset Password</h2>
+        <!-- Error Message Container (optional) -->
+        <div class="error-message" aria-live="assertive"></div>
+        <form class="password-reset-form" action="/reset-password" method="post">
+            <input type="email" id="reset-email" name="reset-email" class="login-input" placeholder="Enter your email" required>
+            <div class="login-actions">
+                <button type="submit" class="login-button">Send Reset Link</button>
+                <a href="#" class="back-to-login">Back to Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Password Reset Confirmation Container -->
+    <div class="password-reset-container" id="password-reset-confirmation" style="display: none;" aria-hidden="true">
+        <h2 class="login-title">Check Your Email</h2>
+        <p class="confirmation-message">If this email is registered, you will receive a password reset link shortly.</p>
+        <a href="#" class="back-to-login">Back to Login</a>
+    </div>
+
+    <!-- Include JavaScript for toggling forms -->
+    <script src="{% static '/js/login.js' %}"></script>
 </body>
 </html>
