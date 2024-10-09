@@ -155,7 +155,7 @@ i{
             {% endif %}
             {% if request.user.client %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:client" %}" aria-expanded="false">
+              <a class="sidebar-link" href="{% url "client_app:client" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-building"></i>
                 </span>
@@ -166,7 +166,7 @@ i{
             
             {% if request.user.council %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:council" %}" aria-expanded="false">
+              <a class="sidebar-link" href="{% url "region_app:council" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-flag"></i>
                 </span>
@@ -184,7 +184,7 @@ i{
             </li>
             {% if request.user.admin %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:admin" %}" aria-expanded="false">
+              <a class="sidebar-link" href="{% url "admin_app:admin" %}" aria-expanded="false">
                 <span>
                   <i class="ti ti-alert-circle"></i>
                 </span>
@@ -204,7 +204,7 @@ i{
             {% endif %}
             {% if request.user.hr %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:hr" %}" aria-expanded="false">
+              <a class="sidebar-link" href="{% url "hr_app:hr" %}" aria-expanded="false">
                 <span>
                   <i class="ti ti-file-description"></i>
                 </span>
@@ -297,7 +297,7 @@ i{
         const a = document.createElement("li");
         a.classList.add('sidebar-item','archive');
         a.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:archive" %}" aria-expanded="false">
+        <a class="sidebar-link" href="{% url "customer_app:archive" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>
@@ -318,7 +318,7 @@ i{
         const a1 = document.createElement("li");
         a1.classList.add('sidebar-item','customers');
         a1.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:customer" %}" aria-expanded="false">
+        <a class="sidebar-link" href="{% url "customer_app:customer" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>
@@ -350,7 +350,7 @@ i{
         const a = document.createElement("li");
         a.classList.add('sidebar-item','questions');
         a.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:questions" %}" aria-expanded="false">
+        <a class="sidebar-link" href="{% url "question_actions_requirements_app:questions" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>
@@ -373,7 +373,7 @@ i{
         const a = document.createElement("li");
         a.classList.add('sidebar-item','cj');
         a.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:customer_journey" %}" aria-expanded="false">
+        <a class="sidebar-link" href="{% url "customer_journey_app:customer_journey" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>
@@ -395,7 +395,7 @@ i{
         const a = document.createElement("li");
         a.classList.add('sidebar-item','funding_route');
         a.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:funding_route" %}" aria-expanded="false">
+        <a class="sidebar-link" href="{% url "funding_route_app:funding_route" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>
@@ -417,7 +417,7 @@ i{
         const a = document.createElement("li");
         a.classList.add('sidebar-item','product');
         a.innerHTML = `
-        <a class="sidebar-link" href="{% url "app:product" %}" aria-expanded="false">
+        <a class="sidebar-link" href="{% url "product_app:product" %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>

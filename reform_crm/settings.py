@@ -16,6 +16,7 @@ from django.contrib.messages import constants as messages
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import os
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -48,6 +49,16 @@ INSTALLED_APPS = [
     "user",
     "tempus_dominus",
     "bootstrap_datepicker_plus",
+    "client_app",
+    "customer_app",
+    "customer_journey_app",
+    "dashboard_app",
+    "funding_route_app",
+    "hr_app",
+    "product_app",
+    "admin_app",
+    "region_app",
+    "question_actions_requirements_app",
 ]
 
 
@@ -67,7 +78,19 @@ ROOT_URLCONF = "reform_crm.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        "DIRS": [
+            os.path.join(BASE_DIR, "templates"),  
+            os.path.join(BASE_DIR, "client_app", "templates"), 
+            os.path.join(BASE_DIR, "customer_app", "templates"), 
+            os.path.join(BASE_DIR, "customer_journey_app", "templates"),  
+            os.path.join(BASE_DIR, "dashboard_app", "templates"),  
+            os.path.join(BASE_DIR, "funding_route_app", "templates"),  
+            os.path.join(BASE_DIR, "hr_app", "templates"),  
+            os.path.join(BASE_DIR, "product_app", "templates"),  
+            os.path.join(BASE_DIR, "region_app", "templates"),  
+            os.path.join(BASE_DIR, "question_actions_requirements_app", "templates"),  
+            os.path.join(BASE_DIR, "admin_app", "templates"),  
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

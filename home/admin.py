@@ -1,27 +1,24 @@
 from django.contrib import admin
 from .models import (
     Action,
-    Customers,
-    Clients,
     Campaign,
-    Councils,
-    Route,
     Stage,
     Document,
     Cities,
     HistoryId,
     Countys,
     Countries,
-    Signature,
-    Product,
-    CoverageAreas,
-    Questions,
-    Rule_Regulation,
-    ClientArchive,
     Client_Council_Route,
-    CJStage,
-    Answer,
 )
+
+from admin_app.models import Signature
+from client_app.models import Clients, ClientArchive, CoverageAreas
+from product_app.models import Product
+from region_app.models import Councils
+from funding_route_app.models import Route
+from customer_journey_app.models import CJStage
+from question_actions_requirements_app.models import Rule_Regulation, Questions
+from customer_app.models import Customers, Answer
 
 admin.site.register(Action)
 admin.site.register(Customers)

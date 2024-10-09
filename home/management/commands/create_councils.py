@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from home.models import Councils
+from region_app.models import Councils
 from home.councils import councils
 from datetime import datetime
 from user.models import User

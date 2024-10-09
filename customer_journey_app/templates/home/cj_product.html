@@ -1,0 +1,117 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<div class="row container-fluid">
+  {% for message in messages %}
+  <div
+    class="alert {{ message.tags }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %}
+
+  <div class="container-fluid pt-4">
+    <div class="card p-0">
+      <div class="card-body p-3 m-0">
+        <h5 class="card-title">Customer Journey - {{ route.name }} - {{ product.name }}</h5>
+        <div
+          class="d-sm-flex d-block align-items-center justify-content-between mb-9"
+        >
+          <div class="mb-3 mb-sm-0">
+            <a href="{% url 'app:funding_route' %}">
+              <h5
+                class="card-title fw-semibold text-primary text-decoration-underline"
+              >
+                Customer Journey Management
+              </h5></a
+            >
+          </div>
+          <div>
+            
+            <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#addStage">
+              Add Stage
+            </button>
+
+            <div class="modal fade" id="addStage" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form action="{% url 'customer_journey_app:cj_product' route.id product.id %}" method="post">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Stage</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    {% csrf_token %}
+                    <select class="form-select" name="stage" aria-label="Default select example">
+                      {% for stage in stages %}
+                        <option value="{{stage.id}}">{{stage.name}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                    <button class="reform_btn">Submit</button>
+                  </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x: auto">
+          <table class="table" style="overflow-x: auto">
+            <thead>
+              <tr>
+                <th>Stage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if cjstages %} {% for stage in cjstages %}
+              <tr>
+                <td>
+                  <a class="text-primary" href="{% url 'customer_journey_app:cj_stage' route.id product.id stage.stage.id %}">
+                  {{ stage.stage.name }} </a>
+                </td>
+                <td><a href="/delete_cj_stage/{{ route.id }}/{{ product.id }}/{{stage.stage.id}}">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="text-danger icon icon-tabler icon-tabler-trash"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 7l16 0" />
+                    <path d="M10 11l0 6" />
+                    <path d="M14 11l0 6" />
+                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                  </svg>
+                </a></td>
+              </tr>
+              {% endfor %} {% else %}
+              <tr
+                class="text-center display-flex align-items-center justify-content-center"
+              >
+                <td colspan="9" class="text-center">No Stages</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
