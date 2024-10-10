@@ -177,7 +177,7 @@
                 <button class="reform_btn bank_details" style="width: fit-content !important;">Bank Details</button>
                 <button class="reform_btn add_details" style="width: fit-content !important; display: none;">Add Details</button>
               </div>
-              <form name="addClientForm" id="addClientForm" method="post" action="{% url 'app:add_client' %}" onsubmit="return validateAddForm()">
+              <form name="addClientForm" id="addClientForm" method="post" action="{% url 'client_app:add_client' %}" onsubmit="return validateAddForm()">
                 {% csrf_token %}
 
                 <div class="tab_add">
@@ -278,7 +278,7 @@
                 <button class="reform_btn bank_details" style="width: fit-content !important;">Bank Details</button>
                 <button class="reform_btn add_details" style="width: fit-content !important; display: none;">Bank Details</button>
               </div>
-                <form name="editClientForm" id="editClientForm" method="post" action="{% url 'app:edit_client' edit_client.id %}" onsubmit="return validateForm()">
+                <form name="editClientForm" id="editClientForm" method="post" action="{% url 'client_app:edit_client' edit_client.id %}" onsubmit="return validateForm()">
                   {% csrf_token %}
                   <div class="tab_add">
                   <div class="mb-3">

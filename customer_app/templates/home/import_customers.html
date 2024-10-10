@@ -24,7 +24,7 @@
             <form
               id="importForm"
               method="post"
-              action="{% url 'app:import_customers' %}"
+              action="{% url 'customer_app:import_customers' %}"
               enctype="multipart/form-data"
             >
               {% csrf_token %}
