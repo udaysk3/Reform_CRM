@@ -21,6 +21,3 @@ __pycache__/
 # Log files
 *.log
 
-# Django migration files
-**/migrations/*.py
-**/migrations/*.pyc
