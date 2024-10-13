@@ -676,7 +676,7 @@ def Customer(request):
         request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, 
                                         "campaigns": campaigns,
                                         "agents": serialize('json', agents), 
-                                        "customers_list": customers_list,
+                                        "customers_list": serialize('json', customers_list),
                                         'page_obj': page_obj, 'clients':client}
     )
 

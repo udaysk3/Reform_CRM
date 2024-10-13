@@ -709,7 +709,7 @@ const form = document.querySelector('#addCustomerForm');
         title: customers[i].fields.first_name + ' ' + customers[i].fields.last_name + ' - ' + customers[i].pk
       });
     }
-    // Create comboTree using unassigned customer names
+    
     comboTree1 = $("#customers").comboTree({
       source: options,
       isMultiple: true,
