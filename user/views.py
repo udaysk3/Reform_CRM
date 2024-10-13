@@ -43,7 +43,7 @@ def add_user(request):
         email = request.POST.get('email')
         if User.objects.filter(email=email).exists():
             messages.error(request, 'User with this email already exists!')
-            return redirect('app:admin') 
+            return redirect('admin_app:admin') 
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         password = request.POST.get('password') 
@@ -76,7 +76,7 @@ def add_user(request):
             hr=hr
         )
         messages.success(request, 'User added successfully!')
-        return redirect('app:admin')  # Redirect to the appropriate URL
+        return redirect('admin_app:admin')  # Redirect to the appropriate URL
 
     return render(request, 'your_template.html')
 
@@ -101,17 +101,17 @@ def edit_user(request, user_id):
         user.save()
 
         messages.success(request, 'User updated successfully!')
-        return redirect('app:admin')  # Redirect to the appropriate URL
+        return redirect('admin_app:admin')  # Redirect to the appropriate URL
 
     context = {'user': user}
-    return redirect('app:adminview')
+    return redirect('admin_app:adminview')
 
 def remove_user(request, user_id):
     user = User.objects.get(pk=user_id)
     if user.is_superuser:
         messages.error(request, 'SuperUser cannot be deleted!')
-        return redirect('app:admin')
+        return redirect('admin_app:admin')
     user.delete()
 
     messages.success(request, 'User deleted successfully!')
-    return redirect('app:admin')
+    return redirect('admin_app:admin')

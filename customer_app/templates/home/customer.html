@@ -702,11 +702,11 @@ const form = document.querySelector('#addCustomerForm');
         title: 'All Unassigned Customers'
       }
     ]
-    let agents = JSON.parse("{{ agents | escapejs }}");
-    for (let i = 0; i < agents.length; i++) {
+    let customers = JSON.parse("{{ customers_list | escapejs }}");
+    for (let i = 0; i < customers.length; i++) {
       options.push({
         id: i+1,
-        title: agents[i].fields.first_name + ' ' + agents[i].fields.last_name + ' - ' + agents[i].pk
+        title: customers[i].fields.first_name + ' ' + customers[i].fields.last_name + ' - ' + customers[i].pk
       });
     }
     // Create comboTree using unassigned customer names

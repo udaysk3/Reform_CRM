@@ -948,7 +948,7 @@ table {
                   <form
                     method="post"
                     class="col"
-                    action="{% url 'app:na_action_submit' client.id %}"
+                    action="{% url 'client_app:na_client_action_submit' client.id %}"
                     
                   >
                     {% csrf_token %}

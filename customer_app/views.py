@@ -659,6 +659,7 @@ def Customer(request):
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False)
+    customers_list = Customers.objects.all()
     p_customers = Paginator(customers, 50)
     page_number = request.GET.get('page')
     try:
@@ -672,7 +673,11 @@ def Customer(request):
     if request.session.get("first_name") and request.GET.get("page") != "add_customer":
         delete_customer_session(request)
     return render(
-        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj, 'clients':client}
+        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, 
+                                        "campaigns": campaigns,
+                                        "agents": serialize('json', agents), 
+                                        "customers_list": customers_list,
+                                        'page_obj': page_obj, 'clients':client}
     )
 
 
