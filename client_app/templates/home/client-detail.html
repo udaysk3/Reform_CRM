@@ -2021,11 +2021,11 @@ forms.forEach((form) => {
 <script src="{% static 'node_modules/jquery-clock-timepicker/jquery-clock-timepicker.min.js' %}"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-{% comment %} 
+
  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg&libraries=places&callback=initMap" async defer></script>
 
 <script>
- let map;
+ {% comment %} let map;
 
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
@@ -2078,7 +2078,9 @@ forms.forEach((form) => {
         center: location
       });
       map.fitBounds(circle.getBounds());
-    }
+    } 
+    
+    {% endcomment %}
 
   function SubmitClose(e){
     const reason = document.querySelector('.c_reason').value;
@@ -2093,7 +2095,7 @@ forms.forEach((form) => {
     }
     document.querySelector('.close_form').submit();
   }
-</script> {% endcomment %}
+</script> 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.js" integrity="sha512-3CuraBvy05nIgcoXjVN33mACRyI89ydVHg7y/HMN9wcTVbHeur0SeBzweSd/rxySapO7Tmfu68+JlKkLTnDFNg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script >

@@ -4,7 +4,7 @@ from django.urls import path
 app_name = "client_app"
 
 urlpatterns = [  
-    path("client", views.ClientListView.as_view(), name="client"),
+    path("client", views.client, name="client"),
     path("add_client", views.add_client, name="add_client"),
     path(
         "client_action_submit/<int:client_id>/",
@@ -17,7 +17,7 @@ urlpatterns = [
         name="client_note_submit",
     ),
     path(
-        "close_client_action_submit/<int:customer_id>/",
+        "close_client_action_submit/<int:client_id>/",
         views.close_client_action_submit,
         name="close_client_action_submit",
     ),
@@ -62,7 +62,7 @@ urlpatterns = [
         name="add_route_client",
     ),
     path(
-        "send_client_email/<int:customer_id>",
+        "send_client_email/<int:cclient_id>",
         views.send_client_email,
         name="send_client_email",
     ),
