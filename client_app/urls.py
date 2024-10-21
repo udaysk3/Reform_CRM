@@ -4,7 +4,7 @@ from django.urls import path
 app_name = "client_app"
 
 urlpatterns = [  
-    path("client", views.Client, name="client"),
+    path("client", views.ClientListView.as_view(), name="client"),
     path("add_client", views.add_client, name="add_client"),
     path(
         "client_action_submit/<int:client_id>/",
@@ -44,7 +44,6 @@ urlpatterns = [
     ),
     path("add_client", views.add_client, name="add_client"),
     path("add_campaign/<int:client_id>", views.add_campaign, name="add_campaign"),
-    path("add_product/<int:client_id>", views.add_product, name="add_product"),
     path("edit_client/<int:client_id>", views.edit_client, name="edit_client"),
     path("remove_client/<int:client_id>", views.remove_client, name="remove_client"),
     path(
@@ -52,7 +51,6 @@ urlpatterns = [
         views.remove_campaign,
         name="remove_campaign",
     ),
-    path("stages/<int:client_id>", views.create_stage, name="create_stage"),
     path(
         "add_product_client/<int:client_id>",
         views.add_product_client,
@@ -63,8 +61,6 @@ urlpatterns = [
         views.add_route_client,
         name="add_route_client",
     ),
-    path("remove_stage/<int:stage_id>", views.remove_stage, name="remove_stage"),
-    path("edit_stage/<int:stage_id>", views.edit_stage, name="edit_stage"),
     path(
         "send_client_email/<int:customer_id>",
         views.send_client_email,
@@ -95,17 +91,6 @@ urlpatterns = [
         views.get_campaign,
         name="get_campaign",
     ),
-    path("stage_template", views.stage_template, name="stage_template"),
-    path(
-        "edit_local_funding_route/<int:funding_route_id>",
-        views.edit_local_funding_route,
-        name="edit_local_funding_route",
-    ),
-    path(
-        "make_template_stage/<int:stage_id>",
-        views.make_template_stage,
-        name="make_template_stage",
-    ),
     path(
         "add_client_stage_rule/<int:route_id>/<int:product_id>/<int:stage_id>/<int:question_id>/<int:client_id>",
         views.add_client_stage_rule,
@@ -114,5 +99,4 @@ urlpatterns = [
     path("add_priority/<int:stage_id>/<int:client_id>", views.add_priority, name="add_priority"),
     path("add__route_priority/<int:route_id>/<int:client_id>", views.add_route_priority, name="add_route_priority"),
     path("customer_jr_order/<int:client_id>", views.customer_jr_order, name="customer_jr_order"),
-    path("add_product/<int:client_id>", views.add_product, name="add_product"),
 ]

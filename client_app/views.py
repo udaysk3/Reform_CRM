@@ -1,441 +1,257 @@
-from django.contrib.auth.decorators import login_required
-from user.models import User
-from django.core.serializers import serialize
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.contrib import messages
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from customer_app.task import getLA
-from customer_app.epc import getEPC
-from home.models import (
-    Campaign,
-    Stage,
-    Document,
-    Stage,
-    Client_Council_Route,
-)
-from admin_app.models import Email, Reason,Signature
-from client_app.models import Clients, CoverageAreas, ClientArchive
-from product_app.models import Product
-from region_app.models import Councils, RegionArchive
-from funding_route_app.models import Route
-from customer_journey_app.models import CJStage
-from question_actions_requirements_app.models import Rule_Regulation, Questions
-import re
-from datetime import datetime, timedelta
-from django.http import HttpResponseRedirect, HttpResponse
-from django.db.models import Max
-import pytz
-from user.models import User
-from pytz import timezone
 import json
 import os
-from django.core.mail import send_mail
-london_tz = pytz.timezone("Europe/London")
-from datetime import datetime
 import os.path
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import re
+from datetime import datetime, timedelta
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+import pytz
+from pytz import timezone
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.serializers import serialize
+from django.db.models import Max
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render, get_object_or_404
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.views.decorators.cache import cache_page
+from django.views.generic import ListView
+
+from admin_app.models import Email, Reason, Signature
+from client_app.models import ClientArchive, Clients, CoverageAreas
+from customer_app.epc import getEPC
+from customer_app.task import getLA
+from customer_journey_app.models import CJStage
+from funding_route_app.models import Route
+from home.models import Campaign, Client_Council_Route, Stage
+from product_app.models import Product
+from question_actions_requirements_app.models import Questions, Rule_Regulation
+from region_app.models import Councils, RegionArchive
+from user.models import User
+
+london_tz = pytz.timezone("Europe/London")
 
 @login_required
-def client_detail(request, client_id, s_client_id=None):
-    prev = None
-    next = None
+@cache_page(60 * 20)
+def client_detail(request, client_id, selected_client_id=None):
     domain_name = request.build_absolute_uri("/")[:-1]
+    london_tz = timezone('Europe/London')
+
+    client = get_object_or_404(Clients, pk=client_id)
+
     signatures = Signature.objects.all()
-    coverage_areas = CoverageAreas.objects.all().filter(
-        client=Clients.objects.get(pk=client_id)
-    )
-
+    coverage_areas = CoverageAreas.objects.filter(client=client)
     regions = Councils.objects.all()
+
+    coverage_postcodes = set(ca.postcode for ca in coverage_areas)
     display_regions = {}
-
     for region in regions:
-        region_postcodes = region.postcodes.split(',')
-        covered_postcodes = []
-
-        for coverage_area in coverage_areas:
-            if coverage_area.postcode in region_postcodes:
-                covered_postcodes.append(coverage_area.postcode)
-
-        if len(covered_postcodes) == len(region_postcodes):
+        region_postcodes = set(region.postcodes.split(','))
+        covered_postcodes = coverage_postcodes & region_postcodes
+        if covered_postcodes == region_postcodes:
             display_regions[region] = 'All'
-        elif len(covered_postcodes) > 0:
+        elif covered_postcodes:
             display_regions[region] = 'Partial'
         else:
             display_regions[region] = 'None'
 
-    clients = (
-        Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
-        .filter(parent_client=None)
-        .filter(closed=False)
-        .order_by("earliest_action_date")
-    )
-    clients = list(clients)
-    new_clients = []
-    for client in clients:
-        actions = client.get_created_at_action_history()
-        flag = False
-        for action in actions:
-            if action.imported == False:
-                new_clients.append(client)
-                break
-    new_clients.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
-    result = [x for x in clients if x not in new_clients] 
-    clients= new_clients + result
-    clients = clients[::-1]
-    if len(clients) == 1:
-        prev = client
-        next = client
-    else:
-        for i in range(len(clients)):
-            if clients[i].id == client_id:
-                if i == 0:
-                    prev = clients[i]
-                    next = clients[i + 1]
-                elif i == len(clients) - 1:
-                    prev = clients[i - 1]
-                    next = clients[i]
-                else:
-                    prev = clients[i - 1]
-                    next = clients[i + 1]
-    if prev:
-        prev = str(prev.id)
-    else:
-        prev = str(client_id)   
-    if next:     
-        next = str(next.id)
-    else:
-        next = str(client_id)
-    client = Clients.objects.get(pk=client_id)
-    campaigns = Campaign.objects.all().filter(client=client).filter(archive=False)
-    uncampaigns = Campaign.objects.all().filter(client=client).filter(archive=True)
-    all_products = Product.objects.all().filter(global_archive=False)
-    products = list(Product.objects.all().filter(client=client).filter(global_archive=False))
-    unproducts = []
-    for prod in products[:]: 
-        if ClientArchive.objects.all().filter(client=client).filter(product=prod).exists():
-            unproducts.append(prod)
-            products.remove(prod)
+    clients = (Clients.objects
+               .annotate(earliest_action_date=Max('action__date_time'))
+               .filter(parent_client=None, closed=False)
+               .order_by('earliest_action_date'))
+
+    clients_list = list(clients)
+    new_clients = [c for c in clients_list if any(not action.imported for action in c.get_created_at_action_history())]
+    old_clients = [c for c in clients_list if c not in new_clients]
+    clients_ordered = (new_clients + old_clients)[::-1]
+
+    client_ids = [c.id for c in clients_ordered]
+    try:
+        index = client_ids.index(client.id)
+    except ValueError:
+        index = 0
+
+    prev_client = clients_ordered[index - 1] if index > 0 else clients_ordered[0]
+    next_client = clients_ordered[index + 1] if index < len(clients_ordered) - 1 else clients_ordered[-1]
+
+    prev_client_id = str(prev_client.id)
+    next_client_id = str(next_client.id)
+
+    campaigns = Campaign.objects.filter(client=client, archive=False)
+    uncampaigns = Campaign.objects.filter(client=client, archive=True)
+    all_products = Product.objects.filter(global_archive=False)
+    products = Product.objects.filter(client=client, global_archive=False)
+    unproducts = products.filter(client_archive__client=client).distinct()
+    products = products.exclude(id__in=unproducts.values_list('id', flat=True))
 
     councils = Councils.objects.all()
-    coverage_area_client = CoverageAreas.objects.filter(client=client)
-    council_coverage_area = []
-    for coun in councils:
-        for ca in coverage_area_client:
-            if ca.postcode in coun.postcodes.split(',') and coun not in council_coverage_area:
-                council_coverage_area.append(coun)
+    coverage_area_postcodes = set(ca.postcode for ca in coverage_areas)
+    council_coverage_area = [
+        council for council in councils
+        if coverage_area_postcodes & set(council.postcodes.split(','))
+    ]
+
     all_routes = {}
     for council in council_coverage_area:
-        for route in council.routes.all():
-            if all_routes.get(council) and route.global_archive == False:
-                all_routes[council].append(route)
-            else:
-                if route.global_archive == False:
-                    all_routes[council] = [route]
+        routes = council.routes.filter(global_archive=False)
+        if routes.exists():
+            all_routes[council] = list(routes)
 
-    d_routes = {}
-    d_unroutes = {}
-
-    for route_obj in Client_Council_Route.objects.filter(client=client):
+    client_council_routes = Client_Council_Route.objects.filter(client=client)
+    routes = {}
+    unroutes = {}
+    for route_obj in client_council_routes:
         council = route_obj.council
         route = route_obj.route
-
-        if (
-            ClientArchive.objects.filter(
-                client=client, route=route, councils=council
-            ).exists()
-            and route.global_archive == False
-        ):
-            if council not in d_unroutes:
-                d_unroutes[council] = []
-            d_unroutes[council].append(route)
+        is_archived = ClientArchive.objects.filter(client=client, route=route, councils=council).exists()
+        is_region_archived = RegionArchive.objects.filter(council=council, route=route).exists()
+        if is_archived or is_region_archived or route.global_archive:
+            unroutes.setdefault(council, []).append(route)
         else:
-            if route.global_archive == False:
-                if council not in d_routes:
-                    d_routes[council] = []
-                d_routes[council].append(route)
-            else:
-                if council not in d_unroutes:
-                    d_unroutes[council] = []
-                d_unroutes[council].append(route)
+            routes.setdefault(council, []).append(route)
 
-    routes = {}
-    unroutes = d_unroutes
-
-    for council, routes_list in d_routes.items():
-        for route in routes_list:
-            if (
-                RegionArchive.objects.filter(council=council, route=route).exists()
-            ):
-                if council not in unroutes:
-                    unroutes[council] = []
-                unroutes[council].append(route)
-            else:
-                if council not in routes:
-                    routes[council] = []
-                routes[council].append(route)
     stages = []
     for council, council_routes in routes.items():
         for route in council_routes:
             for product in products:
                 cjstages = CJStage.objects.filter(route=route, product=product)
                 for cjstage in cjstages:
-                    questions = []
+                    questions = Rule_Regulation.objects.filter(
+                        route=route, product=product, stage=cjstage.stage, is_client=False
+                    ).values_list('question', flat=True).distinct()
+
                     questions_with_rules = []
-                    added_questions = set()
-                    
-                    for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage,is_client=False):
-                        questions.append(rule.question)
-                        
-                    
                     for question in questions:
-                        rule_regulation = (Rule_Regulation.objects
-                                           .filter(route=route)
-                                           .filter(product=product)
-                                           .filter(stage=cjstage.stage)
-                                           .filter(question=question)
-                                           .filter(is_client=True))
-                       
-                        if question not in added_questions:
-                            if rule_regulation.exists():
-                                questions_with_rules.append((question, rule_regulation[0], route, product, cjstage.stage))
-                            else:
-                                questions_with_rules.append((question, None, route, product, cjstage.stage))
-                            
-                            added_questions.add(question)
-                    
+                        rule_regulation = Rule_Regulation.objects.filter(
+                            route=route, product=product, stage=cjstage.stage,
+                            question=question, is_client=True
+                        ).first()
+                        questions_with_rules.append(
+                            (question, rule_regulation, route, product, cjstage.stage)
+                        )
+
                     stages.append({
                         'route': route,
                         'product': product,
-                        'stage': cjstage.stage, 
-                        'order': cjstage.order, 
+                        'stage': cjstage.stage,
+                        'order': cjstage.order,
                         'questions': questions_with_rules
                     })
-    
-    stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
-    
+
+    stages.sort(key=lambda x: x['order'] if x['order'] is not None else float('inf'))
+
     display_stages = {}
-    for stage in stages:
-        key = f"{stage['route'].name} - {stage['product'].name}"
-    
-        if key in display_stages:
-            display_stages[key].append([stage['stage'], stage['questions']])
-        else:
-            display_stages[key] = [[stage['stage'], stage['questions']]]
+    for stage_info in stages:
+        key = f"{stage_info['route'].name} - {stage_info['product'].name}"
+        display_stages.setdefault(key, []).append([stage_info['stage'], stage_info['questions']])
 
-
-    child_clients = Clients.objects.all().filter(parent_client=client)
+    child_clients = Clients.objects.filter(parent_client=client)
     agents = User.objects.filter(is_superuser=False)
-    show_client = client
+    show_client = get_object_or_404(Clients, pk=selected_client_id) if selected_client_id else client
     reasons = Reason.objects.all()
     templates = Email.objects.all()
-    if s_client_id:
-        show_client = Clients.objects.get(pk=s_client_id)
 
-    history = {}
     actions = client.get_created_at_action_history()
+    key_events = actions.filter(keyevents=True)
+    history = {}
     imported = {}
-    london_tz = timezone("Europe/London")
-    keyevents = client.get_created_at_action_history().filter(keyevents=True)
     events = {}
 
-    for i in actions:
-        if i.imported:
-            if i.created_at.replace(tzinfo=london_tz).date() not in imported:
-                imported[i.created_at.replace(tzinfo=london_tz).date()] = []
-        else:
-            if i.created_at.replace(tzinfo=london_tz).date() not in history:
-                history[i.created_at.replace(tzinfo=london_tz).date()] = []
-    for i in actions:
-        if i.imported:
-            imported[i.created_at.replace(tzinfo=london_tz).date()].append(
-                [
-                    i.created_at.astimezone(london_tz).time(),
-                    i.text,
-                    i.agent.first_name,
-                    i.agent.last_name,
-                    i.imported,
-                    i.talked_with,
-                    i.client.postcode,
-                    i.client.house_name,
-                ]
-            )
-        else:
-            history[i.created_at.replace(tzinfo=london_tz).date()].append(
-                [
-                    i.created_at.astimezone(london_tz).time(),
-                    i.client.postcode,
-                    i.client.house_name,
-                    i.agent.first_name,
-                    i.agent.last_name,
-                    i.action_type,
-                    i.date_time,
-                    i.talked_with,
-                    i.text,
-                ]
-            )
+    for action in actions:
+        action_date = action.created_at.astimezone(london_tz).date()
+        action_time = action.created_at.astimezone(london_tz).time()
+        action_data = [
+            action_time,
+            action.text,
+            action.agent.first_name,
+            action.agent.last_name,
+            action.imported,
+            action.talked_with,
+            action.client.postcode,
+            action.client.house_name,
+        ]
 
-    for i in keyevents:
-        if i.created_at.replace(tzinfo=london_tz).date() not in events:
-            events[i.created_at.replace(tzinfo=london_tz).date()] = []
-    for i in keyevents:
-        events[i.created_at.replace(tzinfo=london_tz).date()].append(
-                [
-                    i.created_at.astimezone(london_tz).time(),
-                    i.client.postcode,
-                    i.client.house_name,
-                    i.agent.first_name,
-                    i.agent.last_name,
-                    i.action_type,
-                    i.date_time,
-                    i.talked_with,
-                    i.text
-                ]
-            )
+        if action.imported:
+            imported.setdefault(action_date, []).append(action_data)
+        else:
+            history.setdefault(action_date, []).append(action_data)
 
-        return render(
-            request,
-            "home/client-detail.html",
-            {
-                "councils": councils,
-                "client": client,
-                "history": history,
-                "imported": imported,
-                "prev": prev,
-                "next": next,
-                "child_clients": child_clients,
-                "agents": agents,
-                "show_client": show_client,
-                "events": events,
-                "reasons": reasons,
-                "templates": templates,
-                "signatures": signatures,
-                "domain_name": domain_name,
-                "campaigns": campaigns,
-                "uncampaigns": uncampaigns,
-                "products": products,
-                "unproducts": unproducts,
-                "coverage_areas": coverage_area_client,
-                "all_products": all_products,
-                "all_routes": all_routes,
-                "routes": routes,
-                "unroutes": unroutes,
-                "stages": stages,
-                "display_regions": display_regions,
-                "display_stages":display_stages,
-            },
+    for event in key_events:
+        event_date = event.created_at.astimezone(london_tz).date()
+        event_time = event.created_at.astimezone(london_tz).time()
+        event_data = [
+            event_time,
+            event.client.postcode,
+            event.client.house_name,
+            event.agent.first_name,
+            event.agent.last_name,
+            event.action_type,
+            event.date_time,
+            event.talked_with,
+            event.text,
+        ]
+        events.setdefault(event_date, []).append(event_data)
+
+    context = {
+        'councils': councils,
+        'client': client,
+        'history': history,
+        'imported': imported,
+        'prev': prev_client_id,
+        'next': next_client_id,
+        'child_clients': child_clients,
+        'agents': agents,
+        'show_client': show_client,
+        'events': events,
+        'reasons': reasons,
+        'templates': templates,
+        'signatures': signatures,
+        'domain_name': domain_name,
+        'campaigns': campaigns,
+        'uncampaigns': uncampaigns,
+        'products': products,
+        'unproducts': unproducts,
+        'coverage_areas': coverage_areas,
+        'all_products': all_products,
+        'all_routes': all_routes,
+        'routes': routes,
+        'unroutes': unroutes,
+        'stages': stages,
+        'display_regions': display_regions,
+        'display_stages': display_stages,
+    }
+
+    return render(request, 'home/client-detail.html', context)
+
+
+class ClientListView(ListView):
+    model = Clients
+    template_name = 'home/client.html'
+    context_object_name = 'clients'
+    paginate_by = 50
+
+    def get_queryset(self):
+        return (
+            Clients.objects
+            .filter(parent_client=None, closed=False)
+            .annotate(
+                earliest_action_date=Max('action__date_time'),
+                has_nonimported_action=Exists(
+                    Action.objects.filter(client=OuterRef('pk'), imported=False)
+                )
+            )
+            .order_by('-has_nonimported_action', '-earliest_action_date')
         )
 
-    return render(
-        request,
-        "home/client-detail.html",
-        {
-            "councils": councils,
-            "client": client,
-            "history": history,
-            "imported": imported,
-            "prev": prev,
-            "next": next,
-            "child_clients": child_clients,
-            "agents": agents,
-            "show_client": show_client,
-            "events": events,
-            "reasons": reasons,
-            "templates": templates,
-            "signatures": signatures,
-            "domain_name": domain_name,
-            "campaigns": campaigns,
-            "uncampaigns": uncampaigns,
-            "products": products,
-            "unproducts": unproducts,
-            "coverage_areas": coverage_area_client,
-            "all_products": all_products,
-            "all_routes": all_routes,
-            "routes": routes,
-            "unroutes": unroutes,
-            "stages": stages,
-            "display_regions": display_regions,
-            "display_stages":display_stages,
-        },
-    ) 
-
-
-@login_required
-def Client(request):
-    if request.session.get("first_name"):
-        delete_customer_session(request)
-    if request.GET.get("page") == "edit_client" and request.GET.get("backto") is None:
-        client_id = request.GET.get("id")
-        client = Clients.objects.get(pk=client_id)
-        if client.parent_client:
-            edit_client = client
-            client = Clients.objects.get(pk=client.parent_client.id)
-            clients = Clients.objects.all().filter(parent_client=client)
-            return render(
-                request,
-                "home/client.html",
-                {
-                    "edit_client": edit_client,
-                    "client": client,
-                    "clients": clients,
-                },
-            )
-        edit_client = client
-        clients = Clients.objects.all().filter(parent_client=client)
-        return render(
-            request,
-            "home/client.html",
-            {
-                "edit_client": edit_client,
-                "client": client,
-                "clients": clients,
-            },
-        )
-
-    # clients = Clients.objects.annotate(num_actions=Count('action')).order_by('-num_actions', 'action__date_time').distinct()
-    current_time = datetime.now(london_tz)
-    user  = User.objects.get(email=request.user)
-    clients = (
-        Clients.objects.annotate(earliest_action_date=Max("action__date_time"))
-        .filter(parent_client=None)
-        .filter(closed=False)
-        .order_by("earliest_action_date")
-    )
-
-    clients = list(clients)
-    new_clients = []
-    for client in clients:
-        actions = client.get_created_at_action_history()
-        flag = False
-        for action in actions:
-            if action.imported == False:
-                new_clients.append(client)
-                break
-
-    new_clients.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
-
-    result = [x for x in clients if x not in new_clients] 
-
-    clients= new_clients + result
-    # print(type(clients))
-    clients = clients[::-1]
-    campaigns = Campaign.objects.all()
-    agents = User.objects.filter(is_superuser=False)
-    p_clients = Paginator(clients, 50)
-    page_number = request.GET.get('page')
-    try:
-        page_obj = p_clients.get_page(page_number)
-    except PageNotAnInteger:
-        page_obj = p_clients.page(1)
-    except EmptyPage:
-        page_obj = p_clients.page(p_clients.num_pages)
-
-    return render(
-        request, "home/client.html", {"clients": p_clients, "current_date": datetime.now(london_tz).date, "campaigns": campaigns,"agents": serialize('json', agents), 'page_obj': page_obj}
-    )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_date'] = timezone.now().date()
+        context['campaigns'] = Campaign.objects.all()
+        context['agents'] = serialize('json', User.objects.filter(is_superuser=False))
+        return context
 
 
 @login_required
@@ -484,7 +300,6 @@ def add_client(request):
             )
             
             with open(uk_postcodes, "a") as f:
-                print(f)
                 f.write("," + postcode[:-3].strip())
             uk.postcodes += "," + postcode[:-3].strip()
             uk.save()
@@ -543,7 +358,7 @@ def add_client(request):
         )
         messages.success(request, "Client added successfully!")
         return redirect("client_app:client")
-    return render(request, "home/client.html")
+    return redirect("/client")
 
 
 @login_required
@@ -596,7 +411,6 @@ def edit_client(request, client_id):
         client.house_name = request.POST.get("house_name")
         client.county = request.POST.get("county")
         client.country = request.POST.get("country")
-        # print(request.POST.get("county"),request.POST.get("country"))
         if client.city == "nan" or client.county == "nan" or client.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/client?page=edit_client&id={client_id}")
@@ -633,7 +447,7 @@ def edit_client(request, client_id):
         return redirect(f"/client-detail/{client_id}")
 
     context = {"client": client}
-    return render(request, "home/client.html", context)
+    return redirect('client_app:client', context)
 
 @login_required
 def remove_client(request, client_id):
@@ -813,7 +627,7 @@ def add_campaign(request, client_id):
         )
         messages.success(request, "Campaign added successfully!")
         return redirect(f"/client-detail/{client_id}")
-    return render(request, f"/client-detail/{client_id}")
+    return redirect(f"/client-detail/{client_id}")
 
 
 def remove_campaign(request, campaign_id, client_id):
@@ -822,57 +636,7 @@ def remove_campaign(request, campaign_id, client_id):
     messages.success(request, "Campaign deleted successfully!")
     return redirect(f"/client-detail/{client_id}")
 
-def add_product_client(request,client_id):
-    if request.method == 'POST':
-        product = Product.objects.get(pk=request.POST.get('product_id'))
-        client = Clients.objects.get(pk=client_id)
-        client.product.add(product)
-        product.save()
-        messages.success(request, "Product added successfully to a Client!")
-        return redirect(f'/client-detail/{client_id}')
 
-
-@login_required
-def add_product(request, client_id):
-    clients = Clients.objects.all()
-    fields = {}
-    client = Clients.objects.get(pk=client_id)
-    stages = Stage.objects.all().filter(client=client)
-    if stages.exists():
-        for stage in stages:
-            fields[stage.name] =  json.loads(stage.fields)
-    if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description")
-        dynamicStages = request.POST.getlist("dynamicStage")
-        dynamicFields = request.POST.getlist("dynamicField")
-        dynamicRules = request.POST.getlist("dynamicRule")
-        documents = request.FILES.getlist("document")
-
-        rules_regulations = {}
-        i=0
-        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
-            rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
-            i+=1
-        rules_regulations = json.dumps(rules_regulations)
-
-        product = Product.objects.create(
-            name=name,
-            description=description,
-            rules_regulations=rules_regulations,
-        )
-        client.product.add(product)
-        for document in documents:
-            doc = Document.objects.create(document=document)
-            product.documents.add(doc)
-        product.save()
-        messages.success(request, "Product added successfully!")
-        return redirect(f'/client-detail/{client_id}')
-    return render(
-        request,
-        "home/add_products.html",
-        {"clients": clients, "stages": stages, "fields": fields, "client_id": client_id},
-    )
 
 def add_route_client(request, client_id):
     if request.method == "POST":
@@ -890,6 +654,7 @@ def add_route_client(request, client_id):
         )
         messages.success(request, "Funding Route added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
+    
 
 def add_product_client(request, client_id):
     if request.method == "POST":
@@ -902,92 +667,6 @@ def add_product_client(request, client_id):
         client.save()
         messages.success(request, "Product added successfully to a Client!")
         return redirect(f"/client-detail/{client_id}")
-
-@login_required
-def create_stage(request, client_id):
-    routes = Route.objects.all()
-    client = Clients.objects.get(pk=client_id)
-    stages=Stage.objects.all().filter(client=client).order_by("order")
-    templateablestages = Stage.objects.all().filter(templateable=True)
-    if request.GET.get("page")== 'edit_page':
-        stage = Stage.objects.get(pk=request.GET.get("stage_id"))          
-        return render(request, 'home/stages.html', {"stage":stage, "fields":json.loads(stage.fields), "templateablestages": templateablestages})
-
-    if request.method == "POST":
-        dynamic_types = request.POST.getlist("dynamic_type")
-        dynamic_labels = request.POST.getlist("dynamic_label")
-        order = request.POST.get('order')
-        templateable = request.POST.get('templateable') == 'on'
-        description = request.POST.get('description')
-        documents = request.FILES.getlist("document")
-
-        if order.isdigit():
-            order = int(order)
-        else:
-            messages.error(request, "Order should be a number")
-            return redirect("/client-detail/"+str(client_id))
-        if Stage.objects.filter(client=client).filter(order=order).exists():
-            messages.error(request, "Stage with this order already exists!")
-            return redirect("/client-detail/"+str(client_id))
-
-        dynamic_fields = {}
-        for label, field_type in zip(dynamic_labels, dynamic_types):
-            dynamic_fields[label] = field_type
-        fields = json.dumps(dynamic_fields)
-        stage = Stage.objects.create(
-            name=request.POST.get("name"),
-            fields=fields,
-            order=order,
-            description=description,
-            templateable=templateable,
-            client=client,
-        )
-        for document in documents:
-            doc = Document.objects.create(document=document)
-            stage.documents.add(doc)
-        stage.save()
-        return redirect("/client-detail/"+str(client_id))
-    return render(request, "home/stages.html", {"routes": routes, "stages": stages, "client_id": client_id, "templateablestages": templateablestages}) 
-
-
-@login_required
-def remove_stage(request, stage_id):
-    stage = Stage.objects.get(pk=stage_id)
-    stage.delete()
-    messages.success(request, "Stage deleted successfully!")
-    return redirect("/client-detail/" + str(stage.client.id))
-
-@login_required
-def edit_stage(request, stage_id):
-    stage = Stage.objects.get(pk=stage_id)
-    if request.method == "POST":
-        dynamic_types = request.POST.getlist("dynamic_type")
-        dynamic_labels = request.POST.getlist("dynamic_label")
-        order = request.POST.get("order") 
-        templateable = request.POST.get("templateable") == "on"
-        description = request.POST.get("description")
-        documents = request.FILES.getlist("document")
-        dynamic_fields = {}
-        if order.isdigit():
-            order = int(order)
-        else:
-            messages.error(request, "Order should be a number")
-            return redirect("/client-detail/" + str(stage.client.id))
-        for label, field_type in zip(dynamic_labels, dynamic_types):
-            dynamic_fields[label] = field_type
-        fields = json.dumps(dynamic_fields)
-        stage.name = request.POST.get("name")
-        stage.fields = fields
-        stage.order = order
-        stage.description = description
-        stage.templateable = templateable
-        for document in documents:
-            doc = Document.objects.create(document=document)
-            stage.documents.add(doc)
-        stage.save()
-        messages.success(request, "Stage updated successfully!")
-        return redirect("/client-detail/"+str(stage.client.id))
-
 
 def send_client_email(request, cclient_id):
     cclient = Clients.objects.get(pk=cclient_id)
@@ -1037,13 +716,8 @@ def send_client_email(request, cclient_id):
         text = request.POST.get("text")
         subject = request.POST.get("subject")
 
-    # Replace newline characters with <br> tags
     body = re.sub(r"\r?\n", "<br>", body)
     signature_content = re.sub(r"\r?\n", "<br>", signature.signature)
-
-    print(body)
-    print(signature_content)
-
     context = {
         "body": body,
         "signature": signature_content,
@@ -1108,7 +782,6 @@ def add_coverage_areas(request, client_id):
             messages.success(request, "Coverage Area added successfully!")
                     
         return redirect(r"/client-detail/" + str(client_id))
-    return render(request, "home/admin.html")
 
 def archive_campaign(request,client_id, campaign_id):
     campaign = Campaign.objects.get(pk=campaign_id)
@@ -1173,75 +846,6 @@ def delete_customer_session(request):
     del request.session['campaign']
     del request.session['client']
 
-def stage_template(request):
-    if request.method == 'POST':
-        client_id = request.POST.get('client_id')
-        if request.POST.get("template") == "nan":
-            messages.error(request, "Select a template")
-            return redirect(f"/client-detail/{client_id}")
-        template_id = request.POST.get('template')
-        template = Stage.objects.get(pk=template_id)
-        templateablestages = Stage.objects.all().filter(templateable=True)
-        messages.success(request, "Template copied successfully!")
-        return render(request, 'home/add_stage_template.html', {"stage":template, "templateablestages":templateablestages,"fields":json.loads(template.fields), "client_id": client_id})
-
-
-@login_required
-def edit_local_funding_route(request, funding_route_id):
-    funding_route = Route.objects.get(pk=funding_route_id)
-    clients = funding_route.client.all()
-    if clients.exists():
-        client_id = clients.first().id
-    # stages = Stage.objects.all().filter(client=Clients.objects.get(pk=client_id))
-    # fields = {}
-    # saved_rules_regulations = {}
-    # if funding_route.rules_regulations:
-    #     saved_rules_regulations = json.loads(funding_route.rules_regulations)
-    # if stages.exists():
-    #     for stage in stages:
-    #         fields[stage.name] = json.loads(stage.fields)
-    # if funding_route.sub_rules_regulations:
-    #     sub_rules_regulations = json.loads(funding_route.sub_rules_regulations)
-    # else:
-    #     sub_rules_regulations = None
-    # if stages.exists():
-    #     for stage in stages:
-    #         fields[stage.name] = json.loads(stage.fields)
-    if request.method == "POST":
-        dynamicStages = request.POST.getlist("subDynamicStage")
-        dynamicFields = request.POST.getlist("subDynamicField")
-        dynamicRules = request.POST.getlist("subDynamicRule")
-        
-        rules_regulations = {}
-        i = 0
-        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
-            rules_regulations[f"{i}"] = [d_stage, d_field, d_rule]
-            i += 1
-        funding_route.sub_rules_regulations = json.dumps(rules_regulations)
-        funding_route.save()
-        messages.success(request, "Funding Route updated successfully!")
-        return redirect(f"/client-detail/{client_id}")
-    return render(
-        request,
-        "home/edit_local_funding_routes.html",
-        {
-            "funding_route": funding_route,
-            # "fields": fields,
-            # "saved_rules_regulations": saved_rules_regulations,
-            # "sub_rules_regulations": sub_rules_regulations,
-        },
-    )
-
-def make_template_stage(request,stage_id):
-    stage = Stage.objects.get(pk=stage_id)
-    stage.templateable = not stage.templateable
-    stage.save()
-    if stage.templateable:
-        messages.success(request, "Stage is now made template!")
-    else:
-        messages.success(request, "Stage is not a template!")
-    return redirect(f"/client-detail/{stage.client.id}")
-
 def add_priority(request, stage_id, client_id):
     stage = Stage.objects.get(pk=stage_id)
     if request.method == 'POST':
@@ -1301,46 +905,3 @@ def add_client_stage_rule(request, route_id, product_id, stage_id, question_id, 
 
     messages.success(request, "Rule added successfully!")
     return redirect("/client-detail/"+ str(client_id))
-
-
-@login_required
-def add_product(request, client_id):
-    clients = Clients.objects.all()
-    fields = {}
-    client = Clients.objects.get(pk=client_id)
-    stages = Stage.objects.all().filter(client=client)
-    if stages.exists():
-        for stage in stages:
-            fields[stage.name] =  json.loads(stage.fields)
-    if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description")
-        dynamicStages = request.POST.getlist("dynamicStage")
-        dynamicFields = request.POST.getlist("dynamicField")
-        dynamicRules = request.POST.getlist("dynamicRule")
-        documents = request.FILES.getlist("document")
-
-        rules_regulations = {}
-        i=0
-        for d_stage, d_field, d_rule in zip(dynamicStages, dynamicFields, dynamicRules):
-            rules_regulations[f'{i}'] = [d_stage,d_field, d_rule]
-            i+=1
-        rules_regulations = json.dumps(rules_regulations)
-
-        product = Product.objects.create(
-            name=name,
-            description=description,
-            rules_regulations=rules_regulations,
-        )
-        client.product.add(product)
-        for document in documents:
-            doc = Document.objects.create(document=document)
-            product.documents.add(doc)
-        product.save()
-        messages.success(request, "Product added successfully!")
-        return redirect(f'/client-detail/{client_id}')
-    return render(
-        request,
-        "home/add_products.html",
-        {"clients": clients, "stages": stages, "fields": fields, "client_id": client_id},
-    )
