@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+import datetime
 from django.contrib.auth.base_user import BaseUserManager
 
 class UserManager(BaseUserManager):
@@ -52,12 +53,17 @@ class User(AbstractUser):
     username = None
     username = models.CharField(max_length=100, unique=True)
     email = models.EmailField(_('email address'), unique=True)
+    role = models.CharField(max_length=100, blank=True, null=True)
+    department = models.CharField(max_length=100, blank=True, null=True)
+    satatus = models.BooleanField(default=True)
+    dob = models.DateField(blank=True, null=True)
+    start_date = models.DateField(default=datetime.date.today)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    dashboard = models.BooleanField(default=True)
-    customer = models.BooleanField(default=True)
-    client = models.BooleanField(default=True)
-    archive = models.BooleanField(default=True)
+    dashboard = models.BooleanField(default=False)
+    customer = models.BooleanField(default=False)
+    client = models.BooleanField(default=False)
+    archive = models.BooleanField(default=False)
     council = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     stage = models.BooleanField(default=False)
@@ -65,5 +71,6 @@ class User(AbstractUser):
     finance = models.BooleanField(default=False)
     funding_route = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)
-    
+    is_employee = models.BooleanField(default=False)
+    is_archive = models.BooleanField(default=False)
     objects = UserManager()

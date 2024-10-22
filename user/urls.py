@@ -6,8 +6,8 @@ app_name= 'user'
 urlpatterns = [
     path('login',views.signin,name='login'),
     path('logout',views.logout_view,name='logout'),
-    path('add_user',views.add_user,name='add_user'),
-    path('edit_user/<int:user_id>',views.edit_user,name='edit_user'),
+    path('add_employee',views.add_employee,name='add_employee'),
+    path('edit_employee/<int:emp_id>',views.edit_employee,name='edit_employee'),
     path('remove_user/<int:user_id>',views.remove_user,name='remove_user'),
     
 ]

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom %}
+{% block search %}
+
+<input
+  class="form-control me-2"
+  type="search"
+  placeholder="Search"
+  aria-label="Search"
+  id="myInput"
+/>
+
+{% endblock %}
+{% block content %}
+<style>
+  .flex-container {
+    display: flex;
+    gap: 20px; /* Optional: Adds space between the two divs */
+  }
+</style>
+
+<div class="container-fluid" style="max-width:1500px">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch w-100">
+      <div class="card w-100">
+        <div class="card-body">
+
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+
+          <div class="mb-3 mb-sm-0">
+            <a href="#">
+              <h5 class="card-title fw-semibold text-primary">Off Boarding Management</h5>
+            </a>
+            <div>
+              <button type="button" class="btn btn-danger mt-3" id="deleteSelectedBtn">Archive Selected</button>
+            </div>
+          </div>
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <table class="table" id="employeeTable">
+              <thead>
+                <tr>
+                  <th>
+                    <input type="checkbox" id="selectAll">
+                  </th>
+                  <th>
+                    Full Name
+                  </th>
+                  <th onclick="sortTable(2)">
+                    Role <span id="arrow2"></span>
+                  </th>
+                  <th>
+                    Department
+                  </th>
+                  <th onclick="sortTable(4)">
+                    Status <span id="arrow4"></span>
+                  </th>
+                  <th>
+                    DOB <span id="arrow5"></span>
+                  </th>
+                  <th>
+                    Start Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="myTable">
+                {% if emps %}
+                  {% for emp in emps %}
+                    <tr>
+                      <td>
+                        <input type="checkbox" class="select-employee" data-employee-id="{{ emp.id }}">
+                      </td>
+                      <td class="text-underlined" style="width: 20%;">
+                        <a href="{% url 'hr_app:edit_employee' emp.id %}">{{ emp.first_name }} {{ emp.last_name }}</a>
+                      </td>
+                      <td style="width: 20%;">{{ emp.role }}</td>
+                      <td style="width: 20%;">{{ emp.department }}</td>
+                      <td style="width: 10%;">{% if emp.status %} Activate {% else %} Deactivate {% endif %}</td>
+                      <td style="width: 10%;">{{ emp.dob }}</td>
+                      <td style="width: 10%;">{{ emp.start_date }}</td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr class="text-center display-flex align-items-center justify-content-center">
+                    <td colspan="7" class="text-center">No Employees</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block js %}
+<!-- Include jQuery if not already included -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+  // Search functionality
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+
+  // Select/deselect all checkboxes
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const employeeCheckboxes = document.querySelectorAll('.select-employee');
+
+  selectAllCheckbox.addEventListener('change', function() {
+    employeeCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+  });
+
+  // Bulk archive
+  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+  deleteSelectedBtn.addEventListener('click', function() {
+    const selectedEmployeeIds = Array.from(employeeCheckboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.getAttribute('data-employee-id'));
+
+    if (selectedEmployeeIds.length > 0) {
+      const confirmArchive = confirm('Are you sure you want to archive selected employees?');
+      if (confirmArchive) {
+        window.location.href = `bulk_archive_employes?ids=${selectedEmployeeIds.join(',')}`;
+      }
+    } else {
+      alert('Please select employees to archive.');
+    }
+  });
+});
+
+// Sorting functionality
+function sortTable(colIndex) {
+  var table = document.getElementById("employeeTable");
+  var switching = true;
+  var dir = "asc"; // Set the sorting direction to ascending by default
+  var switchcount = 0;
+
+  while (switching) {
+    switching = false;
+    var rows = table.rows;
+    // Skip the header row (i = 1)
+    for (var i = 1; i < rows.length - 1; i++) {
+      var shouldSwitch = false;
+      var x = rows[i].getElementsByTagName("td")[colIndex];
+      var y = rows[i + 1].getElementsByTagName("td")[colIndex];
+      if (x && y) {
+        if (dir === "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir === "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount++;
+    } else {
+      if (switchcount === 0 && dir === "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+</script>
+{% endblock js %}

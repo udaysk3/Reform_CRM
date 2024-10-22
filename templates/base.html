@@ -204,12 +204,12 @@ i{
             {% endif %}
             {% if request.user.hr %}
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "hr_app:hr" %}" aria-expanded="false">
+              <p class="sidebar-link hr" aria-expanded="false">
                 <span>
                   <i class="ti ti-file-description"></i>
                 </span>
                 <span class="hide-menu">HR</span>
-              </a>
+              </p>
             </li>
             {% endif %}
         </nav>
@@ -332,6 +332,226 @@ i{
         customer.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+      })
+    
+      
+    </script>
+
+  
+  <script>
+    const hr = document.querySelector('.hr');
+    hr.addEventListener('click',()=>{
+
+      if(document.querySelector('.kbase')){
+          document.querySelector('.kbase').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','kbase');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Knowledge Base</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.ochart')){
+          document.querySelector('.ochart').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','ochart');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Organizational Chart</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.offboarding')){
+          document.querySelector('.offboarding').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','offboarding');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="{% url 'hr_app:off_boarding' %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Offboarding</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.enotify')){
+          document.querySelector('.enotify').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','enotify');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Employee Notification</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.eaction')){
+          document.querySelector('.eaction').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','eaction');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Employee Actions</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+      
+      if(document.querySelector('.timesheet')){
+          document.querySelector('.timesheet').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','timesheet');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Timesheet</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.onboarging')){
+          document.querySelector('.onboarging').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','onboarging');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Onboarding</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.appli')){
+          document.querySelector('.appli').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','appli');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Application</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.emp')){
+          document.querySelector('.emp').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','emp');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="{% url 'hr_app:employee' %}" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Employees</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
+      if(document.querySelector('.dash')){
+          document.querySelector('.dash').remove()
+        } else{
+        const a1 = document.createElement("li");
+        a1.classList.add('sidebar-item','dash');
+        a1.innerHTML = `
+        <a class="sidebar-link" href="#" aria-expanded="false">
+                <span>
+                  <i class="bi bi-chevron-down " style="color: transparent;
+                  "></i>
+                </span>
+                <span>
+                  <i class="bi bi-person" style="background-color: transparent;"></i>
+                </span>
+                <span class="hide-menu">Dashboard</span>
+              </a>
+        `
+        hr.parentNode.insertAdjacentElement("afterend", a1);
+        
+      }
+
       })
     
       

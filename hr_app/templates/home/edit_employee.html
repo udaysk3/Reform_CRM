@@ -1,0 +1,127 @@
+{% extends "base.html" %} {% load static %} {% load custom %} {% block css %}
+
+{% endblock %} {%block content%}
+
+<div class="container-fluid" style="max-width: 1500px">
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech w-100">
+      <div class="card w-100">
+        <div class="card-body">
+          <div
+            class="d-sm-flex d-block align-items-center justify-content-between mb-9"
+          >
+            <div class="mb-3 mb-sm-0">
+              <a href="{% url 'hr_app:employee' %}">
+                <h5
+                  class="card-title fw-semibold text-primary text-decoration-underline"
+                >
+                  Employee
+                </h5></a
+              >
+            </div>
+          </div>
+          <div>
+            <form
+              method="post"
+              action="{% url 'user:edit_employee' emp.id %}"
+            >
+              {% csrf_token %}
+
+              <div class="mb-3">
+                <label for="first_name" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="first_name"
+                  name="first_name"
+                  value="{{ emp.first_name }}"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="last_name"
+                  name="last_name"
+                  value="{{emp.last_name}}"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  required
+                  value="{{emp.email}}"
+                  disabled
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="role"
+                  name="role"
+                  value="{{emp.role}}"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="department" class="form-label">Department</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="department"
+                  name="department"
+                  value="emp.department"
+                  required
+                />
+              </div>
+              
+              <div class="my-3">
+                <label for="dob" class="form-label">DOB</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="dob"
+                  name="dob"
+                  value="{{emp.dob}}"
+                  required
+                />
+              </div>
+
+              
+              <button id="submitBtn" class="reform_btn">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %} {% block js %}
+
+
+{% endblock %}

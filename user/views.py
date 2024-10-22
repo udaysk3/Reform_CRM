@@ -38,73 +38,51 @@ def logout_view(request):
     messages.success(request,'Logout Successful')
     return redirect('user:login')
 
-def add_user(request):
+def add_employee(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         if User.objects.filter(email=email).exists():
-            messages.error(request, 'User with this email already exists!')
+            messages.error(request, 'Agent with this email already exists!')
             return redirect('admin_app:admin') 
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        password = request.POST.get('password') 
-        dashboard = request.POST.get('dashboard') == 'on'
-        customer = request.POST.get('customer') == 'on'
-        client = request.POST.get('client') == 'on'
-        stage = request.POST.get('stage') == 'on'
-        product = request.POST.get('product') == 'on'
-        council = request.POST.get('council') == 'on'
-        funding_route = request.POST.get('funding_route') == 'on'
-        admin = request.POST.get('admin') == 'on'
-        finance = request.POST.get('finance') == 'on'
-        hr = request.POST.get('hr') == 'on'
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+        department = request.POST.get('department')
+        dob = request.POST.get('dob')
         hashed_password = make_password(password) 
-        user = User.objects.create(
+        emp = User.objects.create(
             username=email,
             email=email,
             first_name=first_name,
             last_name=last_name,
             password= hashed_password,
-            dashboard=dashboard,
-            customer=customer,
-            client=client,
-            council=council,
-            stage=stage,
-            product=product,
-            funding_route=funding_route,
-            admin=admin,
-            finance=finance,
-            hr=hr
+            role=role,
+            department=department,
+            dob=dob,
+            is_employee=True,
         )
-        messages.success(request, 'User added successfully!')
-        return redirect('admin_app:admin')  # Redirect to the appropriate URL
+        messages.success(request, 'Agnet added successfully!')
+        return redirect('hr_app:employee')
 
     return render(request, 'your_template.html')
 
-def edit_user(request, user_id):
-    user = User.objects.get(pk=user_id)
+def edit_employee(request, emp_id):
+    emp = User.objects.get(pk=emp_id)
     if request.method == 'POST':
-        print(request.POST)
-        user.email = request.POST.get('email')
         if request.POST.get('password'):
-            user.password = make_password(request.POST.get('password'))
-        user.dashboard = request.POST.get('dashboard') == 'on'
-        user.customer = request.POST.get('customer') == 'on'
-        user.client = request.POST.get('client') == 'on'
-        user.council = request.POST.get('council') == 'on'
-        user.stage = request.POST.get('stage') == 'on'
-        user.product = request.POST.get('product') == 'on'
-        user.funding_route = request.POST.get('funding_route') == 'on'
-        user.admin = request.POST.get('admin') == 'on'
-        user.finance = request.POST.get('finance') == 'on'
-        user.hr = request.POST.get('hr') == 'on'
-        # user.set_password(user.password)
-        user.save()
+            emp.password = make_password(request.POST.get('password'))
+        emp.first_name = request.POST.get('first_name')
+        emp.last_name = request.POST.get('last_name')
+        emp.role = request.POST.get('role')
+        emp.department = request.POST.get('department')
+        emp.dob = request.POST.get('dob')
+        emp.save()
 
         messages.success(request, 'User updated successfully!')
-        return redirect('admin_app:admin')  # Redirect to the appropriate URL
+        return redirect('hr_app:employee')  # Redirect to the appropriate URL
 
-    context = {'user': user}
-    return redirect('admin_app:adminview')
+    return redirect('hr_app:employee')
 
 def remove_user(request, user_id):
     user = User.objects.get(pk=user_id)
