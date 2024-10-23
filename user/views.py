@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
+import datetime
 
 def signin(request):
     if request.method == 'POST':
@@ -22,9 +23,10 @@ def signin(request):
                     request.session['email'] = email
                     request.session.save()
                     login(request, authenticated_user)
+                    user.last_login = datetime.datetime.now()
                     messages.success(request, 'Login Successful')
                     return redirect('/dashboard')
-                
+
         messages.error(request,'Incorrect email or password')
         return render(request, 'user/login.html', {'message': 'Incorrect email or password'})
     
@@ -72,6 +74,8 @@ def edit_employee(request, emp_id):
     if request.method == 'POST':
         if request.POST.get('password'):
             emp.password = make_password(request.POST.get('password'))
+        if emp.role != request.POST.get('role'):
+            emp.approved = ''
         emp.first_name = request.POST.get('first_name')
         emp.last_name = request.POST.get('last_name')
         emp.role = request.POST.get('role')

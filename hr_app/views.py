@@ -23,7 +23,12 @@ def add_employee(request):
 
 def edit_employee(request, emp_id):
     emp = User.objects.get(pk=emp_id)
-    return render(request, 'home/edit_employee.html', {'emp':emp})
+    if emp.dob:
+        emp_dob_formatted = emp.dob.strftime('%Y-%m-%d')
+    else:
+        emp_dob_formatted = ''
+
+    return render(request, 'home/edit_employee.html', {'emp':emp, 'emp_dob':emp_dob_formatted})
 
 
 def bulk_archive_employes(request):

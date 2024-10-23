@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "product_app",
     "admin_app",
     "region_app",
+    "security_app",
     "question_actions_requirements_app",
 ]
 
@@ -89,7 +90,8 @@ TEMPLATES = [
             os.path.join(BASE_DIR, "product_app", "templates"),  
             os.path.join(BASE_DIR, "region_app", "templates"),  
             os.path.join(BASE_DIR, "question_actions_requirements_app", "templates"),  
-            os.path.join(BASE_DIR, "admin_app", "templates"),  
+            os.path.join(BASE_DIR, "admin_app", "templates"), 
+            os.path.join(BASE_DIR, "security_app", "templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {

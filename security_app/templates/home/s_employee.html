@@ -16,7 +16,7 @@
 <style>
   .flex-container {
     display: flex;
-    gap: 20px; /* Optional: Adds space between the two divs */
+    gap: 20px;
   }
 </style>
 
@@ -36,37 +36,24 @@
 
           <div class="mb-3 mb-sm-0">
             <a href="#">
-              <h5 class="card-title fw-semibold text-primary">Employee Management</h5>
+              <h5 class="card-title fw-semibold text-primary">Security Employee Management</h5>
             </a>
-            <div>
-              <button type="button" class="btn btn-danger mt-3" id="deleteSelectedBtn">Archive Selected</button>
-              <a href="{% url 'hr_app:add_employee' %}" class="btn btn-primary mt-3">Add Employee</a>
-            </div>
           </div>
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             <table class="table" id="employeeTable">
               <thead>
                 <tr>
                   <th>
-                    <input type="checkbox" id="selectAll">
-                  </th>
-                  <th>
                     Full Name
                   </th>
-                  <th onclick="sortTable(2)">
-                    Role <span id="arrow2"></span>
-                  </th>
                   <th>
-                    Department
+                    Last Login
                   </th>
                   <th onclick="sortTable(4)">
                     Status <span id="arrow4"></span>
                   </th>
-                  <th>
-                    DOB <span id="arrow5"></span>
-                  </th>
-                  <th>
-                    Start Date
+                  <th onclick="sortTable(2)">
+                    Role <span id="arrow2"></span>
                   </th>
                 </tr>
               </thead>
@@ -74,17 +61,12 @@
                 {% if emps %}
                   {% for emp in emps %}
                     <tr>
-                      <td>
-                        <input type="checkbox" class="select-employee" data-employee-id="{{ emp.id }}">
-                      </td>
                       <td class="text-underlined" style="width: 20%;">
-                        <a href="{% url 'hr_app:edit_employee' emp.id %}">{{ emp.first_name }} {{ emp.last_name }}</a>
+                        <a href="{% url 'security_app:s_edit_employee' emp.id %}">{{ emp.first_name }} {{ emp.last_name }}</a>
                       </td>
-                      <td style="width: 20%;">{% if emp.approved != 'approve' %}Not Approved {%else%} {{ emp.role }} {% endif %} </td>
-                      <td style="width: 20%;">{{ emp.department }}</td>
+                      <td style="width: 10%;">{{ emp.last_login }}</td>
                       <td style="width: 10%;">{% if emp.status %} Activate {% else %} Deactivate {% endif %}</td>
-                      <td style="width: 10%;">{{ emp.dob }}</td>
-                      <td style="width: 10%;">{{ emp.start_date }}</td>
+                      <td style="width: 20%;">{{ emp.role }}</td>
                     </tr>
                   {% endfor %}
                 {% else %}
@@ -115,37 +97,7 @@ $(document).ready(function() {
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
     });
   });
-
-  // Select/deselect all checkboxes
-  const selectAllCheckbox = document.getElementById('selectAll');
-  const employeeCheckboxes = document.querySelectorAll('.select-employee');
-
-  selectAllCheckbox.addEventListener('change', function() {
-    employeeCheckboxes.forEach(checkbox => {
-      checkbox.checked = selectAllCheckbox.checked;
-    });
-  });
-
-  // Bulk archive
-  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-
-  deleteSelectedBtn.addEventListener('click', function() {
-    const selectedEmployeeIds = Array.from(employeeCheckboxes)
-      .filter(checkbox => checkbox.checked)
-      .map(checkbox => checkbox.getAttribute('data-employee-id'));
-
-    if (selectedEmployeeIds.length > 0) {
-      const confirmArchive = confirm('Are you sure you want to archive selected employees?');
-      if (confirmArchive) {
-        window.location.href = `bulk_archive_employes?ids=${selectedEmployeeIds.join(',')}`;
-      }
-    } else {
-      alert('Please select employees to archive.');
-    }
-  });
 });
-
-// Sorting functionality
 function sortTable(colIndex) {
   var table = document.getElementById("employeeTable");
   var switching = true;

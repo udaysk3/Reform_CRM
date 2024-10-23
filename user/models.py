@@ -35,6 +35,8 @@ class UserManager(BaseUserManager):
             "finance": True,
             "council":True,
             "hr": True,
+            "security": True,
+            "global_": True,
             "is_staff": True,
             "is_superuser": True,
             **extra_fields,
@@ -68,9 +70,13 @@ class User(AbstractUser):
     admin = models.BooleanField(default=False)
     stage = models.BooleanField(default=False)
     product = models.BooleanField(default=False)
+    globals = models.BooleanField(default=False)
     finance = models.BooleanField(default=False)
     funding_route = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)
+    security = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)
     is_archive = models.BooleanField(default=False)
+    last_login = models.DateTimeField(blank=True, null=True)
+    approved = models.CharField(max_length=100, blank=True, null=True)
     objects = UserManager()

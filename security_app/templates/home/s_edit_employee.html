@@ -11,7 +11,7 @@
             class="d-sm-flex d-block align-items-center justify-content-between mb-9"
           >
             <div class="mb-3 mb-sm-0">
-              <a href="{% url 'hr_app:employee' %}">
+              <a href="{% url 'security_app:s_employee' %}">
                 <h5
                   class="card-title fw-semibold text-primary text-decoration-underline"
                 >
@@ -23,7 +23,7 @@
           <div>
             <form
               method="post"
-              action="{% url 'user:edit_employee' emp.id %}"
+              action="{% url 'security_app:s_edit_employee' emp.id %}"
             >
               {% csrf_token %}
 
@@ -35,6 +35,7 @@
                   id="first_name"
                   name="first_name"
                   value="{{ emp.first_name }}"
+                  disabled
                   required
                 />
               </div>
@@ -47,6 +48,7 @@
                   id="last_name"
                   name="last_name"
                   value="{{emp.last_name}}"
+                  disabled
                   required
                 />
               </div>
@@ -71,44 +73,35 @@
                   class="form-control"
                   id="password"
                   name="password"
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="role"
-                  name="role"
-                  value="{{emp.role}}"
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="department" class="form-label">Department</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="department"
-                  name="department"
-                  value="{{emp.department}}"
-                />
-              </div>
-              
-              <div class="my-3">
-                <label for="dob" class="form-label">DOB</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  id="dob"
-                  name="dob"
-                  value="{{emp_dob}}"
                   required
                 />
               </div>
+
+              <div class="mb-3">
+                <button class="reform_btn"> 2-Factor Authentication </button>
+              </div>
               
-              <button id="submitBtn" class="reform_btn">Submit</button>
+              <div class="mb-3">
+                <label for="role" class="form-label">Role</label> - {{ emp.role }}
+                {% if emp.role and emp.approved != 'approve' and emp.approved != 'deny' %}
+                  <div class="row ms-0">
+                    <a href="{% url 'security_app:approve_role' emp.id %}" class="reform_btn"> Approve </a>
+                    <a href="{% url 'security_app:deny_role' emp.id %}" class="reform_btn"> Deny </a>
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="mb-3">
+                <label for="role" class="form-label">Role</label> - {{ emp.role }}
+                {% if emp.role and emp.approved != 'approve' and emp.approved != 'deny' %}
+                  <div class="row ms-0">
+                    <a href="{% url 'security_app:approve_role' emp.id %}" class="reform_btn"> Approve </a>
+                    <a href="{% url 'security_app:deny_role' emp.id %}" class="reform_btn"> Deny </a>
+                  </div>
+                {% endif %}
+              </div>
+              
+              <button class="reform_btn">Submit</button>
             </form>
           </div>
         </div>

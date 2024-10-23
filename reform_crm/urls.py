@@ -30,6 +30,7 @@ urlpatterns = [
     path('',include('product_app.urls')),
     path('',include('region_app.urls')),
     path('',include('admin_app.urls')),
+    path('',include('security_app.urls')),
     path('',include('question_actions_requirements_app.urls')),
     path('admin/', admin.site.urls),
     path('user/',include('user.urls'),name='user')
