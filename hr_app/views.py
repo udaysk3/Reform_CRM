@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from user.models import User
+from security_app.models import Role
 
 
 @login_required
@@ -19,16 +20,18 @@ def off_boarding(request):
     return render(request, "home/off_boarding.html", {'emps':employes})
 
 def add_employee(request):
-    return render(request, 'home/add_employee.html')
+    roles = Role.objects.all()
+    return render(request, 'home/add_employee.html', {'roles':roles})
 
 def edit_employee(request, emp_id):
     emp = User.objects.get(pk=emp_id)
+    roles = Role.objects.all()
     if emp.dob:
         emp_dob_formatted = emp.dob.strftime('%Y-%m-%d')
     else:
         emp_dob_formatted = ''
 
-    return render(request, 'home/edit_employee.html', {'emp':emp, 'emp_dob':emp_dob_formatted})
+    return render(request, 'home/edit_employee.html', {'emp':emp, 'emp_dob':emp_dob_formatted, 'roles':roles})
 
 
 def bulk_archive_employes(request):

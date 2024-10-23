@@ -175,7 +175,7 @@ i{
             </li>
             {% endif %}
 
-            {% if request.user.global %}
+            {% if request.user.globals %}
             <li class="sidebar-item">
               <div class="sidebar-link customer-journey" aria-expanded="false">
                 <span>
@@ -385,7 +385,7 @@ i{
         const a1 = document.createElement("li");
         a1.classList.add('sidebar-item','s_role');
         a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
+        <a class="sidebar-link" href="{% url 'security_app:role' %}" aria-expanded="false">
                 <span>
                   <i class="bi bi-chevron-down " style="color: transparent;
                   "></i>
