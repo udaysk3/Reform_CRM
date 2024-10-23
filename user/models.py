@@ -78,5 +78,6 @@ class User(AbstractUser):
     is_employee = models.BooleanField(default=False)
     is_archive = models.BooleanField(default=False)
     last_login = models.DateTimeField(blank=True, null=True)
+    status = models.BooleanField(default=False)
     approved = models.CharField(max_length=100, blank=True, null=True)
     objects = UserManager()

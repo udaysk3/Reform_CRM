@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from user.models import User
+from django.contrib.auth.hashers import make_password
+
 
 @login_required
 def s_employee(request):
@@ -13,6 +15,11 @@ def s_employee(request):
 @login_required
 def s_edit_employee(request, emp_id):
     emp = User.objects.get(pk=emp_id)
+    if request.method == 'POST':
+        if request.POST.get('password'):
+            emp.password = make_password(request.POST.get('password'))
+        emp.status = request.POST.get('role')
+        emp.save()
     return render(request, 'home/s_edit_employee.html', {'emp':emp})
 
 def approve_role(request, emp_id):
