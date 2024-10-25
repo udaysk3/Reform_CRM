@@ -1,109 +1,123 @@
-{% extends "base.html" %} {% load static %} {% load custom %} {% block css %}
+{% extends "base.html" %}
+{% load static %}
+{% load custom %}
 
-{% endblock %} {%block content%}
+{% block css %}
+<!-- Add any additional CSS here -->
+{% endblock %}
 
+{% block content %}
 <div class="container-fluid" style="max-width: 1500px">
   <div class="row">
-    <div class="col-lg-12 d-flex align-items-strech w-100">
+    <div class="col-lg-12 d-flex align-items-stretch w-100">
       <div class="card w-100">
         <div class="card-body">
-          <div
-            class="d-sm-flex d-block align-items-center justify-content-between mb-9"
-          >
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             <div class="mb-3 mb-sm-0">
               <a href="{% url 'security_app:s_employee' %}">
-                <h5
-                  class="card-title fw-semibold text-primary text-decoration-underline"
-                >
+                <h5 class="card-title fw-semibold text-primary text-decoration-underline">
                   Employee
-                </h5></a
-              >
+                </h5>
+              </a>
             </div>
           </div>
+
           <div>
-            <form
-              method="post"
-              action="{% url 'security_app:s_edit_employee' emp.id %}"
-            >
+            <form method="post" action="{% url 'security_app:s_edit_employee' emp.id %}">
               {% csrf_token %}
 
+              <!-- First Name Field -->
               <div class="mb-3">
                 <label for="first_name" class="form-label">First Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="first_name"
-                  value="{{ emp.first_name }}"
-                  disabled
-                  required
-                />
+                <input type="text" class="form-control" id="first_name" value="{{ emp.first_name }}" disabled
+                  required />
               </div>
 
+              <!-- Last Name Field -->
               <div class="mb-3">
                 <label for="last_name" class="form-label">Last Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="last_name"
-                  value="{{emp.last_name}}"
-                  disabled
-                  required
-                />
+                <input type="text" class="form-control" id="last_name" value="{{ emp.last_name }}" disabled required />
               </div>
 
+              <!-- Email Field -->
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="email"
-                  required
-                  value="{{emp.email}}"
-                  disabled
-                />
+                <input type="email" class="form-control" id="email" value="{{ emp.email }}" disabled required />
               </div>
 
+              <!-- Password Field -->
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  name="password"
-                />
+                <input type="password" class="form-control" id="password" name="password" />
               </div>
 
-              <div class="mb-3">
-                <button class="reform_btn"> 2-Factor Authentication </button>
-              </div>
-              
-              <div class="mb-3">
-                <label for="role" class="form-label">Role</label> - {{ emp.role }}
-                {% if emp.role and emp.approved != 'approve' and emp.approved != 'deny' %}
-                  <div class="row ms-0">
-                    <a href="{% url 'security_app:approve_role' emp.id %}" class="reform_btn"> Approve </a>
-                    <a href="{% url 'security_app:deny_role' emp.id %}" class="reform_btn"> Deny </a>
-                  </div>
-                {% endif %}
-              </div>
-              
+              <!-- Status Checkbox -->
               <div class="form-check my-3">
-                <input class="form-check-input" type="checkbox" name="status" {% if emp.status %} checked {% endif %} id="status">
+                <input class="form-check-input" type="checkbox" name="status" {% if emp.status %} checked {% endif %}
+                  id="status">
                 <label class="form-check-label" for="status">
                   Activate
                 </label>
               </div>
               
-              <button class="reform_btn">Submit</button>
+              <button type="submit" class="reform_btn">Submit</button>
+
             </form>
+              <!-- Role Approval Section -->
+              <div class="my-3">
+                <label for="role" class="form-label">Role</label> - {{ emp.role }}
+                {% if emp.role and emp.approved != 'approve' and emp.approved != 'deny' %}
+                <div class="row ms-0">
+                  <a href="{% url 'security_app:approve_role' emp.id %}" class="reform_btn"> Approve </a>
+                  <a href="{% url 'security_app:deny_role' emp.id %}" class="reform_btn"> Deny </a>
+                </div>
+                {% endif %}
+              </div>
+
+            <!-- 2-Factor Authentication Button -->
+            <div class="mb-3">
+              <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                2-Factor Authentication
+              </button>
+            
+              <!-- Modal for 2-Factor Authentication -->
+              <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">2-Factor Authentication</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{% url 'security_app:change_otp_mail' emp.id %}" method="post">
+                    <div class="modal-body">
+                      <!-- Form for OTP Email Change -->
+                        {% csrf_token %}
+                        <div class="mb-3">
+                          <label for="otp_email" class="form-label">Change authentication email</label>
+                          <input type="email" name="email" class="form-control" id="otp_email" required>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <!-- Submit button for OTP form -->
+                        <button type="submit" class="reform_btn">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+              <!-- Submit Button for Main Form -->
+            </div>
           </div>
         </div>
       </div>
-    </div>
   </div>
 </div>
+{% endblock content %}
 
-{% endblock content %} {% block js %}
-
-
+{% block js %}
 {% endblock %}

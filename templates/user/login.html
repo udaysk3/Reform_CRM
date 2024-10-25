@@ -4,11 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <!-- Meta viewport tag for mobile responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Link to Google Fonts with specific font weights -->
-    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,300;0,400;0,600;0,900;1,300&display=swap" rel="stylesheet">
-    <!-- Link to login-specific styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,300;0,400;0,600;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static '/css/login.css' %}">
 </head>
 <body>
@@ -19,13 +16,11 @@
     </div>
 
     <!-- Login Form Container -->
-    <div class="login-container" id="login-form" aria-hidden="false">
-        <h2 class="login-title">Login {{ message}}</h2>
-        <!-- Error Message Container (optional) -->
-        <div class="error-message" aria-live="assertive"></div>
+    <div class="login-container" id="login-form">
+        <h2 class="login-title">Login</h2>
         <form class="login-form" action="{% url 'user:login' %}" method="POST">
             {% csrf_token %}
-            <input type="text" id="username" name="email" class="login-input" placeholder="Username" required>
+            <input type="email" id="email" name="email" class="login-input" placeholder="Email" required>
             <input type="password" id="password" name="password" class="login-input" placeholder="Password" required>
             <div class="login-actions">
                 <button class="login-button">LOGIN</button>
@@ -34,28 +29,5 @@
         </form>
     </div>
 
-    <!-- Password Reset Form Container -->
-    <div class="password-reset-container" id="password-reset-form" style="display: none;" aria-hidden="true">
-        <h2 class="login-title">Reset Password</h2>
-        <!-- Error Message Container (optional) -->
-        <div class="error-message" aria-live="assertive"></div>
-        <form class="password-reset-form" action="/reset-password" method="post">
-            <input type="email" id="reset-email" name="reset-email" class="login-input" placeholder="Enter your email" required>
-            <div class="login-actions">
-                <button type="submit" class="login-button">Send Reset Link</button>
-                <a href="#" class="back-to-login">Back to Login</a>
-            </div>
-        </form>
-    </div>
-
-    <!-- Password Reset Confirmation Container -->
-    <div class="password-reset-container" id="password-reset-confirmation" style="display: none;" aria-hidden="true">
-        <h2 class="login-title">Check Your Email</h2>
-        <p class="confirmation-message">If this email is registered, you will receive a password reset link shortly.</p>
-        <a href="#" class="back-to-login">Back to Login</a>
-    </div>
-
-    <!-- Include JavaScript for toggling forms -->
-    <script src="{% static '/js/login.js' %}"></script>
 </body>
 </html>

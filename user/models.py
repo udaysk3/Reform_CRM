@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
 
         extra_fields = {
             "dashboard": True,
-            "customer": True,
+            "mcustomer": True,
             "client": True,
             "archive": True,
             "funding_route":True,
@@ -35,10 +35,30 @@ class UserManager(BaseUserManager):
             "finance": True,
             "council":True,
             "hr": True,
+            "globals": True,
             "security": True,
-            "global_": True,
             "is_staff": True,
             "is_superuser": True,
+
+            
+            "customer": True,
+            "product": True,
+            "funding_route": True,
+            "CJ": True,
+            "QA": True,
+            "h_dashboard": True,
+            "h_employee": True,
+            "h_application": True,
+            "h_onboarding": True,
+            "h_timesheet": True,
+            "h_emp_action": True,
+            "h_emp_notify": True,
+            "h_offboarding": True,
+            "h_org_chart": True,
+            "knowledge_base": True,
+            "s_employee": True,
+            "s_role": True,
+            "s_client": True,
             **extra_fields,
         }
 
@@ -63,16 +83,14 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     dashboard = models.BooleanField(default=False)
-    customer = models.BooleanField(default=False)
+    mcustomer = models.BooleanField(default=False)
     client = models.BooleanField(default=False)
     archive = models.BooleanField(default=False)
     council = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     stage = models.BooleanField(default=False)
-    product = models.BooleanField(default=False)
     globals = models.BooleanField(default=False)
     finance = models.BooleanField(default=False)
-    funding_route = models.BooleanField(default=False)
     hr = models.BooleanField(default=False)
     security = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)
@@ -80,4 +98,24 @@ class User(AbstractUser):
     last_login = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(default=False)
     approved = models.CharField(max_length=100, blank=True, null=True)
+
+    customer = models.BooleanField(default=False)
+    product = models.BooleanField(default=False)
+    funding_route = models.BooleanField(default=False)
+    CJ = models.BooleanField(default=False)
+    QA = models.BooleanField(default=False)
+    h_dashboard = models.BooleanField(default=False)
+    h_employee = models.BooleanField(default=False)
+    h_application = models.BooleanField(default=False)
+    h_onboarding = models.BooleanField(default=False)
+    h_timesheet = models.BooleanField(default=False)
+    h_emp_action = models.BooleanField(default=False)
+    h_emp_notify = models.BooleanField(default=False)
+    h_offboarding = models.BooleanField(default=False)
+    h_org_chart = models.BooleanField(default=False)
+    knowledge_base = models.BooleanField(default=False)
+    s_employee = models.BooleanField(default=False)
+    s_role = models.BooleanField(default=False)
+    s_client = models.BooleanField(default=False)
+
     objects = UserManager()

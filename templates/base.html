@@ -129,7 +129,7 @@ i{
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Home</span>
             </li>
-            {% if request.user.customer %}
+            {% if request.user.dashboard %}
             <li class="sidebar-item">
               <a class="sidebar-link" href="/dashboard" aria-expanded="false">
                 <span>
@@ -143,7 +143,7 @@ i{
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Your Tabs</span>
             </li>
-            {% if request.user.customer %}
+            {% if request.user.mcustomer %}
             <li class="sidebar-item">
               <div class="sidebar-link customer " aria-expanded="false">
                 <span>
@@ -329,6 +329,7 @@ i{
         
       }
       {% endif %}
+      {% if request.user.customer %}
       if(document.querySelector('.customers')){
           document.querySelector('.customers').remove()
         } else{
@@ -349,6 +350,7 @@ i{
         customer.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+      {% endif %}
       })
     
       
@@ -358,6 +360,7 @@ i{
     const security = document.querySelector('.security');
     security.addEventListener('click',()=>{
 
+      {% if request.user.s_client %}
       if(document.querySelector('.s_client')){
           document.querySelector('.s_client').remove()
         } else{
@@ -377,6 +380,9 @@ i{
         `
         security.parentNode.insertAdjacentElement("afterend", a1);
       }
+      {% endif %}
+
+      {% if request.user.s_role %}
 
 
       if(document.querySelector('.s_role')){
@@ -398,7 +404,9 @@ i{
         `
         security.parentNode.insertAdjacentElement("afterend", a1);
       }
+      {% endif %}
 
+      {% if request.user.s_employee %}
 
       if(document.querySelector('.s_emp')){
           document.querySelector('.s_emp').remove()
@@ -418,7 +426,9 @@ i{
               </a>
         `
         security.parentNode.insertAdjacentElement("afterend", a1);
-      }
+      } 
+      {% endif %}
+
 
     })
     
@@ -430,6 +440,7 @@ i{
     const hr = document.querySelector('.hr');
     hr.addEventListener('click',()=>{
 
+      {% if request.user.knowledge_base %}
       if(document.querySelector('.kbase')){
           document.querySelector('.kbase').remove()
         } else{
@@ -450,6 +461,9 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+      {% endif %}
+
+      {% if request.user.h_org_chart %}
 
       if(document.querySelector('.ochart')){
           document.querySelector('.ochart').remove()
@@ -471,6 +485,9 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+      {% endif %}
+
+      {% if request.user.offboarding %}
 
       if(document.querySelector('.offboarding')){
           document.querySelector('.offboarding').remove()
@@ -492,6 +509,9 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+      {% endif %}
+
+      {% if request.user.h_emp_notify %}
 
       if(document.querySelector('.enotify')){
           document.querySelector('.enotify').remove()
@@ -514,6 +534,10 @@ i{
         
       }
 
+      {% endif %}
+
+      {% if request.user.h_emp_action %}
+
       if(document.querySelector('.eaction')){
           document.querySelector('.eaction').remove()
         } else{
@@ -534,6 +558,10 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+
+      {% endif %}
+
+      {% if request.user.h_timesheet %}
       
       if(document.querySelector('.timesheet')){
           document.querySelector('.timesheet').remove()
@@ -555,6 +583,10 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+        
+        {% endif %}
+  
+        {% if request.user.h_onboarding %}
 
       if(document.querySelector('.onboarging')){
           document.querySelector('.onboarging').remove()
@@ -577,6 +609,10 @@ i{
         
       }
 
+      {% endif %}
+
+      {% if request.user.h_application %}
+
       if(document.querySelector('.appli')){
           document.querySelector('.appli').remove()
         } else{
@@ -597,6 +633,10 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
+
+      {% endif %}
+
+      {% if request.user.h_employee %}
 
       if(document.querySelector('.emp')){
           document.querySelector('.emp').remove()
@@ -619,6 +659,10 @@ i{
         
       }
 
+      {% endif %}
+
+      {% if request.user.h_dashboard %}
+
       if(document.querySelector('.dash')){
           document.querySelector('.dash').remove()
         } else{
@@ -639,7 +683,9 @@ i{
         hr.parentNode.insertAdjacentElement("afterend", a1);
         
       }
-
+        
+        {% endif %}
+  
       })
     
       
@@ -650,7 +696,9 @@ i{
     const customerJourney = document.querySelector('.customer-journey');
     customerJourney.addEventListener('click',()=>{
 
-      
+
+        {% if request.user.QA %}
+
         if(document.querySelector('.questions')){
           document.querySelector('.questions').remove()
         } else{
@@ -672,6 +720,10 @@ i{
         customerJourney.parentNode.insertAdjacentElement("afterend", a);
         
       }
+
+      {% endif %}
+
+      {% if request.user.CJ %}
 
 
       if(document.querySelector('.cj')){
@@ -696,6 +748,10 @@ i{
         
       }
 
+      {% endif %}
+
+      {% if request.user.funding_route %}
+
       if(document.querySelector('.funding_route')){
           document.querySelector('.funding_route').remove()
         } else{
@@ -718,6 +774,10 @@ i{
         
       }
 
+      {% endif %}
+
+      {% if request.user.product %}
+
         if(document.querySelector('.product')){
           document.querySelector('.product').remove()
         } else{
@@ -739,6 +799,8 @@ i{
         customerJourney.parentNode.insertAdjacentElement("afterend", a);
         
       }
+
+      {% endif %}
 
 
       })

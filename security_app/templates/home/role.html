@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% load static %}
 {% block css %}
@@ -6,13 +5,7 @@
 {% endblock %}
 {% block search %}
 
-<input
-  class="form-control me-2"
-  type="search"
-  placeholder="Search"
-  aria-label="Search"
-  id="myInput"
-/>
+<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="myInput" />
 
 {% endblock %}
 
@@ -25,127 +18,258 @@
     <div class="col-lg-12 d-flex align-items-strech w-100">
       <div class="card w-100">
         <div class="card-body">
-          
+
           {% for message in messages %}
-            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-                  {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+          <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
           {% endfor %}
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
-            
+
             <div class="mb-3 mb-sm-0">
-             <a href="#"> <h5 class="card-title fw-semibold text-primary text-decoration-underline">Role Management</h5></a>
+              <a href="#">
+                <h5 class="card-title fw-semibold text-primary text-decoration-underline">Role Management</h5>
+              </a>
             </div>
             <div class="mb-3 mb-sm-0">
 
-               <button type="button" class="reform_btn position-relative mb-3"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+              <button type="button" class="reform_btn position-relative mb-3" data-bs-toggle="modal"
+                data-bs-target="#fundingroute">
                 <i class="bi bi-plus-lg"></i> Role
               </button>
 
               <!-- Modal -->
-              <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
                       <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Role</h1>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                  <form method='post' action="{% url 'security_app:add_role' %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                     
-                      <div class="mb-3">
-                        <label for="role" class="form-label">Role</label>
-                        <input type="text" class="form-control" id="role" name='role'>
-                      </div>
+                    <form method='post' action="{% url 'security_app:add_role' %}">
+                      {% csrf_token %}
+                      <div class="modal-body">
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="dashboard" name="dashboard">
-                        <label class="form-check-label" for="dashboard">
-                          Dashboard
-                        </label>
-                      </div>
+                        <div class="mb-3">
+                          <label for="role" class="form-label">Role</label>
+                          <input type="text" class="form-control" id="role" name='role'>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="customer" name="customer">
-                        <label class="form-check-label" for="customer">
-                          Customer
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="dashboard" name="dashboard">
+                          <label class="form-check-label" for="dashboard">
+                            Dashboard
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="client" name="client">
-                        <label class="form-check-label" for="client">
-                          Client
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="mcustomer" name="mcustomer">
+                          <label class="form-check-label" for="mcustomer">
+                            Customers
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="region" name="region">
-                        <label class="form-check-label" for="region">
-                          Region
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="client" name="client">
+                          <label class="form-check-label" for="client">
+                            Client
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="global" name="global">
-                        <label class="form-check-label" for="global">
-                          Global
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="region" name="region">
+                          <label class="form-check-label" for="region">
+                            Region
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="admin" name="admin">
-                        <label class="form-check-label" for="admin">
-                          Admin
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="global" name="global">
+                          <label class="form-check-label" for="global">
+                            Global
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="finance" name="finance">
-                        <label class="form-check-label" for="finance">
-                          Finance
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="admin" name="admin">
+                          <label class="form-check-label" for="admin">
+                            Admin
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="hr" name="hr">
-                        <label class="form-check-label" for="hr">
-                          HR
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="finance" name="finance">
+                          <label class="form-check-label" for="finance">
+                            Finance
+                          </label>
+                        </div>
 
-                      <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="security" name="security">
-                        <label class="form-check-label" for="security">
-                          Security
-                        </label>
-                      </div>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="hr" name="hr">
+                          <label class="form-check-label" for="hr">
+                            HR
+                          </label>
+                        </div>
 
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                      <button type="submit" class="reform_btn">Submit</button>
-                    </div>
-                  </form>
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="security" name="security">
+                          <label class="form-check-label" for="security">
+                            Security
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="customer" name="customer">
+                          <label class="form-check-label" for="customer">
+                            Customer
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="product" name="product">
+                          <label class="form-check-label" for="product">
+                            Product
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="funding_route" name="funding_route">
+                          <label class="form-check-label" for="funding_route">
+                            Funding Route
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="CJ" name="CJ">
+                          <label class="form-check-label" for="CJ">
+                            Customer Journey
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="QA" name="QA">
+                          <label class="form-check-label" for="QA">
+                            Question and Answer
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_dashboard" name="h_dashboard">
+                          <label class="form-check-label" for="h_dashboard">
+                            HR Dashboard
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_employee" name="h_employee">
+                          <label class="form-check-label" for="h_employee">
+                            HR Employee
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_application" name="h_application">
+                          <label class="form-check-label" for="h_application">
+                            Application
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_onboarding" name="h_onboarding">
+                          <label class="form-check-label" for="h_onboarding">
+                            Onboarding
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_timesheet" name="h_timesheet">
+                          <label class="form-check-label" for="h_timesheet">
+                            Time Sheet
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_emp_action" name="h_emp_action">
+                          <label class="form-check-label" for="h_emp_action">
+                            Employee Action
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_emp_notify" name="h_emp_notify">
+                          <label class="form-check-label" for="h_emp_notify">
+                            Employee Notification
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_offboarding" name="h_offboarding">
+                          <label class="form-check-label" for="h_offboarding">
+                            Off Boarding
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="h_org_chart" name="h_org_chart">
+                          <label class="form-check-label" for="h_org_chart">
+                            Organisation Chart
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="knowledge_base" name="knowledge_base">
+                          <label class="form-check-label" for="knowledge_base">
+                            knowledge Base
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="s_employee" name="s_employee">
+                          <label class="form-check-label" for="s_employee">
+                            Security Employee
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="s_role" name="s_role">
+                          <label class="form-check-label" for="s_role">
+                            Security Role
+                          </label>
+                        </div>
+
+                        <div class="form-check my-3">
+                          <input class="form-check-input" type="checkbox" id="s_client" name="s_client">
+                          <label class="form-check-label" for="s_client">
+                            Security Client
+                          </label>
+                        </div>
+
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="reform_btn">Submit</button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        <div>
-            
+          <div>
 
+          <div style="overflow-x: auto;">
             <table class="table">
-              
+
               <thead>
                 <tr>
                   <th>
-                    Role  <span id="arrow0"></span>
+                    Role <span id="arrow0"></span>
                   </th>
+                  <th>Edit</th>
                   <th>Dashboard</th>
-                  <th>Customer</th>
+                  <th>Customers</th>
                   <th>Client</th>
                   <th>Region</th>
                   <th>Global</th>
@@ -153,103 +277,810 @@
                   <th>Finance</th>
                   <th>HR</th>
                   <th>Security</th>
+                  <th>Customer</th>
+                  <th>Product</th>
+                  <th>Funding Route</th>
+                  <th>Customer Journey</th>
+                  <th>Question and Answer</th>
+                  <th>HR Dashboard</th>
+                  <th>HR Employee</th>
+                  <th>Application</th>
+                  <th>Onboarding</th>
+                  <th>Time Sheet</th>
+                  <th>Employee Action</th>
+                  <th>Employee Notification</th>
+                  <th>Off Boarding</th>
+                  <th>Organisation Chart</th>
+                  <th>knowledge Base</th>
+                  <th>Security Employee</th>
+                  <th>Security Role</th>
+                  <th>Security Client</th>
                 </tr>
               </thead>
               <tbody id="myTable">
                 {% if roles %}
                 {% for role in roles %}
-                  <tr>
-                    <td class="text-underlined" style="width: 20%;"><a class="text-primary">{{ role.name }}</a></td>
-                    {% if role.dashboard %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.customer %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.client %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.region %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.global %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.admin %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.finance %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.hr %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                    {% if role.security %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                      </td>
-                      {% else %}
-                      <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                      </td>
-                    {% endif %}
-                  </tr>
+                <tr>
+                  <td class="text-underlined" style="width: 20%;"><a class="text-primary">{{ role.name }}</a></td>
+                  <td class="text-underlined" style="width: 20%;">
+                    <button type="button" class="reform_btn" data-bs-toggle="modal"
+                      data-bs-target="#Role{{ forloop.counter }}">
+                      Edit
+                    </button>
+
+                    <div class="modal fade" id="Role{{ forloop.counter }}" data-bs-backdrop="static"
+                      data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit Role</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <form method='post' action="{% url 'security_app:edit_role' role.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+
+                              <div class="mb-3">
+                                <label for="role" class="form-label">Role</label>
+                                <input type="text" class="form-control" id="role" name='role' value="{{ role.name }}">
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="dashboard" name="dashboard" {% if role.dashboard %} checked {% endif %}>
+                                <label class="form-check-label" for="dashboard">
+                                  Dashboard
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="mcustomer" name="mcustomer" {% if role.mcustomer %} checked {% endif %}>
+                                <label class="form-check-label" for="mcustomer">
+                                  Customers
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="client" name="client" {% if role.client %} checked {% endif %}>
+                                <label class="form-check-label" for="client">
+                                  Client
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="council" name="council" {% if role.council %} checked {% endif %}>
+                                <label class="form-check-label" for="council">
+                                  Region
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="global" name="global" {% if role.globals %} checked {% endif %}>
+                                <label class="form-check-label" for="global">
+                                  Global
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="admin" name="admin" {% if role.admin %} checked {% endif %}>
+                                <label class="form-check-label" for="admin">
+                                  Admin
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="finance" name="finance" {% if  role.finance %} checked {% endif %}>
+                                <label class="form-check-label" for="finance">
+                                  Finance
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="hr" name="hr" {% if role.hr %}
+                                  checked {% endif %}>
+                                <label class="form-check-label" for="hr">
+                                  HR
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="security" name="security" {% if role.security %} checked {% endif %}>
+                                <label class="form-check-label" for="security">
+                                  Security
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="customer" name="customer" {% if role.customer %} checked {% endif %}>
+                                <label class="form-check label" for="customer">
+                                  Customer
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="product" name="product" {% if role.product %} checked {% endif %}>
+                                <label class="form-check label" for="product">
+                                  Product
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="funding_route" name="funding_route"
+                                  {% if role.funding_route %} checked {% endif %}>
+                                <label class="form-check label" for="funding_route">
+                                  Funding Route
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="CJ" name="CJ" {% if role.CJ %}
+                                  checked {% endif %}>
+                                <label class="form-check label" for="CJ">
+                                  Customer Journey
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="QA" name="QA" {% if role.QA %}
+                                  checked {% endif %}>
+                                <label class="form-check label" for="QA">
+                                  Question and Answer
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_dashboard" name="h_dashboard" {% if role.h_dashboard %} checked {% endif %}>
+                                <label class="form-check label" for="h_dashboard">
+                                  HR Dashboard
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_employee" name="h_employee" {% if role.h_employee %} checked {% endif %}>
+                                <label class="form-check label" for="h_employee">
+                                  HR Employee
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_application" name="h_application"
+                                  {% if role.h_application %} checked {% endif %}>
+                                <label class="form-check label" for="h_application">
+                                  Application
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_onboarding" name="h_onboarding" {% if role.h_onboarding %} checked {% endif %}>
+                                <label class="form-check label" for="h_onboarding">
+                                  Onboarding
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_timesheet" name="h_timesheet" {% if role.h_timesheet %} checked {% endif %}>
+                                <label class="form-check label" for="h_timesheet">
+                                  Time Sheet
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_emp_action" name="h_emp_action" {% if role.h_emp_action %} checked {% endif %}>
+                                <label class="form-check label" for="h_emp_action">
+                                  Employee Action
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_emp_notify" name="h_emp_notify" {% if role.h_emp_notify %} checked {% endif %}>
+                                <label class="form-check label" for="h_emp_notify">
+                                  Employee Notification
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_offboarding" name="h_offboarding"
+                                  {% if role.h_offboarding %} checked {% endif %}>
+                                <label class="form-check label" for="h_offboarding">
+                                  Off Boarding
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="h_org_chart" name="h_org_chart" {% if role.h_org_chart %} checked {% endif %}>
+                                <label class="form-check label" for="h_org_chart">
+                                  Organisation Chart
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="knowledge_base"
+                                  name="knowledge_base" {% if role.knowledge_base %} checked {% endif %}>
+                                <label class="form-check label" for="knowledge_base">
+                                  Knowledge Base
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="s_employee" name="s_employee" {% if role.s_employee %} checked {% endif %}>
+                                <label class="form-check label" for="s_employee">
+                                  Security Employee
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="s_role" name="s_role" {% if  role.s_role %} checked {% endif %}>
+                                <label class="form-check label" for="s_role">
+                                  Security Role
+                                </label>
+                              </div>
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" id="s_client" name="s_client" {% if role.s_client %} checked {% endif %}>
+                                <label class="form-check label" for="s_client">
+                                  Security Client
+                                </label>
+                              </div>
+
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                              <button type="submit" class="reform_btn">Submit</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  {% if role.dashboard %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.mcustomer %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.client %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.council %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.globals %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.admin %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.finance %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.hr %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.security %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.customer %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.product %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.funding_route %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.CJ %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.QA %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_dashboard %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_employee %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_application %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_onboarding %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_timesheet %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_emp_action %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_emp_notify %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_offboarding %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.h_org_chart %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.knowledge_base %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.s_employee %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.s_role %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.s_client %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                </tr>
                 {% endfor %}
                 {% else %}
                 <tr class="text-center display-flex align-items-center justify-content-center">
                   <td colspan="6" class="text-center">No Role</td>
                 </tr>
-              {% endif %}
+                {% endif %}
               </tbody>
             </table>
+          </div>
           </div>
         </div>
       </div>
