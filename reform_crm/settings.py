@@ -166,4 +166,4 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Ensure Two Factor Authentication URLs
-LOGIN_URL = 'two_factor:login'
+LOGIN_URL = 'user/login'
