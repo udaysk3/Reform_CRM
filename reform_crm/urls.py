@@ -33,6 +33,7 @@ urlpatterns = [
     path('',include('security_app.urls')),
     path('',include('question_actions_requirements_app.urls')),
     path('admin/', admin.site.urls),
+    path('', include(('two_factor.urls', 'two_factor'), namespace='two_factor')),
     path('user/',include('user.urls'),name='user')
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
