@@ -19,6 +19,22 @@ def off_boarding(request):
     employes = User.objects.all().filter(is_employee=True).filter(is_archive=True)
     return render(request, "home/off_boarding.html", {'emps':employes})
 
+@login_required
+def emp_profile(request):
+    return render(request, "home/profile.html")
+
+@login_required
+def job_info(request):
+    return render(request, "home/job_info.html")
+
+@login_required
+def time_off(request):
+    return render(request, "home/time_off.html")
+
+@login_required
+def courses(request):
+    return render(request, "home/courses.html")
+
 def add_employee(request):
     roles = Role.objects.all()
     return render(request, 'home/add_employee.html', {'roles':roles})

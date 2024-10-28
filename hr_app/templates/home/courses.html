@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom %}
+
+{% block css %}
+
+    <link rel="stylesheet" href="{% static 'css/emp_profile.css' %}">
+    <style>
+        :root {
+  --progress-bar-width: 200px;
+  --progress-bar-height: 200px;
+  --font-size: 2rem;
+}
+
+.circular-progress {
+  width: var(--progress-bar-width);
+  height: var(--progress-bar-height);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.inner-circle {
+  position: absolute;
+  width: calc(var(--progress-bar-width) - 30px);
+  height: calc(var(--progress-bar-height) - 30px);
+  border-radius: 50%;
+  background-color: #fff;
+}
+
+.percentage {
+  position: relative;
+  font-size: var(--font-size);
+  color: rgb(0, 0, 0, 0.8);
+}
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid" style="max-width:1500px">
+		<div class="main-body">
+			<div class="row">
+                <div class="col-lg-12 d-flex align-items-stretch w-100">
+                    <div class="card w-100 p-0">
+                        <div class="card-body row m-0 p-3 ">
+                            <a href="#" class="col fs-5">Applicants</a>
+                            <a href="#" class="col fs-5">Onboarding</a>
+                            <a href="#" class="col fs-5">Probation</a>
+                            <a href="{% url 'hr_app:employee' %}" class="col fs-5">Employees</a>
+                            <a href="{% url 'hr_app:off_boarding' %}" class="col fs-5">Off Boarding</a>
+                            <a href="#" class="col fs-5">Former Employees</a>
+                            <a href="#" class="col fs-5">Archive</a>
+                        </div>
+                    </div>
+                </div>
+
+				<div class="col-lg-4">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex flex-column align-items-center text-center">
+								<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
+								<div class="mt-3">
+									<h4>John Doe</h4>
+								</div>
+							</div>
+                            <div class="my-3 d-flex justify-content-between">
+                                <b>Full Stack Developer</b>
+                                <a href="#">Edit</a>
+                            </div>
+							<hr class="my-4">
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
+									<h6 class="mb-0"><b>Status:</b></h6>
+									<h4 class="mt-2">Status</h4>
+								</li>
+								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
+									<h6 class="mb-0"><b>Position:</b></h6>
+									<h4 class="mt-2">Status</h4>
+								</li>
+								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
+									<h6 class="mb-0"><b>Reporting to:</b></h6>
+									<h4 class="mt-2">Status</h4>
+								</li>
+								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
+									<h6 class="mb-0"><b>Email Address:</b></h6>
+									<h4 class="mt-2">Status</h4>
+								</li>
+								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
+									<h6 class="mb-0"><b>Phone:</b></h6>
+									<h4 class="mt-2">Status</h4>
+								</li>
+								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
+									<h6 class="mb-0"><b>Work Set-Up:</b></h6>
+									<h4 class="mt-2">Status</h4>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-8">
+					<div class="card">
+						<div class="card-body row py-2">
+                            <a href="#" class="col ms-3 fs-5">Personal</a>
+                            <a href="#" class="col fs-5">Job Info</a>
+                            <a href="#" class="col fs-5">Time Off</a>
+                            <a href="{% url 'hr_app:employee' %}" class="col fs-5">Performance</a>
+                            <a href="{% url 'hr_app:off_boarding' %}" class="col fs-5">Documents</a>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							<div class="card">
+								<div class="card-body">
+                                    <div class=" d-flex justify-content-between align-items-center">
+                                        <h2>Courses</h2>
+                                        <a href="#" class="mt-0 fs-5"></a>
+                                    </div>
+                                    <div class="mb-3">
+                                        <table class="table">
+					                    	<thead>
+					                    		<tr>
+					                    			<th>
+								                    	Assigned
+								                    </th>
+								                    <th>
+								                    	Status
+								                    </th>
+								                    <th>
+								                    	Due on
+								                    </th>
+					                    		</tr>
+					                    	</thead>
+					                    	<tbody id="myTable">
+					                    		{% if emps %}
+					                    		{% for emp in emps %}
+					                    		<tr>
+					                    			<td style="width: 10%;">{{ emp.start_date }}</td>
+					                    		</tr>
+					                    		{% endfor %}
+					                    		{% else %}
+					                    		<tr class="text-center display-flex align-items-center justify-content-center">
+					                    			<td colspan="7" class="text-center">No Employees</td>
+					                    		</tr>
+					                    		{% endif %}
+					                    	</tbody>
+					                    </table>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Work Setup</h6>
+                                            </div>
+                                        </div>
+                                        <table class="table">
+					                    	<tbody id="myTable">
+					                    		{% if emps %}
+					                    		{% for emp in emps %}
+					                    		<tr>
+					                    			<td style="width: 10%;">{{ emp.start_date }}</td>
+					                    		</tr>
+					                    		{% endfor %}
+					                    		{% else %}
+					                    		<tr class="text-center display-flex align-items-center justify-content-center">
+					                    			<td colspan="7" class="text-center">No Employees</td>
+					                    		</tr>
+					                    		{% endif %}
+					                    	</tbody>
+					                    </table>
+                                    </div>
+								</div>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="card">
+								<div class="card-body">
+                                    <div class=" d-flex justify-content-between align-items-center">
+                                        <h2>Completion Rate</h2>
+                                        <a href="#" class="mt-0 fs-5"></a>
+                                    </div>
+									<div class="mb-3 d-flex justify-content-center">
+                                        <div class="circular-progress" data-inner-circle-color="#fff" data-percentage="80" data-progress-color="red" data-bg-color="green">
+                                          <div class="inner-circle"></div>
+                                          <p class="percentage">0%</p>
+                                        </div>
+                                    </div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							
+						</div>
+						<div class="col-6">
+							<div class="card">
+								<div class="card-body">
+                                    <div class=" d-flex justify-content-between align-items-center">
+                                        <h2>CRM Access</h2>
+                                        <a href="#" class="mt-0 fs-5"></a>
+                                    </div>
+									<div class="mb-3">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Customer</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Clients</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Region</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Global</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Admin</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Finance</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">HR</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}
+
+{% block js %}
+
+    <script>
+        const circularProgress = document.querySelectorAll(".circular-progress");
+
+            Array.from(circularProgress).forEach((progressBar) => {
+                const progressValue = progressBar.querySelector(".percentage");
+                const innerCircle = progressBar.querySelector(".inner-circle");
+                let startValue = 0,
+                    endValue = Number(progressBar.getAttribute("data-percentage")),
+                    speed = 50,
+                    progressColor = progressBar.getAttribute("data-progress-color");
+
+                const progress = setInterval(() => {
+                    startValue++;
+                    progressValue.textContent = `${startValue}%`;
+                    progressValue.style.color = `${progressColor}`;
+
+                    innerCircle.style.backgroundColor = `${progressBar.getAttribute(
+                        "data-inner-circle-color"
+                    )}`;
+
+                    progressBar.style.background = `conic-gradient(${progressColor} ${startValue * 3.6
+                        }deg,${progressBar.getAttribute("data-bg-color")} 0deg)`;
+                    if (startValue === endValue) {
+                        clearInterval(progress);
+                    }
+                }, speed);
+            });
+    </script>
+
+{% endblock %}

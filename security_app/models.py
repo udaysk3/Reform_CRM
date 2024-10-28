@@ -5,6 +5,7 @@ class Role(models.Model):
     dashboard = models.BooleanField(default=False)
     mcustomer = models.BooleanField(default=False)
     customer = models.BooleanField(default=False)
+    archive = models.BooleanField(default=False)
     client = models.BooleanField(default=False)
     council = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)

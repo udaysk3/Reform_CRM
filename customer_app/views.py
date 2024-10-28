@@ -1519,7 +1519,6 @@ def send_email(request, customer_id):
         template_name=template_name, context=context
     )
     plain_message = strip_tags(convert_to_html_content)
-    print(convert_to_html_content)
     email = send_mail(
         subject=subject,
         message=plain_message,

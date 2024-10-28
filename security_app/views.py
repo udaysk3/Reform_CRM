@@ -26,6 +26,7 @@ def add_role(request):
         client = request.POST.get('client') == 'on'
         council = request.POST.get('council') == 'on'
         admin = request.POST.get('admin') == 'on'
+        archive = request.POST.get('archive') == 'on'
         product = request.POST.get('product') == 'on'
         globals = request.POST.get('global') == 'on'
         finance = request.POST.get('finance') == 'on'
@@ -54,6 +55,7 @@ def add_role(request):
             mcustomer=mcustomer,
             client=client,
             council=council,
+            archive=archive,
             admin=admin,
             product=product,
             globals=globals,
@@ -99,6 +101,7 @@ def approve_role(request, emp_id):
     emp.dashboard = role.dashboard
     emp.mcustomer = role.mcustomer
     emp.customer = role.customer
+    emp.archive = role.archive
     emp.client = role.client
     emp.council = role.council
     emp.admin = role.admin
@@ -159,6 +162,7 @@ def edit_role(request, role_id):
         role.client = request.POST.get('client') == 'on'
         role.council = request.POST.get('council') == 'on'
         role.admin = request.POST.get('admin') == 'on'
+        role.archive = request.POST.get('archive') == 'on'
         role.product = request.POST.get('product') == 'on'
         role.globals = request.POST.get('global') == 'on'
         role.finance = request.POST.get('finance') == 'on'
@@ -206,3 +210,16 @@ def delete_customer_session(request):
     ]
     for key in keys_to_delete:
         request.session.pop(key, None)
+
+def reset_password(request, emp_id):
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        conform_password = request.POST.get('conform_password')
+        if password != conform_password:
+            messages.error(request, 'Password and conform password does not match!')
+            return redirect('security_app:s_employee')
+        emp = User.objects.get(pk=emp_id)
+        emp.password = make_password(password)
+        emp.save()
+    messages.success(request, 'Password reset successfully!')
+    return redirect('security_app:s_employee')

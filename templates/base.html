@@ -487,29 +487,6 @@ i{
       }
       {% endif %}
 
-      {% if request.user.h_offboarding %}
-
-      if(document.querySelector('.offboarding')){
-          document.querySelector('.offboarding').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','offboarding');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="{% url 'hr_app:off_boarding' %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Offboarding</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-      {% endif %}
 
       {% if request.user.h_emp_notify %}
 
@@ -585,56 +562,6 @@ i{
       }
         
         {% endif %}
-  
-        {% if request.user.h_onboarding %}
-
-      if(document.querySelector('.onboarging')){
-          document.querySelector('.onboarging').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','onboarging');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Onboarding</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.h_application %}
-
-      if(document.querySelector('.appli')){
-          document.querySelector('.appli').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','appli');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Application</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-
-      {% endif %}
 
       {% if request.user.h_employee %}
 

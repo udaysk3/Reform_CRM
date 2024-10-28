@@ -11,6 +11,7 @@ urlpatterns = [
     path('role',views.role,name='role'),
     path('add_role',views.add_role,name='add_role'),
     path('change_otp_mail/<int:emp_id>',views.change_otp_mail,name='change_otp_mail'),
+    path('reset_password/<int:emp_id>',views.reset_password,name='reset_password'),
     path('edit_role/<int:role_id>',views.edit_role,name='edit_role'),
     path('bulk_delete_roles',views.bulk_delete_roles,name='bulk_delete_roles'),
 ]
