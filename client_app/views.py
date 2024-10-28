@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timedelta
 
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -431,6 +432,13 @@ def add_client(request):
         county = request.POST.get("county")
         country = request.POST.get("country")
         agent = User.objects.get(email=request.user)
+        user = User.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=make_password(request.POST.get("password")),
+            is_client=True,
+        )
 
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
@@ -505,6 +513,7 @@ def add_client(request):
             address=address,
             district=district,
             constituency=constituency,
+            user=user,
         )
         client.add_action(
                 agent=User.objects.get(email=request.user),
@@ -521,6 +530,12 @@ def add_client(request):
 @login_required
 def edit_client(request, client_id):
     client = Clients.objects.get(pk=client_id)
+    user = client.user
+    user.first_name = request.POST.get("first_name")
+    user.last_name = request.POST.get("last_name")
+    user.email = request.POST.get("email")
+    user.password = make_password(request.POST.get("password"))
+    user.save()
     if request.method == "POST":
         changed = ''
         if client.acc_number != request.POST.get("acc_number"):
@@ -590,6 +605,7 @@ def edit_client(request, client_id):
             action_type=f"Updated {client.first_name},  {client.last_name} - " + changed,
             keyevents=True,
         )
+
         messages.success(request, "Client updated successfully!")
         if client.parent_client:
             client.parent_client.add_action(

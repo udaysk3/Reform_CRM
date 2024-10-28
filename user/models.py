@@ -117,5 +117,6 @@ class User(AbstractUser):
     s_employee = models.BooleanField(default=False)
     s_role = models.BooleanField(default=False)
     s_client = models.BooleanField(default=False)
+    is_client = models.BooleanField(default=False)
 
     objects = UserManager()

@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
-import datetime
 from django_otp.plugins.otp_email.models import EmailDevice
 
 def signin(request):

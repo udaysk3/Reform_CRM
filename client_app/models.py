@@ -3,6 +3,8 @@ from home.models import Action, Stage
 from user.models import User
 
 class Clients(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='client_profile')
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='clients_as_agent')
     acc_number = models.CharField(max_length=255, blank=True, null=True)
     sort_code = models.CharField(max_length=255, blank=True, null=True)
     iban = models.CharField(max_length=255, blank=True, null=True)
@@ -26,7 +28,7 @@ class Clients(models.Model):
     county = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
-    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    client_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='client_user')
     parent_client = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
     primary_client = models.BooleanField(default=False)
     council = models.ForeignKey('region_app.Councils', on_delete=models.SET_NULL, null=True)
