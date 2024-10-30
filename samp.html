@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <title>Side Navigation Bar in HTML CSS JavaScript</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="row">
+    
+    <nav class="sidebar col">
+        <div class="menu_content ">
+            <div class="logo_item">
+                <i class="bx bx-menu" id="sidebarOpen"></i>
+                <img class="full_logo" src="reform_full logo_gradient.png" style="height: 50px; width:200px;" alt=""/>
+                <img class="logo" src="reform_favicon_green.png" style="height: 50px; width:50px; margin-left:15px; display:none;" alt=""/>
+            </div>
+            <ul class="menu_items">
+                <div class="menu_title menu_home"></div>
+                <li class="item">
+                    <a href="#" class="nav_link">
+                        <span class="navlink_icon">
+                            <i class="bx bxs-magic-wand"></i>
+                        </span>
+                        <span class="navlink">Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="menu_items">
+                <div class="menu_title menu_your_tabs"></div>
+
+                <li class="item">
+                    <div href="#" class="nav_link submenu_item">
+                        <span class="navlink_icon">
+                            <i class="bx bx-grid-alt"></i>
+                        </span>
+                        <span class="navlink">Customers</span>
+                        <i class="bx bx-chevron-right arrow-left"></i>
+                    </div>
+                    <ul class="menu_items submenu">
+                        <a href="#" class="nav_link sublink">Customer</a>
+                        <a href="#" class="nav_link sublink">Achive</a>
+                    </ul>
+                </li>
+                
+                <li class="item">
+                    <a href="#" class="nav_link">
+                        <span class="navlink_icon">
+                            <i class="bx bxs-magic-wand"></i>
+                        </span>
+                        <span class="navlink">Client</span>
+                    </a>
+                </li>
+
+                <li class="item">
+                    <a href="#" class="nav_link">
+                        <span class="navlink_icon">
+                            <i class="bx bxs-magic-wand"></i>
+                        </span>
+                        <span class="navlink">Region</span>
+                    </a>
+                </li>
+                
+                <li class="item">
+                    <div href="#" class="nav_link submenu_item">
+                        <span class="navlink_icon">
+                            <i class="bx bx-grid-alt"></i>
+                        </span>
+                        <span class="navlink">Global</span>
+                        <i class="bx bx-chevron-right arrow-left"></i>
+                    </div>
+                    <ul class="menu_items submenu">
+                        <a href="#" class="nav_link sublink">Product</a>
+                        <a href="#" class="nav_link sublink">Funding Route</a>
+                        <a href="#" class="nav_link sublink">Customer Journey</a>
+                        <a href="#" class="nav_link sublink">Question And Answers</a>
+                    </ul>
+                </li>
+                
+                <li class="item">
+                    <a href="#" class="nav_link">
+                        <span class="navlink_icon">
+                            <i class="bx bxs-magic-wand"></i>
+                        </span>
+                        <span class="navlink">Admin</span>
+                    </a>
+                </li>
+                
+                <li class="item">
+                    <a href="#" class="nav_link">
+                        <span class="navlink_icon">
+                            <i class="bx bxs-magic-wand"></i>
+                        </span>
+                        <span class="navlink">Finance</span>
+                    </a>
+                </li>
+                
+                <li class="item">
+                    <div href="#" class="nav_link submenu_item">
+                        <span class="navlink_icon">
+                            <i class="bx bx-grid-alt"></i>
+                        </span>
+                        <span class="navlink">HR</span>
+                        <i class="bx bx-chevron-right arrow-left"></i>
+                    </div>
+                    <ul class="menu_items submenu">
+                        <a href="#" class="nav_link sublink">Dashboard</a>
+                        <a href="#" class="nav_link sublink">Employee</a>
+                        <a href="#" class="nav_link sublink">Timesheet</a>
+                        <a href="#" class="nav_link sublink">Employee Actions</a>
+                        <a href="#" class="nav_link sublink">Employee Notification</a>
+                        <a href="#" class="nav_link sublink">Organizational Chart</a>
+                        <a href="#" class="nav_link sublink">Knowledge Base</a>
+                    </ul>
+                </li>
+                
+                <li class="item">
+                    <div href="#" class="nav_link submenu_item">
+                        <span class="navlink_icon">
+                            <i class="bx bx-grid-alt"></i>
+                        </span>
+                        <span class="navlink">Security</span>
+                        <i class="bx bx-chevron-right arrow-left"></i>
+                    </div>
+                    <ul class="menu_items submenu">
+                        <a href="#" class="nav_link sublink">Employee</a>
+                        <a href="#" class="nav_link sublink">Role</a>
+                        <a href="#" class="nav_link sublink">Client</a>
+                    </ul>
+                </li>
+                
+            </ul>
+            <div class="bottom_content">
+                <div class="bottom expand_sidebar">
+                    <span> </span>
+                    <i class='bx bx-log-in'></i>
+                </div>
+                <div class="bottom collapse_sidebar">
+                    <span> </span>
+                    <i class='bx bx-log-out'></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <script src="script.js"></script>
+</body>
+
+</html>

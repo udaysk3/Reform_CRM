@@ -15,7 +15,15 @@
   <link rel="stylesheet" href="https://rawgit.com/enyo/dropzone/master/dist/dropzone.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{% static 'css/layout_style.css' %}">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/nav.css' %}">
   <style>
+
+    body{
+      background-image: linear-gradient(#fff, #004652);
+  background-attachment: fixed;
+  margin: 0;
+    }
     
     .sidebar-link:hover{
       color: #024753 !important;
@@ -96,9 +104,6 @@ i{
   font-size:20px;
 }
 
-  body{
-    background-color: #EBF8F1;
-  }
   </style>
   {% block css %}
   {% endblock %}
@@ -106,193 +111,227 @@ i{
 
 <body>
   <!--  Body Wrapper -->
-  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-    data-sidebar-position="fixed" data-header-position="fixed">
-    <!-- Sidebar Start -->
-    <aside class="left-sidebar">
-      <!-- Sidebar scroll-->
-      <div>
-        <div class="brand-logo d-flex align-items-center justify-content-between">
-          <a href="/dashboard" class="text-nowrap logo-img" style="position:relative; left:10px;">
-            {% comment %} <img src="{% static "images/logos/dark-logo.svg" %}" width="180" alt="" /> {% endcomment %}
-            {% comment %} <h1> Reform CRM</h1> {% endcomment %}
-            <img width="170px" src="{% static 'images/logos/logo.png' %}" alt="">
-          </a>
-          <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
-            <i class="ti ti-x fs-8"></i>
-          </div>
-        </div>
-        <!-- Sidebar navigation-->
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-          <ul id="sidebarnav">
-            <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Home</span>
-            </li>
-            {% if request.user.dashboard %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="/dashboard" aria-expanded="false">
-                <span>
-                  <i class="ti ti-layout-dashboard"></i>
-                </span>
-                <span class="hide-menu">Dashboard</span>
-              </a>
-            </li>
-            {% endif %}
-            <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Your Tabs</span>
-            </li>
-            {% if request.user.mcustomer %}
-            <li class="sidebar-item">
-              <div class="sidebar-link customer " aria-expanded="false">
-                <span>
-                  <i class="bi bi-people-fill"></i>
-                </span>
-                <span class="hide-menu">Customers</span>
-              </div>
-            </li>
-            {% endif %}
-            {% if request.user.client %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "client_app:client" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-building"></i>
-                </span>
-                <span class="hide-menu">Client</span>
-              </a>
-            </li>
-            {% endif %}
-            
-            {% if request.user.council %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "region_app:council" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-flag"></i>
-                </span>
-                <span class="hide-menu">Region</span>
-              </a>
-            </li>
-            {% endif %}
+  <div>
+    
+    <nav class="sidebar">
+        <div class="menu_content ">
+          <div class="bottom_content">
+                <div class="bottom expand_sidebar">
+                    <span> </span>
+                    <i class='bx bx-chevrons-right'></i>
+                </div>
+                <div class="bottom collapse_sidebar">
+                    <span> </span>
+                    <i class='bx bx-chevrons-left'></i>
+                </div>
+            </div>
+            <div class="logo_item">
+                <i class="bx bx-menu" id="sidebarOpen"></i>
+                <img class="full_logo" src="{% static 'images/logos/reform_full logo_gradient.png' %}" style="height: 50px; width:200px;" alt=""/>
+                <img class="logo" src="{% static 'images/logos/reform_favicon_green.png' %}" style="height: 50px; width:50px; margin-left:15px; display:none;" alt=""/>
+            </div>
+            <ul class="menu_items">
+                <div class="menu_title menu_home"></div>
+                {% if request.user.dashboard %}
+                <li class="item">
+                    <a href="{% url 'dashboard_app:dashboard' %}" class="nav_link">
+                        <span class="navlink_icon">
+                            <i class="bx bxs-magic-wand"></i>
+                        </span>
+                        <span class="navlink">Dashboard</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
 
-            {% if request.user.globals %}
-            <li class="sidebar-item">
-              <div class="sidebar-link customer-journey" aria-expanded="false">
-                <span>
-                  <i class="ti ti-world"></i>
-                </span>
-                <span class="hide-menu">Global</span>
-              </div>
-            </li>
-            {% endif %}
-
-            {% if request.user.admin %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "admin_app:admin" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-alert-circle"></i>
-                </span>
-                <span class="hide-menu">Admin</span>
-              </a>
-            </li>
-            {% endif %}
-            {% if request.user.finance %}
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url "app:finance" %}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-cards"></i>
-                </span>
-                <span class="hide-menu">Finance</span>
-              </a>
-            </li>
-            {% endif %}
-
-            {% if request.user.hr %}
-            <li class="sidebar-item">
-              <p class="sidebar-link hr" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file-description"></i>
-                </span>
-                <span class="hide-menu">HR</span>
-              </p>
-            </li>
-            {% endif %}
-
-            {% if request.user.security %}
-            <li class="sidebar-item">
-              <p class="sidebar-link security" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file-description"></i>
-                </span>
-                <span class="hide-menu">Security</span>
-              </p>
-            </li>
-            {% endif %}
-
-        </nav>
-        <!-- End Sidebar navigation -->
-      </div>
-      <!-- End Sidebar scroll-->
-    </aside>
-    <!--  Sidebar End -->
-    <!--  Main wrapper -->
-    <div class="body-wrapper">
-      <!--  Header Start -->
-      <header class="app-header">
-        <nav class="navbar navbar-expand-lg navbar-light">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link " href="javascript:void(0)" onclick="window.history.back();">
-                <i class="ti ti-arrow-left"></i>
-              </a>
-            </li>
-          </ul>
-          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
-            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              {% block search %}
-              {% endblock %}
-              <li class="nav-item dropdown">
-                <a class="nav-link nav-icon-hover drop2" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+            <ul class="menu_items">
+                <div class="menu_title menu_your_tabs"></div>
+                
+                {% if request.user.mcustomer %}
+                <li class="item">
+                    <div href="#" class="nav_link submenu_item">
+                        <span class="navlink_icon">
+                            <i class="bx bx-group"></i>
+                        </span>
+                        <span class="navlink">Customers</span>
+                        <i class="bx bx-chevron-right arrow-left"></i>
+                    </div>
+                    <ul class="menu_items submenu">
+                        {% if request.user.customer %}
+                        <a href="{% url 'customer_app:customer' %}" class="nav_link sublink">Customer</a>
+                        {% endif %}
+                        {% if request.user.archive %}
+                        <a href="{% url 'customer_app:archive' %}" class="nav_link sublink">Achive</a>
+                        {% endif %}
+                      </ul>
+                    </li>
+                    {% endif %}
+                    
+                {% if request.user.client %}
+                <li class="item">
+                  <a href="{% url 'client_app:client' %}" class="nav_link">
+                    <span class="navlink_icon">
+                      <i class="bx bxs-user"></i>
+                    </span>
+                    <span class="navlink">Client</span>
+                  </a>
+                </li>
+                {% endif %}
+                
+                {% if request.user.council %}
+                <li class="item">
+                  <a href="{% url 'region_app:council' %}" class="nav_link">
+                    <span class="navlink_icon">
+                      <i class="bx bxs-location-plus"></i>
+                    </span>
+                    <span class="navlink">Region</span>
+                  </a>
+                </li>
+                {% endif %}
+                
+                {% if request.user.globals %}
+                <li class="item">
+                  <div href="#" class="nav_link submenu_item">
+                    <span class="navlink_icon">
+                      <i class="bx bx-world"></i>
+                    </span>
+                    <span class="navlink">Global</span>
+                    <i class="bx bx-chevron-right arrow-left"></i>
+                  </div>
+                  <ul class="menu_items submenu">
+                    {% if request.user.product %}
+                    <a href="{% url 'product_app:product' %}" class="nav_link sublink">Product</a>
+                    {% endif %}
+                    {% if request.user.funding_route %}
+                    <a href="{% url 'funding_route_app:funding_route' %}" class="nav_link sublink">Funding Route</a>
+                    {% endif %}
+                    {% if request.user.CJ %}
+                    <a href="{% url 'customer_journey_app:customer_journey' %}" class="nav_link sublink">Customer Journey</a>
+                    {% endif %}
+                    {% if request.user.QA %}
+                    <a href="{% url 'question_actions_requirements_app:questions' %}" class="nav_link sublink">Question And Answers</a>
+                    {% endif %}
+                  </ul>
+                </li>
+                {% endif %}
+                
+                {% if request.user.admin %}
+                <li class="item">
+                  <a href="{% url 'admin_app:admin' %}" class="nav_link">
+                    <span class="navlink_icon">
+                      <i class="bx bx-key"></i>
+                    </span>
+                    <span class="navlink">Admin</span>
+                  </a>
+                </li>
+                {% endif %}
+                
+                {% if request.user.finance %}
+                <li class="item">
+                  <a href="{% url 'app:finance' %}" class="nav_link">
+                    <span class="navlink_icon">
+                      <i class="bx bx-dollar"></i>
+                    </span>
+                    <span class="navlink">Finance</span>
+                  </a>
+                </li>
+                {% endif %}
+                
+                {% if request.user.hr %}
+                <li class="item">
+                  <div href="#" class="nav_link submenu_item">
+                    <span class="navlink_icon">
+                      <i class="bx bx-bar-chart-square"></i>
+                    </span>
+                    <span class="navlink">HR</span>
+                    <i class="bx bx-chevron-right arrow-left"></i>
+                  </div>
+                  <ul class="menu_items submenu">
+                    {% if request.user.h_dashboard %}
+                    <a href="#" class="nav_link sublink">Dashboard</a>
+                    {% endif %}
+                    {% if request.user.h_employee %}
+                    <a href="{% url 'hr_app:employee' %}" class="nav_link sublink">Employee</a>
+                    {% endif %}
+                    {% if request.user.h_timesheet %}
+                    <a href="#" class="nav_link sublink">Timesheet</a>
+                    {% endif %}
+                    {% if request.user.h_emp_action %}
+                    <a href="#" class="nav_link sublink">Employee Actions</a>
+                    {% endif %}
+                    {% if request.user.h_emp_notify %}
+                    <a href="#" class="nav_link sublink">Employee Notification</a>
+                    {% endif %}
+                    {% if request.user.h_org_chart %}
+                    <a href="#" class="nav_link sublink">Organizational Chart</a>
+                    {% endif %}
+                    {% if request.user.knowledge_base %}
+                    <a href="#" class="nav_link sublink">Knowledge Base</a>
+                    {% endif %}
+                  </ul>
+                </li>
+                {% endif %}
+                
+                {% if request.user.security %}
+                <li class="item">
+                  <div href="#" class="nav_link submenu_item">
+                    <span class="navlink_icon">
+                      <i class="bx bx-check-shield"></i>
+                    </span>
+                    <span class="navlink">Security</span>
+                    <i class="bx bx-chevron-right arrow-left"></i>
+                  </div>
+                  <ul class="menu_items submenu">
+                    {% if request.user.s_employee %}
+                    <a href="{% url 'security_app:s_employee' %}" class="nav_link sublink">Employee</a>
+                    {% endif %}
+                    {% if request.user.s_role %}
+                    <a href="{% url 'security_app:role' %}" class="nav_link sublink">Role</a>
+                    {% endif %}
+                    {% if request.user.s_client %}
+                    <a href="#" class="nav_link sublink">Client</a>
+                    {% endif %}
+                  </ul>
+                </li>
+                {% endif %}
+                
+                
+              </ul>
+              <ul class="menu_items">
+                <div class="menu_title menu_user"></div>
+                <li class="ms-4">
+                  <a class="nav-link nav-icon-hover drop2" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
                   <img src="{% static 'images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
                 </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up drop3" aria-labelledby="drop2">
-                  <div class="message-body">
-                    <a href="#" class=" text-center reform_btn mx-3 mt-2 d-block" style="width:200px">Profile</a>
-                    <a href="{% url "user:logout" %}" class=" text-center secondary_reform_btn mx-3 mt-2 d-block" style="width:200px">Logout</a>
-                  </div>
-                </div>
+              </li>
+              <li class="item">
+                <a href="{% url 'user:logout' %}" class="nav_link">
+                  <span class="navlink_icon">
+                    <i class="bx bx-log-out"></i>
+                  </span>
+                  <span class="navlink">Logout</span>
+                </a>
               </li>
             </ul>
+            
           </div>
         </nav>
-      </header>
-      
-      {% comment %} {% if request.GET.page != 'customer' or request.GET.page != 'product' or 'council_detail' in request.GET.page %}
-      {% for message in messages %}
-      <div class="container-fluid p-0 m-0">
-        <div class="alert {{ message.tags }} alert-dismissible m-0 text-center" role="alert" >
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="True">&times;</span>
-          </button>
-         {{ message }}
+        
+        <div class="main_content mt-5" >
+          {% block content %}{% endblock content %}
         </div>
       </div>
-      {% endfor %}
-      {% endif %} {% endcomment %}
-
-      {% block content %}{% endblock content %}
-      </div>
     </div>
-  </div>
-  <script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
-  <script src="{% static 'libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'js/sidebarmenu.js' %}"></script>
-  <script src="{% static 'js/app.min.js' %}"></script>
-  <script src="{% static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
-  <script src="{% static 'libs/simplebar/dist/simplebar.js' %}"></script>
-  <script src="{% static 'js/dashboard.js' %}"></script>
- 
+    <script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/sidebarmenu.js' %}"></script>
+    <script src="{% static 'js/app.min.js' %}"></script>
+    <script src="{% static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+    <script src="{% static 'libs/simplebar/dist/simplebar.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/nav.js' %}"></script>
+    
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
@@ -301,439 +340,6 @@ i{
 
 
   <script src="{% static 'js/comboTreePlugin.js' %} " type="text/javascript"></script>
-
-  
-  <script>
-    const customer = document.querySelector('.customer');
-    customer.addEventListener('click',()=>{
-        {% if request.user.archive %}
-        if(document.querySelector('.archive')){
-          document.querySelector('.archive').remove()
-        } else{
-          
-        const a = document.createElement("li");
-        a.classList.add('sidebar-item','archive');
-        a.innerHTML = `
-        <a class="sidebar-link" href="{% url "customer_app:archive" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person-fill-dash" style="background-color: transparent; "></i>
-                </span>
-                <span class="hide-menu">Archive</span>
-              </a>
-        `
-        customer.parentNode.insertAdjacentElement("afterend", a);
-        
-      }
-      {% endif %}
-      {% if request.user.customer %}
-      if(document.querySelector('.customers')){
-          document.querySelector('.customers').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','customers');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="{% url "customer_app:customer" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Customer</span>
-              </a>
-        `
-        customer.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-      {% endif %}
-      })
-    
-      
-    </script>
-  
-  <script>
-    const security = document.querySelector('.security');
-    security.addEventListener('click',()=>{
-
-      {% if request.user.s_client %}
-      if(document.querySelector('.s_client')){
-          document.querySelector('.s_client').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','s_client');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Clients</span>
-              </a>
-        `
-        security.parentNode.insertAdjacentElement("afterend", a1);
-      }
-      {% endif %}
-
-      {% if request.user.s_role %}
-
-
-      if(document.querySelector('.s_role')){
-          document.querySelector('.s_role').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','s_role');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="{% url 'security_app:role' %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Roles</span>
-              </a>
-        `
-        security.parentNode.insertAdjacentElement("afterend", a1);
-      }
-      {% endif %}
-
-      {% if request.user.s_employee %}
-
-      if(document.querySelector('.s_emp')){
-          document.querySelector('.s_emp').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','s_emp');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="{% url "security_app:s_employee" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Employee</span>
-              </a>
-        `
-        security.parentNode.insertAdjacentElement("afterend", a1);
-      } 
-      {% endif %}
-
-
-    })
-    
-      
-    </script>
-
-  
-  <script>
-    const hr = document.querySelector('.hr');
-    hr.addEventListener('click',()=>{
-
-      {% if request.user.knowledge_base %}
-      if(document.querySelector('.kbase')){
-          document.querySelector('.kbase').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','kbase');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Knowledge Base</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-      {% endif %}
-
-      {% if request.user.h_org_chart %}
-
-      if(document.querySelector('.ochart')){
-          document.querySelector('.ochart').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','ochart');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Organizational Chart</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-      {% endif %}
-
-
-      {% if request.user.h_emp_notify %}
-
-      if(document.querySelector('.enotify')){
-          document.querySelector('.enotify').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','enotify');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Employee Notification</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.h_emp_action %}
-
-      if(document.querySelector('.eaction')){
-          document.querySelector('.eaction').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','eaction');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Employee Actions</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.h_timesheet %}
-      
-      if(document.querySelector('.timesheet')){
-          document.querySelector('.timesheet').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','timesheet');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Timesheet</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-        
-        {% endif %}
-
-      {% if request.user.h_employee %}
-
-      if(document.querySelector('.emp')){
-          document.querySelector('.emp').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','emp');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="{% url 'hr_app:employee' %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Employees</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.h_dashboard %}
-
-      if(document.querySelector('.dash')){
-          document.querySelector('.dash').remove()
-        } else{
-        const a1 = document.createElement("li");
-        a1.classList.add('sidebar-item','dash');
-        a1.innerHTML = `
-        <a class="sidebar-link" href="#" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-person" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Dashboard</span>
-              </a>
-        `
-        hr.parentNode.insertAdjacentElement("afterend", a1);
-        
-      }
-        
-        {% endif %}
-  
-      })
-    
-      
-    </script>
-
-  
-  <script>
-    const customerJourney = document.querySelector('.customer-journey');
-    customerJourney.addEventListener('click',()=>{
-
-
-        {% if request.user.QA %}
-
-        if(document.querySelector('.questions')){
-          document.querySelector('.questions').remove()
-        } else{
-          
-        const a = document.createElement("li");
-        a.classList.add('sidebar-item','questions');
-        a.innerHTML = `
-        <a class="sidebar-link" href="{% url "question_actions_requirements_app:questions" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-question-lg" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Question and Action</span>
-              </a>
-        `
-        customerJourney.parentNode.insertAdjacentElement("afterend", a);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.CJ %}
-
-
-      if(document.querySelector('.cj')){
-          document.querySelector('.cj').remove()
-        } else{
-          
-        const a = document.createElement("li");
-        a.classList.add('sidebar-item','cj');
-        a.innerHTML = `
-        <a class="sidebar-link" href="{% url "customer_journey_app:customer_journey" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <h3> CJ</h2>
-                </span>
-                <span class="hide-menu">Customer Journey</span>
-              </a>
-        `
-        customerJourney.parentNode.insertAdjacentElement("afterend", a);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.funding_route %}
-
-      if(document.querySelector('.funding_route')){
-          document.querySelector('.funding_route').remove()
-        } else{
-          
-        const a = document.createElement("li");
-        a.classList.add('sidebar-item','funding_route');
-        a.innerHTML = `
-        <a class="sidebar-link" href="{% url "funding_route_app:funding_route" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-compass" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Funding Route</span>
-              </a>
-        `
-        customerJourney.parentNode.insertAdjacentElement("afterend", a);
-        
-      }
-
-      {% endif %}
-
-      {% if request.user.product %}
-
-        if(document.querySelector('.product')){
-          document.querySelector('.product').remove()
-        } else{
-          
-        const a = document.createElement("li");
-        a.classList.add('sidebar-item','product');
-        a.innerHTML = `
-        <a class="sidebar-link" href="{% url "product_app:product" %}" aria-expanded="false">
-                <span>
-                  <i class="bi bi-chevron-down " style="color: transparent;
-                  "></i>
-                </span>
-                <span>
-                  <i class="bi bi-car-front-fill" style="background-color: transparent;"></i>
-                </span>
-                <span class="hide-menu">Product</span>
-              </a>
-        `
-        customerJourney.parentNode.insertAdjacentElement("afterend", a);
-        
-      }
-
-      {% endif %}
-
-
-      })
-    
-      
-    </script>
 
   {% block js %}
   

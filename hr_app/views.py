@@ -20,8 +20,9 @@ def off_boarding(request):
     return render(request, "home/off_boarding.html", {'emps':employes})
 
 @login_required
-def emp_profile(request):
-    return render(request, "home/profile.html")
+def emp_profile(request, emp_id):
+    emp = User.objects.get(pk=emp_id)
+    return render(request, "home/profile.html", {'emp':emp})
 
 @login_required
 def job_info(request):

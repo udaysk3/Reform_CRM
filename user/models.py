@@ -39,8 +39,6 @@ class UserManager(BaseUserManager):
             "security": True,
             "is_staff": True,
             "is_superuser": True,
-
-            
             "customer": True,
             "product": True,
             "funding_route": True,
@@ -71,6 +69,7 @@ USER_CHOICES = [
     ('HR', 'HR'),
     ('Admin', 'Admin'),
 ]
+
 class User(AbstractUser):
     username = None
     username = models.CharField(max_length=100, unique=True)
@@ -98,7 +97,6 @@ class User(AbstractUser):
     last_login = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(default=False)
     approved = models.CharField(max_length=100, blank=True, null=True)
-
     customer = models.BooleanField(default=False)
     product = models.BooleanField(default=False)
     funding_route = models.BooleanField(default=False)
@@ -118,5 +116,6 @@ class User(AbstractUser):
     s_role = models.BooleanField(default=False)
     s_client = models.BooleanField(default=False)
     is_client = models.BooleanField(default=False)
+    
 
     objects = UserManager()

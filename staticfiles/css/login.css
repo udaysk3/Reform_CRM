@@ -1,239 +1,96 @@
-/* Import the font with specific weights and styles */
-@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,300;0,400;0,600;0,900;1,300&display=swap');
-
-/* Reset default margins and paddings */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Root variables for consistent design */
-:root {
-    --main-color: #7AD1A1;        /* Main Color (Medium Aquamarine) */
-    --secondary-color: #3EA86D;   /* Secondary Color (Medium Sea Green) */
-    --background-color: #004652;  /* Background (Midnight Green) */
-    --white-color: #FFFFFF;       /* White */
-    --text-color: #333333;        /* Default text color */
-    --font-family: 'Albert Sans', sans-serif;
-    --border-radius: 8px;
-}
-
-/* Apply background color and font to body */
-body {
-    background-color: var(--background-color);
-    font-family: var(--font-family);
+ body {
+    height: 100vh;
+    padding-left: 33vw;
     display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
-    align-items: center;
-    padding: 60px 20px;
-    min-height: 100vh;
-    margin: 0;
-}
+ }
 
-/* Logo container styling */
-.logo-container {
-    margin-bottom: 30px;
-}
+ .login-container {
+     background: white;
+     border-radius: 40px;
+     padding: 2rem;
+     width: 100%;
+     max-width: 480px;
+     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+ }
 
-.logo-image {
-    max-width: 250px;
-    width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-}
+ .login-form-section {
+     background: #004D4D;
+     border-radius: 25px;
+     padding: 2rem;
+     margin-top: 1rem;
+ }
 
-/* Login container styling */
-.login-container {
-    background-color: var(--white-color);
-    padding: 40px;
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-}
+ .logo {
+     width: 150px;
+     margin-bottom: 1.5rem;
+ }
 
-/* Login title */
-.login-title {
-    color: var(--background-color);
-    font-size: 28px;
-    font-weight: 900;
-    margin-bottom: 30px;
-}
+ .welcome-text {
+     color: #7FD1AE;
+     font-size: 1.5rem;
+     margin-bottom: 0.5rem;
+ }
 
-/* Input fields */
-.login-input {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--text-color);
-    background-color: var(--white-color);
-}
+ .subtitle {
+     color: #666;
+     font-size: 0.9rem;
+     margin-bottom: 2rem;
+ }
 
-/* Placeholder text */
-.login-input::placeholder {
-    color: #666666;
-    font-weight: 300;
-}
+ .form-label {
+     color: white;
+     font-size: 0.9rem;
+     margin-bottom: 0.5rem;
+ }
 
-/* Hover and focus effects on input fields */
-.login-input:hover {
-    border-color: var(--main-color);
-}
+ .form-control {
+     border: none;
+     border-radius: 8px;
+     padding: 0.75rem;
+     margin-bottom: 1rem;
+     height: 45px;
+ }
 
-.login-input:focus {
-    border-color: var(--main-color);
-    box-shadow: 0 0 0 3px rgba(122, 209, 161, 0.2);
-    outline: none;
-}
+ .form-check-label {
+     color: white;
+     font-size: 0.9rem;
+ }
 
-/* Login actions (button and link) */
-.login-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+ .form-check-input {
+     border-color: white;
+ }
 
-/* Login button */
-.login-button {
-    padding: 12px 20px;
-    background-color: var(--main-color);
-    color: var(--white-color);
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: 600;
-    flex: 1;
-    margin-right: 10px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
+ .forgot-password {
+     color: white;
+     text-decoration: none;
+     font-size: 0.9rem;
+ }
 
-/* Adjusted hover effect */
-.login-button:hover {
-    background-color: var(--secondary-color);
-    box-shadow: 0 4px 12px rgba(62, 168, 109, 0.4);
-}
+ .btn-2fa {
+     background-color: white;
+     border: none;
+     padding: 0.75rem;
+     width: 100%;
+     border-radius: 8px;
+     color: #004D4D;
+     margin-bottom: 1rem;
+     height: 45px;
+ }
 
-/* Forgot password link */
-.forgot-password {
-    color: var(--main-color);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 300;
-    font-style: italic;
-}
+ .btn-login {
+     background-color: #7FD1AE;
+     border: none;
+     padding: 0.75rem;
+     width: 100%;
+     border-radius: 8px;
+     color: #004D4D;
+     font-weight: 500;
+     height: 45px;
+ }
 
-/* Adjust link hover effect */
-.forgot-password:hover {
-    color: var(--secondary-color);
-    text-decoration: underline;
-}
-
-/* Password Reset Container Styling */
-.password-reset-container {
-    background-color: var(--white-color);
-    padding: 40px;
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-}
-
-.password-reset-container .login-title {
-    color: var(--background-color);
-    font-size: 28px;
-    font-weight: 900;
-    margin-bottom: 30px;
-}
-
-.password-reset-container .login-input {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--text-color);
-    background-color: var(--white-color);
-}
-
-.password-reset-container .login-input::placeholder {
-    color: #666666;
-    font-weight: 300;
-}
-
-.password-reset-container .login-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.password-reset-container .login-button {
-    padding: 12px 20px;
-    background-color: var(--main-color);
-    color: var(--white-color);
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: 600;
-    flex: 1;
-    margin-right: 10px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.password-reset-container .login-button:hover {
-    background-color: var(--secondary-color);
-    box-shadow: 0 4px 12px rgba(62, 168, 109, 0.4);
-}
-
-.password-reset-container .back-to-login {
-    color: var(--main-color);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 300;
-    font-style: italic;
-}
-
-.password-reset-container .back-to-login:hover {
-    color: var(--secondary-color);
-    text-decoration: underline;
-}
-
-/* Adjustments for smaller screens */
-@media (max-width: 500px) {
-    body {
-        padding: 40px 10px;
-    }
-    .logo-container {
-        margin-bottom: 20px;
-    }
-    .login-container,
-    .password-reset-container {
-        padding: 30px;
-    }
-    .login-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .login-button {
-        margin-right: 0;
-        margin-bottom: 15px;
-    }
-    .forgot-password,
-    .back-to-login {
-        margin-top: 0;
-        text-align: center;
-    }
-}
+ .btn-login:hover {
+     background-color: #6fc09d;
+ }
