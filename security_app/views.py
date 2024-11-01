@@ -1,9 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.core.serializers import serialize
+from datetime import datetime
+import pytz
+from pytz import timezone
 from user.models import User
 from .models import Role
 from django.contrib.auth.hashers import make_password
+from client_app.models import Clients
 
 @login_required
 def s_employee(request):
@@ -11,6 +16,84 @@ def s_employee(request):
         delete_customer_session(request)
     employes = User.objects.filter(is_employee=True, is_archive=False)
     return render(request, "home/s_employee.html", {'emps': employes})
+
+@login_required
+def s_client(request):
+    clients = Clients.objects.all()
+    clients_list = Clients.objects.all()
+    agents = User.objects.all().filter(is_employee=True)
+    return render(request, 'home/s_client.html', {'clients': clients, "agents": serialize('json', agents), "clients_list": serialize('json', clients_list)})
+
+def assign_agents(request):
+    if request.method == "POST":
+     try:
+        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
+        clients = request.POST.get("clients")
+        clients = list(clients.split(','))
+        if "All Unassigned Clients" in clients or " All Unassigned Clients" in clients:
+            if "All Unassigned Clients" in clients:
+                clients.remove("All Unassigned Clients")
+            else:
+                clients.remove(" All Unassigned Clients")
+            client_ids = Clients.objects.filter(assigned_to=None).values_list('id', flat=True)
+            
+            num_clients = len(client_ids)
+            num_agents = len(agent_ids)
+            clients_per_agent = num_clients // num_agents
+            extra_clients = num_clients % num_agents
+            
+            agent_index = 0
+            for agent_id in agent_ids:
+                agent = User.objects.get(pk=agent_id)
+                
+                if extra_clients > 0:
+                    num_clients_for_agent = clients_per_agent + 1
+                    extra_clients -= 1
+                else:
+                    num_clients_for_agent = clients_per_agent
+                
+                assigned_clients = client_ids[:num_clients_for_agent]
+                Clients.objects.filter(id__in=assigned_clients).update(assigned_to=agent_id)
+                client_ids = client_ids[num_clients_for_agent:]
+                
+                agent_index += 1
+        if clients:
+            c_agent_ids = []
+            for agent_id in clients:
+                c_agent_ids.append(int(agent_id.split(' - ')[-1]))
+            client_ids = []
+            for agent_id in c_agent_ids:
+                client_ids.extend(list(Clients.objects.filter(assigned_to=agent_id).values_list('id', flat=True)))
+            num_clients = len(client_ids)
+            num_agents = len(agent_ids)
+            clients_per_agent = num_clients // num_agents
+            extra_clients = num_clients % num_agents
+
+            agent_index = 0
+            for agent_id in agent_ids:
+                agent = User.objects.get(pk=agent_id)
+
+                if extra_clients > 0:
+                    num_clients_for_agent = clients_per_agent + 1
+                    extra_clients -= 1
+                else:
+                    num_clients_for_agent = clients_per_agent
+
+                assigned_clients = client_ids[:num_clients_for_agent]
+                Clients.objects.filter(id__in=assigned_clients).update(assigned_to=agent_id)
+                client_ids = client_ids[num_clients_for_agent:]
+
+                agent_index += 1
+        
+        messages.success(request, "Clients Assigned successfully!")
+        return redirect("security_app:s_client")
+     except Exception as e:
+        messages.error(request, f"Error assigning clients: {e}")
+        return redirect("security_app:s_client")
+    else:
+        messages.error(request, "Cannot Assign clients!")
+        return redirect("security_app:s_client")
+
 
 @login_required
 def role(request):
@@ -80,19 +163,50 @@ def add_role(request):
             s_role=s_role,
             s_client=s_client
         )
+        messages.success(request, "Role added successfully!")
         return redirect('security_app:role')
     return render(request, 'home/add_role.html')
 
 @login_required
 def s_edit_employee(request, emp_id):
     emp = User.objects.get(pk=emp_id)
+    history = {}
+    actions = emp.employee_user.get_created_at_emp_action_history()
+    london_tz = timezone("Europe/London")
+
+    for i in actions:
+        if i.created_at.replace(tzinfo=london_tz).date() not in history:
+            history[i.created_at.replace(tzinfo=london_tz).date()] = []
+
+    for i in actions:
+        history[i.created_at.replace(tzinfo=london_tz).date()].append(
+            [
+                i.created_at.astimezone(london_tz).time(),
+                i.agent.first_name,
+                i.agent.last_name,
+                i.action_type,
+                i.text,
+            ]
+        )
+        
     if request.method == 'POST':
         if request.POST.get('password'):
             emp.password = make_password(request.POST.get('password'))
         emp.status = request.POST.get('status') == 'on'
         emp.save()
-        return redirect('security_app:s_employee')
-    return render(request, 'home/s_edit_employee.html', {'emp': emp})
+        action_type = ''
+        if request.POST.get('status') == 'on':
+            action_type = 'Employee activated'
+        else:
+            action_type = 'Employee deactivated'
+        emp.employee_user.add_emp_action(
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type=action_type,
+            agent=request.user,
+        )
+        messages.success(request, 'Employee activated successfully!')
+        return redirect('/s_edit_employee/' + str(emp_id))
+    return render(request, 'home/s_edit_employee.html', {'emp': emp, "history": history})
 
 def approve_role(request, emp_id):
     emp = User.objects.get(pk=emp_id)
@@ -127,15 +241,26 @@ def approve_role(request, emp_id):
     emp.s_role = role.s_role
     emp.s_client = role.s_client
     emp.save()
+    emp.employee_user.add_emp_action(
+        created_at=datetime.now(pytz.timezone("Europe/London")),
+        action_type="Role approved",
+        agent=request.user,
+    )
     messages.success(request, 'Role approved successfully!')
-    return redirect('security_app:s_employee')
+    return redirect('/s_edit_employee/' + str(emp_id))
 
 def deny_role(request, emp_id):
     emp = User.objects.get(pk=emp_id)
     emp.approved = 'deny'
     emp.save()
+    emp.employee_user.add_emp_action(
+        created_at=datetime.now(pytz.timezone("Europe/London")),
+        action_type="Role denied",
+        agent=request.user,
+    )
+
     messages.success(request, 'Role denied successfully!')
-    return redirect('security_app:s_employee')
+    return redirect('/s_edit_employee/' + str(emp_id))
 
 def change_otp_mail(request, emp_id):
     emp = get_object_or_404(User, pk=emp_id)
@@ -144,13 +269,19 @@ def change_otp_mail(request, emp_id):
         if new_email:
             if User.objects.filter(email=new_email).exists():
                 messages.error(request, 'This email is already in use!')
-                return redirect('security_app:s_employee')
+                return redirect('/s_edit_employee/' + str(emp_id))
             emp.email = new_email
             emp.save()
             messages.success(request, 'OTP mail changed successfully!')
+            emp.employee_user.add_emp_action(
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Email updated to " + new_email,
+                agent=request.user,
+            )
+
         else:
             messages.error(request, 'Email cannot be empty.')
-    return redirect('security_app:s_employee')
+    return redirect('/s_edit_employee/' + str(emp_id))
 
 def edit_role(request, role_id):
     role = Role.objects.get(pk=role_id)
@@ -185,6 +316,7 @@ def edit_role(request, role_id):
         role.s_role = request.POST.get('s_role') == 'on'
         role.s_client = request.POST.get('s_client') == 'on'
         role.save()
+        messages.success(request, 'Role updated successfully!')
         return redirect('security_app:role')
     return render(request, 'home/edit_role.html', {'role': role})
 
@@ -217,9 +349,28 @@ def reset_password(request, emp_id):
         conform_password = request.POST.get('conform_password')
         if password != conform_password:
             messages.error(request, 'Password and conform password does not match!')
-            return redirect('security_app:s_employee')
+            return redirect('/s_edit_employee/' + str(emp_id))
         emp = User.objects.get(pk=emp_id)
         emp.password = make_password(password)
         emp.save()
+        emp.employee_user.add_emp_action(
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Updated Password",
+                agent=request.user,
+            )
     messages.success(request, 'Password reset successfully!')
-    return redirect('security_app:s_employee')
+    return redirect('/s_edit_employee/' + str(emp_id))
+
+def upload_profile(request, emp_id):
+    if request.method == 'POST':
+        emp = User.objects.get(pk=emp_id)
+
+        emp.employee_user.employee_image = request.FILES['profile']
+        emp.employee_user.save()
+        emp.employee_user.add_emp_action(
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Profile picture updated",
+                agent=request.user,
+            )
+    messages.success(request, 'Profile picture updated successfully!')
+    return redirect('/s_edit_employee/' + str(emp_id))

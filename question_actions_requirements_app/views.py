@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Questions 
+from .models import Questions, Rule_Regulation
+
 
 
 def questions(request):
     questions = Questions.objects.all()
-    return render(request, 'home/question_actions.html', {'questions':questions})
+    rule_regulations = Rule_Regulation.objects.all()
+    return render(request, 'home/question_actions.html', {'questions':questions, 'rule_regulations':rule_regulations})
 
 def add_question(request):
     if request.method == 'POST':

@@ -1,8 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password
+from datetime import datetime
+import pytz
 from user.models import User
 from security_app.models import Role
+from .models import Employee
 
 
 @login_required
@@ -38,6 +42,38 @@ def courses(request):
 
 def add_employee(request):
     roles = Role.objects.all()
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Agent with this email already exists!')
+            return redirect('admin_app:admin') 
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+        department = request.POST.get('department')
+        dob = request.POST.get('dob')
+        hashed_password = make_password(password) 
+        emp = User.objects.create(
+            username=email,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            password= hashed_password,
+            role=role,
+            department=department,
+            dob=dob,
+            is_employee=True,
+        )
+        employee = Employee.objects.create(user=emp)
+        employee.add_emp_action(
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type='Employee added',
+            agent=request.user,
+        )
+
+        messages.success(request, 'Agnet added successfully!')
+        return redirect('hr_app:employee')
     return render(request, 'home/add_employee.html', {'roles':roles})
 
 def edit_employee(request, emp_id):
@@ -47,9 +83,28 @@ def edit_employee(request, emp_id):
         emp_dob_formatted = emp.dob.strftime('%Y-%m-%d')
     else:
         emp_dob_formatted = ''
+    if request.method == 'POST':
+        if request.POST.get('password'):
+            emp.password = make_password(request.POST.get('password'))
+        if emp.role != request.POST.get('role'):
+            emp.approved = ''
+        emp.first_name = request.POST.get('first_name')
+        emp.last_name = request.POST.get('last_name')
+        emp.role = request.POST.get('role')
+        emp.department = request.POST.get('department')
+        emp.dob = request.POST.get('dob')
+        emp.save()
+
+        emp.employee_user.add_emp_action(
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type='Employee updated',
+            agent=request.user,
+        )
+
+        messages.success(request, 'User updated successfully!')
+        return redirect('hr_app:employee')  
 
     return render(request, 'home/edit_employee.html', {'emp':emp, 'emp_dob':emp_dob_formatted, 'roles':roles})
-
 
 def bulk_archive_employes(request):
     if request.method == "GET":

@@ -19,7 +19,7 @@
     <a
       type="button"
       class="reform_btn position-absolute"
-      style="top:90px; right: 50px; width: fit-content;"
+      style="top:50px; right: 50px; width: fit-content;"
       href="/add_question"
     >
       Add Question
@@ -39,6 +39,7 @@
                   <th>Question/Action</th>
                   <th>Parameter</th>
                   <th>Input</th>
+                  <th>CJ</th>
                 </tr>
               </thead>
 
@@ -59,12 +60,12 @@
                   {% with field=product.type|split:',' %}
                   {% if field.0 == 'dropdown' or field.0 == 'checkbox' or field.0 == 'radio' %}
                   <td style="width: 10%">
-                     <button
+                    <button
                       type="button"
                       class="reform_btn"
                       data-bs-toggle="modal"
                       data-bs-target="#questionModal{{ forloop.counter }}"
-                  >
+                    >
                       View
                     </button>
                   
@@ -117,6 +118,52 @@
                     </td>
                   {% endif %}
                   {% endwith %}
+
+                  <td style="width: 10%">
+                    <button
+                      type="button"
+                      class="reform_btn"
+                      data-bs-toggle="modal"
+                      data-bs-target="#cj{{ forloop.counter }}"
+                    >
+                      View
+                    </button>
+                  
+                    <div
+                      class="modal fade"
+                      id="cj{{ forloop.counter }}"
+                      data-bs-backdrop="static"
+                      data-bs-keyboard="false"
+                      tabindex="-1"
+                      aria-labelledby="staticBackdropLabel"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                              <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                                Customer Journey
+                              </h1>
+                              <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                              ></button>
+                            </div>
+                            <div class="modal-body">
+                              {% for rule_regulation in rule_regulations %}
+                                {% if rule_regulation.question == product %}
+                                  <div class="mb-3">
+                                    {{ rule_regulation.route }} - {{ rule_regulation.product }} - {{ rule_regulation.stage }}
+                                  </div>
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
 
                   <td style="width: 10%">
                     <a href="/edit_question/{{ product.id }}" class="edit-signature-btn">

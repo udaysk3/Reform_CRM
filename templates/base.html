@@ -19,6 +19,10 @@
   <link rel="stylesheet" href="{% static 'css/nav.css' %}">
   <style>
 
+    .nav_link:hover, .navlink_icon:hover{
+      background-color: #004652;
+    }
+
     body{
       background-image: linear-gradient(#fff, #004652);
   background-attachment: fixed;
@@ -102,6 +106,10 @@
 
 i{
   font-size:20px;
+}
+
+.sidebar{
+  padding-top: 20px;
 }
 
   </style>
@@ -289,7 +297,7 @@ i{
                     <a href="{% url 'security_app:role' %}" class="nav_link sublink">Role</a>
                     {% endif %}
                     {% if request.user.s_client %}
-                    <a href="#" class="nav_link sublink">Client</a>
+                    <a href="{% url 'security_app:s_client' %}" class="nav_link sublink">Client</a>
                     {% endif %}
                   </ul>
                 </li>

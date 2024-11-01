@@ -1,9 +1,6 @@
 from django.db import models
 from home.models import Stage
 
-# Create your models here.
-
-
 class Questions(models.Model):
     question = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)

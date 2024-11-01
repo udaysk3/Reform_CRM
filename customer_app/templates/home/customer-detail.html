@@ -1058,26 +1058,26 @@ table {
                           {% if v.5 == 'Email Received' %}
                           - <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#Email_data{{forloop.counter}}">
                             View Email
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Email</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        {{ v.8 }}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="reform_btn">Understood</button>
-      </div>
-    </div>
-  </div>
-</div>
+                          </button>
+                          
+                          <!-- Modal -->
+                          <div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h1 class="modal-title fs-5" id="staticBackdropLabel">Email</h1>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  {{ v.8 }}
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                                  <button type="button" class="reform_btn">Understood</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                           {% else %}
                           - {{ v.8 }} 
                           {% endif %}

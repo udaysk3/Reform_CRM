@@ -358,7 +358,6 @@ def client_detail(request, client_id, s_client_id=None):
     ) 
 
 @login_required
-@cache_page(60 * 20)
 def client(request):
     """
     View function to display the list of clients.

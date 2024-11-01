@@ -40,6 +40,7 @@ class Clients(models.Model):
     product = models.ManyToManyField(
         "product_app.Product", related_name="client",
     )
+    assigned_to = models.ForeignKey(User, related_name= 'client_assigned_to', on_delete=models.DO_NOTHING, null=True)
 
     def add_action(
         self,
