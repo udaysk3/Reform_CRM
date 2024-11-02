@@ -111,7 +111,7 @@ def edit_employee(request, emp_id):
         messages.success(request, 'Employee Details updated successfully!')
         return redirect('/emp_profile/'+str(emp_id))  
 
-    return render(request, 'home/edit_employee.html', {'emp':emp, 'emp_dob':emp_dob_formatted, 'roles':roles, 'users':users,})
+    return render(request, 'home/edit_employee.html', {'emp':emp, 'roles':roles, 'users':users,})
 
 def edit_basic_information(request, emp_id):
     emp = User.objects.get(pk=emp_id)
