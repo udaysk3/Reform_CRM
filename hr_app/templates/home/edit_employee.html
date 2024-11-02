@@ -22,8 +22,14 @@
             <form
               method="post"
               action="{% url 'hr_app:edit_employee' emp.id %}"
+              enctype="multipart/form-data" 
             >
               {% csrf_token %}
+
+              <div class="mb-3">
+                <label for="formFile" class="form-label">Profile Image</label>
+                <input class="form-control" type="file" id="formFile" name="profile">
+              </div>
 
               <div class="mb-3">
                 <label for="first_name" class="form-label">First Name</label>

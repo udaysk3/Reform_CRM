@@ -55,6 +55,7 @@ def add_employee(request):
         last_name = request.POST.get('last_name')
         password = request.POST.get('password')
         role = request.POST.get('role')
+        employee_image = request.FILES['profile']
         hashed_password = make_password(password) 
         emp = User.objects.create(
             username=email,
@@ -71,6 +72,7 @@ def add_employee(request):
             reporting_to=User.objects.get(pk=request.POST.get('reporting_to')),
             phone_number=request.POST.get('phone'),
             work_setup=request.POST.get('work_setup'),
+            employee_image=employee_image,
         )
         employee.add_emp_action(
             created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -91,6 +93,7 @@ def edit_employee(request, emp_id):
             emp.password = make_password(request.POST.get('password'))
         if emp.role != request.POST.get('role'):
             emp.approved = ''
+        emp.employee_user.employee_image = request.FILES['profile']
         emp.first_name = request.POST.get('first_name')
         emp.last_name = request.POST.get('last_name')
         emp.role = request.POST.get('role')
