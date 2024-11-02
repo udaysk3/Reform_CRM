@@ -1361,15 +1361,12 @@ def remove_customer_route(request, customer_id):
     messages.success(request, "Route removed successfully!")
     return redirect(f"/customer-detail/{customer_id}")
 
-from django.http import JsonResponse
 from .models import Customers
 from user.models import User
-from googleapiclient.discovery import build
 
 def assign_agents(request):
     if request.method == "POST":
      try:
-        # Parse customers and agents from the POST request
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
         customers = request.POST.get("customers")
         customers = list(customers.split(','))
@@ -1385,19 +1382,16 @@ def assign_agents(request):
             customers_per_agent = num_customers // num_agents
             extra_customers = num_customers % num_agents
             
-            # Assign customers to agents
             agent_index = 0
             for agent_id in agent_ids:
                 agent = User.objects.get(pk=agent_id)
                 
-                # Determine the number of customers to assign to this agent
                 if extra_customers > 0:
                     num_customers_for_agent = customers_per_agent + 1
                     extra_customers -= 1
                 else:
                     num_customers_for_agent = customers_per_agent
                 
-                # Assign customers to this agent
                 assigned_customers = customer_ids[:num_customers_for_agent]
                 Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
                 customer_ids = customer_ids[num_customers_for_agent:]
@@ -1415,19 +1409,16 @@ def assign_agents(request):
             customers_per_agent = num_customers // num_agents
             extra_customers = num_customers % num_agents
 
-            # Assign customers to agents
             agent_index = 0
             for agent_id in agent_ids:
                 agent = User.objects.get(pk=agent_id)
 
-                # Determine the number of customers to assign to this agent
                 if extra_customers > 0:
                     num_customers_for_agent = customers_per_agent + 1
                     extra_customers -= 1
                 else:
                     num_customers_for_agent = customers_per_agent
 
-                # Assign customers to this agent
                 assigned_customers = customer_ids[:num_customers_for_agent]
                 Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
                 customer_ids = customer_ids[num_customers_for_agent:]

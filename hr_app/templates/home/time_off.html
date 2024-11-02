@@ -31,40 +31,46 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="d-flex flex-column align-items-center text-center">
-								<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
+								<img src="
+									{% if emp.employee_user.employee_image %}
+                					  {{ emp.employee_user.employee_image.url }}
+                					{% else %}
+                					  {% static 'images/profile/user-1.jpg' %}
+                					{% endif %}
+								" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
 								<div class="mt-3">
-									<h4>John Doe</h4>
+									<h4>{{ emp.first_name }} {{ emp.last_name }}</h4>
 								</div>
 							</div>
                             <div class="my-3 d-flex justify-content-between">
-                                <b>Full Stack Developer</b>
-                                <a href="#">Edit</a>
+                                <b>Employee Details</b>
+                                <a href="{% url 'hr_app:edit_employee' emp.id %}">Edit</a>
                             </div>
 							<hr class="my-4">
 							<ul class="list-group list-group-flush">
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Status:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{emp.status}} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Position:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.role }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Reporting to:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.employee_user.reporting_to.first_name }} {{ emp.employee_user.reporting_to.last_name }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Email Address:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.email }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Phone:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.employee_user.phone_number }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Work Set-Up:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.employee_user.work_setup }} </h4>
 								</li>
 							</ul>
 						</div>
@@ -73,11 +79,11 @@
 				<div class="col-lg-8">
 					<div class="card">
 						<div class="card-body row py-2">
-                            <a href="#" class="col ms-3 fs-5">Personal</a>
-                            <a href="#" class="col fs-5">Job Info</a>
-                            <a href="#" class="col fs-5">Time Off</a>
-                            <a href="{% url 'hr_app:employee' %}" class="col fs-5">Performance</a>
-                            <a href="{% url 'hr_app:off_boarding' %}" class="col fs-5">Documents</a>
+                            <a href="{% url 'hr_app:emp_profile' emp.id %}" class="col ms-3 fs-5">Personal</a>
+                            <a href="{% url 'hr_app:job_info' emp.id %}" class="col fs-5">Job Info</a>
+                            <a href="{% url 'hr_app:time_off' emp.id %}" class="col fs-5">Time Off</a>
+                            <a href="#" class="col fs-5">Performance</a>
+                            <a href="#" class="col fs-5">Documents</a>
 						</div>
 					</div>
 					<div class="card">
@@ -89,9 +95,9 @@
 							<div class="row mb-3">
 								<div class="col-sm-3 d-flex align-items-center flex-column">
 									<div class="rounded-circle p-1 d-flex justify-content-center align-items-center" style="width: 100px; height:100px; border: medium solid rgba(128, 128, 128, 0.158);">
-										<div class="d-flex flex-column align-items-center">
-											<h1 class="mb-2">12</h1>
-											<h6>Days Available</h6>
+										<div class="d-flex flex-column justify-items-center align-items-center">
+											<h1 class="mb-2">{{ emp.employee_user.holiday }}</h1>
+											<h6 class="ms-4">Days Available</h6>
 										</div>
 									</div>
 									<h4 class="mt-2">Holiday</h4>
@@ -99,8 +105,8 @@
 								<div class="col-sm-3 d-flex align-items-center flex-column">
 									<div class="rounded-circle p-1 d-flex justify-content-center align-items-center" style="width: 100px; height:100px; border: medium solid rgba(128, 128, 128, 0.158);">
 										<div class="d-flex flex-column align-items-center">
-											<h1 class="mb-2">12</h1>
-											<h6>Days Available</h6>
+											<h1 class="mb-2">{{ emp.employee_user.sick }}</h1>
+											<h6 class="ms-4">Days Available</h6>
 										</div>
 									</div>
 									<h4 class="mt-2">Sick</h4>
@@ -108,8 +114,8 @@
 								<div class="col-sm-3 d-flex align-items-center flex-column">
 									<div class="rounded-circle p-1 d-flex justify-content-center align-items-center" style="width: 100px; height:100px; border: medium solid rgba(128, 128, 128, 0.158);">
 										<div class="d-flex flex-column align-items-center">
-											<h1 class="mb-2">12</h1>
-											<h6>Days Available</h6>
+											<h1 class="mb-2">{{ emp.employee_user.compassionate }}</h1>
+											<h6 class="ms-4">Days Available</h6>
 										</div>
 									</div>
 									<h4 class="mt-2">Compassionate</h4>
@@ -117,11 +123,11 @@
 								<div class="col-sm-3 d-flex align-items-center flex-column">
 									<div class="rounded-circle p-1 d-flex justify-content-center align-items-center" style="width: 100px; height:100px; border: medium solid rgba(128, 128, 128, 0.158);">
 										<div class="d-flex flex-column align-items-center">
-											<h1 class="mb-2">12</h1>
-											<h6>Days Available</h6>
+											<h1 class="mb-2">{{ emp.employee_user.duvey }}</h1>
+											<h6 class="ms-4">Days Available</h6>
 										</div>
 									</div>
-									<h4 class="mt-2">Duvet</h4>
+									<h4 class="mt-2">Duvey</h4>
 								</div>
 							</div>
 						</div>
@@ -153,15 +159,19 @@
 									</tr>
 								</thead>
 								<tbody id="myTable">
-									{% if emps %}
-									{% for emp in emps %}
+									{% if emp.employee_user.emp_upcoming_time_off %}
+									{% for time_off in emp.employee_user.emp_upcoming_time_off.all %}
 									<tr>
-										<td style="width: 10%;">{{ emp.start_date }}</td>
+										<td style="width: 10%;">{{ time_off.leave_type }}</td>
+										<td style="width: 10%;">{{ time_off.duration }}</td>
+										<td style="width: 10%;">{{ time_off.hours }}</td>
+										<td style="width: 10%;">{{ time_off.status }}</td>
+										<td style="width: 10%;">{{ time_off.leave_file }}</td>
 									</tr>
 									{% endfor %}
 									{% else %}
 									<tr class="text-center display-flex align-items-center justify-content-center">
-										<td colspan="7" class="text-center">No Employees</td>
+										<td colspan="7" class="text-center">No time off</td>
 									</tr>
 									{% endif %}
 								</tbody>
@@ -195,15 +205,19 @@
 									</tr>
 								</thead>
 								<tbody id="myTable">
-									{% if emps %}
-									{% for emp in emps %}
+									{% if emp.employee_user.emp_requests_time_off %}
+									{% for time_off in emp.employee_user.emp_requests_time_off.all %}
 									<tr>
-										<td style="width: 10%;">{{ emp.start_date }}</td>
+										<td style="width: 10%;">{{ time_off.leave_type }}</td>
+										<td style="width: 10%;">{{ time_off.duration }}</td>
+										<td style="width: 10%;">{{ time_off.hours }}</td>
+										<td style="width: 10%;">{{ time_off.status }}</td>
+										<td style="width: 10%;">{{ time_off.leave_file }}</td>
 									</tr>
 									{% endfor %}
 									{% else %}
 									<tr class="text-center display-flex align-items-center justify-content-center">
-										<td colspan="7" class="text-center">No Employees</td>
+										<td colspan="7" class="text-center">No time off</td>
 									</tr>
 									{% endif %}
 								</tbody>
@@ -242,15 +256,20 @@
 							</tr>
 						</thead>
 						<tbody id="myTable">
-							{% if emps %}
-							{% for emp in emps %}
+							{% if emp.employee_user.emp_time_off_summary %}
+							{% for time_off in emp.employee_user.emp_time_off_summary.all %}
 							<tr>
-								<td style="width: 10%;">{{ emp.start_date }}</td>
+								<td style="width: 10%;">{{ time_off.leave_type }}</td>
+								<td style="width: 10%;">{{ time_off.beginning_balance }}</td>
+								<td style="width: 10%;">{{ time_off.accrued }}</td>
+								<td style="width: 10%;">{{ time_off.used }}</td>
+								<td style="width: 10%;">{{ time_off.scheduled }}</td>
+								<td style="width: 10%;">{{ time_off.current_balance }}</td>
 							</tr>
 							{% endfor %}
 							{% else %}
 							<tr class="text-center display-flex align-items-center justify-content-center">
-								<td colspan="7" class="text-center">No Employees</td>
+								<td colspan="7" class="text-center">No time off</td>
 							</tr>
 							{% endif %}
 						</tbody>

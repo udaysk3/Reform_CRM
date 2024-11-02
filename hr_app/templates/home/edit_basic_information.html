@@ -11,19 +11,17 @@
             class="d-sm-flex d-block align-items-center justify-content-between mb-9"
           >
             <div class="mb-3 mb-sm-0">
-              <a href="{% url 'hr_app:employee' %}">
                 <h5
                   class="card-title fw-semibold text-primary text-decoration-underline"
                 >
-                  Employee
-                </h5></a
-              >
+                  Basic Information
+                </h5>
             </div>
           </div>
           <div>
             <form
               method="post"
-              action="{% url 'hr_app:add_employee' %}"
+              action="{% url 'hr_app:edit_basic_information' emp.id %}"
             >
               {% csrf_token %}
 
@@ -34,6 +32,7 @@
                   class="form-control"
                   id="first_name"
                   name="first_name"
+                  value="{{ emp.first_name }}"
                   required
                 />
               </div>
@@ -45,71 +44,88 @@
                   class="form-control"
                   id="last_name"
                   name="last_name"
+                  value="{{emp.last_name}}"
                   required
                 />
               </div>
 
               <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-select" name="gender" id="gender">
+                  <option {% if emp.employee_user.gender == male %}  selected {% endif %} value="male">Male</option>
+                  <option {% if emp.employee_user.gender == female %}  selected {% endif %} value="female">Female</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="religion" class="form-label">Religion</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="religion"
+                  name="religion"
+                  value="{{emp.employee_user.religion}}"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="nationality" class="form-label">Nationality</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nationality"
+                  name="nationality"
+                  value="{{emp.employee_user.nationality}}"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+    <label for="dob" class="form-label">Date of Birth</label>
+    <input
+      type="date"
+      class="form-control"
+      id="dob"
+      name="dob"
+      value="{{ emp_dob_formatted }}"
+      required
+    />
+</div>
+
+              <div class="mb-3">
+                <label for="personal_email" class="form-label">Personal Email Address</label>
                 <input
                   type="email"
                   class="form-control"
-                  id="email"
-                  name="email"
-                  required
+                  id="personal_email"
+                  name="personal_email"
+                  value="{{emp.employee_user.personal_email}}"
                 />
-              </div>
-
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  name="password"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <select class="form-select" aria-label="Default select example" name="role">
-                  {% for role in roles %}
-                    <option value="{{ role.name }}">{{ role.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label for="reporting_to" class="form-label">Reporting to</label>
-                <select class="form-select" aria-label="Default select example" name="reporting_to">
-                  {% for user in users %}
-                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} </option>
-                  {% endfor %}
-                </select>
               </div>
               
               <div class="my-3">
-                <label for="phone" class="form-label">Phone</label>
+                <label for="personal_phon" class="form-label">Personal Number</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="phone"
-                  name="phone"
+                  id="personal_phon"
+                  name="personal_phon"
+                  value="{{ emp.employee_user.personal_phon }}"
                   required
                 />
               </div>
               
               <div class="my-3">
-                <label for="work_setup" class="form-label">Work Set-Up</label>
+                <label for="address" class="form-label">Address</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="work_setup"
-                  name="work_setup"
+                  id="address"
+                  name="address"
+                  value="{{ emp.employee_user.address }}"
                 />
               </div>
-
               
               <button id="submitBtn" class="reform_btn">Submit</button>
             </form>

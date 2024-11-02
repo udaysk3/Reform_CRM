@@ -11,13 +11,11 @@
             class="d-sm-flex d-block align-items-center justify-content-between mb-9"
           >
             <div class="mb-3 mb-sm-0">
-              <a href="{% url 'hr_app:employee' %}">
                 <h5
                   class="card-title fw-semibold text-primary text-decoration-underline"
                 >
-                  Employee
-                </h5></a
-              >
+                  Employee Details
+                </h5>
             </div>
           </div>
           <div>
@@ -58,7 +56,6 @@
                   class="form-control"
                   id="email"
                   name="email"
-                  required
                   value="{{emp.email}}"
                   disabled
                 />
@@ -74,25 +71,34 @@
               </div>
 
               <div class="mb-3">
-                <label for="department" class="form-label">Department</label>
+                <label for="reporting_to" class="form-label">Reporting to</label>
+                <select class="form-select" aria-label="Default select example" name="reporting_to">
+                  {% for user in users %}
+                    <option value="{{ user.id }}" {% if emp.employee_user.reporting_to.id == user.id %} selected {% endif %} >{{ user.first_name }} {{ user.last_name }} </option>
+                  {% endfor %}
+                </select>
+              </div>
+              
+              <div class="my-3">
+                <label for="phone" class="form-label">Phone</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="department"
-                  name="department"
-                  value="{{emp.department}}"
+                  id="phone"
+                  name="phone"
+                  value="{{ emp.employee_user.phone_number }}"
+                  required
                 />
               </div>
               
               <div class="my-3">
-                <label for="dob" class="form-label">DOB</label>
+                <label for="work_setup" class="form-label">Work Set-Up</label>
                 <input
-                  type="date"
+                  type="text"
                   class="form-control"
-                  id="dob"
-                  name="dob"
-                  value="{{emp_dob}}"
-                  required
+                  id="work_setup"
+                  name="work_setup"
+                  value="{{ emp.employee_user.work_setup }}"
                 />
               </div>
               

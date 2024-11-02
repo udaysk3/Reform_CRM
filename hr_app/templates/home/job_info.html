@@ -31,40 +31,46 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="d-flex flex-column align-items-center text-center">
-								<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
+								<img src="
+									{% if emp.employee_user.employee_image %}
+                					  {{ emp.employee_user.employee_image.url }}
+                					{% else %}
+                					  {% static 'images/profile/user-1.jpg' %}
+                					{% endif %}
+								" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
 								<div class="mt-3">
-									<h4>John Doe</h4>
+									<h4>{{ emp.first_name }} {{ emp.last_name }}</h4>
 								</div>
 							</div>
                             <div class="my-3 d-flex justify-content-between">
-                                <b>Full Stack Developer</b>
-                                <a href="#">Edit</a>
+                                <b>Employee Details</b>
+                                <a href="{% url 'hr_app:edit_employee' emp.id %}">Edit</a>
                             </div>
 							<hr class="my-4">
 							<ul class="list-group list-group-flush">
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Status:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{emp.status}} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Position:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.role }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Reporting to:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.employee_user.reporting_to.first_name }} {{ emp.employee_user.reporting_to.last_name }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Email Address:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.email }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Phone:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.employee_user.phone_number }} </h4>
 								</li>
 								<li class="list-group-item d-flex flex-column justify-content-end align-items-start flex-wrap">
 									<h6 class="mb-0"><b>Work Set-Up:</b></h6>
-									<h4 class="mt-2">Status</h4>
+									<h4 class="mt-2"> {{ emp.employee_user.work_setup }} </h4>
 								</li>
 							</ul>
 						</div>
@@ -73,11 +79,11 @@
 				<div class="col-lg-8">
 					<div class="card">
 						<div class="card-body row py-2">
-                            <a href="#" class="col ms-3 fs-5">Personal</a>
-                            <a href="#" class="col fs-5">Job Info</a>
-                            <a href="#" class="col fs-5">Time Off</a>
-                            <a href="{% url 'hr_app:employee' %}" class="col fs-5">Performance</a>
-                            <a href="{% url 'hr_app:off_boarding' %}" class="col fs-5">Documents</a>
+                            <a href="{% url 'hr_app:emp_profile' emp.id %}" class="col ms-3 fs-5">Personal</a>
+                            <a href="{% url 'hr_app:job_info' emp.id %}" class="col fs-5">Job Info</a>
+                            <a href="{% url 'hr_app:time_off' emp.id %}" class="col fs-5">Time Off</a>
+                            <a href="#" class="col fs-5">Performance</a>
+                            <a href="#" class="col fs-5">Documents</a>
 						</div>
 					</div>
 					<div class="row">
@@ -85,8 +91,8 @@
 							<div class="card">
 								<div class="card-body">
                                     <div class=" d-flex justify-content-between align-items-center">
-                                        <h2>Employment Details</h2>
-                                        <a href="#" class="mt-0 fs-5">Edit</a>
+                                        <h2>Job Details</h2>
+                                        <a href="{% url 'hr_app:edit_job_detail' emp.id %}" class="mt-0 fs-5">Edit</a>
                                     </div>
                                     <div class="mb-3">
                                         <div class="row mb-3">
@@ -94,7 +100,7 @@
                                                 <h6 class="fs-4 mb-0">Employee ID</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{emp.id}}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -102,7 +108,7 @@
                                                 <h6 class="fs-4 mb-0">Designation</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{emp.employee_user.designation}}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -110,7 +116,11 @@
                                                 <h6 class="fs-4 mb-0">Client</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">
+                                                    {% for client in emp.client_assigned_to.all %}
+                                                        {{ client.first_name }} {{ client.last_name }}
+                                                    {% endfor %}
+                                                </h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -118,7 +128,7 @@
                                                 <h6 class="fs-4 mb-0">Date of Joining</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.data_of_joining }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -126,7 +136,7 @@
                                                 <h6 class="fs-4 mb-0">Employee Type</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.employee_type }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -134,7 +144,7 @@
                                                 <h6 class="fs-4 mb-0">Qualifications</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.qualification }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -142,7 +152,7 @@
                                                 <h6 class="fs-4 mb-0">Tenure</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.tenure }}</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -162,7 +172,7 @@
                                                 <h6 class="fs-4 mb-0">Work Setup</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.work_setup }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -208,7 +218,7 @@
 								<div class="card-body">
                                     <div class=" d-flex justify-content-between align-items-center">
                                         <h2>Employment Status</h2>
-                                        <a href="#" class="mt-0 fs-5">Edit</a>
+                                        <a href="{% url 'hr_app:edit_employment_status' emp.id %}" class="mt-0 fs-5">Edit</a>
                                     </div>
                                     <div class="mb-3">
                                         <div class="row mb-1">
@@ -216,7 +226,7 @@
                                                 <h6 class="fs-4 mb-0">Onboarding</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.onboarding }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -224,7 +234,7 @@
                                                 <h6 class="fs-4 mb-0">Probation</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.probation }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -232,7 +242,7 @@
                                                 <h6 class="fs-4 mb-0">Regularised</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.regularised }}</h6>
                                             </div>
                                         </div>
                                     </div>
