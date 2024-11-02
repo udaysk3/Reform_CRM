@@ -1369,63 +1369,32 @@ def assign_agents(request):
      try:
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
         customers = request.POST.get("customers")
-        customers = list(customers.split(','))
-        if "All Unassigned Customers" in customers or " All Unassigned Customers" in customers:
-            if "All Unassigned Customers" in customers:
-                customers.remove("All Unassigned Customers")
-            else:
-                customers.remove(" All Unassigned Customers")
+        if customers == "All Unassigned Customers":
             customer_ids = Customers.objects.filter(assigned_to=None).values_list('id', flat=True)
+        else:
+            agent_id = int(customers.split(' - ')[-1])
+            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
             
-            num_customers = len(customer_ids)
-            num_agents = len(agent_ids)
-            customers_per_agent = num_customers // num_agents
-            extra_customers = num_customers % num_agents
+        num_customers = len(customer_ids)
+        num_agents = len(agent_ids)
+        customers_per_agent = num_customers // num_agents
+        extra_customers = num_customers % num_agents
+        
+        agent_index = 0
+        for agent_id in agent_ids:
+            agent = User.objects.get(pk=agent_id)
             
-            agent_index = 0
-            for agent_id in agent_ids:
-                agent = User.objects.get(pk=agent_id)
-                
-                if extra_customers > 0:
-                    num_customers_for_agent = customers_per_agent + 1
-                    extra_customers -= 1
-                else:
-                    num_customers_for_agent = customers_per_agent
-                
-                assigned_customers = customer_ids[:num_customers_for_agent]
-                Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
-                customer_ids = customer_ids[num_customers_for_agent:]
-                
-                agent_index += 1
-        if customers:
-            c_agent_ids = []
-            for agent_id in customers:
-                c_agent_ids.append(int(agent_id.split(' - ')[-1]))
-            customer_ids = []
-            for agent_id in c_agent_ids:
-                customer_ids.extend(list(Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)))
-            num_customers = len(customer_ids)
-            num_agents = len(agent_ids)
-            customers_per_agent = num_customers // num_agents
-            extra_customers = num_customers % num_agents
-
-            agent_index = 0
-            for agent_id in agent_ids:
-                agent = User.objects.get(pk=agent_id)
-
-                if extra_customers > 0:
-                    num_customers_for_agent = customers_per_agent + 1
-                    extra_customers -= 1
-                else:
-                    num_customers_for_agent = customers_per_agent
-
-                assigned_customers = customer_ids[:num_customers_for_agent]
-                Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
-                customer_ids = customer_ids[num_customers_for_agent:]
-
-                agent_index += 1
-
-
+            if extra_customers > 0:
+                num_customers_for_agent = customers_per_agent + 1
+                extra_customers -= 1
+            else:
+                num_customers_for_agent = customers_per_agent
+            
+            assigned_customers = customer_ids[:num_customers_for_agent]
+            Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
+            customer_ids = customer_ids[num_customers_for_agent:]
+            
+            agent_index += 1
         
         messages.success(request, "Customers Assigned successfully!")
         return redirect("customer_app:customer")

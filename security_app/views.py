@@ -29,61 +29,32 @@ def assign_agents(request):
      try:
         agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
         clients = request.POST.get("clients")
-        clients = list(clients.split(','))
-        if "All Unassigned Clients" in clients or " All Unassigned Clients" in clients:
-            if "All Unassigned Clients" in clients:
-                clients.remove("All Unassigned Clients")
-            else:
-                clients.remove(" All Unassigned Clients")
+        if clients == "All Unassigned Clients":
             client_ids = Clients.objects.filter(assigned_to=None).values_list('id', flat=True)
+        else:
+            agent_id = int(clients.split(' - ')[-1])
+            client_ids = Clients.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
             
-            num_clients = len(client_ids)
-            num_agents = len(agent_ids)
-            clients_per_agent = num_clients // num_agents
-            extra_clients = num_clients % num_agents
+        num_clients = len(client_ids)
+        num_agents = len(agent_ids)
+        clients_per_agent = num_clients // num_agents
+        extra_clients = num_clients % num_agents
+        
+        agent_index = 0
+        for agent_id in agent_ids:
+            agent = User.objects.get(pk=agent_id)
             
-            agent_index = 0
-            for agent_id in agent_ids:
-                agent = User.objects.get(pk=agent_id)
-                
-                if extra_clients > 0:
-                    num_clients_for_agent = clients_per_agent + 1
-                    extra_clients -= 1
-                else:
-                    num_clients_for_agent = clients_per_agent
-                
-                assigned_clients = client_ids[:num_clients_for_agent]
-                Clients.objects.filter(id__in=assigned_clients).update(assigned_to=agent_id)
-                client_ids = client_ids[num_clients_for_agent:]
-                
-                agent_index += 1
-        if clients:
-            c_agent_ids = []
-            for agent_id in clients:
-                c_agent_ids.append(int(agent_id.split(' - ')[-1]))
-            client_ids = []
-            for agent_id in c_agent_ids:
-                client_ids.extend(list(Clients.objects.filter(assigned_to=agent_id).values_list('id', flat=True)))
-            num_clients = len(client_ids)
-            num_agents = len(agent_ids)
-            clients_per_agent = num_clients // num_agents
-            extra_clients = num_clients % num_agents
-
-            agent_index = 0
-            for agent_id in agent_ids:
-                agent = User.objects.get(pk=agent_id)
-
-                if extra_clients > 0:
-                    num_clients_for_agent = clients_per_agent + 1
-                    extra_clients -= 1
-                else:
-                    num_clients_for_agent = clients_per_agent
-
-                assigned_clients = client_ids[:num_clients_for_agent]
-                Clients.objects.filter(id__in=assigned_clients).update(assigned_to=agent_id)
-                client_ids = client_ids[num_clients_for_agent:]
-
-                agent_index += 1
+            if extra_clients > 0:
+                num_clients_for_agent = clients_per_agent + 1
+                extra_clients -= 1
+            else:
+                num_clients_for_agent = clients_per_agent
+            
+            assigned_clients = client_ids[:num_clients_for_agent]
+            Clients.objects.filter(id__in=assigned_clients).update(assigned_to=agent_id)
+            client_ids = client_ids[num_clients_for_agent:]
+            
+            agent_index += 1
         
         messages.success(request, "Clients Assigned successfully!")
         return redirect("security_app:s_client")

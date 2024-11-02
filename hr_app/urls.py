@@ -16,4 +16,6 @@ urlpatterns = [
     path('edit_basic_information/<int:emp_id>', views.edit_basic_information, name="edit_basic_information"),
     path('edit_job_detail/<int:emp_id>', views.edit_job_detail, name="edit_job_detail"),
     path('edit_employment_status/<int:emp_id>', views.edit_employment_status, name="edit_employment_status"),
+    path('add_emergency_contact/<int:emp_id>', views.add_emergency_contact, name="add_emergency_contact"),
+    path('edit_emergency_contact/<int:contact_id>', views.edit_emergency_contact, name="edit_emergency_contact"),
 ]

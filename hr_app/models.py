@@ -14,9 +14,11 @@ class Employee(models.Model):
     dob = models.DateField(blank=True, null=True)
     personal_email = models.EmailField(max_length=100, blank=True, null=True)
     personal_phon = models.CharField(max_length=100, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    region = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    postal_code = models.CharField(max_length=100, blank=True, null=True)
     work_history = models.TextField(blank=True, null=True)
-    emergency_contact = models.ForeignKey('Emergency_contact', on_delete=models.CASCADE, blank=True, null=True)
     designation = models.CharField(max_length=100, blank=True, null=True)
     client = models.ForeignKey('client_app.Clients', on_delete=models.CASCADE, blank=True, null=True)
     data_of_joining = models.DateField(blank=True, null=True)
@@ -39,14 +41,10 @@ class Employee(models.Model):
         return (Employee_Action.objects.filter(employee=self).order_by("-created_at"))
 
 class Emergency_contact(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, related_name='emp_emergency_contact')
     name = models.CharField(max_length=100, blank=True, null=True)
     phone = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(max_length=100, blank=True, null=True)
-
-class Emergency_status(models.Model):
-    onboarding = models.CharField(max_length=100, blank=True, null=True)
-    probation = models.CharField(max_length=100, blank=True, null=True)
-    regularised = models.CharField(max_length=100, blank=True, null=True)
 
 class Employee_Action(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True)
@@ -79,3 +77,10 @@ class Time_off_summary(models.Model):
     used = models.IntegerField(blank=True, null=True)
     scheduled = models.IntegerField(blank=True, null=True)
     current_balance = models.IntegerField(blank=True, null=True)
+
+class Courses(models.Model):
+    assigned = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, related_name='emp_courses')
+    status = models.CharField(max_length=100, blank=True, null=True)
+    due_on = models.DateField(blank=True, null=True)
+    completed = models.TextField(blank=True, null=True)
+    view_certificate = models.FileField(upload_to='certificates', blank=True, null=True)

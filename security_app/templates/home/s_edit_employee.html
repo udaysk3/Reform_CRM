@@ -21,6 +21,12 @@
     <div class="col-lg-12 d-flex align-items-stretch w-100">
       <div class="card w-100">
         <div class="card-body">
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
 
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
             <div class="mb-3 mb-sm-0 row d-flex " style="width:100%">
@@ -155,6 +161,11 @@
 
           <div class="mb-3 d-flex justify-content-between field">
             <h4>Client</h4>
+            <div class="row">
+              {% for client in emp.client_assigned_to.all %}
+                <h5> {{ client.first_name }} {{ client.last_name }} </h5>
+              {% endfor %}
+            </div>
           </div>
 
           <div class="mb-3 d-flex justify-content-between field">

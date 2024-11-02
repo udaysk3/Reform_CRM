@@ -14,61 +14,47 @@
                 <h5
                   class="card-title fw-semibold text-primary text-decoration-underline"
                 >
-                  Job Detail
+                  Emergency Contact
                 </h5>
             </div>
           </div>
           <div>
             <form
               method="post"
-              action="{% url 'hr_app:edit_job_detail' emp.id %}"
+              action="{% url 'hr_app:add_emergency_contact' emp.id %}"
             >
               {% csrf_token %}
 
               <div class="mb-3">
-                <label for="designation" class="form-label">Designation</label>
+                <label for="name" class="form-label">Name</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="designation"
-                  name="designation"
-                  value="{{ emp.employee_user.designation }}"
+                  id="name"
+                  name="name"
+                  required
                 />
               </div>
 
               <div class="mb-3">
-                <label for="employee_type" class="form-label">Employee Type</label>
+                <label for="phno" class="form-label">Phone Number</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="employee_type"
-                  name="employee_type"
-                  value="{{ emp.employee_user.employee_type }}"
+                  id="phno"
+                  name="phno"
                 />
               </div>
 
               <div class="mb-3">
-                <label for="qualifications" class="form-label">Qualifications</label>
+                <label for="email" class="form-label">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   class="form-control"
-                  id="qualifications"
-                  name="qualifications"
-                  value="{{ emp.employee_user.qualifications }}"
+                  id="email"
+                  name="email"
                 />
               </div>
-
-              <div class="mb-3">
-                <label for="tenure" class="form-label">Tenure</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="tenure"
-                  name="tenure"
-                  value="{{ emp.employee_user.tenure }}"
-                />
-              </div>
-
               
               <button id="submitBtn" class="reform_btn">Submit</button>
             </form>

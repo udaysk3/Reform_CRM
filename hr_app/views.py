@@ -6,7 +6,7 @@ from datetime import datetime
 import pytz
 from user.models import User
 from security_app.models import Role
-from .models import Employee
+from .models import Employee, Emergency_contact
 
 
 @login_required
@@ -55,8 +55,6 @@ def add_employee(request):
         last_name = request.POST.get('last_name')
         password = request.POST.get('password')
         role = request.POST.get('role')
-        department = request.POST.get('department')
-        dob = request.POST.get('dob')
         hashed_password = make_password(password) 
         emp = User.objects.create(
             username=email,
@@ -113,6 +111,50 @@ def edit_employee(request, emp_id):
 
     return render(request, 'home/edit_employee.html', {'emp':emp, 'roles':roles, 'users':users,})
 
+def add_emergency_contact(request, emp_id):
+    emp = User.objects.get(pk=emp_id)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phno = request.POST.get('phno')
+        email = request.POST.get('email')
+        emergency_contact = Emergency_contact.objects.create(
+            name=name,
+            phone=phno,
+            email=email,
+            employee=emp.employee_user,
+        )
+        emp.employee_user.add_emp_action(
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type='Emergency Contact added',
+            agent=request.user,
+        )
+
+        messages.success(request, 'Emergency contact added successfully!')
+        return redirect('/emp_profile/'+str(emp_id))  
+
+    return render(request, 'home/add_emergency_contact.html', {'emp':emp})
+
+def edit_emergency_contact(request, contact_id):
+    contact = Emergency_contact.objects.get(pk=contact_id)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phno = request.POST.get('phno')
+        email = request.POST.get('email')
+        contact.name = name
+        contact.phone = phno
+        contact.email = email
+        contact.save()
+        contact.employee.add_emp_action(
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type='Emergency contact updated',
+            agent=request.user,
+        )
+
+        messages.success(request, 'Emergency contact updated successfully!')
+        return redirect('/emp_profile/'+str(contact.employee.user.id))  
+
+    return render(request, 'home/edit_emergency_contact.html', {'contact':contact})
+
 def edit_basic_information(request, emp_id):
     emp = User.objects.get(pk=emp_id)
     if emp.employee_user.dob:
@@ -128,7 +170,10 @@ def edit_basic_information(request, emp_id):
         emp.employee_user.dob = request.POST.get('dob')
         emp.employee_user.personal_email = request.POST.get('personal_email')
         emp.employee_user.personal_phon = request.POST.get('personal_phon')
-        emp.employee_user.address = request.POST.get('address')
+        emp.employee_user.city = request.POST.get('city')
+        emp.employee_user.region = request.POST.get('region')
+        emp.employee_user.country = request.POST.get('country')
+        emp.employee_user.postal_code = request.POST.get('postal_code')
         emp.save()
         emp.employee_user.save()
 

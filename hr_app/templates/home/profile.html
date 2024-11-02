@@ -10,6 +10,12 @@
 
 {% block content %}
 
+{% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
     <div class="container-fluid" style="max-width:1500px">
 		<div class="main-body">
 			<div class="row">
@@ -82,7 +88,7 @@
                             <a href="{% url 'hr_app:emp_profile' emp.id %}" class="col ms-3 fs-5">Personal</a>
                             <a href="{% url 'hr_app:job_info' emp.id %}" class="col fs-5">Job Info</a>
                             <a href="{% url 'hr_app:time_off' emp.id %}" class="col fs-5">Time Off</a>
-                            <a href="#" class="col fs-5">Performance</a>
+                            <a href="{% url 'hr_app:courses' emp.id %}" class="col fs-5">Performance</a>
                             <a href="#" class="col fs-5">Documents</a>
 						</div>
 					</div>
@@ -137,7 +143,7 @@
 									<h6 class="fs-4 mb-0">Date of Birth</h6>
 								</div>
 								<div class="col-sm-9 text-secondary">
-                                    <h6 class="fs-4 mb-0"> {{ emp.dob }} </h6>
+                                    <h6 class="fs-4 mb-0"> {{ emp.employee_user.dob }} </h6>
 								</div>
 							</div>
 							<div class="row mb-3">
@@ -161,7 +167,7 @@
 									<h6 class="fs-4 mb-0">Address</h6>
 								</div>
 								<div class="col-sm-9 text-secondary">
-                                    <h6 class="fs-4 mb-0"> {{ emp.employee_user.address }} </h6>
+                                    <h6 class="fs-4 mb-0"> {{ emp.employee_user.city }} {{ emp.employee_user.region }} {{ emp.employee_user.country }} {{ emp.employee_user.postal_code }} </h6>
 								</div>
 							</div>
 						</div>
@@ -172,36 +178,38 @@
 								<div class="card-body">
                                     <div class=" d-flex justify-content-between align-items-center">
                                         <h2>Emergency Contacts</h2>
-                                        <a href="#" class="mt-0 fs-5">Edit</a>
+                                        <a href="{% url 'hr_app:add_emergency_contact' emp.id %}" class="mt-0 fs-5">Add</a>
                                     </div>
-                                    <div class="mb-3">
-                                        {% for contact in emp.employee_user.emergency_contact %}
-										<div class="row mb-1">
-                                            <div class="col-sm-6">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
-                                            </div>
-                                            <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">{{ contact.name }}</h6>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-sm-6">
-                                                <h6 class="fs-4 mb-0">Phone Number</h6>
-                                            </div>
-                                            <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">{{ contact.phno }}</h6>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-sm-6">
-                                                <h6 class="fs-4 mb-0">Email</h6>
-                                            </div>
-                                            <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">{{ contact.email }}</h6>
-                                            </div>
-                                        </div>
-										{% endfor %}
-                                    </div>
+									{% for contact in emp.employee_user.emp_emergency_contact.all %}
+                                    <a href='{% url "hr_app:edit_emergency_contact" contact.id %}'>
+										<div class="mb-3">
+											<div class="row mb-1">
+                                        	    <div class="col-sm-6">
+                                        	        <h6 class="fs-4 mb-0">Full Name</h6>
+                                        	    </div>
+                                        	    <div class="col-sm-6 text-secondary">
+                                        	        <h6 class="fs-4 mb-0">{{ contact.name }}</h6>
+                                        	    </div>
+                                        	</div>
+                                        	<div class="row mb-1">
+                                        	    <div class="col-sm-6">
+                                        	        <h6 class="fs-4 mb-0">Phone Number</h6>
+                                        	    </div>
+                                        	    <div class="col-sm-6 text-secondary">
+                                        	        <h6 class="fs-4 mb-0">{{ contact.phone }}</h6>
+                                        	    </div>
+                                        	</div>
+                                        	<div class="row mb-1">
+                                        	    <div class="col-sm-6">
+                                        	        <h6 class="fs-4 mb-0">Email</h6>
+                                        	    </div>
+                                        	    <div class="col-sm-6 text-secondary">
+                                        	        <h6 class="fs-4 mb-0">{{ contact.email }}</h6>
+                                        	    </div>
+                                        	</div>
+										</div>
+									</a>
+									{% endfor %}
 								</div>
 							</div>
 						</div>

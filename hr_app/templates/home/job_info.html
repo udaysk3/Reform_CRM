@@ -9,7 +9,12 @@
 {% endblock %}
 
 {% block content %}
-
+{% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
     <div class="container-fluid" style="max-width:1500px">
 		<div class="main-body">
 			<div class="row">
@@ -82,7 +87,7 @@
                             <a href="{% url 'hr_app:emp_profile' emp.id %}" class="col ms-3 fs-5">Personal</a>
                             <a href="{% url 'hr_app:job_info' emp.id %}" class="col fs-5">Job Info</a>
                             <a href="{% url 'hr_app:time_off' emp.id %}" class="col fs-5">Time Off</a>
-                            <a href="#" class="col fs-5">Performance</a>
+                            <a href="{% url 'hr_app:courses' emp.id %}" class="col fs-5">Performance</a>
                             <a href="#" class="col fs-5">Documents</a>
 						</div>
 					</div>
@@ -164,7 +169,7 @@
 								<div class="card-body">
                                     <div class=" d-flex justify-content-between align-items-center">
                                         <h2>Location</h2>
-                                        <a href="#" class="mt-0 fs-5">Edit</a>
+                                        <a href="#" class="mt-0 fs-5"></a>
                                     </div>
 									<div class="mb-3">
                                         <div class="row mb-3">
@@ -180,7 +185,7 @@
                                                 <h6 class="fs-4 mb-0">Town/ City</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0"> {{ emp.employee_user.city }} </h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -188,7 +193,7 @@
                                                 <h6 class="fs-4 mb-0">Region</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.region }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -196,7 +201,7 @@
                                                 <h6 class="fs-4 mb-0">Country</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.country }}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -204,7 +209,7 @@
                                                 <h6 class="fs-4 mb-0">Post code</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{{ emp.employee_user.postal_code }}</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -262,7 +267,7 @@
                                                 <h6 class="fs-4 mb-0">Customer</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0"> {% if emp.mcustomer %} Approved {% else %} Denied {% endif %} </h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -270,7 +275,7 @@
                                                 <h6 class="fs-4 mb-0">Clients</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{% if emp.client %} Approved {% else %} Denied {% endif %}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -278,7 +283,7 @@
                                                 <h6 class="fs-4 mb-0">Region</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{% if emp.council %} Approved {% else %} Denied {% endif %}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -286,7 +291,7 @@
                                                 <h6 class="fs-4 mb-0">Global</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{% if emp.globls %} Approved {% else %} Denied {% endif %}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -294,7 +299,7 @@
                                                 <h6 class="fs-4 mb-0">Admin</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{% if emp.admin %} Approved {% else %} Denied {% endif %}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -302,7 +307,7 @@
                                                 <h6 class="fs-4 mb-0">Finance</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{% if emp.finance %} Approved {% else %} Denied {% endif %}</h6>
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -310,7 +315,15 @@
                                                 <h6 class="fs-4 mb-0">HR</h6>
                                             </div>
                                             <div class="col-sm-6 text-secondary">
-                                                <h6 class="fs-4 mb-0">Full Name</h6>
+                                                <h6 class="fs-4 mb-0">{% if emp.hr %} Approved {% else %} Denied {% endif %}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <div class="col-sm-6">
+                                                <h6 class="fs-4 mb-0">Security</h6>
+                                            </div>
+                                            <div class="col-sm-6 text-secondary">
+                                                <h6 class="fs-4 mb-0">{% if emp.security %} Approved {% else %} Denied {% endif %}</h6>
                                             </div>
                                         </div>
                                     </div>
