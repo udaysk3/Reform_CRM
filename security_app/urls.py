@@ -10,6 +10,7 @@ urlpatterns = [
     path('deny_role/<int:emp_id>',views.deny_role,name='deny_role'),
     path('role',views.role,name='role'),
     path('client_assign_agents',views.assign_agents,name='assign_agents'),
+    path('client_assign_agent',views.assign_agent,name='assign_agent'),
     path('s_client',views.s_client,name='s_client'),
     path('add_role',views.add_role,name='add_role'),
     path('change_otp_mail/<int:emp_id>',views.change_otp_mail,name='change_otp_mail'),

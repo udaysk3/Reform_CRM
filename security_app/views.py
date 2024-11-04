@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.contrib import messages
 from django.core.serializers import serialize
 from datetime import datetime
@@ -51,7 +51,9 @@ def assign_agents(request):
                 num_clients_for_agent = clients_per_agent
             
             assigned_clients = client_ids[:num_clients_for_agent]
-            Clients.objects.filter(id__in=assigned_clients).update(assigned_to=agent_id)
+            assign_clients = Clients.objects.filter(id__in=assigned_clients)
+            for assign_client in assign_clients:
+                assign_client.assigned_to.add(agent_id)
             client_ids = client_ids[num_clients_for_agent:]
             
             agent_index += 1
@@ -159,6 +161,7 @@ def s_edit_employee(request, emp_id):
                 i.text,
             ]
         )
+    clients = Clients.objects.all()
         
     if request.method == 'POST':
         if request.POST.get('password'):
@@ -177,7 +180,7 @@ def s_edit_employee(request, emp_id):
         )
         messages.success(request, 'Employee activated successfully!')
         return redirect('/s_edit_employee/' + str(emp_id))
-    return render(request, 'home/s_edit_employee.html', {'emp': emp, "history": history})
+    return render(request, 'home/s_edit_employee.html', {'emp': emp, "history": history, "clients": serialize('json', clients)})
 
 def approve_role(request, emp_id):
     emp = User.objects.get(pk=emp_id)
@@ -345,3 +348,29 @@ def upload_profile(request, emp_id):
             )
     messages.success(request, 'Profile picture updated successfully!')
     return redirect('/s_edit_employee/' + str(emp_id))
+
+
+def assign_agent(request):
+    client_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("clients").split(',')]
+    agent_id = request.POST.get("agent_id")
+    agent = User.objects.get(pk=agent_id)
+    try:
+        for client_id in client_ids:
+            client = Clients.objects.get(pk=client_id)
+            client.assigned_to.add(agent)
+            client.save()
+        all_clients = Clients.objects.all()
+        for client in all_clients:
+            if agent in client.assigned_to.all() and client.id not in client_ids:
+                client.assigned_to.remove(agent)
+                client.save()
+        agent.employee_user.add_emp_action(
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            action_type="Clients Assigned",
+            agent=request.user,
+        )
+        messages.success(request, "Client Assigned successfully!")
+        return HttpResponseRedirect("/s_edit_employee/" + str(agent_id))
+    except Exception as e:
+        messages.error(request, f"Error assigning client: {e}")
+        return HttpResponseRedirect("/s_edit_employee/" + str(agent_id))

@@ -162,9 +162,45 @@
           <div class="mb-3 d-flex justify-content-between field">
             <h4>Client</h4>
             <div class="row">
-              {% for client in emp.client_assigned_to.all %}
-                <h5> {{ client.first_name }} {{ client.last_name }} </h5>
-              {% endfor %}
+              
+              <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+                  <i class="bi bi-arrow-bar-right"></i> Assign to Agent
+                </button>
+  
+                <!-- Modal -->
+                <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Client to the Agent</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method='post' action="{% url 'security_app:assign_agent' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="agent_id" value="{{ emp.id }}">
+                      <div class="modal-body flex-container">
+                        <div class="mb-3">
+                          <input
+                                type="text"
+                                id="clients"
+                                placeholder="Select the Clients you wish to assign to the agent"
+                                autocomplete="off"
+                                name= "clients"
+                              />
+                           </div>
+                           {% for client in emp.client_assigned_to.all %}
+                     {{ client.first_name }} {{ client.last_name }}
+                   {% endfor %}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="reform_btn">Submit</button>
+                      </div>
+                    </form>
+                    </div>
+                  </div>
+                </div>
+                
             </div>
           </div>
 
@@ -217,4 +253,24 @@
 {% endblock  %}
 
 {% block js %}
+<script type="module">
+  jQuery(document).ready(function ($) {
+    let clients = JSON.parse("{{ clients | escapejs }}");
+
+    let comboSource2 = clients.map(client => {
+      return {
+        id: client.pk,
+        title: client.fields.first_name + ' ' + client.fields.last_name + ' - ' + client.pk
+      };  
+    });
+    comboTree2 = $("#clients").comboTree({
+      source: comboSource2,
+      isMultiple: true,
+      cascadeSelect: false,
+      collapse: true,
+      selectAll: true,
+    });
+  });
+  
+</script>
 {% endblock %}
