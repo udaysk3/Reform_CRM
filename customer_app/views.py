@@ -153,7 +153,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
         if customer.postcode.split(' ')[0] in region.postcodes:
             display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
-    agents = User.objects.filter(is_superuser=False)
+    agents = User.objects.filter(is_superuser=False).filter(is_client=False)
     show_customer = customer
     reasons = Reason.objects.all()
     templates = Email.objects.all()
@@ -657,7 +657,7 @@ def Customer(request):
     customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
-    agents = User.objects.filter(is_superuser=False)
+    agents = User.objects.filter(is_superuser=False).filter(is_client=False)
     print(user.is_employee)
     if user.is_employee:
         clients_with_customers = Clients.objects.filter(assigned_to=user).prefetch_related('customers')
