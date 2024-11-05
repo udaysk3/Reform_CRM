@@ -64,7 +64,6 @@ def add_employee(request):
             password= hashed_password,
             role=role,
             is_employee=True,
-            data_of_joining=datetime.now(pytz.timezone("Europe/London")),
         )
         employee = Employee.objects.create(
             user=emp,
@@ -72,6 +71,7 @@ def add_employee(request):
             phone_number=request.POST.get('phone'),
             work_setup=request.POST.get('work_setup'),
             employee_image=employee_image,
+            data_of_joining=datetime.now(pytz.timezone("Europe/London")),
         )
         employee.add_emp_action(
             created_at=datetime.now(pytz.timezone("Europe/London")),
