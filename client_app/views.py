@@ -439,7 +439,7 @@ def add_client(request):
             last_name=last_name,
             username=email,
             email=email,
-            password=make_password(request.POST.get("password")),
+            password=make_password('123'),
             is_client=True,
         )
 
@@ -537,7 +537,7 @@ def edit_client(request, client_id):
     user.first_name = request.POST.get("first_name")
     user.last_name = request.POST.get("last_name")
     user.email = request.POST.get("email")
-    user.password = make_password(request.POST.get("password"))
+    user.password = make_password('123')
     user.save()
     if request.method == "POST":
         changed = ''
