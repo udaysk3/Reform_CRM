@@ -430,10 +430,14 @@ def add_client(request):
         city = request.POST.get("city")
         county = request.POST.get("county")
         country = request.POST.get("country")
-        agent = User.objects.get(email=request.user)
+        agent = request.user
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "User with this email already exists")
+            return redirect("/client?page=add_client")
         user = User.objects.create(
             first_name=first_name,
             last_name=last_name,
+            username=email,
             email=email,
             password=make_password(request.POST.get("password")),
             is_client=True,
