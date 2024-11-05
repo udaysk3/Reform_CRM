@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom %}
+
+{% block css %}
+<style>
+  .field{
+    border-bottom-color:#91E0DA;
+    border-bottom-style:solid;
+    border-bottom-width:2px;
+    padding-bottom: 5px;
+    display:flex;
+    align-items:baseline;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1500px">
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch w-100">
+      <div class="card w-100">
+        <div class="card-body">
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <div class="mb-3 mb-sm-0 row d-flex " style="width:100%">
+              <div class="position-relative rounded-circle col-1">
+                <img src="
+                {% if emp.employee_user.employee_image %}
+                  {{ emp.employee_user.employee_image.url }}
+                {% else %}
+                  {% static 'images/profile/user-1.jpg' %}
+                {% endif %}
+                " alt="" width="80" height="70" class="rounded-circle ">
+                <button class="bx bxs-pencil" style="position:absolute; background-color:transparent; border:0px; right:0px; bottom:0px;" data-bs-toggle="modal" data-bs-target="#upload_image"></button>
+                
+                <div class="modal fade" id="upload_image" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Upload Image</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form action="{% url 'security_app:upload_profile' emp.id %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label for="formFile" class="form-label">Upload Image</label>
+                            <input class="form-control" type="file" id="formFile" name="profile">
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                          <button class="reform_btn">Submit</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <h1 class="col-8 align-self-center"> {{ emp.first_name }} {{ emp.last_name }} </h1>
+            </div>
+          </div>
+
+          
+
+
+          <div class="mb-3 d-flex justify-content-between field" style="border-top-color:#91E0DA; border-top-style:solid; border-top-width:2px; padding-top: 5px;">
+            <h4 >Password</h4>
+            <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#reset_pass">
+              Change
+            </button>
+            <div class="modal fade" id="reset_pass" data-bs-backdrop="static" data-bs-keyboard="false"
+              tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Reset Password</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form action="{% url 'security_app:reset_password' emp.id %}" method="post">
+                    <div class="modal-body">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" id="password" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="password_conform" class="form-label">Password Conform</label>
+                        <input type="password" name="conform_password" class="form-control" id="password_conform" required>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                      <button type="submit" class="reform_btn">Submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="mb-3 d-flex justify-content-between field">
+            <h4>Two-Factor Authentication</h4>
+            <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+              Manage
+            </button>
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+              tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">2-Factor Authentication</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form action="{% url 'security_app:change_otp_mail' emp.id %}" method="post">
+                    <div class="modal-body">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                        <label for="otp_email" class="form-label">Change authentication email</label>
+                        <input type="email" name="email" class="form-control" id="otp_email" required>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                      <button type="submit" class="reform_btn">Submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3 d-flex justify-content-between field">
+            <h4>Role</h4>
+            <div class="d-flex">
+              <p class="ms-2">{{ emp.role }}</p>
+              {% if emp.approved == 'approve' %}
+                <span class="badge bg-success ms-2" style="height: fit-content;">Approved</span> 
+                <a href="{% url 'security_app:deny_role' emp.id %}" class="reform_btn ms-2"> Deny the role </a> 
+              {% elif emp.approved == 'deny' %}
+               <span class="badge bg-danger ms-2" style="height: fit-content;">Denied</span> 
+               <a href="{% url 'security_app:approve_role' emp.id %}" class="reform_btn ms-2"> Approve the role </a> 
+              {% endif %}
+            </div>
+            {% if emp.role and emp.approved != 'approve' and emp.approved != 'deny' %}
+            <div class="row ms-0">
+              <a href="{% url 'security_app:approve_role' emp.id %}" class="reform_btn"> Approve </a>
+              <a href="{% url 'security_app:deny_role' emp.id %}" class="reform_btn"> Deny </a>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3 d-flex justify-content-between field">
+            <h4>Client</h4>
+            <div class="row">
+              
+              <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+                  <i class="bi bi-arrow-bar-right"></i> Assign to Agent
+                </button>
+  
+                <!-- Modal -->
+                <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Client to the Agent</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method='post' action="{% url 'security_app:assign_agent' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="agent_id" value="{{ emp.id }}">
+                      <div class="modal-body flex-container">
+                        <div class="mb-3">
+                          <input
+                                type="text"
+                                id="clients"
+                                placeholder="Select the Clients you wish to assign to the agent"
+                                autocomplete="off"
+                                name= "clients"
+                              />
+                           </div>
+                           {% for client in emp.client_assigned_to.all %}
+                     {{ client.first_name }} {{ client.last_name }}
+                   {% endfor %}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="reform_btn">Submit</button>
+                      </div>
+                    </form>
+                    </div>
+                  </div>
+                </div>
+                
+            </div>
+          </div>
+
+          <div class="mb-3 d-flex justify-content-between field">
+            <h4>Activate Profile</h4>
+            <form method="post" class="row" action="{% url 'security_app:s_edit_employee' emp.id %}">
+              {% csrf_token %}
+              <div class="form-check my-3 col">
+                <input class="form-check-input" type="checkbox" name="status" {% if emp.status %} checked {% endif %}
+                  id="status">
+                <label class="form-check-label" for="status">
+                  Active
+                </label>
+              </div>
+
+              <button type="submit" class="reform_btn col">Submit</button>
+
+            </form>
+          </div>
+
+          <div class="mb-3">
+            <h4>History</h4>
+            <div class="card p-0 m-0">
+              <div
+                class="card-body p-3 m-0"
+                style="height: 150px; overflow-y: auto"
+              >
+                <ul>
+                  {% for key,value in history.items %}
+                  <li><b>{{ key }}</b></li>
+                  <ul class="ps-3">
+                    {% for v in value %}
+                    <li class="mb-2">
+                      <b>{{ v.0 }}</b> - <b> {{ v.3 }} </b> - By <b>{{ v.1 }} {{ v.2 }}</b>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock  %}
+
+{% block js %}
+<script type="module">
+  jQuery(document).ready(function ($) {
+    let clients = JSON.parse("{{ clients | escapejs }}");
+
+    let comboSource2 = clients.map(client => {
+      return {
+        id: client.pk,
+        title: client.fields.first_name + ' ' + client.fields.last_name + ' - ' + client.pk
+      };  
+    });
+    comboTree2 = $("#clients").comboTree({
+      source: comboSource2,
+      isMultiple: true,
+      cascadeSelect: false,
+      collapse: true,
+      selectAll: true,
+    });
+  });
+  
+</script>
+{% endblock %}

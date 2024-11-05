@@ -2,10 +2,10 @@ from django.db import models
 from home.models import Stage
 
 class Questions(models.Model):
-    question = models.CharField(max_length=255, blank=True, null=True)
-    type = models.CharField(max_length=255, blank=True, null=True)
+    question = models.CharField(max_length=9999, blank=True, null=True)
+    type = models.CharField(max_length=9999, blank=True, null=True)
     answer_frequency = models.IntegerField(blank=True, null=True)
-    parameter = models.CharField(max_length=255, blank=True, null=True)
+    parameter = models.CharField(max_length=9999, blank=True, null=True)
     def __str__(self):
         return f"{self.question}"
 
