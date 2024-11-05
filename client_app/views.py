@@ -430,12 +430,16 @@ def add_client(request):
         city = request.POST.get("city")
         county = request.POST.get("county")
         country = request.POST.get("country")
-        agent = User.objects.get(email=request.user)
+        agent = request.user
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "User with this email already exists")
+            return redirect("/client?page=add_client")
         user = User.objects.create(
             first_name=first_name,
             last_name=last_name,
+            username=email,
             email=email,
-            password=make_password(request.POST.get("password")),
+            password=make_password('123'),
             is_client=True,
         )
 
@@ -533,7 +537,7 @@ def edit_client(request, client_id):
     user.first_name = request.POST.get("first_name")
     user.last_name = request.POST.get("last_name")
     user.email = request.POST.get("email")
-    user.password = make_password(request.POST.get("password"))
+    user.password = make_password('123')
     user.save()
     if request.method == "POST":
         changed = ''

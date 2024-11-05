@@ -77,10 +77,6 @@
                       <input type="text" class="form-control" id="last_name" name="last_name" required>
                   </div>
                   <div class="mb-3">
-                      <label for="password" class="form-label">Password</label>
-                      <input type="password" class="form-control" id="password" name="password" required>
-                  </div>
-                  <div class="mb-3">
                       <label for="phone_number" class="form-label">Phone Number</label>
                       <input type="text" class="form-control" id="phone_number" name="phone_number" required>
                   </div>
@@ -179,10 +175,6 @@
                   <div class="mb-3">
                       <label for="edit_last_name" class="form-label">Last Name</label>
                       <input type="text" class="form-control" id="edit_last_name" name="last_name" value="{% if edit_client.last_name != 'None' %}{{ edit_client.last_name }}{% endif %}" required>
-                  </div>
-                  <div class="mb-3">
-                      <label for="password" class="form-label">Password</label>
-                      <input type="password" class="form-control" id="password" name="password" required>
                   </div>
                   <div class="mb-3">
                     <label for="phone_number" class="form-label">Phone Number</label>

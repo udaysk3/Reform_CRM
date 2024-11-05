@@ -23,6 +23,13 @@ users = [
         'email': 'burluudaysantoshkumar3@gmail.com',
         'password': 'Uday@123',
     },
+    {
+        'username': 'Sai Gowtham',
+        'first_name': 'Sai',
+        'last_name': 'P',
+        'email': 'puvvulasaigowtham@gmail.com',
+        'password': '123',
+    },
 ]
 
 class Command(BaseCommand):

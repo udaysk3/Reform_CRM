@@ -53,10 +53,9 @@ def add_employee(request):
             return redirect('admin_app:admin') 
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        password = request.POST.get('password')
         role = request.POST.get('role')
         employee_image = request.FILES['profile']
-        hashed_password = make_password(password) 
+        hashed_password = make_password('123') 
         emp = User.objects.create(
             username=email,
             email=email,
