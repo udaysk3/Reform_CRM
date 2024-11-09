@@ -191,8 +191,8 @@ table {
 }
 
 #myChart, #myChart1{
-    width: 50% !important;
-    height: 80% !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 </style>
@@ -215,12 +215,23 @@ table {
       <div class="col-7">
         <div class="row">
           <div class="row" style="border-bottom: 2px solid #91E0DA;">
+            <div class="cnav-item col-1 position-absolute" style="left:-0px; top:8px;">
+              <a href="/customer-detail/{{prev}}" >
+                <i class="bx bx-left-arrow my-4 fs-6"></i>
+              </a>
+            </div>
+
             <div class="col">
               <h3>Customer</h3>
             </div>
-            <div class="col text-end" style="right: 0px; position:relative">
-              <h5>Assigned To: {{ customer.assigned_to }}</h5>
+            <div class="col-9 text-end" style="right: 0px; position:relative">
+              <div class="row">
+                <h5 class="col">Assigned To: {{ customer.assigned_to }}</h5>
+                <h5 class="col">Client: {{ customer.client }}</h5>
+                <h5 class="col">Campaign: {{ customer.campaign }}</h5>
+              </div>
             </div>
+
           </div>
           <div class="row mt-4">
             <div class="col-sm-6 mb-sm-0 ">
@@ -297,8 +308,13 @@ table {
       
       <div class="col-5">
         <div class="row d-flex" style="padding-top: 10%;">
-          <canvas id="myChart" ></canvas>
-          <canvas id="myChart1" ></canvas>
+          <div class="col-6">
+            <canvas id="myChart" ></canvas>
+            <h4 class="position-absolute" style="top:40%; right:27%;">{{ current_route_product.2 }}</h1>
+          </div>
+          <div class="cnav-item fs-6 col-1 position-absolute" style="right:-30px; top:8px;">
+             <a href="/customer-detail/{{next}}"><i class="bx bx-right-arrow my-4 fs-6"></i></a>
+            </div>
         </div>
       </div>
     </div>
@@ -1299,31 +1315,22 @@ var formattedTime = londonDate.split(", ")[1].split(":");
   
   const ctx = document.getElementById('myChart');
 
+  const currentNums = {{ current_nums }} -1;
+  const totalNums = {{ total_nums }};
+  const remaining = totalNums - currentNums;
+
   new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['NA', 'LM'],
+      labels: ['Completed', 'Remaining'],
       datasets: [{
-        data: [10,10], borderWidth: 1 }]
+        data: [currentNums, remaining], borderWidth: 1 }]
             },
             options: {
     cutout: '85%' 
   }
         });
 
-  const ctx1 = document.getElementById('myChart1');
-
-  new Chart(ctx1, {
-    type: 'doughnut',
-    data: {
-      labels: ['NA', 'LM'],
-      datasets: [{
-        data: [10,10], borderWidth: 1 }]
-            },
-            options: {
-    cutout: '85%' 
-  }
-        });
 </script>
 
 {% endblock %}

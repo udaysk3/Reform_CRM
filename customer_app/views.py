@@ -471,18 +471,22 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
     current_route_product = None
     last_route_product = None
-
+    current_nums =0
+    total_nums = 0
     for route_product, stages in display_stages.items():
         all_true_for_product = True  
 
         for i, (stage, question_ans, all_ans) in enumerate(stages):
+            current_nums += 1
             if not all_ans:
-                current_route_product = [stages, 100 / len(stages)]
+                total_nums = len(stages)
+                current_route_product = [stages, 100 / len(stages), route_product]
                 all_true_for_product = False
                 break
 
         if all_true_for_product:
-            last_route_product = [stages, 100 / len(stages)]
+            total_nums = len(stages)
+            last_route_product = [stages, 100 / len(stages), route_product]
         else:
             break
 
@@ -491,13 +495,16 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
 
     current_stage = None
+
     for route_product, stages in display_stages.items():
         for i, (stage, question_ans, all_ans) in enumerate(stages):
             if all_ans == False:
                 current_stage = question_ans
                 break
         if current_stage != None:
+
             break
+    
 
     return render(
         request,
@@ -526,6 +533,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "display_stages":display_stages,
             "current_route_product":current_route_product,
             "current_stage": current_stage,
+            "current_nums": current_nums,
+            "total_nums": total_nums,
         },
     )
 
