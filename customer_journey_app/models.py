@@ -23,5 +23,12 @@ class CJStage(models.Model):
         blank=True,
         related_name="CJStage",
     )
+    client = models.ForeignKey(
+        'client_app.Clients',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="CJStage",
+    )
     question = models.JSONField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)

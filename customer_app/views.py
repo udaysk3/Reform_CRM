@@ -254,7 +254,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
     for route in routes:
         for product in products:
-            cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
+            if CJStage.objects.filter(route=route, product=product, client=customer.client).exists():
+                cjstages = CJStage.objects.filter(route=route, product=product, client=customer.client)
+            else:
+                cjstages = CJStage.objects.filter(route=route, product=product)
             for cjstage in cjstages:
                 all_answered = True
             
@@ -269,6 +272,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 else: 
                     for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage. stage):
                         questions.append(rule.question)
+                
                 
                 for question in questions:
                     ans = (Answer.objects.filter(route=route)
@@ -325,7 +329,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                             rule = rule_requirements[0]
                             type = question.type.split(',')
                             if len(type) > 1:
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     rule_values = rule.rules_regulation[0].split(',')
@@ -339,17 +343,17 @@ def customer_detail(request, customer_id, s_customer_id=None):
                                                 correct_ans = True
                                                 break
                             if type[0] in ['text', 'email', 'password', 'phone']:
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] == 'checkbox':
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] in ['date', 'month', 'time', 'number']:
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     if type[0] == 'date' or type[0] == 'month':
@@ -406,7 +410,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                             rule = rule_requirements[0]
                             type = question.type.split(',')
                             if len(type) > 1:
-                                if ans.answer[0] == '':
+                                print(ans.answer)
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     rule_values = rule.rules_regulation[0].split(',')
@@ -420,17 +425,17 @@ def customer_detail(request, customer_id, s_customer_id=None):
                                                 correct_ans = True
                                                 break
                             if type[0] in ['text', 'email', 'password', 'phone']:
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] == 'checkbox':
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] in ['date', 'month', 'time', 'number']:
-                                if ans.answer[0] == '':
+                                if ans.answer == [] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     if type[0] == 'date' or type[0] == 'month':

@@ -176,7 +176,10 @@ def client_detail(request, client_id, s_client_id=None):
     for council, council_routes in routes.items():
         for route in council_routes:
             for product in products:
-                cjstages = CJStage.objects.filter(route=route, product=product)
+                if CJStage.objects.filter(route=route, product=product, client=client).exists():
+                    cjstages = CJStage.objects.filter(route=route, product=product, client=client)
+                else:
+                    cjstages = CJStage.objects.filter(route=route, product=product)
                 for cjstage in cjstages:
                     questions = []
                     questions_with_rules = []
@@ -1059,6 +1062,7 @@ def customer_jr_order(request,client_id):
             cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).first()
             cjstage.question = i['questions']
             cjstage.order = i['order']
+            cjstage.client = client
             cjstage.save()
     return HttpResponse(200)
 
