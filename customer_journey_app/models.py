@@ -1,9 +1,6 @@
 from django.db import models
 from home.models import Stage
 
-# Create your models here.
-
-
 class CJStage(models.Model):
     route = models.ForeignKey(
         'funding_route_app.Route',
@@ -26,4 +23,5 @@ class CJStage(models.Model):
         blank=True,
         related_name="CJStage",
     )
+    question = models.JSONField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)

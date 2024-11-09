@@ -326,11 +326,22 @@ i{
           </div>
         </nav>
         
-        <div class="main_content mt-5" >
+        <div class="main_content" >
+          <a href="#" onclick="goBack();">
+            <span>
+              <i class="bx bx-left-arrow-alt my-4 display-6"></i>
+            </span>
+          </a>
+          
           {% block content %}{% endblock content %}
         </div>
       </div>
     </div>
+    <script>
+      function goBack() {
+        window.history.back();
+      }
+    </script>
     <script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/sidebarmenu.js' %}"></script>

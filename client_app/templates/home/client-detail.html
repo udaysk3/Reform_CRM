@@ -1649,25 +1649,19 @@ table {
               </div>
             </div>
           
-{% comment %} 
-{% for area in coverage_areas %}
-    <p class="postcodes" style="display: none;">{{ area.postcode }}</p>
-{% endfor %} {% endcomment %}
-
-
-{% for k,v in display_stages.items %}
-    {% for i in v %}
-      <div class="modal fade" id="orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}" tabindex="-1" aria-labelledby="exampleModalLabel" draggable="false" aria-hidden="true">
+            {% for k,v in display_stages.items %}
+              {% for i in v %}
+                <div class="modal fade" id="orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}" tabindex="-1" aria-labelledby="exampleModalLabel" draggable="false" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h1 class="modal-title fs-5" id="exampleModalLabel">{{ i.0 }}</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
-                      <div class="modal-body">
+                      <div class="modal-body question-container{{ forloop.counter }}{{ forloop.parentloop.counter }} ">
                         {% if i.1 %}
                         {% for question, rules_regulations, route, product, stage in i.1 %}
-                          <div class="col">
+                          <div class="col questiondrag orderQuestion orderquestion{{ forloop.counter }}{{ forloop.parentloop.counter }}{{ forloop.parentloop.parentloop.counter }} {{ question.id }}" draggable="true">
                             <div class="row ms-3">
                               {{ question.question }}
                             </div>
@@ -1768,7 +1762,6 @@ forms.forEach((form) => {
       }
     });
 
-    // Handle radio and checkbox inputs
     const checkboxinputs = document.querySelectorAll(".checkboxinput");
     if (checkboxinputs) {
       checkboxinputs.forEach((checkboxinput) => {
@@ -1782,7 +1775,6 @@ forms.forEach((form) => {
       });
     }
 
-    // Handle the .tgl-flip checkbox
     const tglFlip = form.querySelector(".tgl-flip");
     if (tglFlip && tglFlip.checked) {
       if (cb.value == '') {
@@ -1802,6 +1794,8 @@ forms.forEach((form) => {
 });
 
 
+
+
   {% for k,v in display_stages.items %}
     {% for i in v %}
       document.querySelector('.orderstage{{ forloop.counter }}{{ forloop.parentloop.counter }}').addEventListener('click',()=>{
@@ -1819,7 +1813,7 @@ forms.forEach((form) => {
     const pdraggables = document.querySelectorAll('.productdrag');
 
     pdraggables.forEach(draggable => {
-      let sent = false; // Reset sent for each draggable
+      let sent = false;
 
       draggable.addEventListener('dragstart', (e) => {
         e.stopPropagation();
@@ -1834,6 +1828,14 @@ forms.forEach((form) => {
           const orderStages = document.querySelectorAll('.orderStages');
           const cjstages = [];
           orderStages.forEach((stage, i) => {
+            questionContainer = document.querySelector(`#${stage.classList[4]}`);
+            questions = questionContainer.querySelectorAll('.orderQuestion');
+            const questionIds = []
+            questions.forEach((question,j) => {
+              questionIds.push(question.classList[4])
+            })
+            
+
             const orderRoutes = stage.closest('.productdrag').querySelector('.orderRoutes').innerText;
             const orderRoute = orderRoutes.split(' - ')[0];
             const orderProduct = orderRoutes.split(' - ')[1];
@@ -1841,6 +1843,7 @@ forms.forEach((form) => {
               route: orderRoute,
               product: orderProduct,
               stage: stage.innerText,
+              questions: questionIds,
               order: i + 1
             });
           });
@@ -1884,6 +1887,8 @@ forms.forEach((form) => {
         }
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
+
+    
 {% if display_stages %}
   {% for route_product, stages in display_stages.items %}
       let scontainer{{ forloop.counter }} = document.querySelector('.stage-container{{ forloop.counter }}');
@@ -1906,6 +1911,13 @@ forms.forEach((form) => {
             const orderStages = document.querySelectorAll('.orderStages');
           const cjstages = [];
           orderStages.forEach((stage, i) => {
+            questionContainer = document.querySelector(`#${stage.classList[4]}`);
+            questions = questionContainer.querySelectorAll('.orderQuestion');
+            const questionIds = []
+            questions.forEach((question,j) => {
+              questionIds.push(question.classList[4])
+            })
+
             const orderRoutes = stage.closest('.productdrag').querySelector('.orderRoutes').innerText;
             const orderRoute = orderRoutes.split(' - ')[0];
             const orderProduct = orderRoutes.split(' - ')[1];
@@ -1913,6 +1925,7 @@ forms.forEach((form) => {
               route: orderRoute,
               product: orderProduct,
               stage: stage.innerText,
+              questions: questionIds,
               order: i + 1
             });
           });
@@ -1956,6 +1969,95 @@ forms.forEach((form) => {
           }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
       }
+  {% endfor %}
+{% endif %}
+
+
+
+{% if display_stages %}
+  {% for route_product, stages in display_stages.items %}
+     {% for i in stages %}
+
+          let qcontainer{{ forloop.counter }}{{ forloop.parentloop.counter }} = document.querySelector('.question-container{{ forloop.counter }}{{ forloop.parentloop.counter }}');
+          let qdraggables{{ forloop.counter }}{{ forloop.parentloop.counter }} = qcontainer{{ forloop.counter }}{{ forloop.parentloop.counter }}.querySelectorAll('.questiondrag');
+
+          qdraggables{{ forloop.counter }}{{ forloop.parentloop.counter }}.forEach(draggable => {
+            let sentStage = false; 
+          
+            draggable.addEventListener('dragstart', (e) => {
+              e.stopPropagation();
+              draggable.classList.add('dragging');
+            });
+          
+            draggable.addEventListener('dragend', (e) => {
+              e.stopPropagation();
+              draggable.classList.remove('dragging');
+              const cjstages = [];
+            
+              if (!sentStage) {
+                const orderStages = document.querySelectorAll('.orderStages');
+              const cjstages = [];
+              orderStages.forEach((stage, i) => {
+                questionContainer = document.querySelector(`#${stage.classList[4]}`);
+                questions = questionContainer.querySelectorAll('.orderQuestion');
+                const questionIds = []
+                questions.forEach((question,j) => {
+                  questionIds.push(question.classList[4])
+                })
+
+                const orderRoutes = stage.closest('.productdrag').querySelector('.orderRoutes').innerText;
+                const orderRoute = orderRoutes.split(' - ')[0];
+                const orderProduct = orderRoutes.split(' - ')[1];
+                cjstages.push({
+                  route: orderRoute,
+                  product: orderProduct,
+                  stage: stage.innerText,
+                  questions: questionIds,
+                  order: i + 1
+                });
+              });
+            
+                fetch('/customer_jr_order/{{ client.id }}', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  body: JSON.stringify({ 'cjstages': cjstages })
+                });
+              
+                sentStage = true; // Mark as sent for this stage
+              }
+            });
+          });
+        
+          qcontainer{{ forloop.counter }}{{ forloop.parentloop.counter }}.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = getDragAfterElementQuestion(qcontainer{{ forloop.counter }}{{ forloop.parentloop.counter }}, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            if (draggable && Array.from(qdraggables{{ forloop.counter }}{{ forloop.parentloop.counter }}).includes(draggable)) {
+              if (afterElement == null) {
+                qcontainer{{ forloop.counter }}{{ forloop.parentloop.counter }}.appendChild(draggable);
+              } else {
+                qcontainer{{ forloop.counter }}{{ forloop.parentloop.counter }}.insertBefore(draggable, afterElement);
+              }
+            }
+          });
+        
+          function getDragAfterElementQuestion(container, y) {
+            const draggableElements = [...container.querySelectorAll('.questiondrag:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+              const box = child.getBoundingClientRect();
+              const offset = y - box.top - box.height / 2;
+              if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+              } else {
+                return closest;
+              }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+          }
+
+    {% endfor %}
   {% endfor %}
 {% endif %}
 

@@ -1,0 +1,85 @@
+#progress-bar {
+    position: relative;
+    padding-top: 5px;
+    margin-bottom: 1.5em;
+    color: #4d483f;
+}
+
+#progress-bar #progress-steps {
+    height: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+    border-radius: 10%;
+    background-color: #fff;
+    position: relative;
+    list-style-type: none;
+    counter-reset: item;
+    border: 1px solid #e0e0e0;
+    -webkit-border-radius: 10%;
+    -moz-border-radius: 10%;
+    -ms-border-radius: 10%;
+    -o-border-radius: 10%;
+}
+
+#progress-bar .progress-step {
+    width: 16.66%;
+    height: 8px;
+    float: left;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+#progress-bar .count:before {
+    content: counter(item) " ";
+    counter-increment: item;
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    position: absolute;
+    right: -7px;
+    top: -6px;
+    padding: 2px 0 0 6px;
+    font-size: 14px;
+    border: 1px solid #e0e0e0;
+    font-weight: bold;
+    z-index: 999;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+#progress-bar .highlight-index:before {
+    background-color: #3cb0a5;
+    color: #fff;
+}
+
+#progress-bar .highlight-index {
+    background-color: #3cb0a5;
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+}
+
+#progress-bar .description {
+    display: block;
+    text-align: center;
+    width: 64%;
+    right: -32%;
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.9em;
+}
+
+#progress-bar .bolded-step {
+    font-weight: normal !important;
+}

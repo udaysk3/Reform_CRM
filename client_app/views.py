@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timedelta
 
 from django.utils import timezone
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -17,7 +17,6 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from django.views.decorators.cache import cache_page
 
 from admin_app.models import Email, Reason, Signature
 from client_app.models import ClientArchive, Clients, CoverageAreas
@@ -183,8 +182,13 @@ def client_detail(request, client_id, s_client_id=None):
                     questions_with_rules = []
                     added_questions = set()
                     
-                    for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage,is_client=False):
-                        questions.append(rule.question)
+                    if cjstage.question:
+                        for question in cjstage.question:
+                            qus = Questions.objects.get(pk=question)
+                            questions.append(qus)
+                    else:        
+                        for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage,is_client=False):
+                            questions.append(rule.question)
                         
                     
                     for question in questions:
@@ -1052,8 +1056,8 @@ def customer_jr_order(request,client_id):
         response = json.loads(body)
         cjstages = response['cjstages']
         for i in cjstages:
-            print(i['route'],i['product'],i['stage'])
             cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).first()
+            cjstage.question = i['questions']
             cjstage.order = i['order']
             cjstage.save()
     return HttpResponse(200)
