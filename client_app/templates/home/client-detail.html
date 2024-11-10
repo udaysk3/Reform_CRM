@@ -1690,16 +1690,19 @@ table {
                                         </div>
                                       {% endif %}
                                   </div>
+                                  <button class="reform_btn mt-2 ms-3">Submit</button>
                                 {% endwith %}
                                 {% else %}
                                   {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
                                     <div class="col-6 rules mt-3 ms-3">
                                       <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
                                     </div>
+                                    <button class="reform_btn mt-2 ms-3">Submit</button>
                                   {% elif field.0 == "checkbox" %}
                                     <div class="col-6 rules mt-3 ms-3">
                                       <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
                                     </div>
+                                    <button class="reform_btn mt-2 ms-3">Submit</button>
                                   {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
                                   {% with options=b.0|split:',' %}
                                   <div class="col-6 rules mt-3 ms-3">
@@ -1715,12 +1718,13 @@ table {
                                     <input type="{{ field.0 }}" value="{{ options.0 }}" class="form-control checkboxinput" placeholder="Enter The Value">
                                     <input name="dynamicRule" type="hidden">
                                   </div>
+                                  <button class="reform_btn mt-2 ms-3">Submit</button>
                                   {% endwith %}
                                   {% endif %}
                                 {% endif %}
                             {% endwith %}
                             {% endwith %}
-                            <button class="reform_btn mt-2 ms-3">Submit</button>
+                            
                             </form>
                             </div>
                           </div>

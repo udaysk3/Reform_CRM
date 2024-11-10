@@ -179,7 +179,7 @@ def client_detail(request, client_id, s_client_id=None):
                 if CJStage.objects.filter(route=route, product=product, client=client).exists():
                     cjstages = CJStage.objects.filter(route=route, product=product, client=client)
                 else:
-                    cjstages = CJStage.objects.filter(route=route, product=product)
+                    cjstages = CJStage.objects.filter(route=route, product=product, client=None)
                 for cjstage in cjstages:
                     questions = []
                     questions_with_rules = []
@@ -1059,10 +1059,20 @@ def customer_jr_order(request,client_id):
         response = json.loads(body)
         cjstages = response['cjstages']
         for i in cjstages:
-            cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).first()
+            if CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).filter(client=client).exists():
+                cjstage = CJStage.objects.all().filter(route=Route.objects.get(name=i['route'])).filter(product=Product.objects.get(name=i['product'])).filter(stage=Stage.objects.get(name=i['stage'])).filter(client=client).first()
+            else:
+                cjstage = CJStage.objects.create(
+                    route=Route.objects.get(name=i['route']),
+                    product=Product.objects.get(name=i['product']),
+                    stage=Stage.objects.get(name=i['stage']),
+                    client=client
+                )
+            
+            
+            
             cjstage.question = i['questions']
             cjstage.order = i['order']
-            cjstage.client = client
             cjstage.save()
     return HttpResponse(200)
 
