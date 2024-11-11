@@ -322,7 +322,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 correct_ans = True
                 if ans == None:
                     correct_ans = False
-                elif ans.answer == [''] or ans.answer == '':
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
                 else:
                     rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
@@ -405,7 +405,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 correct_ans = True
                 if ans == None:
                     correct_ans = False
-                elif ans.answer == [''] or ans.answer == '':
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
                 elif ans and all_ans == False:
                     rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
