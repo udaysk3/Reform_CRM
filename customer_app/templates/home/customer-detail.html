@@ -384,7 +384,7 @@ table {
                           {{ question.question }}
                         </div>
                         <div class="row mb-3">
-                          <form class="ans_form" action="/add_stage_ans/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{customer.id}}" method="post">
+                          <form class="ans_form" action="/add_stage_ans/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{customer.id}}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                           {% with b=answer.answer %}
                           {% with field=question.type|firstsplit:',' %}
@@ -431,7 +431,7 @@ table {
                               {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
                               <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
                               {% elif field.0 == 'file' %}
-                              <input type="file" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                              <input type="file" name="dynamicRule" class="form-control file" value="{{ b.0 }}" placeholder="Enter The Value">
 
                               {% endif %}
                             {% endif %}
@@ -987,6 +987,16 @@ function onFormsSubmit(e) {
     const forms = modalContent.querySelectorAll('.ans_form');
     forms.forEach((form) => {
 
+      const formData = new FormData(form);
+        const files = form.querySelectorAll('.file');
+        files.forEach((fileInput) => {
+          
+            const fileFieldName = fileInput.getAttribute('name');
+            if (fileInput.files.length > 0) {
+                formData.append(fileFieldName, fileInput.files[0]);
+            }
+        });
+
         const cb = form.querySelector('.cb');
         const checkBoxs = form.querySelectorAll('.check-box');
 
@@ -1023,6 +1033,8 @@ function onFormsSubmit(e) {
                 targetInput.value += ',' + option.parentElement.children[0].value;
             }
         });
+
+        console.log(FormData);
 
         fetch(form.action, {
             method: 'POST',

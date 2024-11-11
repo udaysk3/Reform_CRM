@@ -320,6 +320,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
             correct_stage = True
             for question, ans, route, product, stage in question_ans:
                 correct_ans = True
+                if ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
+                        continue
                 if ans == None:
                     correct_ans = False
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
@@ -354,6 +358,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
+                            
                             if type[0] in ['date', 'month', 'time', 'number']:
                                 if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
@@ -403,6 +408,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
             correct_stage = True
             for question, ans, route, product, stage in question_ans:
                 correct_ans = True
+                if ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
+                        continue
                 if ans == None:
                     correct_ans = False
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
@@ -1601,6 +1610,8 @@ def delete_customer_session(request):
     del request.session['client']
 
 
+from django.http import JsonResponse  # Import this if you want to return JSON
+
 def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer_id):
     question = Questions.objects.get(pk=question_id)
     customer = Customers.objects.get(pk=customer_id)
@@ -1608,10 +1619,9 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
     if request.method == "POST":
         dynamicAns = request.POST.getlist("dynamicRule")
         
-        rules = Rule_Regulation.objects.all().filter(question=question, is_client=False)
+        rules = Rule_Regulation.objects.filter(question=question, is_client=False)
         
         for rule in rules:
-        
             answer = Answer.objects.filter(
                 route=rule.route, product=rule.product, stage=rule.stage, question=question, customer=customer
             ).first()
@@ -1629,4 +1639,9 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
                     answer=dynamicAns,
                 )
 
-    return HttpResponse(200)
+            if 'dynamicRule' in request.FILES:
+                uploaded_file = request.FILES['dynamicRule']
+                answer.file = uploaded_file
+                answer.save()
+
+    return JsonResponse({'status': 'success'}, status=200)
