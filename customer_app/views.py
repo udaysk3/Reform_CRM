@@ -239,12 +239,12 @@ def customer_detail(request, customer_id, s_customer_id=None):
             pass
         else:
             if route.global_archive == False:
-                client_routes.append(route)
+                client_routes.append([council , route])
 
     for region in display_regions:
         council_routes_in_region = region.routes.filter(global_archive=False)
         for council_route in council_routes_in_region:
-            if council_route in client_routes:
+            if [region, council_route] in client_routes:
                 if not ClientArchive.objects.filter(
                     client=customer.client, route=council_route, councils=region
                 ).exists():
@@ -320,12 +320,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
             correct_stage = True
             for question, ans, route, product, stage in question_ans:
                 correct_ans = True
-                if ans.question.type == 'file':
-                    if ans.file != '':
-                        correct_ans = True
-                        continue
                 if ans == None:
                     correct_ans = False
+                elif ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
                 else:
@@ -408,12 +407,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
             correct_stage = True
             for question, ans, route, product, stage in question_ans:
                 correct_ans = True
-                if ans.question.type == 'file':
-                    if ans.file != '':
-                        correct_ans = True
-                        continue
                 if ans == None:
                     correct_ans = False
+                elif ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
                 elif ans and all_ans == False:

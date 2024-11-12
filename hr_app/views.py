@@ -54,7 +54,7 @@ def add_employee(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         role = request.POST.get('role')
-        employee_image = request.FILES['profile']
+        employee_image = request.FILES.get('profile')
         hashed_password = make_password('123') 
         emp = User.objects.create(
             username=email,
