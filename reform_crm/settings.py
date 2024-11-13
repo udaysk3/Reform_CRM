@@ -111,12 +111,8 @@ WSGI_APPLICATION = 'reform_crm.wsgi.application'
 # Database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'reform',
-        'USER': 'reform',
-        'PASSWORD': 'Reform@123',
-        'HOST': '35.179.137.230',
-        'PORT': 5432,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
     }
 }
 
@@ -167,7 +163,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://reformcrm.up.railway.app/',
     'https://reformcrm-beta-0c709f5.kuberns.com',
-    "https://myreform.uk",
 ]
 
 # Ensure Two Factor Authentication URLs
