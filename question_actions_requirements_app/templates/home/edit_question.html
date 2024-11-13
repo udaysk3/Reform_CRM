@@ -67,6 +67,7 @@
                                   <option {% if question.type == 'number' %} selected {% endif %} value="number">Number</option>
                                   <option {% if question.type == 'password' %} selected {% endif %} value="password">Password</option>
                                   <option {% if question.type == 'time' %} selected {% endif %} value="time">Time</option>
+                                  <option {% if question.type == 'file' %} selected {% endif %} value="file">File</option>
                                   <option {% if question.type == 'url' %} selected {% endif %} value="url">URL</option>
                                   <option {% if 'dropdown' in question.type %} selected {% endif %} value="dropdown">Dropdown</option>
                                 </select>

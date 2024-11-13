@@ -1,12 +1,10 @@
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
 
 <style>
-
-
-
   #assigned_to, #change_client, #change_campaign {
     cursor: pointer;
   }
+
   .accordion-container {
     height: 390px;
     overflow-y: auto; 
@@ -28,10 +26,9 @@
   .accordion.active, .accordion:hover {
     background-color: #ddd;
   }
-
   
   .panel input[type="text"] {
-    width: calc(100% - 36px); /* Adjusting width for padding and border */
+    width: calc(100% - 36px);
     padding: 10px;
     margin: 5px 0;
     border: 1px solid #ccc;
@@ -48,19 +45,22 @@
   .cnav-item {
     font-size: 15px;
   }
+  
   h6 {
     font-size: 14px;
   }
+
   ::after,
-::before {
+  ::before {
     box-sizing: border-box;
-}
+  }
 
 
 .wrapper {
 	max-width: 18rem;
 	padding: 0 0.5rem;
 }
+
 .label {
 	font-size: 0.75rem;
 	font-weight: 400;
@@ -74,6 +74,7 @@
     font-weight: 600;
     color: #2A3547 !important;
 }
+
 .input {
 	font-family: 'Roboto', sans-serif;
 	display:block;
@@ -87,6 +88,7 @@
 	width: 100%;
 	margin-top: 0.5rem;
 }
+
 .input:focus {outline: none;}
 #ui-datepicker-div {
 	display: none;
@@ -175,509 +177,457 @@ table {
   top: 100px !important;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.contacts-container::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.contacts-container {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-  height: 150px; 
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-}
-
 .contacts{
   scroll-snap-align:start;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
 .tabs::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
 .tabs {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+#myChart, #myChart1{
+    width: 100% !important;
+    height: 100% !important;
 }
 
 </style>
 
+<link rel="stylesheet" href="{% static 'css/progressbar.css' %}">
+
 {% endblock %} {% block content %}
 
-<div class="row container-fluid">
-  <div class="cnav-item fs-6 col-1">
-    <a
-          class="btn btn-link fs-6 "
-          href="/customer-detail/{{prev}}"
-          ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
-          </svg></a>
-  </div>
-  <div class="cnav-item fs-6 col-2">
-{{prev.id}}
-    <span class="col"> <b>Stage </b> - </span> <div class="mt-1">
-      {% if customer.closed %}
-      Closed
-      {% else %}
-      Stage1
-      {% endif %}
-    </div>
-  </div>
-  <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Campaign</b> - </span>
-    <div class="mt-1" >
-    {% if customer.campaign %}
-     {{ customer.campaign.name }}
-    {% else %}
-      Unassigned
-    {% endif %}
-    </div>
-    <div class="d-grid gap-2 d-md-block">
-      <!-- Button trigger modal -->
-      <!-- Modal -->
-      <div class="modal fade" id="change_campaign_modal" data-bs-backdrop="static" data-bs-keyboard="false"
-        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit Campaign</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form method='post' action="{% url 'customer_app:change_customer_client' customer.id  %}">
-                          {% csrf_token %}
-                        <div class="modal-body">
-                          <div class="mb-3 client">
-                            <label for="client" class="form-label">Client</label>
-                            <select class="form-select client_input" id="client" name="client" aria-label="Default select example">
-                              <option value="nan">Select the client</option>
-                              {% for client in clients %}
-                                <option {% if customer.client == client %} selected {% endif %} value="{{client.id}}">{{client.company_name}}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                          <div class="mb-3 campaign">
-                            <label for="campaign" class="form-label">Campaign</label>
-                            <select class="form-select campaign_input" id="campaign" name="campaign" aria-label="Default select example">
-                              <option value="nan">Select the Campaign</option>
-                              {% for campaign in customer.client.campaigns.all %}
-                                <option {% if customer.campaign == campaign %} selected {% endif %} value="{{campaign.id}}">{{campaign.name}}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                          
-
-                          
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                          <button class="reform_btn" >Submit</button>
-                        </div>
-                      </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="cnav-item fs-6 col-2"><span class="col"> <b>Route</b> - </span><div class="mt-1"> value </div></div>
-
-  <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Client</b> - </span>
-    <div class="mt-1">
-    {% if customer.client %}
-     {{ customer.client.company_name }}
-    {% else %}
-      Unassigned
-    {% endif %}
-    </div>
-    
-  </div>
-  <div class="cnav-item fs-6 col-2">
-    <span class="col"> <b>Assigned To</b> - </span>
-    <div class="mt-1 link-primary" id="assigned_to">
-    {% if customer.assigned_to %}
-     {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }}
-    
-    {% else %}
-      Unassigned
-    {% endif %}
-    </div>
-    <div class="d-grid gap-2 d-md-block">
-      <!-- Button trigger modal -->
-      <!-- Modal -->
-      <div class="modal fade" id="assigned_to_modal" data-bs-backdrop="static" data-bs-keyboard="false"
-        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Agent</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method='post' action="{% url 'customer_app:assign_agent'  %}">
-              {% csrf_token %}
-              <div class="modal-body">
-                <input type"text" hidden value="{{ customer.id }}" name="customer_id">
-                <select class="form-select" aria-label="Default select example" name="agent_id">
-                  {% for agent in agents %}
-                  <option value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="reform_btn">Submit</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
- 
-  <div class="cnav-item fs-6 col-1 ">
-    <a
-          class="btn btn-link fs-6"
-          href="/customer-detail/{{next}}"
-          ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
-          </svg></a
-        >
+{% for message in messages %}
+<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-<div class="mt-3">
-<a href="#" class="edit-user-btn" data-user-id="{{ customer.id }}">
-  <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-</a>
-{% comment %} {% if user.admin %}
-<a href="#" class="delete-user-btn" data-user-id="{{ show_customer.id }}">
-  <svg xmlns="http://www.w3.org/2000/svg" class="text-danger icon icon-tabler icon-tabler-trash" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-</a>
-</div>
-{% endif %} {% endcomment %}
+{% endfor %}
 
+<div class="row container-fluid ">
 
-
-<div class="container-fluid pt-4">
-  <div class="row">
-    <div class="card p-0 d-flex">      
-      <div class="card-body p-3 pb-0 m-0">
+  <div class="card" >
+    <div class="card-body pb-0 row">
+      <div class="col-7">
         <div class="row">
-          <div class="col-sm-4 mb-sm-0">
-            <div class="card pb-3">
-              <div class="card-body py-0 contacts-container" style="overflow:hidden; height: 185px;">
-                <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
-                  <a href="{% url 'customer_app:customer_detail' customer.id customer.id %}" type="button" class="{% if customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {% endif %} </a>
-                  {% for c_customer in child_customers %}
-                  <a href="{% url 'customer_app:customer_detail' customer.id c_customer.id %}" type="button" class="{% if c_customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}" style="margin-left:-3px">
-                    {% if c_customer == show_customer %}{{ c_customer.first_name }} {% else %} {{ c_customer.first_name|truncatechars:5 }} {% endif %}
-                  </a>
-                  {% endfor %}
+          <div class="row" style="border-bottom: 2px solid #91E0DA;">
+            <div class="cnav-item col-1 position-absolute" style="left:-0px; top:8px;">
+              <a href="/customer-detail/{{prev}}" >
+                <i class="bx bx-left-arrow my-4 fs-6"></i>
+              </a>
+            </div>
 
-                </div>
-                <div class=" d-flex  justify-content-between mb-2">
-                  <form  method="post" action="/make_primary/{{ customer.id }}/{{ show_customer.id }}">
-                    {% csrf_token %}
-                    {% if show_customer.primary_customer %}
-                    <input type="checkbox" checked class="make_primary"> Primary
-                    {% else %}
-                    <input type="checkbox" class="make_primary"> Primary
-                    {% endif %} 
-                  </form>
-                </div>
-                <h6>
-                  <b> Name : </b> {{show_customer.first_name}} {{show_customer.last_name}}
-                </h6>
-                <h6><b> Telephone : </b> {{show_customer.phone_number}}</h6>
-                <h6><b> Email: </b> {{show_customer.email}}</h6>
+            <div class="col">
+              <h3>Customer</h3>
+            </div>
+            <div class="col-9 text-end" style="right: 0px; position:relative">
+              <div class="row">
+                <h5 class="col">Assigned To: {{ customer.assigned_to }}</h5>
+                <h5 class="col">Client: {{ customer.client }}</h5>
+                <h5 class="col">Campaign: {{ customer.campaign }}</h5>
               </div>
             </div>
-          </div>
 
-          <div class="col-sm-4">
-            <div class="card m-0">
-              <div class="card-body" style="height: 200px;">
-                <h6><b>House Name/Number</b> : {{customer.house_name}}</h6>
-                <h6><b>Street Name</b> : {{customer.street_name}}</h6>
-                {% comment %} <h6><b>Address</b> : {{customer.address}}</h6> {% endcomment %}
-                <h6><b>City/Town</b> : {{customer.city}}</h6>
-                <h6><b>County</b> : {{customer.county}}</h6>
-                <h6><b>Postcode</b> : {{customer.postcode}}</h6>
-                <h6><b>Country</b> : {{customer.country}}</h6>
-                <h6><b>Region</b> : 
-                  {% for region in display_regions %}
+          </div>
+          <div class="row mt-4">
+            <div class="col-sm-6 mb-sm-0 ">
+              <div class="card">
+                <div class="card-body py-0">
+                  <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
+                    <a href="{% url 'customer_app:customer_detail' customer.id customer.id %}" type="button"
+                      class="{% if customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {{ c_customer.last_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {%endif%} </a>
+                    {% for c_customer in child_customers %}
+                    <a href="{% url 'customer_app:customer_detail' customer.id c_customer.id %}" type="button"
+                      class="{% if c_customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}"
+                      style="margin-left:-3px">
+                      {% if c_customer == show_customer %}{{ c_customer.first_name }} {{ c_customer.last_name }} {% else %} {{ c_customer.first_name|truncatechars:5 }} {% endif %}
+                    </a>
+                    {% endfor %}
+            
+                  </div>
+                  <div class=" d-flex  justify-content-between mb-2">
+                    <form method="post" action="/make_primary/{{ customer.id }}/{{ show_customer.id }}">
+                      {% csrf_token %}
+                      {% if show_customer.primary_customer %}
+                      <input type="checkbox" checked class="make_primary"> Primary
+                      {% else %}
+                      <input type="checkbox" class="make_primary"> Primary
+                      {% endif %}
+                    </form>
+                    <a href="#" class="edit-user-btn" data-user-id="{{ customer.id }}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="28"
+                        height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                        <path d="M13.5 6.5l4 4" />
+                      </svg>
+                    </a>
+                  </div>
+                  <h6><b> Name : </b> {{show_customer.first_name}} {{show_customer.last_name}}</h6>
+                  <h6><b> Telephone : </b> {{show_customer.phone_number}}</h6>
+                  <h6><b> Email: </b> {{show_customer.email}}</h6>
+                  <h6><b>House Name/Number</b> : {{customer.house_name}}</h6>
+                  <h6><b>Street Name</b> : {{customer.street_name}}</h6>
+                  <h6><b>City/Town</b> : {{customer.city}}</h6>
+                  <h6><b>Postcode</b> : {{customer.postcode}}</h6>
+                  <h6><b>Region</b> :
+                    {% for region in display_regions %}
                     {% if forloop.counter == 1 %}
-                    {{region.name}} 
+                    {{region.name}}
                     {% else %}
                     , {{region.name}}
                     {% endif %}
-                  {% endfor %}
-                </h6>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-4">
-            <div class="card m-0">
-              <div class="card-body" style="height: 200px;">
-                
-                
-                <h6><b>Local Authority</b>: {{ customer.district }}</h6>
-                <h6><b>Constituency</b>: {{ customer.constituency }}</h6>
-                {% if customer.energy_rating %}
-                <h6><b>Energy Rating</b>: {{ customer.energy_rating }}</h6>
-                {% else %}
-                <h6><b>Energy Rating</b>: No EPC</h6>
-                {% endif %}
-                {% comment %} {{customer.energy_certificate_link}} {% endcomment %}
-                {% if customer.energy_certificate_link %}
-                <h6><b>Certificate Link</b>: <a target="_blank" href="{{ customer.energy_certificate_link }}">Click Here </a></h6>
-                {% else %}
-                <h6><b>Certificate Link</b>: No EPC</h6>
-                {% endif %}
-
-                {% if customer.recommendations %}
-                <h6><b>Recommendations</b>:  
-                  <a href="#" class="" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                  Click Here
-                </a>
-
-                <!-- Modal -->
-                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Recommendations List</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="mb-3">  
-                          <div>
-                            <table style="border-collapse: collapse;">
-                              <thead>
-                                <tr>
-                                  <th style="padding: 8px;">Improvement</th>
-                                  <th style="padding: 8px;">Indicative Cost</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {% for recommendation in recommendations_list %}
-                                  <tr style="border: 1px solid black; margin: 4px;">
-                                    <td style="padding: 8px;">{{ recommendation.improvement }}</td>
-                                    <td style="padding: 8px;">£{{ recommendation.indicative_cost }}</td>
-                                  </tr>
-                                {% endfor %}
-                              </tbody>
-                            </table>
-                            
-                          </div>
-                      </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                    {% endfor %}
                   </h6>
-                {% else %}
-                <h6><b>Recommendations</b>: -</h6>
-                {% endif %}
-
-                <h6><b>Google Maps Link</b>: <a target="_blank" class="googlemap">Click Here </a></h6>
-
+                </div>
               </div>
             </div>
+            
+            <div class="col-sm-6 mb-sm-0 ">
+              <div class="card">
+                <div class="card-body py-0">
+                  <h2 class="position-relative">Initial Check</h2>
+                  <h6><b> EPC : </b> </h6>
+                  <h6><b> Floor Area : </b> </h6>
+                  <h6><b> Property Type : </b> </h6>
+                  <h6><b>Gas Safe :</b> </h6>
+                  <h6><b>Loft Insulation :</b> </h6>
+                  <h6><b>Boiler Type :</b> </h6>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
+      
+      <div class="col-5">
+        <div class="row d-flex" style="padding-top: 10%;">
+          <div class="col-6">
+            <canvas id="myChart" ></canvas>
+            <h4 class="position-absolute" style="top:40%; right:27%;">{{ current_route_product.2 }}</h1>
+          </div>
+          <div class="cnav-item fs-6 col-1 position-absolute" style="right:-30px; top:8px;">
+             <a href="/customer-detail/{{next}}"><i class="bx bx-right-arrow my-4 fs-6"></i></a>
+            </div>
+        </div>
+      </div>
     </div>
-    {% for message in messages %}
-    <div
-      class="alert {{ message.tags }} alert-dismissible fade show"
-      role="alert"
-    >
-      {{ message }}
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-      ></button>
+  </div>
+</div>
+
+
+<div class="row container-fluid">
+<div class="container-fluid pt-4">
+  <div class="row">
+    <div class="card py-3 d-flex">      
+      <div class="card-body p-5 pb-0 m-0">
+        <div id="progress-bar">
+          <ol id="progress-steps">
+            {% for stage, question_answer, can_ans in current_route_product.0 %}
+              <li class="progress-step" style="width: {{ current_route_product.1 }}%;">
+                <span class="count
+                {% if can_ans %} 
+                  highlight-index
+                {% endif %}
+                "></span>
+                <span class="description">{{ stage }}</span>
+              </li>
+            {% endfor %}
+          </ol>
+        </div>
+      </div>
     </div>
-    {% endfor %}
-<div class="card p-0">
-      <div class="card-body p-3 m-0">
-        <div class="row">
-          <div class="col mb-3 mb-sm-0">
-            <div class="card m-0">
-              <div class="card-body row m-0">
-                <h6 class="fs-6">
-                  <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
-                  {{latest_action.date_time }} {% endwith %}
-                </h6>
 
+    <div class="card py-3 d-flex">
+      <div class="card-body p-3 pb-0 m-0 row">
+        <div class="col">
+          <div class="card py-3 d-flex">
+            <div class="card-body p-3 pb-0 m-0 row">
+              <h6>Available Funding Routes</h6>
 
-                <div class="row">
+              <div class="card p-0 m-0">
+                <div class="card-body p-3 m-0 position-relative">
+                  <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
+                    {% for route in routes %}
+                    <h6 class="reform_btn me-3">{{ route.name }}</h6>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
 
+              <h6 class="mt-3">Available Products</h6>
+              
+              <div class="card p-0 m-0">
+                <div class="card-body p-3 m-0">
+                  <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
+                    {% for product in products %}
+                    <h6 class="reform_btn me-3">{{ product.name }}</h6>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
 
-                  <form
-                  id="action_submit_form"
-                  method="post"
-                  name="action_submit_form"
-                  onSubmit="DoSubmit(this);"
-                  action="{% url 'customer_app:note_submit' customer.id %}"
-                  class="col"
-                >
-                  {% csrf_token %}
-                  
+              <h6 class="mt-3">Current Stage: <b> {{ current_stage.0.4 }} </b></h6>
 
-                  <!-- Button trigger modal -->
-
-                  <button
-                    type="button"
-                    class="secondary_reform_btn my-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#staticBackdropnote"
-                  >
-                    Note
-                  </button>
-
-                  <!-- Modal -->
-                  <div
-                    class="modal fade"
-                    id="staticBackdropnote"
-                    data-bs-backdrop="static"
-                    data-bs-keyboard="false"
-                    tabindex="-1"
-                    aria-labelledby="staticBackdropLabel"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Note</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="card p-0 m-0">
+                <div class="card-body p-3 m-0" style="height: 260px; overflow-y: auto;">
+                  {% if current_stage %}
+                    {% for question, answer, route, product, stage in current_stage %}
+                      <div class="col">
+                        <div class="row ms-3">
+                          {{ question.question }}
                         </div>
-                        <div class="modal-body row">
-                          <div class="col">
-                            <div class="form-floating">
-                              <div class="wrapper">
-                                <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
-                                <label class="label" for="date_field">
-                                  <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
-                                </label>	
+                        <div class="row mb-3">
+                          <form class="ans_form" action="/add_stage_ans/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{customer.id}}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                          {% with b=answer.answer %}
+                          {% with field=question.type|firstsplit:',' %}
+                            {% if field.1 %}
+                            {% with options=field.1|split:',' %}
+                            {% if field.0 == 'radio' %}
+                              {% for option in options %}
+                                <div class="form-check">
+                                  <input class="form-check checkboxinput" {% if option == b.0 %}
+                                    checked="checked"
+                                  {% endif %} type="radio" value="{{ option }}" id="{{ forloop.parentloop.counter }}radio{{ forloop.counter }}" name="dynamicRule">
+                                  <label class="form-check
+                                  {% if option == b.0 %}
+                                    checked
+                                  {% endif %}" for="{{ forloop.parentloop.counter }}radio{{ forloop.counter }}">
+                                    {{option}}
+                                  </label>
+                                </div>
+                              {% endfor %}
+                                  
+                            {% else %}
+                              <div class="col-6 rules mt-3 ms-3">
+                                <input type="hidden" class="cb" id="name" name="dynamicRule">
+                                  {% for option in options %}
+                                    <div class="form-check">
+                                      <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}{{ forloop.parentloop.counter }}">
+                                      <label class="form-check-label" for="check{{ forloop.counter }}{{ forloop.parentloop.counter }}">
+                                        {{option}}
+                                      </label>
+                                    </div>
+                                  {% endfor %}
+                              </div>
+                              {% endif %}
+                            {% endwith %}
+                            {% else %}
+                              {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                <div class="col-6 rules mt-3 ms-3">
+                                  <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                                </div>
+                              {% elif field.0 == "checkbox" %}
+                                <div class="col-6 rules mt-3 ms-3">
+                                  <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                </div>
+                              {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                              <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                              {% elif field.0 == 'file' %}
+                              <input type="file" name="dynamicRule" class="form-control file" value="{{ b.0 }}" placeholder="Enter The Value">
+
+                              {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                        {% endwith %}
+                        </form>
+                        </div>
+                          </div>
+                        
+                    {% endfor %}
+                        {% else %}
+                        
+                      <h4> Questions are not allocated </h4>
+                    {% endif %}
+                    <button type="button" class="reform_btn" onClick="onFormsSubmit(event);">Submit</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card py-3 d-flex">
+            <div class="card-body p-3 pb-0 m-0 row">
+              <h6 class="fs-6">
+                <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
+                {{latest_action.date_time }} {% endwith %}
+              </h6>
+              <div class="row">
+                
+                <div class="d-grid gap-2 d-md-block mt-3 col">
+                  <form method="post" class="col" action="{% url 'customer_app:na_action_submit' customer.id %}">
+                    {% csrf_token %}
+                    <button class="secondary_reform_btn" style="background-color:#91E0DA;" type="submit">NA</button>
+                  </form>
+                </div>
+
+
+
+                <div class="d-grid gap-2 d-md-block col">
+                  <form id="action_submit_form" method="post" action="{% url 'customer_app:send_email' customer.id %}" class="col"
+                    onSubmit="DoSubmit(this);">
+                    {% csrf_token %}
+                
+                    <button type="button" class="secondary_reform_btn my-3" data-bs-toggle="modal" data-bs-target="#Email">
+                      Email
+                    </button>
+                
+                    <!-- Modal -->
+                    <div class="modal fade" id="Email" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title " id="staticBackdropLabel">Send Email</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body row pt-0">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label fs-5">Template</label>
+                            <div class="form-floating ">
+                
+                              <select id="select" class="form-select py-0 " name="template">
+                
+                                <option value="nan"> Create a email </option>
+                                {% for email in templates %}
+                                <option value="{{ email.id }}">{{ email.name }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                
+                
+                            <label style="border: medium dashed #fff;" for="select" class="form-label fs-5 mt-3">Schedule next
+                              action</label>
+                            <div class="col ">
+                              <div class="form-floating" style=" margin-left: -5px;">
+                                <div class="wrapper">
+                                  <p for="date_field" class="mb-1 " style="font-weight: 600; color: #2A3547;">Date</p>
+                                  <label class="label" for="date_field">
+                                    <input type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
+                                  </label>
+                                </div>
+                              </div>
+                
+                
+                
+                            </div>
+                            <div class="col" style=" margin-left: 58px;">
+                              <div class="mb-0">
+                                <div class="wrapper">
+                                  <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
+                                  <input class="time form-control" id="time_field" type="text" data-precision="5"
+                                    placeholder="Pick date & time" name='time_field' />
+                                </div>
+                
                               </div>
                             </div>
-
+                            <div class="row">
+                              <div class="col-4">
+                                <button class="reform_btn my-3 minutes" type="button">Minutes</button>
+                              </div>
+                              <div class="col-4">
+                                <button class="reform_btn my-3 hour" style=" margin-left: 40px; width: 85px;"
+                                  type="button">Hour</button>
+                              </div>
+                              <div class="col-4">
+                                <button class="reform_btn my-3 day" style=" margin-left: 70px; width: 87px;" type="button">Day</button>
+                              </div>
+                              <div class="col-4">
+                                <button class="reform_btn my-3 week" style="width: 85px;" type="button">Week</button>
+                              </div>
+                              <div class="col-4">
+                                <button class="reform_btn my-3 month" style=" margin-left: 40px; width: 85px;"
+                                  type="button">Month</button>
+                              </div>
+                              <div class="col-4">
+                                <button class="reform_btn my-3 year position-relative" style=" margin-left: 70px; width: 87px;"
+                                  type="button">Year</button>
+                              </div>
+                            </div>
+                
+                            <div class="form-floating mt-3">
+                              <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"
+                                style="height: 50px" name="subject"></textarea>
+                              <label for="floatingTextarea">Subject</label>
+                            </div>
+                            <div class="form-floating mt-3">
+                              <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"
+                                style="height: 100px" name="text"></textarea>
+                              <label for="floatingTextarea">Body</label>
+                            </div>
+                            <div class="form-floating mt-3">
+                              <select id="select" class="form-select py-0" name="signature">
+                
+                                <option value="nan"> Select a signature </option>
+                                {% for signature in signatures %}
+                                <option value="{{ signature.id }}">{{ signature.signature|truncatechars:50 }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
                           </div>
-                          <div class="col">
-                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
-                            <select id="select" class="form-select"  name="talked_customer">
-                              <option
-                              {% if customer.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
-                              {% for i in child_customers %}
-                              <option
-                              {% if i.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
-                              {% endfor %}
-                            </select>
+                          <div class="modal-footer">
+                            <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">
+                              Close
+                            </button>
+                            <button class="reform_btn" type="submit">
+                              Submit
+                            </button>
                           </div>
-                          
-                          <div class="form-floating" style="margin-left: 6px; width: 490px;">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
-                            name="text"></textarea>
-                            <label for="floatingTextarea">Comments</label>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button
-                            type="button"
-                            class="secondary_reform_btn"
-                            data-bs-dismiss="modal"
-                          >
-                            Close
-                          </button>
-                          <button class="reform_btn" type="submit">
-                            Submit
-                          </button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </form>
-
-
-
-                <div class="d-grid gap-2 d-md-block mt-3 col">
-                  <form
-                    method="post"
-                    class="col"
-                    action="{% url 'customer_app:na_action_submit' customer.id %}"
-                    
-                  >
-                    {% csrf_token %}
-                    <button class="secondary_reform_btn" type="submit">NA</button>
                   </form>
                 </div>
+                
+            
+              </div>
 
-
-
-
-                <div class="d-grid gap-2 d-md-block mt-3 col">
-                  <form
-                    method="post"
-                    class="col"
-                    action="{% url 'customer_app:lm_action_submit' customer.id %}"
-                    
-                  >
+              <div class="row">
+                
+                <div class="d-grid gap-2 d-md-block  col">
+                  <form method="post" class="col" action="{% url 'customer_app:lm_action_submit' customer.id %}">
                     {% csrf_token %}
-                    <button class="secondary_reform_btn" type="submit">LM</button>
+                    <button class="secondary_reform_btn" style="background-color:#91E0DA;" type="submit">LM</button>
                   </form>
                 </div>
+                
+                
+                
+                
+                <div class="d-grid gap-2 d-md-block  col">
+                  <form method="post" class="col" action="{% url 'customer_app:na_action_submit' customer.id %}">
+                    {% csrf_token %}
+                    <button class="secondary_reform_btn" type="button">SMS</button>
+                  </form>
+                </div>
+              </div>
 
-
-
-
-                <form
-                  id="action_submit_form"
-                  method="post"
-                  name="action_submit_form"
-                  onSubmit="DoSubmit(this);"
-                  action="{% url 'customer_app:action_submit' customer.id %}"
-                  class="col"
-                >
+              <div class="row">
+                
+                
+                
+                <form id="action_submit_form" method="post" name="action_submit_form" onSubmit="DoSubmit(this);"
+                  action="{% url 'customer_app:action_submit' customer.id %}" class="col">
                   {% csrf_token %}
-                  
-
+                
+                
                   <!-- Button trigger modal -->
-
-                  <button
-                    type="button"
-                    class="secondary_reform_btn my-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#staticBackdrop1"
-                  >
+                
+                  <button type="button" class="secondary_reform_btn my-3" style="background-color:#FFD000;" data-bs-toggle="modal" data-bs-target="#staticBackdrop1">
                     CB
                   </button>
-
+                
                   <!-- Modal -->
-                  <div
-                    class="modal fade"
-                    id="staticBackdrop1"
-                    data-bs-backdrop="static"
-                    data-bs-keyboard="false"
-                    tabindex="-1"
-                    aria-labelledby="staticBackdropLabel"
-                    aria-hidden="true"
-                  >
+                  <div class="modal fade" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
@@ -686,72 +636,64 @@ table {
                         </div>
                         <div class="modal-body row">
                           <div class="col">
-                          <div class="form-floating">
-                            <div class="wrapper">
-                              <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
-                              <label class="label" for="date_field">
-                                <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
-                              </label>	
+                            <div class="form-floating">
+                              <div class="wrapper">
+                                <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
+                                <label class="label" for="date_field">
+                                  <input type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
+                                </label>
+                              </div>
                             </div>
-                          </div>
-
-                          <div class="mb-0">
-                            <div class="wrapper">
-                            <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
-                            <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
-                          </div>
-                        </div>
-
+                
+                            <div class="mb-0">
+                              <div class="wrapper">
+                                <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
+                                <input class="time form-control" id="time_field" type="text" data-precision="5"
+                                  placeholder="Pick date & time" name='time_field' />
+                              </div>
+                            </div>
+                
                           </div>
                           <div class="col">
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
-                            <select id="select" class="form-select"  name="talked_customer">
-                              <option
-                              {% if customer.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
+                            <select id="select" class="form-select" name="talked_customer">
+                              <option {% if customer.primary_customer %} selected {% endif %}
+                                value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{
+                                customer.last_name }} </option>
                               {% for i in child_customers %}
-                              <option
-                              {% if i.primary_customer %}
-                              selected
-                              {% endif %}
-                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
+                              <option {% if i.primary_customer %} selected {% endif %} value="{{ i.first_name }} {{ i.last_name }}"> {{
+                                i.first_name }} {{ i.last_name }} </option>
                               {% endfor %}
                             </select>
                           </div>
                           <div class="row">
                             <div class="col-4">
-                            <button class="reform_btn my-3 minutes" type="button">Minutes</button>
+                              <button class="reform_btn my-3 minutes" type="button">Minutes</button>
                             </div>
                             <div class="col-4">
-                            <button class="reform_btn my-3 hour" type="button">Hour</button>
+                              <button class="reform_btn my-3 hour" type="button">Hour</button>
                             </div>
                             <div class="col-4">
-                            <button class="reform_btn my-3 day" type="button">Day</button>
+                              <button class="reform_btn my-3 day" type="button">Day</button>
                             </div>
                             <div class="col-4">
-                            <button class="reform_btn my-3 week" type="button">Week</button>
+                              <button class="reform_btn my-3 week" type="button">Week</button>
                             </div>
                             <div class="col-4">
-                            <button class="reform_btn my-3 month" type="button">Month</button>
+                              <button class="reform_btn my-3 month" type="button">Month</button>
                             </div>
                             <div class="col-4">
-                            <button class="reform_btn my-3 year" type="button">Year</button>
-                          </div>  
+                              <button class="reform_btn my-3 year" type="button">Year</button>
+                            </div>
                           </div>
                           <div class="form-floating">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
-                            name="text"></textarea>
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"
+                              style="height: 100px" name="text"></textarea>
                             <label for="floatingTextarea">Comments</label>
                           </div>
                         </div>
                         <div class="modal-footer">
-                          <button
-                            type="button"
-                            class="secondary_reform_btn"
-                            data-bs-dismiss="modal"
-                          >
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">
                             Close
                           </button>
                           <button class="reform_btn" type="submit">
@@ -762,200 +704,28 @@ table {
                     </div>
                   </div>
                 </form>
-
-
-
-
-                <div class="d-grid gap-2 d-md-block col">
-                  <form
-                  id="action_submit_form"
-                  method="post"
-                  action="{% url 'customer_app:send_email' customer.id %}"
-                  class="col"
-                  onSubmit="DoSubmit(this);"
-                >
+                
+                
+                
+                
+                <form id="action_submit_form" method="post" name="action_submit_form"
+                  action="{% url 'customer_app:close_action_submit' customer.id %}" class="col close_form">
                   {% csrf_token %}
-                  
-
+                
+                
                   <!-- Button trigger modal -->
-
-                  <button
-                    type="button"
-                    class="secondary_reform_btn my-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#Email"
-                  >
-                    Email
-                  </button>
-
-                  <!-- Modal -->
-                  <div
-                    class="modal fade"
-                    id="Email"
-                    data-bs-backdrop="static"
-                    data-bs-keyboard="false"
-                    tabindex="-1"
-                    aria-labelledby="staticBackdropLabel"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h1 class="modal-title " id="staticBackdropLabel">Send Email</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body row pt-0">
-                          <label style="border: medium dashed #fff;" for="select" class="form-label fs-5">Template</label>
-                            <div class="form-floating ">
-                          
-                            <select id="select" class="form-select py-0 "  name="template">
-                              
-                              <option value="nan"> Create a email </option>
-                              {% for email in templates %}
-                              <option value="{{ email.id }}">{{ email.name }}</option>
-                              {% endfor %}
-                            </select>
-                            </div>
-
-
-                            <label style="border: medium dashed #fff;" for="select" class="form-label fs-5 mt-3">Schedule next action</label>
-                            <div class="col ">
-                          <div class="form-floating" style=" margin-left: -5px;">
-                            <div class="wrapper">
-                              <p for="date_field" class="mb-1 " style="font-weight: 600; color: #2A3547;">Date</p>
-                              <label class="label" for="date_field">
-                                <input  type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
-                              </label>	
-                            </div>
-                          </div>
-
-                          
-
-                          </div>
-                          <div class="col" style=" margin-left: 58px;">
-                            <div class="mb-0">
-                            <div class="wrapper">
-                            <p for="time_field" class="mb-1" style="font-weight: 600; color: #2A3547">Time</p>
-                            <input class="time form-control" id="time_field" type="text" data-precision="5" placeholder="Pick date & time" name='time_field'/>
-                          </div>
-
-                          </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-4">
-                            <button class="reform_btn my-3 minutes" type="button">Minutes</button>
-                            </div>
-                            <div class="col-4">
-                            <button class="reform_btn my-3 hour" style=" margin-left: 40px; width: 85px;" type="button">Hour</button>
-                            </div>
-                            <div class="col-4">
-                            <button class="reform_btn my-3 day" style=" margin-left: 70px; width: 87px;" type="button">Day</button>
-                            </div>
-                            <div class="col-4">
-                            <button class="reform_btn my-3 week" style="width: 85px;" type="button">Week</button>
-                            </div>
-                            <div class="col-4">
-                            <button class="reform_btn my-3 month" style=" margin-left: 40px; width: 85px;" type="button">Month</button>
-                            </div>
-                            <div class="col-4">
-                            <button class="reform_btn my-3 year position-relative" style=" margin-left: 70px; width: 87px;" type="button">Year</button>
-                          </div>  
-                          </div>
-
-                            <div class="form-floating mt-3">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 50px"
-                            name="subject"></textarea>
-                            <label for="floatingTextarea">Subject</label>
-                          </div>
-                            <div class="form-floating mt-3">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
-                            name="text"></textarea>
-                            <label for="floatingTextarea">Body</label>
-                          </div>
-                          <div class="form-floating mt-3">
-                            <select id="select" class="form-select py-0"  name="signature">
-                              
-                              <option value="nan"> Select a signature </option>
-                              {% for signature in signatures %}
-                              <option value="{{ signature.id }}">{{ signature.signature|truncatechars:50 }}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button
-                            type="button"
-                            class="secondary_reform_btn"
-                            data-bs-dismiss="modal"
-                          >
-                            Close
-                          </button>
-                          <button class="reform_btn" type="submit">
-                            Submit
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-                </div>
-
-
-
-
-                <div class="d-grid gap-2 d-md-block mt-3 col">
-                  <form
-                    method="post"
-                    class="col"
-                    action="{% url 'customer_app:na_action_submit' customer.id %}"
-                    
-                  >
-                    {% csrf_token %}
-                    <button class="secondary_reform_btn" type="button">SMS</button>
-                  </form>
-                </div>
-
-
-
-
-
-
-
-                <form
-                  id="action_submit_form"
-                  method="post"
-                  name="action_submit_form"
-                  action="{% url 'customer_app:close_action_submit' customer.id %}"
-                  class="col close_form"
-                >
-                  {% csrf_token %}
-                  
-
-                  <!-- Button trigger modal -->
-
-                  <button
-                    type="button"
-                    class="secondary_reform_btn my-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#staticBackdrop2"
-                  >
-                  {% if customer.closed %}
+                
+                  <button type="button" class="secondary_reform_btn my-3" style="background-color:#FA896B;" data-bs-toggle="modal" data-bs-target="#staticBackdrop2">
+                    {% if customer.closed %}
                     Reopen
-                  {% else %}
+                    {% else %}
                     Close
-                  {% endif %}
+                    {% endif %}
                   </button>
-
+                
                   <!-- Modal -->
-                  <div
-                    class="modal fade"
-                    id="staticBackdrop2"
-                    data-bs-backdrop="static"
-                    data-bs-keyboard="false"
-                    tabindex="-1"
-                    aria-labelledby="staticBackdropLabel"
-                    aria-hidden="true"
-                  >
+                  <div class="modal fade" id="staticBackdrop2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
@@ -977,7 +747,7 @@ table {
                               Reason
                               {% endif %}
                             </label>
-                            <select id="select" class="c_reason form-select"  name="reason">
+                            <select id="select" class="c_reason form-select" name="reason">
                               {% if customer.closed %}
                               {% for agent in agents %}
                               <option value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
@@ -989,36 +759,31 @@ table {
                               {% endfor %}
                               {% endif %}
                             </select>
-
-                          
-
+                
+                
+                
                           </div>
                           <div class="col">
                             <label style="border: medium dashed #fff;" for="select" class="form-label">Spoke To</label>
-                            <select id="select" class="c_talked_customer form-select"  name="talked_customer">
+                            <select id="select" class="c_talked_customer form-select" name="talked_customer">
                               <option value="nan">Select a Customer</option>
                               <option value="Nobody">Nobody</option>
-                              <option
-                               value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{ customer.last_name }} </option>
+                              <option value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{
+                                customer.last_name }} </option>
                               {% for i in child_customers %}
-                              <option
-                               value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
+                              <option value="{{ i.first_name }} {{ i.last_name }}"> {{ i.first_name }} {{ i.last_name }} </option>
                               {% endfor %}
                             </select>
                           </div>
-                            
+                
                           <div class="form-floating mt-3">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="height: 100px"
-                            name="text"></textarea>
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"
+                              style="height: 100px" name="text"></textarea>
                             <label for="floatingTextarea">Comments</label>
                           </div>
                         </div>
                         <div class="modal-footer">
-                          <button
-                            type="button"
-                            class="secondary_reform_btn"
-                            data-bs-dismiss="modal"
-                          >
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">
                             Close
                           </button>
                           <button class="reform_btn" onclick="SubmitClose(this);" type="button">
@@ -1031,37 +796,100 @@ table {
                 </form>
               </div>
 
+              <div class="row">
+                
+                <form id="action_submit_form" method="post" name="action_submit_form" onSubmit="DoSubmit(this);"
+                  action="{% url 'customer_app:note_submit' customer.id %}" class="col">
+                  {% csrf_token %}
+                
+                
+                  <!-- Button trigger modal -->
+                
+                  <button type="button" class="secondary_reform_btn mb-3" data-bs-toggle="modal" data-bs-target="#staticBackdropnote">
+                    Note
+                  </button>
+                
+                  <!-- Modal -->
+                  <div class="modal fade" id="staticBackdropnote" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Note</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row">
+                          <div class="col">
+                            <div class="form-floating">
+                              <div class="wrapper">
+                                <p for="date_field" style="font-weight: 600; color: #2A3547">Date</p>
+                                <label class="label" for="date_field">
+                                  <input type="text" class="input date cadate" id="date_field" name="date_field" autocomplete="off">
+                                </label>
+                              </div>
+                            </div>
+                
+                          </div>
+                          <div class="col">
+                            <label style="border: medium dashed #fff;" for="select" class="form-label">Customer</label>
+                            <select id="select" class="form-select" name="talked_customer">
+                              <option {% if customer.primary_customer %} selected {% endif %}
+                                value="{{ customer.first_name }} {{ customer.last_name }}"> {{ customer.first_name }} {{
+                                customer.last_name }} </option>
+                              {% for i in child_customers %}
+                              <option {% if i.primary_customer %} selected {% endif %} value="{{ i.first_name }} {{ i.last_name }}"> {{
+                                i.first_name }} {{ i.last_name }} </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                
+                          <div class="form-floating" style="margin-left: 6px; width: 490px;">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"
+                              style="height: 100px" name="text"></textarea>
+                            <label for="floatingTextarea">Comments</label>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">
+                            Close
+                          </button>
+                          <button class="reform_btn" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                
+              </div>
 
-              <div class="col">
-
-
+              <div class="row">
                 <h6>History</h6>
                 <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 150px; overflow-y: auto"
-                  >
+                  <div class="card-body p-3 m-0" style="height: 150px; overflow-y: auto">
                     <ul>
                       {% for key,value in history.items %}
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
                         <li class="mb-2"><b>{{ v.0 }} - {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
-                          {% if v.7 %}
-                           spoke to <b> {{ v.7 }}</b> 
-                          {% endif %}
-                           - <b> {{ v.5 }} </b>
-                          - Next Action: {{ v.6 }}
-                          
-                        </b>
+                            {% if v.7 %}
+                            spoke to <b> {{ v.7 }}</b>
+                            {% endif %}
+                            - <b> {{ v.5 }} </b>
+                            - Next Action: {{ v.6 }}
+                
+                          </b>
                           {% if v.8 %}
                           {% if v.5 == 'Email Received' %}
                           - <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#Email_data{{forloop.counter}}">
                             View Email
                           </button>
-                          
+                
                           <!-- Modal -->
-                          <div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                          <div class="modal fade" id="Email_data{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false"
+                            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                               <div class="modal-content">
                                 <div class="modal-header">
@@ -1079,11 +907,11 @@ table {
                             </div>
                           </div>
                           {% else %}
-                          - {{ v.8 }} 
+                          - {{ v.8 }}
                           {% endif %}
                           {% endif %}
                         </li>
-                          {% endfor %}
+                        {% endfor %}
                       </ul>
                       {% endfor %}
                       {% for key,value in imported.items %}
@@ -1101,14 +929,11 @@ table {
                   </div>
                 </div>
               </div>
-              
-                <div class="col">
-                  <h6 class="" >Key Events</h6>
+
+              <div class="row">
+                <h6 class="mt-3">Key Events</h6>
                 <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                    style="height: 150px; overflow-y: auto"
-                  >
+                  <div class="card-body p-3 m-0" style="height: 150px; overflow-y: auto">
                     <ul class="ps-3">
                       {% for key,value in events.items %}
                       <li><b>{{ key }}</b></li>
@@ -1119,178 +944,31 @@ table {
                           {{ v.6 }}
                           {% endif %}
                           {% if v.7 %}
-                           spoke to <b> {{ v.7 }}</b> 
+                          spoke to <b> {{ v.7 }}</b>
                           {% endif %}
                           {% if v.8 %}
-                          - {{ v.8 }} 
+                          - {{ v.8 }}
                           {% endif %}
                         </li>
-                          {% endfor %}
+                        {% endfor %}
                       </ul>
                       {% endfor %}
                       {% if customer.imported %}
-                        <li class="mb-2"> <b>{{ customer.created_at }}</b> - {{ customer.house_name }} - {{ customer.postcode }} - Imported/Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }} </li>
+                      <li class="mb-2"> <b>{{ customer.created_at }}</b> - {{ customer.house_name }} - {{ customer.postcode }} -
+                        Imported/Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }} </li>
                       {% endif %}
                     </ul>
                   </div>
                 </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-          </div>
-
-          <div class="row">
-            <div class="card m-3">
-              <div class="card-body row">
-                <div class="col">
-
-
-
-                  <h6>Available Funding Routes</h6>
-                
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0 position-relative"
-                  >
-                    <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
-                      {% for route in routes %}
-                        <h6 class="reform_btn me-3">{{ route.name }}</h6>
-                      {% endfor %}
-
-                </div>
-                  </div>
-                </div>
-
-                </div>
-                <div class="col">
-                <h6 class="">Available Products</h6>
-                
-                <div class="card p-0 m-0">
-                  <div
-                    class="card-body p-3 m-0"
-                  >
-                    <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;" >
-                    {% for product in products %}
-                      <h6 class="reform_btn me-3">{{ product.name }}</h6>
-                    {% endfor %}
-
-                      
-                      
-                </div>
-                  </div>
-                </div>
-
-                  
-                </div>
-
-                <div class="row">
-
-                  
-                <h6 class="fs-6 mt-3"> <b> Customer Journey </b></h6>                
-
-                     
-          <div class="mt-3 row">
-  <div class="product-pcontainer">
-    {% if display_stages %}
-      {% for route_product, stages in display_stages.items %}
-        <div class="productdrag card p-0" style="margi-bottom: 10px;">
-          <div class="card-body p-3">
-            <h6>
-              <span class="orderRoutes">{{ route_product }}
-                
-              </span>
-            </h6>
-            <div class="stage-container{{ forloop.counter }} ps-4" style="display:flex; flex-direction: row;">
-              {% for stage, question_answer, can_ans in stages %}
-                <button class="reform_btn mx-2 stagedrag orderStages  {% if not can_ans %}
-                disabled
-                {% endif %}" 
-                {% if not can_ans %}
-                disabled
-                {% endif %}
-
-                data-bs-toggle="modal" data-bs-target="#exampleModal{{ forloop.parentloop.counter }}{{ forloop.counter }}">
-                  {{ stage }}
-                </button>
-                <div class="modal fade" id="exampleModal{{ forloop.parentloop.counter }}{{ forloop.counter }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ stage }}</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        {% if question_answer %}
-                        {% for question, answer, route, product, stage in question_answer %}
-                          <div class="col">
-                            <div class="row ms-3">
-                              {{ question.question }}
-                            </div>
-                            <div class="row mb-3">
-                              <form class="ans_form" action="/add_stage_ans/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{customer.id}}" method="post">
-                                {% csrf_token %}
-                              {% with b=answer.answer %}
-                              {% with field=question.type|firstsplit:',' %}
-                                {% if field.1 %}
-                                {% with options=field.1|split:',' %}
-                                  <div class="col-6 rules mt-3 ms-3">
-                                    <input type="hidden" class="cb" id="name" name="dynamicRule">
-                                      {% for option in options %}
-                                        <div class="form-check">
-                                          <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}">
-                                          <label class="form-check-label" for="check{{ forloop.counter }}">
-                                            {{option}}
-                                          </label>
-                                        </div>
-                                      {% endfor %}
-                                  </div>
-                                {% endwith %}
-                                {% else %}
-                                  {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
-                                    <div class="col-6 rules mt-3 ms-3">
-                                      <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
-                                    </div>
-                                  {% elif field.0 == "checkbox" %}
-                                    <div class="col-6 rules mt-3 ms-3">
-                                      <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
-                                    </div>
-                                  {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
-                                  <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
-                                  {% endif %}
-                                {% endif %}
-                            {% endwith %}
-                            {% endwith %}
-                            </form>
-                            </div>
-                          </div>
-
-                        {% endfor %}
-                        {% else %}
-
-                          <h4> Questions are not allocated </h4>
-                        {% endif %}
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="reform_btn" onClick="onFormsSubmit(event);">Submit</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              {% endfor %}
+              </div>              
             </div>
           </div>
         </div>
-      {% endfor %}
-    {% endif %}
+      </div>
+    </div>
   </div>
 </div>
-
-                </div>
-
-              </div>
-            </div>
+    
 
 
 {% endblock %} {% block js %}
@@ -1300,7 +978,7 @@ table {
 function onFormsSubmit(e) {
     e.preventDefault();
     
-    const modalContent = e.target.closest('.modal-content');
+    const modalContent = e.target.closest('.card-body');
     if (!modalContent) {
         console.error('No modal content found');
         return;
@@ -1309,27 +987,40 @@ function onFormsSubmit(e) {
     const forms = modalContent.querySelectorAll('.ans_form');
     forms.forEach((form) => {
 
-        const cb = form.querySelector('.cb');
-        const checkBoxs = form.querySelectorAll('.check-box');
-
-        checkBoxs.forEach((checkBox) => {
-            if (checkBox.checked) {
-                if (cb.value === '') {
-                    cb.value += checkBox.value;
-                } else {
-                    cb.value += ',' + checkBox.value;
-                }
+      const formData = new FormData(form);
+        const files = form.querySelectorAll('.file');
+        files.forEach((fileInput) => {
+          
+            const fileFieldName = fileInput.getAttribute('name');
+            if (fileInput.files.length > 0) {
+                formData.append(fileFieldName, fileInput.files[0]);
             }
         });
 
-        const checkboxinputs = form.querySelectorAll(".checkboxinput"); // Scope within form
+        const cb = form.querySelector('.cb');
+        const checkBoxs = form.querySelectorAll('.check-box');
+
+        let cbValues = [];
+        checkBoxs.forEach((checkBox) => {
+            if (checkBox.checked) {
+                cbValues.push(checkBox.value);
+            }
+        });
+        if (cbValues.length > 0) {
+            cb.value = cbValues.join(',');
+        }
+
+        const checkboxinputs = form.querySelectorAll(".checkboxinput");
         if (checkboxinputs) {
             checkboxinputs.forEach((checkboxinput) => {
                 const checkboxdiv = checkboxinput.closest('.form-check');
                 const radios = checkboxdiv.querySelectorAll("input[type='radio']");
                 radios.forEach((radio) => {
                     if (radio.checked) {
-                        checkboxdiv.querySelector("input[name='dynamicRule']").value = `${checkboxinput.value},${radio.value}`;
+                        const dynamicRuleInput = checkboxdiv.querySelector("input[name='dynamicRule']");
+                        if (checkboxinput.value && radio.value) {
+                            dynamicRuleInput.value = `${checkboxinput.value},${radio.value}`;
+                        }
                     }
                 });
             });
@@ -1337,8 +1028,13 @@ function onFormsSubmit(e) {
 
         const options = form.querySelectorAll('.option');
         options.forEach(option => {
-            option.parentElement.parentElement.children[0].value += ',' + option.parentElement.children[0].value;
+            const targetInput = option.parentElement.parentElement.children[0];
+            if (option.parentElement.children[0].value) {
+                targetInput.value += ',' + option.parentElement.children[0].value;
+            }
         });
+
+        console.log(FormData);
 
         fetch(form.action, {
             method: 'POST',
@@ -1357,44 +1053,6 @@ function onFormsSubmit(e) {
     });
     window.location.reload();
 }
-
-    //const forms = document.querySelectorAll(".ans_form");
-    //forms.forEach((form)=>{
-    //form.addEventListener("submit", (e) => {
-//
-    //});
-    //});
-
-  const stage_submit_form = document.querySelector('.stage_submit_form')
-  stage_submit_form.addEventListener('submit', () => {
-    const stage_checkboxs = stage_submit_form.querySelectorAll('input[type="checkbox"]')
-    stage_checkboxs.forEach((stage_checkbox) => {
-      if(stage_checkbox.checked) {
-        stage_checkbox.parentElement.querySelector('.checkboxno').disabled = true;
-      }
-    })
-  })
-
-  window.addEventListener('DOMContentLoaded', function () {
-    const postcode = '{{ customer.postcode }}';
-    if (postcode) {
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${postcode}&key=AIzaSyA7ZdDlMBhpQMLH_5OrFpAC-Rs1L-oFrLg`)
-        .then(response => response.json())
-        .then(data => {
-          if (data) {
-            const googlemap = document.querySelector('.googlemap');
-            const longitude = data.results[0].geometry.location.lng;
-            const latitude = data.results[0].geometry.location.lat;
-            googlemap.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            
-          }
-        });
-      findAddressBtn.disable = false;
-    } else {
-      alert('Please enter a postcode.');
-    }
-  });
-
 
 
 </script>
@@ -1423,33 +1081,6 @@ function onFormsSubmit(e) {
     }
     document.querySelector('.close_form').submit();
   }
-
-
-  document.getElementById('assigned_to').addEventListener('click',()=>{
-    let assigned_to_modal = new bootstrap.Modal(
-          document.getElementById("assigned_to_modal"),
-          {}
-        );
-        // https://getbootstrap.com/docs/5.0/components/modal/#show
-        assigned_to_modal.show();
-    });
-
-  document.getElementById('change_client').addEventListener('click',()=>{
-     let change_campaign_modal = new bootstrap.Modal(
-          document.getElementById("change_campaign_modal"),
-          {}
-        );
-        change_campaign_modal.show();
-    });
-
-  document.getElementById('change_campaign').addEventListener('click',()=>{
-    let change_campaign_modal = new bootstrap.Modal(
-          document.getElementById("change_campaign_modal"),
-          {}
-        );
-        change_campaign_modal.show();
-    });
-
 
 
   var accordions = document.getElementsByClassName("accordion");
@@ -1667,11 +1298,9 @@ var formattedTime = londonDate.split(", ")[1].split(":");
   })
 
   const years = document.querySelectorAll('.year');
-  console.log(years)
     years.forEach(year => {
     
       year.addEventListener('click',()=>{
-        console.log(1)
         var date_fields = document.querySelectorAll('.date');
         date_fields.forEach(date_field => {
         var date_field_value = date_field.value.split('-');
@@ -1705,31 +1334,28 @@ var formattedTime = londonDate.split(", ")[1].split(":");
     
   </script>
 
-  <script>
-  const client = document.querySelector('.client')
-  document.querySelector('.client_input').addEventListener('change',()=>{
-    const value = document.querySelector('.client_input').value
-    fetch('/get_campaign/'+value)
-    .then(response => response.json())
-    .then(data => {
-      if (document.querySelector('.campaign')) {
-        document.querySelector('.campaign').remove();
-      }
-      const newField = document.createElement('div');
-      newField.classList.add('mb-3', 'campaign');
-      var input = `
-        <label for="campaign" class="form-label">Campaign</label>
-        <select class="form-select" id="campaign" name="campaign" aria-label="Default select example">
-      `;
-      data.forEach(campaign => {
-        console.log(campaign)
-        input += `<option value="${campaign.campaign_id}">${campaign.campaign_name}</option>`
-      })
-      input += `</select>`;
-      newField.innerHTML = input;
-      client.insertAdjacentElement('afterend', newField);
-    })
-  })
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  
+  const ctx = document.getElementById('myChart');
+
+  const currentNums = {{ current_nums }} -1;
+  const totalNums = {{ total_nums }};
+  const remaining = totalNums - currentNums;
+
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Remaining'],
+      datasets: [{
+        data: [currentNums, remaining], borderWidth: 1 }]
+            },
+            options: {
+    cutout: '85%' 
+  }
+        });
+
 </script>
 
 {% endblock %}

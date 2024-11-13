@@ -91,5 +91,6 @@ class Answer(models.Model):
         blank=True,
         null=True,
     )
+    file = models.FileField(upload_to='uploads/answers', blank=True, null=True)
     def __str__(self):
         return f"{self.route} {self.product} {self.stage} {self.question} {self.customer}"

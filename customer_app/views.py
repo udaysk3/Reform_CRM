@@ -6,12 +6,7 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from .models import Customers, Answer
-from home.models import (
-    Campaign,
-    Stage,
-    Stage,
-    Client_Council_Route,
-)
+from home.models import Campaign, Stage, Client_Council_Route
 from admin_app.models import Email, Reason,Signature
 from client_app.models import Clients, ClientArchive
 from product_app.models import Product
@@ -34,7 +29,6 @@ import os
 from django.core.mail import send_mail
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
-import base64 
 import requests
 import os.path
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -145,7 +139,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
             next = str(next.id)
         else:
             next = str(customer_id)
-    # print(type(prev), next)
     customer = Customers.objects.get(pk=customer_id)
     display_regions =[]
     regions = Councils.objects.all()
@@ -246,45 +239,52 @@ def customer_detail(request, customer_id, s_customer_id=None):
             pass
         else:
             if route.global_archive == False:
-                client_routes.append(route)
+                client_routes.append([council , route])
 
     for region in display_regions:
         council_routes_in_region = region.routes.filter(global_archive=False)
         for council_route in council_routes_in_region:
-            if council_route in client_routes:
+            if [region, council_route] in client_routes:
                 if not ClientArchive.objects.filter(
                     client=customer.client, route=council_route, councils=region
                 ).exists():
                     routes.append(council_route)
-    all_stages = Stage.objects.all()    
     products = Product.objects.all().filter(client=customer.client)
-    true_products = [True] * len(products)
-    true_routes = [True] * len(routes)
     stages = []
 
     for route in routes:
         for product in products:
-            cjstages = CJStage.objects.all().filter(route=route).filter(product=product)
+            if CJStage.objects.filter(route=route, product=product, client=customer.client).exists():
+                cjstages = CJStage.objects.filter(route=route, product=product, client=customer.client)
+            else:
+                cjstages = CJStage.objects.filter(route=route, product=product, client=None)
             for cjstage in cjstages:
                 all_answered = True
             
                 questions = []
                 questions_with_ans = []
                 added_ans = set()
-            
-                for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage):
-                    questions.append(rule.question)
-            
+
+                if cjstage.question:
+                    for question in cjstage.question:
+                        qus = Questions.objects.get(pk=question)
+                        questions.append(qus)
+                else: 
+                    for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage. stage):
+                        questions.append(rule.question)
+                
+                
                 for question in questions:
                     ans = (Answer.objects.filter(route=route)
                                          .filter(product=product)
                                          .filter(stage=cjstage.stage)
                                          .filter(question=question)
                                          .filter(customer=customer))
-                
+
                     if question not in added_ans:
                         if ans.exists():
                             questions_with_ans.append([question, ans[0], route, product, cjstage.stage])
+                            
                         else:
                             questions_with_ans.append([question, None, route, product, cjstage.stage])
                             all_answered = False
@@ -300,7 +300,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 })
 
     stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
-
     previous_all_answered = True
     for i, stage in enumerate(stages):
         stage['all_answered'], previous_all_answered = previous_all_answered, stage['all_answered']
@@ -314,7 +313,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
         else:
             display_stages[key] = [[stage['stage'], stage['questions'], stage['all_answered']]]
 
-
     for route_product, stages in display_stages.items():
         for i, (stage, question_ans, all_ans) in enumerate(stages):
             route = route_product.split(' - ')[0]
@@ -322,14 +320,21 @@ def customer_detail(request, customer_id, s_customer_id=None):
             correct_stage = True
             for question, ans, route, product, stage in question_ans:
                 correct_ans = True
-                if ans:
+                if ans == None:
+                    correct_ans = False
+                elif ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
+                    correct_ans = False
+                else:
                     rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
                     if rule_requirements:
                         if rule_requirements[0].rules_regulation:
                             rule = rule_requirements[0]
                             type = question.type.split(',')
                             if len(type) > 1:
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     rule_values = rule.rules_regulation[0].split(',')
@@ -343,17 +348,18 @@ def customer_detail(request, customer_id, s_customer_id=None):
                                                 correct_ans = True
                                                 break
                             if type[0] in ['text', 'email', 'password', 'phone']:
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] == 'checkbox':
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
+                            
                             if type[0] in ['date', 'month', 'time', 'number']:
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     if type[0] == 'date' or type[0] == 'month':
@@ -401,14 +407,21 @@ def customer_detail(request, customer_id, s_customer_id=None):
             correct_stage = True
             for question, ans, route, product, stage in question_ans:
                 correct_ans = True
-                if ans and all_ans == False:
+                if ans == None:
+                    correct_ans = False
+                elif ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
+                    correct_ans = False
+                elif ans and all_ans == False:
                     rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
                     if rule_requirements:
                         if rule_requirements[0].rules_regulation:
                             rule = rule_requirements[0]
                             type = question.type.split(',')
                             if len(type) > 1:
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     rule_values = rule.rules_regulation[0].split(',')
@@ -422,17 +435,17 @@ def customer_detail(request, customer_id, s_customer_id=None):
                                                 correct_ans = True
                                                 break
                             if type[0] in ['text', 'email', 'password', 'phone']:
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] == 'checkbox':
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     correct_ans = ans.answer == rule.rules_regulation
                             if type[0] in ['date', 'month', 'time', 'number']:
-                                if ans.answer[0] == '':
+                                if ans.answer or ans.answer == [''] or ans.answer[0] == '':
                                     correct_ans = False
                                 else:
                                     if type[0] == 'date' or type[0] == 'month':
@@ -470,24 +483,43 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 correct_stage =  correct_stage and correct_ans
 
             stages[i] = (stage, question_ans, correct_stage)
-            
 
-
-    update_stages = {}
-    
+    current_route_product = None
+    last_route_product = None
+    current_nums =0
+    total_nums = 0
     for route_product, stages in display_stages.items():
-        prev_all_correct = True
-        all_true = True
-        for i, (stage, question_ans, all_ans) in enumerate(stages):
-            all_ans, prev_all_correct = prev_all_correct, all_ans
-            stages[i] = (stage, question_ans, all_ans)
-            if not all_ans:
-                all_true = False
-        if all_true:
-            update_stages[route_product+' - Available'] = display_stages[route_product]
-        else:
-            update_stages[route_product+' - Not Available'] = display_stages[route_product]
+        all_true_for_product = True  
 
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            current_nums += 1
+            if not all_ans:
+                total_nums = len(stages)
+                current_route_product = [stages, 100 / len(stages), route_product]
+                all_true_for_product = False
+                break
+
+        if all_true_for_product:
+            total_nums = len(stages)
+            last_route_product = [stages, 100 / len(stages), route_product]
+        else:
+            break
+
+    if current_route_product is None:
+        current_route_product = last_route_product
+
+
+    current_stage = None
+
+    for route_product, stages in display_stages.items():
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            if all_ans == False:
+                current_stage = question_ans
+                break
+        if current_stage != None:
+
+            break
+    
 
     return render(
         request,
@@ -513,7 +545,11 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "clients": clients,
             "campaigns": campaigns,
             "display_regions":display_regions,
-            "display_stages":update_stages,
+            "display_stages":display_stages,
+            "current_route_product":current_route_product,
+            "current_stage": current_stage,
+            "current_nums": current_nums,
+            "total_nums": total_nums,
         },
     )
 
@@ -653,12 +689,10 @@ def Customer(request):
     result = [x for x in customers if x not in new_customers] 
 
     customers= new_customers + result
-    # print(type(customers))
     customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_superuser=False).filter(is_client=False)
-    print(user.is_employee)
     if user.is_employee:
         clients_with_customers = Clients.objects.filter(assigned_to=user).prefetch_related('customers')
         customers_list = []
@@ -708,8 +742,6 @@ def archive(request):
 
     result = [x for x in customers if x not in new_customers] 
 
-    # for customer in customers:
-    #     print(customer.get_action_history())
     customers= new_customers + result
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
@@ -889,7 +921,6 @@ def edit_customer(request, customer_id):
         customer.house_name = request.POST.get("house_name")
         customer.county = request.POST.get("county")
         customer.country = request.POST.get("country")
-        # print(request.POST.get("county"),request.POST.get("country"))
         if customer.campaign == "nan" or customer.city == "nan" or customer.county == "nan" or customer.country == "nan":
             messages.error(request, "Select all dropdown fields")
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
@@ -1577,6 +1608,8 @@ def delete_customer_session(request):
     del request.session['client']
 
 
+from django.http import JsonResponse  # Import this if you want to return JSON
+
 def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer_id):
     question = Questions.objects.get(pk=question_id)
     customer = Customers.objects.get(pk=customer_id)
@@ -1584,10 +1617,9 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
     if request.method == "POST":
         dynamicAns = request.POST.getlist("dynamicRule")
         
-        rules = Rule_Regulation.objects.all().filter(question=question, is_client=False)
+        rules = Rule_Regulation.objects.filter(question=question, is_client=False)
         
         for rule in rules:
-        
             answer = Answer.objects.filter(
                 route=rule.route, product=rule.product, stage=rule.stage, question=question, customer=customer
             ).first()
@@ -1605,4 +1637,9 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
                     answer=dynamicAns,
                 )
 
-    return HttpResponse(200)
+            if 'dynamicRule' in request.FILES:
+                uploaded_file = request.FILES['dynamicRule']
+                answer.file = uploaded_file
+                answer.save()
+
+    return JsonResponse({'status': 'success'}, status=200)

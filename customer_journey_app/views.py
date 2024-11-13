@@ -52,7 +52,7 @@ def cj_product(request ,route_id ,product_id):
     route = Route.objects.get(pk=route_id)
     product = Product.objects.get(pk=product_id)
     stages = Stage.objects.all().filter(global_archive=False)
-    cjstages = CJStage.objects.all().filter(route=route,product=product)
+    cjstages = CJStage.objects.all().filter(route=route,product=product,client=None)
     
     
     if request.method == 'POST':
@@ -93,6 +93,11 @@ def cj_stage(request, route_id, product_id, stage_id):
         question = Questions.objects.get(pk=request.POST.get('question'))
         stage.question.add(question)
         Rule_Regulation.objects.create(route=route,product=product,stage=stage,question=question)
+        cjstages = CJStage.objects.all().filter(route=route,product=product, stage=stage)
+        for cjstage in cjstages:
+            if cjstage.question:
+                cjstage.question.append(question.id)
+                cjstage.save()
         stage.save()
         messages.success(request, "Question added to stage successfully!")
         return redirect(f"/cj_stage/{route_id}/{product_id}/{stage_id}")
@@ -153,6 +158,11 @@ def delete_cj_stage_question(request, route_id, product_id, stage_id, question_i
     rule = Rule_Regulation.objects.filter(
             route=route, product=product, stage=stage, question=question
         ).first()
+    cjstages = CJStage.objects.all().filter(route=route,product=product, stage=stage)
+    for cjstage in cjstages:
+        if cjstage.question:
+            cjstage.question.remove(question.id)
+            cjstage.save()
     rule.delete()
     question.save()
     stage.save()
