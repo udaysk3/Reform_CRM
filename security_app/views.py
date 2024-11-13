@@ -339,7 +339,7 @@ def upload_profile(request, emp_id):
     if request.method == 'POST':
         emp = User.objects.get(pk=emp_id)
 
-        emp.employee_user.employee_image = request.FILES['profile']
+        emp.employee_user.employee_image = request.FILES.get('profile')
         emp.employee_user.save()
         emp.employee_user.add_emp_action(
                 created_at=datetime.now(pytz.timezone("Europe/London")),

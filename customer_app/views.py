@@ -265,8 +265,8 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 questions_with_ans = []
                 added_ans = set()
 
-                if cjstage.question:
-                    for question in cjstage.question:
+                if cjstage.questions:
+                    for question in cjstage.questions:
                         qus = Questions.objects.get(pk=question)
                         questions.append(qus)
                 else: 

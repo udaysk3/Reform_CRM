@@ -95,8 +95,8 @@ def cj_stage(request, route_id, product_id, stage_id):
         Rule_Regulation.objects.create(route=route,product=product,stage=stage,question=question)
         cjstages = CJStage.objects.all().filter(route=route,product=product, stage=stage)
         for cjstage in cjstages:
-            if cjstage.question:
-                cjstage.question.append(question.id)
+            if cjstage.questions:
+                cjstage.questions.append(question.id)
                 cjstage.save()
         stage.save()
         messages.success(request, "Question added to stage successfully!")
@@ -160,8 +160,8 @@ def delete_cj_stage_question(request, route_id, product_id, stage_id, question_i
         ).first()
     cjstages = CJStage.objects.all().filter(route=route,product=product, stage=stage)
     for cjstage in cjstages:
-        if cjstage.question:
-            cjstage.question.remove(question.id)
+        if cjstage.questions:
+            cjstage.questions.remove(question.id)
             cjstage.save()
     rule.delete()
     question.save()
