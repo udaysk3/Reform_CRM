@@ -92,7 +92,7 @@ def edit_employee(request, emp_id):
             emp.password = make_password(request.POST.get('password'))
         if emp.role != request.POST.get('role'):
             emp.approved = ''
-        emp.employee_user.employee_image = request.FILES['profile']
+        emp.employee_user.employee_image = request.FILES.get('profile')
         emp.first_name = request.POST.get('first_name')
         emp.last_name = request.POST.get('last_name')
         emp.role = request.POST.get('role')

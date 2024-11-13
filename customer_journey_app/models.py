@@ -30,5 +30,5 @@ class CJStage(models.Model):
         blank=True,
         related_name="CJStage",
     )
-    question = models.JSONField(blank=True, null=True)
+    questions = models.JSONField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)

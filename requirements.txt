@@ -43,7 +43,6 @@ phonenumbers==8.13.48
 pillow==11.0.0
 proto-plus==1.23.0
 protobuf==4.25.3
-psycopg2-binary==2.9.9
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
 pycparser==2.21

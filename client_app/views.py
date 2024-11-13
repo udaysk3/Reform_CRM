@@ -185,8 +185,8 @@ def client_detail(request, client_id, s_client_id=None):
                     questions_with_rules = []
                     added_questions = set()
                     
-                    if cjstage.question:
-                        for question in cjstage.question:
+                    if cjstage.questions:
+                        for question in cjstage.questions:
                             qus = Questions.objects.get(pk=question)
                             questions.append(qus)
                     else:        
@@ -1071,7 +1071,7 @@ def customer_jr_order(request,client_id):
             
             
             
-            cjstage.question = i['questions']
+            cjstage.questions = i['questions']
             cjstage.order = i['order']
             cjstage.save()
     return HttpResponse(200)

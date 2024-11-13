@@ -271,6 +271,14 @@ table {
                   <h6><b> Name : </b> {{show_customer.first_name}} {{show_customer.last_name}}</h6>
                   <h6><b> Telephone : </b> {{show_customer.phone_number}}</h6>
                   <h6><b> Email: </b> {{show_customer.email}}</h6>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-sm-6 mb-sm-0 ">
+              <div class="card">
+                <div class="card-body py-0">
+                  <div class="mb-5"></div>
                   <h6><b>House Name/Number</b> : {{customer.house_name}}</h6>
                   <h6><b>Street Name</b> : {{customer.street_name}}</h6>
                   <h6><b>City/Town</b> : {{customer.city}}</h6>
@@ -287,27 +295,13 @@ table {
                 </div>
               </div>
             </div>
-            
-            <div class="col-sm-6 mb-sm-0 ">
-              <div class="card">
-                <div class="card-body py-0">
-                  <h2 class="position-relative">Initial Check</h2>
-                  <h6><b> EPC : </b> </h6>
-                  <h6><b> Floor Area : </b> </h6>
-                  <h6><b> Property Type : </b> </h6>
-                  <h6><b>Gas Safe :</b> </h6>
-                  <h6><b>Loft Insulation :</b> </h6>
-                  <h6><b>Boiler Type :</b> </h6>
-                </div>
-              </div>
-            </div>
 
           </div>
         </div>
       </div>
       
       <div class="col-5">
-        <div class="row d-flex" style="padding-top: 10%;">
+        <div class="row d-flex">
           <div class="col-6">
             <canvas id="myChart" ></canvas>
             <h4 class="position-absolute" style="top:40%; right:27%;">{{ current_route_product.2 }}</h1>
