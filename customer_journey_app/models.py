@@ -30,5 +30,6 @@ class CJStage(models.Model):
         blank=True,
         related_name="CJStage",
     )
+    question = models.ForeignKey("question_actions_requirements_app.Questions", on_delete=models.CASCADE, null=True, blank=True)
     questions = models.JSONField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)
