@@ -111,8 +111,12 @@ WSGI_APPLICATION = 'reform_crm.wsgi.application'
 # Database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'reform',
+        'USER': 'reform',
+        'PASSWORD': 'Reform@123',
+        'HOST': '35.179.137.230',
+        'PORT': 5432,
     }
 }
 
