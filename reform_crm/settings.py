@@ -167,6 +167,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://reformcrm.up.railway.app/',
     'https://reformcrm-beta-0c709f5.kuberns.com',
+    'https://myreform.uk',
 ]
 
 # Ensure Two Factor Authentication URLs
