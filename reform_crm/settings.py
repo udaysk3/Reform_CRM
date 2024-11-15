@@ -116,6 +116,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'reform',
+#         'USER': 'reform',
+#         'PASSWORD': 'Reform@123',
+#         'HOST': '35.179.137.230',
+#         'PORT': 5432,
+#     }
+# }
+
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
     messages.INFO: "alert-info",
@@ -166,4 +177,4 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Ensure Two Factor Authentication URLs
-LOGIN_URL = 'user/login'
+LOGIN_URL = '/user/login'

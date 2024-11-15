@@ -692,16 +692,7 @@ def Customer(request):
     customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
-    agents = User.objects.filter(is_superuser=False).filter(is_client=False)
-    if user.is_employee:
-        clients_with_customers = Clients.objects.filter(assigned_to=user).prefetch_related('customers')
-        customers_list = []
-
-        for client in clients_with_customers:
-            customers_list.extend(client.customers.all())
-
-    else:
-        customers_list = Customers.objects.all()
+    agents = User.objects.filter(is_employee=True)
     p_customers = Paginator(customers, 50)
     page_number = request.GET.get('page')
     try:
@@ -715,7 +706,7 @@ def Customer(request):
     if request.session.get("first_name") and request.GET.get("page") != "add_customer":
         delete_customer_session(request)
     return render(
-        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "agents": serialize('json', agents), "customers_list": serialize('json',customers_list), 'page_obj': page_obj, 'clients':client}
+        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "agents": agents, 'page_obj': page_obj, 'clients':client}
     )
 
 
@@ -745,7 +736,7 @@ def archive(request):
     customers= new_customers + result
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
-    agents = User.objects.filter(is_superuser=False)
+    agents = User.objects.filter(is_superuser=False).filter(is_client=False).filter(is_employee=False)
     if request.session.get("first_name"):
         delete_customer_session(request)
     return render(
@@ -1398,34 +1389,19 @@ from user.models import User
 def assign_agents(request):
     if request.method == "POST":
      try:
-        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
-        customers = request.POST.get("customers")
-        if customers == "All Unassigned Customers":
-            customer_ids = Customers.objects.filter(assigned_to=None).values_list('id', flat=True)
-        else:
-            agent_id = int(customers.split(' - ')[-1])
-            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
-            
-        num_customers = len(customer_ids)
-        num_agents = len(agent_ids)
-        customers_per_agent = num_customers // num_agents
-        extra_customers = num_customers % num_agents
-        
-        agent_index = 0
-        for agent_id in agent_ids:
-            agent = User.objects.get(pk=agent_id)
-            
-            if extra_customers > 0:
-                num_customers_for_agent = customers_per_agent + 1
-                extra_customers -= 1
-            else:
-                num_customers_for_agent = customers_per_agent
-            
-            assigned_customers = customer_ids[:num_customers_for_agent]
-            Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
-            customer_ids = customer_ids[num_customers_for_agent:]
-            
-            agent_index += 1
+        agent_id = request.POST.get("agent_id")
+        customer_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("customers").split(',')]
+        agent = User.objects.get(pk=agent_id)
+        for customer_id in customer_ids:
+            customer = Customers.objects.get(pk=customer_id)
+            customer.assigned_to =  agent
+            customer.save()
+            customer.add_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Assigned to Agent",
+            )
         
         messages.success(request, "Customers Assigned successfully!")
         return redirect("customer_app:customer")
@@ -1643,3 +1619,11 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
                 answer.save()
 
     return JsonResponse({'status': 'success'}, status=200)
+
+def get_agent_customers(request, agent_id):
+    agent = User.objects.get(pk=agent_id)
+    clients_with_customers = Clients.objects.filter(assigned_to=agent).prefetch_related('customers')
+    customers_list = []
+    for client in clients_with_customers:
+        customers_list.extend(client.customers.all())
+    return JsonResponse([{"customer_id": customer.id, "customer_first_name":customer.first_name, "customer_last_name":customer.last_name} for customer in customers_list], safe=False)

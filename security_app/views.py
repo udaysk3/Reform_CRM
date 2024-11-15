@@ -24,49 +24,6 @@ def s_client(request):
     agents = User.objects.all().filter(is_employee=True)
     return render(request, 'home/s_client.html', {'clients': clients, "agents": serialize('json', agents), "clients_list": serialize('json', clients_list)})
 
-def assign_agents(request):
-    if request.method == "POST":
-     try:
-        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
-        clients = request.POST.get("clients")
-        if clients == "All Unassigned Clients":
-            client_ids = Clients.objects.filter(assigned_to=None).values_list('id', flat=True)
-        else:
-            agent_id = int(clients.split(' - ')[-1])
-            client_ids = Clients.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
-            
-        num_clients = len(client_ids)
-        num_agents = len(agent_ids)
-        clients_per_agent = num_clients // num_agents
-        extra_clients = num_clients % num_agents
-        
-        agent_index = 0
-        for agent_id in agent_ids:
-            agent = User.objects.get(pk=agent_id)
-            
-            if extra_clients > 0:
-                num_clients_for_agent = clients_per_agent + 1
-                extra_clients -= 1
-            else:
-                num_clients_for_agent = clients_per_agent
-            
-            assigned_clients = client_ids[:num_clients_for_agent]
-            assign_clients = Clients.objects.filter(id__in=assigned_clients)
-            for assign_client in assign_clients:
-                assign_client.assigned_to.add(agent_id)
-            client_ids = client_ids[num_clients_for_agent:]
-            
-            agent_index += 1
-        
-        messages.success(request, "Clients Assigned successfully!")
-        return redirect("security_app:s_client")
-     except Exception as e:
-        messages.error(request, f"Error assigning clients: {e}")
-        return redirect("security_app:s_client")
-    else:
-        messages.error(request, "Cannot Assign clients!")
-        return redirect("security_app:s_client")
-
 
 @login_required
 def role(request):
@@ -349,6 +306,44 @@ def upload_profile(request, emp_id):
     messages.success(request, 'Profile picture updated successfully!')
     return redirect('/s_edit_employee/' + str(emp_id))
 
+
+def assign_agents(request):
+    if request.method == "POST":
+     try:
+        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
+        client_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("clients").split(',')]
+            
+        num_clients = len(client_ids)
+        num_agents = len(agent_ids)
+        clients_per_agent = num_clients // num_agents
+        extra_clients = num_clients % num_agents
+        
+        agent_index = 0
+        for agent_id in agent_ids:
+            agent = User.objects.get(pk=agent_id)
+            
+            if extra_clients > 0:
+                num_clients_for_agent = clients_per_agent + 1
+                extra_clients -= 1
+            else:
+                num_clients_for_agent = clients_per_agent
+            
+            assigned_clients = client_ids[:num_clients_for_agent]
+            assign_clients = Clients.objects.filter(id__in=assigned_clients)
+            for assign_client in assign_clients:
+                assign_client.assigned_to.add(agent_id)
+            client_ids = client_ids[num_clients_for_agent:]
+            
+            agent_index += 1
+        
+        messages.success(request, "Clients Assigned successfully!")
+        return redirect("security_app:s_client")
+     except Exception as e:
+        messages.error(request, f"Error assigning clients: {e}")
+        return redirect("security_app:s_client")
+    else:
+        messages.error(request, "Cannot Assign clients!")
+        return redirect("security_app:s_client")
 
 def assign_agent(request):
     client_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("clients").split(',')]
