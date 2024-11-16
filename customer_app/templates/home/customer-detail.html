@@ -723,14 +723,11 @@ table {
                 </div>
                 
             
-              </div>
-
-              <div class="row">
                 
                 <div class="d-grid gap-2 d-md-block  col">
                   <form method="post" class="col" action="{% url 'customer_app:lm_action_submit' customer.id %}">
                     {% csrf_token %}
-                    <button class="secondary_reform_btn" style="background-color:#91E0DA; width:100px;" type="submit">LM</button>
+                    <button class="secondary_reform_btn my-3" style="background-color:#91E0DA; width:100px;" type="submit">LM</button>
                   </form>
                 </div>
                 
@@ -740,12 +737,9 @@ table {
                 <div class="d-grid gap-2 d-md-block  col">
                   <form method="post" class="col" action="{% url 'customer_app:na_action_submit' customer.id %}">
                     {% csrf_token %}
-                    <button class="secondary_reform_btn" style=" width:100px;" type="button">SMS</button>
+                    <button class="secondary_reform_btn my-3" style=" width:100px;" type="button">SMS</button>
                   </form>
                 </div>
-              </div>
-
-              <div class="row">
                 
                 
                 
@@ -927,9 +921,6 @@ table {
                     </div>
                   </div>
                 </form>
-              </div>
-
-              <div class="row">
                 
                 <form id="action_submit_form" method="post" name="action_submit_form" onSubmit="DoSubmit(this);"
                   action="{% url 'customer_app:note_submit' customer.id %}" class="col">
@@ -938,7 +929,7 @@ table {
                 
                   <!-- Button trigger modal -->
                 
-                  <button type="button" style=" width:100px;" class="secondary_reform_btn mb-3" data-bs-toggle="modal" data-bs-target="#staticBackdropnote">
+                  <button type="button" style=" width:100px;" class="secondary_reform_btn  my-3" data-bs-toggle="modal" data-bs-target="#staticBackdropnote">
                     Note
                   </button>
                 

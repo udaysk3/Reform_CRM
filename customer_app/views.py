@@ -777,10 +777,12 @@ def add_customer(request):
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
             phone_number = "+44" + phone_number
-        elif phone_number[0] == "+":
-            phone_number = phone_number
-        else:
+        elif phone_number[0] == "4" and phone_number[1] == "4":
+            phone_number = "+" + phone_number
+        elif phone_number[0] != "+":
             phone_number = "+44" + phone_number
+        if phone_number[-2:] == ".0":
+            phone_number = phone_number[:-2]
 
         if Customers.objects.filter(email=email).filter(client=client).exists():
             messages.error(request, "Email with this Client already exists")
@@ -908,7 +910,17 @@ def edit_customer(request, customer_id):
 
         customer.first_name = request.POST.get("first_name")
         customer.last_name = request.POST.get("last_name").upper()
-        customer.phone_number = request.POST.get("phone_number")
+        phone_number = request.POST.get("phone_number")
+        if phone_number[0] == "0":
+            phone_number = phone_number[1:]
+            phone_number = "+44" + phone_number
+        elif phone_number[0] == "4" and phone_number[1] == "4":
+            phone_number = "+" + phone_number
+        elif phone_number[0] != "+":
+            phone_number = "+44" + phone_number
+        if phone_number[-2:] == ".0":
+            phone_number = phone_number[:-2]
+        customer.phone_number = phone_number
         customer.email = request.POST.get("email")
         postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         customer.street_name = request.POST.get("street_name")

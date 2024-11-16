@@ -234,13 +234,13 @@
                           {% endwith %}
                   </td>
                   <td><button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#addRegulation{{ forloop.counter }}">
-                      Edit Requirments
+                      Edit Requirements
                     </button></td>
                 {% else %}
                 <td>N/A</td>
                   <td>
                     <button type="button" class="reform_btn" data-bs-toggle="modal" data-bs-target="#addRegulation{{ forloop.counter }}">
-                      Add Requirments
+                      Add Requirements
                     </button>
                   
                   </td>
@@ -273,7 +273,7 @@
                       <div class="modal-content">
                         <form action="/add_stage_rule/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}" method="post">
                         <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Requirments</h1>
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Requirements</h1>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
