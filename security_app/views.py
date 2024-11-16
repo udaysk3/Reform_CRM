@@ -183,6 +183,34 @@ def approve_role(request, emp_id):
 def deny_role(request, emp_id):
     emp = User.objects.get(pk=emp_id)
     emp.approved = 'deny'
+    emp.dashboard = False
+    emp.mcustomer = False
+    emp.customer = False
+    emp.archive = False
+    emp.client = False
+    emp.council = False
+    emp.admin = False
+    emp.product = False
+    emp.globals = False
+    emp.finance = False
+    emp.hr = False
+    emp.security = False
+    emp.funding_route = False
+    emp.CJ = False
+    emp.QA = False
+    emp.h_dashboard = False
+    emp.h_employee = False
+    emp.h_application = False
+    emp.h_onboarding = False
+    emp.h_timesheet = False
+    emp.h_emp_action = False
+    emp.h_emp_notify = False
+    emp.h_offboarding = False
+    emp.h_org_chart = False
+    emp.knowledge_base = False
+    emp.s_employee = False
+    emp.s_role = False
+    emp.s_client = False
     emp.save()
     emp.employee_user.add_emp_action(
         created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -247,6 +275,38 @@ def edit_role(request, role_id):
         role.s_role = request.POST.get('s_role') == 'on'
         role.s_client = request.POST.get('s_client') == 'on'
         role.save()
+        employees = User.objects.filter(role=role.name)
+        for emp in employees:
+            emp.dashboard = role.dashboard
+            emp.mcustomer = role.mcustomer
+            emp.customer = role.customer
+            emp.client = role.client
+            emp.council = role.council
+            emp.admin = role.admin
+            emp.archive = role.archive
+            emp.product = role.product
+            emp.globals = role.globals
+            emp.finance = role.finance
+            emp.hr = role.hr
+            emp.security = role.security
+            emp.funding_route = role.funding_route
+            emp.CJ = role.CJ
+            emp.QA = role.QA
+            emp.h_dashboard = role.h_dashboard
+            emp.h_employee = role.h_employee
+            emp.h_application = role.h_application
+            emp.h_onboarding = role.h_onboarding
+            emp.h_timesheet = role.h_timesheet
+            emp.h_emp_action = role.h_emp_action
+            emp.h_emp_notify = role.h_emp_notify
+            emp.h_offboarding = role.h_offboarding
+            emp.h_org_chart = role.h_org_chart
+            emp.knowledge_base = role.knowledge_base
+            emp.s_employee = role.s_employee
+            emp.s_role = role.s_role
+            emp.s_client = role.s_client
+            emp.save()
+            
         messages.success(request, 'Role updated successfully!')
         return redirect('security_app:role')
     return render(request, 'home/edit_role.html', {'role': role})

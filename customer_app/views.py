@@ -1197,8 +1197,12 @@ def import_customers_view(request):
                     phone_number = value
                     if phone_number[0] == "0":
                         phone_number = "+44" + phone_number[1:]
+                    elif phone_number[0] == "4" and phone_number[1] == "4":
+                        phone_number = "+" + phone_number
                     elif phone_number[0] != "+":
                         phone_number = "+44" + phone_number
+                    if phone_number[-2:] == ".0":
+                        phone_number = phone_number[:-2]
                     customer_data[column_mappings[i]] = phone_number
                 elif column_mappings[i] == "postcode":
                     postcode = value

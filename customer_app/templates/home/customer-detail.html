@@ -226,7 +226,46 @@ table {
             </div>
             <div class="col-9 text-end" style="right: 0px; position:relative">
               <div class="row">
-                <h5 class="col">Assigned To: {{ customer.assigned_to }}</h5>
+                <h5 class="col">Assigned To: 
+                  <div class="mt-1 link-primary" id="assigned_to">
+                    {% if customer.assigned_to %}
+                     {{ customer.assigned_to.first_name }} {{ customer.assigned_to.last_name }}
+
+                    {% else %}
+                      Unassigned
+                    {% endif %}
+                  </div>
+                  <div class="d-grid gap-2 d-md-block">
+                    <!-- Button trigger modal -->
+                    <!-- Modal -->
+                    <div class="modal fade" id="assigned_to_modal" data-bs-backdrop="static" data-bs-keyboard="false"
+                      tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Agent</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <form method='post' action="{% url 'customer_app:assign_agent'  %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                              <input type"text" hidden value="{{ customer.id }}" name="customer_id">
+                              <select class="form-select" aria-label="Default select example" name="agent_id">
+                                {% for agent in agents %}
+                                <option value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                              <button type="submit" class="reform_btn">Submit</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </h5>
                 <h5 class="col">Client: {{ customer.client }}</h5>
                 <h5 class="col">Campaign: {{ customer.campaign }}</h5>
               </div>
@@ -968,6 +1007,15 @@ table {
 {% endblock %} {% block js %}
 
 <script>
+
+  document.getElementById('assigned_to').addEventListener('click',()=>{
+    let assigned_to_modal = new bootstrap.Modal(
+          document.getElementById("assigned_to_modal"),
+          {}
+        );
+        // https://getbootstrap.com/docs/5.0/components/modal/#show
+        assigned_to_modal.show();
+    });
 
 function onFormsSubmit(e) {
     e.preventDefault();
