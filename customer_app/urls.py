@@ -79,4 +79,5 @@ urlpatterns = [
         views.add_stage_ans,
         name="add_stage_ans",
     ),
+    path("get_agent_customers/<int:agent_id>", views.get_agent_customers, name="get_agent_customers"),
 ]

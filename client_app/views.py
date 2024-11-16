@@ -188,10 +188,12 @@ def client_detail(request, client_id, s_client_id=None):
                     if cjstage.questions:
                         for question in cjstage.questions:
                             qus = Questions.objects.get(pk=question)
-                            questions.append(qus)
+                            if qus.is_archive == False:
+                                questions.append(qus)
                     else:        
                         for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage.stage,is_client=False):
-                            questions.append(rule.question)
+                            if rule.question.is_archive == False:
+                                questions.append(rule.question)
                         
                     
                     for question in questions:

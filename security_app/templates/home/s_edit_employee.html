@@ -160,11 +160,11 @@
           </div>
 
           <div class="mb-3 d-flex justify-content-between field">
-            <h4>Client</h4>
+            <h4>Assign Clients</h4>
             <div class="row">
               
               <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
-                  <i class="bi bi-arrow-bar-right"></i> Assign to Agent
+                  <i class="bi bi-arrow-bar-right"></i> Assign clients
                 </button>
   
                 <!-- Modal -->
@@ -260,7 +260,7 @@
     let comboSource2 = clients.map(client => {
       return {
         id: client.pk,
-        title: client.fields.first_name + ' ' + client.fields.last_name + ' - ' + client.pk
+        title: client.fields.company_name + ' - ' + client.pk
       };  
     });
     comboTree2 = $("#clients").comboTree({
