@@ -96,7 +96,7 @@
                       </td>
                       <td style="width: 20%;">{% if emp.approved != 'approve' %}Not Approved {%else%} {{ emp.role }} {% endif %} </td>
                       <td style="width: 20%;">{{ emp.department }}</td>
-                      <td style="width: 10%;">{% if emp.status %} Activate {% else %} Deactivate {% endif %}</td>
+                      <td style="width: 10%;">{% if emp.status %} Active {% else %} Deactivated {% endif %}</td>
                       <td style="width: 10%;">{{ emp.dob }}</td>
                       <td style="width: 10%;">{{ emp.start_date }}</td>
                     </tr>

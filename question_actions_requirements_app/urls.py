@@ -8,8 +8,13 @@ urlpatterns = [
     path("add_question", views.add_question, name="add_question"),
     path("edit_question/<int:question_id>", views.edit_question, name="edit_question"),
     path(
-        "delete_question/<int:question_id>",
-        views.delete_question,
-        name="delete_question",
+        "archive_question/<int:question_id>",
+        views.archive_question,
+        name="archive_question",
+    ),
+    path(
+        "client_archive_question/<int:question_id>/<int:client_id>",
+        views.client_archive_question,
+        name="client_archive_question",
     ),
 ]

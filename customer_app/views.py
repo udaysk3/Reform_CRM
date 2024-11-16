@@ -268,10 +268,14 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 if cjstage.questions:
                     for question in cjstage.questions:
                         qus = Questions.objects.get(pk=question)
-                        questions.append(qus)
+                        if qus.is_archive == False:
+                            if qus.is_client_archive == False:
+                                questions.append(qus)
                 else: 
                     for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage. stage):
-                        questions.append(rule.question)
+                        if rule.question.is_archive == False:
+                            if rule.question.is_client_archive == False:
+                                questions.append(rule.question)
                 
                 
                 for question in questions:
@@ -1143,61 +1147,64 @@ def import_customers_view(request):
     expected_columns = ["history"]
     history = {}
     message = []
+    
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         campaign = request.POST.get("campaign")
         client = request.POST.get("client")
+        
         if campaign == "nan":
             messages.error(request, "Select a Campaign")
             return redirect("customer_app:import_customers")
+        
         df = pd.read_excel(excel_file)
         excel_columns = df.columns.tolist()
         column_mappings = []
+        
+        # Retrieve column mappings
         for i, column in enumerate(excel_columns):
-            # Retrieve user's selection for each column
             attribute = request.POST.get(f"column{i}", "")
             column_mappings.append(attribute)
 
-        if (
-            "email"
-            and "first_name"
-            and "last_name"
-            and "phone_number" not in column_mappings
-        ):
+        # Check if mandatory columns are mapped
+        if not all(field in column_mappings for field in ["email", "first_name", "last_name", "phone_number"]):
             messages.error(
                 request,
-                "First Name, Last Name, Phone Number and  Email fields should be mapped",
+                "First Name, Last Name, Phone Number, and Email fields should be mapped.",
             )
             return redirect("customer_app:import_customers")
 
         for index, row in df.iterrows():
             district = None
             customer_data = {}
+            missing_mandatory_field = False  # Flag to check if any mandatory field is missing
+
             for i, column in enumerate(excel_columns):
-                history[excel_columns[i]] = str(row[i])
+                value = str(row[i]).strip()
+                
+                # Check if mandatory fields are empty
+                if column_mappings[i] in ["email", "first_name", "last_name", "phone_number"] and (
+                    not value or value.lower() in ["nan", "nat", "none"]
+                ):
+                    missing_mandatory_field = True
+                    break
+            
                 if column_mappings[i] == "history":
-                    history[excel_columns[i]] = str(row[i])
+                    history[excel_columns[i]] = value
                 elif column_mappings[i] == "last_name":
-                    customer_data[column_mappings[i]] = str(row[i]).upper()
+                    customer_data[column_mappings[i]] = value.upper()
                 elif column_mappings[i] == "phone_number":
-                    phone_number = str(row[i])
+                    phone_number = value
                     if phone_number[0] == "0":
-                        phone_number = phone_number[1:]
-                        phone_number = "+44" + phone_number
-                    elif phone_number[0] == "+":
-                        phone_number = phone_number
-                    else:
+                        phone_number = "+44" + phone_number[1:]
+                    elif phone_number[0] != "+":
                         phone_number = "+44" + phone_number
                     customer_data[column_mappings[i]] = phone_number
                 elif column_mappings[i] == "postcode":
-                    postcode = str(row[i])
-
+                    postcode = value
                     url = "https://api.postcodes.io/postcodes/" + postcode.strip()
                     try:
-                        response = requests.get(
-                            url, headers={"muteHttpExceptions": "true"}
-                        )
-
+                        response = requests.get(url, headers={"muteHttpExceptions": "true"})
                         if response.status_code == 200:
                             json_data = response.json()
                             status = json_data.get("status")
@@ -1207,28 +1214,28 @@ def import_customers_view(request):
                                 district = "Invalid postcode or not found"
                         else:
                             district = "Error fetching data"
-                    except requests.exceptions.RequestException as e:
-                        district = f"Request Error"
+                    except requests.exceptions.RequestException:
+                        district = "Request Error"
                     customer_data[column_mappings[i]] = re.sub(r'\s+', ' ', postcode)
                 else:
-                    customer_data[column_mappings[i]] = str(row[i])
+                    customer_data[column_mappings[i]] = value
 
-            if Customers.objects.filter(email=customer_data['email']).exists():
+            # Skip creating customer if any mandatory field is missing
+            if missing_mandatory_field:
+                continue
+
+            # Check for existing customer by email or phone number
+            if Customers.objects.filter(email=customer_data['email']).exists() or \
+               Customers.objects.filter(phone_number=customer_data['phone_number']).exists():
                 message.append(f'{customer_data["first_name"]} {customer_data["last_name"]}')
                 continue
 
-            elif Customers.objects.filter(
-                phone_number=customer_data['phone_number']
-            ).exists():
-                message.append(
-                    f'{customer_data["first_name"]} {customer_data["last_name"]}'
-                )
-                continue
-            
+            # Ensure campaign and client are selected
             if campaign == "nan" or client == "nan":
                 messages.error(request, "Select all dropdown fields")
                 return redirect("/customer?page=add_customer")
 
+            # Create and save customer
             customer = Customers.objects.create(
                 **customer_data,
                 district=district,
@@ -1239,11 +1246,12 @@ def import_customers_view(request):
                 imported=True,
             )
             customer.primary_customer = True
-
             customer.save()
-            for i in history:
+            
+            # Add action history for customer
+            for key, value in history.items():
                 customer.add_action(
-                    text=f"{i} : {history[i]}",
+                    text=f"{key} : {value}",
                     date_time=datetime.now(pytz.timezone("Europe/London")),
                     agent=User.objects.get(email=request.user),
                     closed=False,
@@ -1254,23 +1262,25 @@ def import_customers_view(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.first_name}  {customer.last_name},  {customer.house_name },  {customer.phone_number},  {customer.email}, {customer.house_name},  {customer.street_name},  {customer.city}, {customer.county},  {customer.country}",
+                action_type=f"Added {customer.first_name} {customer.last_name}, {customer.phone_number}, {customer.email}",
                 keyevents=True,
-        )
+            )
+        
+        # Show success or error messages
         if message:
-            messages.error(request, f"Customer with email or phone number already exists: {', '.join(message)}")
+            messages.error(request, f"Customer(s) with duplicate email or phone number: {', '.join(message)}")
         else:
             messages.success(request, "Customers imported successfully.")
+        
         return redirect("customer_app:customer")
 
     campaigns = Campaign.objects.all()
-    client = Clients.objects.all()    
-
-
+    clients = Clients.objects.all()
+    
     return render(
         request,
         "home/import_customers.html",
-        {"excel_columns": excel_columns, "campaigns": campaigns, 'clients':client},
+        {"excel_columns": excel_columns, "campaigns": campaigns, "clients": clients},
     )
 
 
@@ -1383,8 +1393,6 @@ def remove_customer_route(request, customer_id):
     messages.success(request, "Route removed successfully!")
     return redirect(f"/customer-detail/{customer_id}")
 
-from .models import Customers
-from user.models import User
 
 def assign_agents(request):
     if request.method == "POST":

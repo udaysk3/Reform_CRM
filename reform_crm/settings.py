@@ -109,23 +109,23 @@ AUTH_PASSWORD_VALIDATORS = [
 WSGI_APPLICATION = 'reform_crm.wsgi.application'
 
 # Database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'reform',
-#         'USER': 'reform',
-#         'PASSWORD': 'Reform@123',
-#         'HOST': '35.179.137.230',
-#         'PORT': 5432,
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'reformCRM',
+        'USER': 'postgres',
+        'PASSWORD': 'Gowtham839938',
+        'HOST': 'localhost',
+        'PORT': 5432,
+    }
+}
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
