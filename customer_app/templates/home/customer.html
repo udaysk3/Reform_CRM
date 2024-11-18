@@ -321,11 +321,9 @@
                   
                   <thead>
   <tr>
-    {% if user.is_staff %}
       <th>
         <input type="checkbox" id="selectAll">
       </th>
-    {% endif %}
    {% comment %} <th onclick="sortTable(0)">
       ID <span id="arrow0"></span>
     </th>  {% endcomment %}
@@ -355,11 +353,9 @@
                     {% for customer in page_obj.object_list %}
 
                       <tr>
-                        {% if user.is_staff %}
                         <td>
                           <input type="checkbox" class="select-customer" data-customer-id="{{ customer.id }}">
                         </td>
-                      {% endif %}
                       
                         <td style="width: 20%;">{{ customer.created_at }}</td>
                         <td class="text-underlined" style="width: 20%; color:#024753"><a class="text-primary" href="/customer-detail/{{customer.id}}">{{ customer.first_name }} {{ customer.last_name }}</a></td>
