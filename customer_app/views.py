@@ -1412,7 +1412,6 @@ def remove_customer_route(request, customer_id):
 
 def assign_agents(request):
     if request.method == "POST":
-     message = []
      try:
         agent_id = request.POST.get("agent_id")
         customer_ids = request.POST.get("customers").split(",")
@@ -1424,7 +1423,7 @@ def assign_agents(request):
         for customer_id in customer_ids:
             customer = Customers.objects.get(pk=customer_id)
             if customer not in customers_list:
-                message.append(f"Customer {customer.first_name} {customer.last_name} can not be assigned to the {agent.first_name} {agent.last_name}")
+                messages.error(request,f"Customer {customer.first_name} {customer.last_name} can not be assigned to the {agent.first_name} {agent.last_name}")
             else:
                 customer.assigned_to =  agent
                 customer.save()
@@ -1434,10 +1433,8 @@ def assign_agents(request):
                     created_at=datetime.now(pytz.timezone("Europe/London")),
                     action_type="Assigned to Agent",
                 )
-        if message:
-            messages.error(request, ', '.join(message))
-        messages.success(request, "Customers Assigned successfully!")
-        return redirect("customer_app:customer")
+                messages.success(request, "Customers Assigned successfully!")
+                return redirect("customer_app:customer")
      except Exception as e:
         messages.error(request, f"Error assigning customers: {e}")
         return redirect("customer_app:customer")

@@ -189,7 +189,7 @@
                               />
                            </div>
                            {% for client in emp.client_assigned_to.all %}
-                     {{ client.first_name }} {{ client.last_name }}
+                     {{ client.company_name }}
                    {% endfor %}
                       </div>
                       <div class="modal-footer">
