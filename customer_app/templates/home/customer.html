@@ -17,7 +17,7 @@
 <style>
   .flex-container {
     display: flex;
-    gap: 20px; /* Optional: Adds space between the two divs */
+    gap: 20px;
 }
 
 </style>
@@ -62,29 +62,22 @@
                       </div>
                       <form method='post' action="{% url 'customer_app:assign_agents'  %}">
                         {% csrf_token %}
-                      <div class="modal-body flex-container">
+                      <div class="modal-body">
                         <div class="mb-3">
-                          <input
-                            type="text"
-                            id="customers"
-                            placeholder="Select the Customers you wish to assign to the agents"
-                            autocomplete="off"
-                            name= "customers"
-                          />
-                           </div>
-                        <div class="mb-3">
-                          <input
-                                type="text"
-                                id="agents"
-                                placeholder="Select the Agents you wish to assign to the customers"
-                                autocomplete="off"
-                                name= "agents"
-                              />
-                           </div>
+                        <label for="agents" class="form-label">Agents</label>
+                        <select class="form-select agents" aria-label="Default select example" name="agent_id">
+                          <option value="nan">Select a agent</option>
+                          {% for agent in agents %}
+                            <option value="{{agent.id}}">{{agent.first_name}} {{agent.last_name}}</option>
+                          {% endfor %}
+                        </select>
+                        <input type="hidden" name="customers" id="customer_ids">
+                        </div>
+
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="reform_btn">Submit</button>
+                        <button type="button" id="assignSelectedBtn" class="reform_btn">Submit</button>
                       </div>
                     </form>
                     </div>
@@ -405,11 +398,11 @@
                     </tr>
                   {% endif %}
                   </tbody>
-                  {% if user.is_staff %}
                   <div>
-                    <button type="button" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
+                    {% if user.is_staff %}
+                      <button type="button" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
+                    {% endif %}
                   </div>
-                {% endif %}
                 </table>
             {% endif %}
 
@@ -695,52 +688,6 @@ const form = document.querySelector('#addCustomerForm');
 </script>
 
 <script type="module">
-  jQuery(document).ready(function ($) {
-    const options = [
-      {
-        id:0,
-        title: 'All Unassigned Customers'
-      }
-    ]
-    let customers = JSON.parse("{{ customers_list | escapejs }}");
-    for (let i = 0; i < customers.length; i++) {
-      options.push({
-        id: i+1,
-        title: customers[i].fields.first_name + ' ' + customers[i].fields.last_name + ' - ' + customers[i].pk
-      });
-    }
-    
-    comboTree1 = $("#customers").comboTree({
-      source: options,
-      isMultiple: true,
-      cascadeSelect: false,
-      collapse: true,
-    });
-  });
-
-  
-  jQuery(document).ready(function ($) {
-    // Get the unassigned customers from the backend
-    let agents = JSON.parse("{{ agents | escapejs }}");
-
-    // Extract the names of unassigned customers
-    let comboSource2 = agents.map(agent => {
-      return {
-        id: agent.pk,
-        title: agent.fields.first_name + ' ' + agent.fields.last_name + ' - ' + agent.pk
-      };  
-    });
-    // Create comboTree using unassigned customer names
-    comboTree2 = $("#agents").comboTree({
-      source: comboSource2,
-      isMultiple: true,
-      cascadeSelect: false,
-      collapse: true,
-      selectAll: true,
-    });
-  });
-
-  
 
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -826,6 +773,41 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 {% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const customerCheckboxes = document.querySelectorAll('.select-customer');
 
+  selectAllCheckbox.addEventListener('change', function () {
+    customerCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+  });
+
+  const assignSelectedBtn = document.getElementById('assignSelectedBtn');
+
+  assignSelectedBtn.addEventListener('click', function () {
+    const selectedCustomerIds = Array.from(customerCheckboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.getAttribute('data-customer-id'));
+
+    if (selectedCustomerIds.length > 0) {
+      const agentId = document.querySelector('.agents').value;
+      if (agentId === 'nan') {
+        alert('Please select an agent to assign customers to.');
+        return;
+      }
+
+      const form = assignSelectedBtn.closest('form');
+      document.getElementById('customer_ids').value = selectedCustomerIds
+      form.submit();
+
+
+    } else {
+      alert('Please select customers to assign.');
+    }
+  });
+});
+</script>
 
 {% endblock js %}

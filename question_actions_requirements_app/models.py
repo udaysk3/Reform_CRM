@@ -7,6 +7,8 @@ class Questions(models.Model):
     answer_frequency = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)
     parameter = models.CharField(max_length=9999, blank=True, null=True)
+    is_archive = models.BooleanField(default=False)
+    is_client_archive = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.question}"
 

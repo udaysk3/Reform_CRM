@@ -25,7 +25,7 @@ from user.models import User
 from pytz import timezone
 from .task import getLA
 from .epc import getEPC
-import os
+import os, json
 from django.core.mail import send_mail
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
@@ -268,10 +268,14 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 if cjstage.questions:
                     for question in cjstage.questions:
                         qus = Questions.objects.get(pk=question)
-                        questions.append(qus)
+                        if qus.is_archive == False:
+                            if qus.is_client_archive == False:
+                                questions.append(qus)
                 else: 
                     for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage. stage):
-                        questions.append(rule.question)
+                        if rule.question.is_archive == False:
+                            if rule.question.is_client_archive == False:
+                                questions.append(rule.question)
                 
                 
                 for question in questions:
@@ -692,16 +696,7 @@ def Customer(request):
     customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
-    agents = User.objects.filter(is_superuser=False).filter(is_client=False)
-    if user.is_employee:
-        clients_with_customers = Clients.objects.filter(assigned_to=user).prefetch_related('customers')
-        customers_list = []
-
-        for client in clients_with_customers:
-            customers_list.extend(client.customers.all())
-
-    else:
-        customers_list = Customers.objects.all()
+    agents = User.objects.filter(is_employee=True)
     p_customers = Paginator(customers, 50)
     page_number = request.GET.get('page')
     try:
@@ -715,7 +710,7 @@ def Customer(request):
     if request.session.get("first_name") and request.GET.get("page") != "add_customer":
         delete_customer_session(request)
     return render(
-        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "agents": serialize('json', agents), "customers_list": serialize('json',customers_list), 'page_obj': page_obj, 'clients':client}
+        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "agents": agents, 'page_obj': page_obj, 'clients':client}
     )
 
 
@@ -745,7 +740,7 @@ def archive(request):
     customers= new_customers + result
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
-    agents = User.objects.filter(is_superuser=False)
+    agents = User.objects.filter(is_superuser=False).filter(is_client=False).filter(is_employee=False)
     if request.session.get("first_name"):
         delete_customer_session(request)
     return render(
@@ -782,10 +777,12 @@ def add_customer(request):
         if phone_number[0] == "0":
             phone_number = phone_number[1:]
             phone_number = "+44" + phone_number
-        elif phone_number[0] == "+":
-            phone_number = phone_number
-        else:
+        elif phone_number[0] == "4" and phone_number[1] == "4":
+            phone_number = "+" + phone_number
+        elif phone_number[0] != "+":
             phone_number = "+44" + phone_number
+        if phone_number[-2:] == ".0":
+            phone_number = phone_number[:-2]
 
         if Customers.objects.filter(email=email).filter(client=client).exists():
             messages.error(request, "Email with this Client already exists")
@@ -913,7 +910,17 @@ def edit_customer(request, customer_id):
 
         customer.first_name = request.POST.get("first_name")
         customer.last_name = request.POST.get("last_name").upper()
-        customer.phone_number = request.POST.get("phone_number")
+        phone_number = request.POST.get("phone_number")
+        if phone_number[0] == "0":
+            phone_number = phone_number[1:]
+            phone_number = "+44" + phone_number
+        elif phone_number[0] == "4" and phone_number[1] == "4":
+            phone_number = "+" + phone_number
+        elif phone_number[0] != "+":
+            phone_number = "+44" + phone_number
+        if phone_number[-2:] == ".0":
+            phone_number = phone_number[:-2]
+        customer.phone_number = phone_number
         customer.email = request.POST.get("email")
         postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         customer.street_name = request.POST.get("street_name")
@@ -1113,7 +1120,7 @@ def na_action_submit(request, customer_id):
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
-        time_obj += timedelta(minutes=60)
+        time_obj += timedelta(minutes=180)
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
@@ -1133,7 +1140,7 @@ def lm_action_submit(request, customer_id):
         date_str = datetime.now(london_tz).strftime("%Y-%m-%d")
         time_str = datetime.now(london_tz).strftime("%H:%M")
         time_obj = datetime.strptime(time_str, "%H:%M")
-        time_obj += timedelta(minutes=60)
+        time_obj += timedelta(minutes=180)
         time_str_updated = time_obj.strftime("%H:%M")
         date_time_str = f"{date_str} {time_str_updated}"
         date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
@@ -1152,61 +1159,68 @@ def import_customers_view(request):
     expected_columns = ["history"]
     history = {}
     message = []
+    
     if request.method == "POST":
         excel_file = request.FILES["excel_file"]
         campaign = request.POST.get("campaign")
         client = request.POST.get("client")
+        
         if campaign == "nan":
             messages.error(request, "Select a Campaign")
             return redirect("customer_app:import_customers")
+        
         df = pd.read_excel(excel_file)
         excel_columns = df.columns.tolist()
         column_mappings = []
+        
+        # Retrieve column mappings
         for i, column in enumerate(excel_columns):
-            # Retrieve user's selection for each column
             attribute = request.POST.get(f"column{i}", "")
             column_mappings.append(attribute)
 
-        if (
-            "email"
-            and "first_name"
-            and "last_name"
-            and "phone_number" not in column_mappings
-        ):
+        # Check if mandatory columns are mapped
+        if not all(field in column_mappings for field in ["email", "first_name", "last_name", "phone_number"]):
             messages.error(
                 request,
-                "First Name, Last Name, Phone Number and  Email fields should be mapped",
+                "First Name, Last Name, Phone Number, and Email fields should be mapped.",
             )
             return redirect("customer_app:import_customers")
 
         for index, row in df.iterrows():
             district = None
             customer_data = {}
+            missing_mandatory_field = False  # Flag to check if any mandatory field is missing
+
             for i, column in enumerate(excel_columns):
-                history[excel_columns[i]] = str(row[i])
+                value = str(row[i]).strip()
+                
+                # Check if mandatory fields are empty
+                if column_mappings[i] in ["email", "first_name", "last_name", "phone_number"] and (
+                    not value or value.lower() in ["nan", "nat", "none"]
+                ):
+                    missing_mandatory_field = True
+                    break
+            
                 if column_mappings[i] == "history":
-                    history[excel_columns[i]] = str(row[i])
+                    history[excel_columns[i]] = value
                 elif column_mappings[i] == "last_name":
-                    customer_data[column_mappings[i]] = str(row[i]).upper()
+                    customer_data[column_mappings[i]] = value.upper()
                 elif column_mappings[i] == "phone_number":
-                    phone_number = str(row[i])
+                    phone_number = value
                     if phone_number[0] == "0":
-                        phone_number = phone_number[1:]
+                        phone_number = "+44" + phone_number[1:]
+                    elif phone_number[0] == "4" and phone_number[1] == "4":
+                        phone_number = "+" + phone_number
+                    elif phone_number[0] != "+":
                         phone_number = "+44" + phone_number
-                    elif phone_number[0] == "+":
-                        phone_number = phone_number
-                    else:
-                        phone_number = "+44" + phone_number
+                    if phone_number[-2:] == ".0":
+                        phone_number = phone_number[:-2]
                     customer_data[column_mappings[i]] = phone_number
                 elif column_mappings[i] == "postcode":
-                    postcode = str(row[i])
-
+                    postcode = value
                     url = "https://api.postcodes.io/postcodes/" + postcode.strip()
                     try:
-                        response = requests.get(
-                            url, headers={"muteHttpExceptions": "true"}
-                        )
-
+                        response = requests.get(url, headers={"muteHttpExceptions": "true"})
                         if response.status_code == 200:
                             json_data = response.json()
                             status = json_data.get("status")
@@ -1216,28 +1230,28 @@ def import_customers_view(request):
                                 district = "Invalid postcode or not found"
                         else:
                             district = "Error fetching data"
-                    except requests.exceptions.RequestException as e:
-                        district = f"Request Error"
+                    except requests.exceptions.RequestException:
+                        district = "Request Error"
                     customer_data[column_mappings[i]] = re.sub(r'\s+', ' ', postcode)
                 else:
-                    customer_data[column_mappings[i]] = str(row[i])
+                    customer_data[column_mappings[i]] = value
 
-            if Customers.objects.filter(email=customer_data['email']).exists():
+            # Skip creating customer if any mandatory field is missing
+            if missing_mandatory_field:
+                continue
+
+            # Check for existing customer by email or phone number
+            if Customers.objects.filter(email=customer_data['email']).exists() or \
+               Customers.objects.filter(phone_number=customer_data['phone_number']).exists():
                 message.append(f'{customer_data["first_name"]} {customer_data["last_name"]}')
                 continue
 
-            elif Customers.objects.filter(
-                phone_number=customer_data['phone_number']
-            ).exists():
-                message.append(
-                    f'{customer_data["first_name"]} {customer_data["last_name"]}'
-                )
-                continue
-            
+            # Ensure campaign and client are selected
             if campaign == "nan" or client == "nan":
                 messages.error(request, "Select all dropdown fields")
                 return redirect("/customer?page=add_customer")
 
+            # Create and save customer
             customer = Customers.objects.create(
                 **customer_data,
                 district=district,
@@ -1248,11 +1262,12 @@ def import_customers_view(request):
                 imported=True,
             )
             customer.primary_customer = True
-
             customer.save()
-            for i in history:
+            
+            # Add action history for customer
+            for key, value in history.items():
                 customer.add_action(
-                    text=f"{i} : {history[i]}",
+                    text=f"{key} : {value}",
                     date_time=datetime.now(pytz.timezone("Europe/London")),
                     agent=User.objects.get(email=request.user),
                     closed=False,
@@ -1263,23 +1278,25 @@ def import_customers_view(request):
                 agent=User.objects.get(email=request.user),
                 date_time=datetime.now(pytz.timezone("Europe/London")),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type=f"Added {customer.first_name}  {customer.last_name},  {customer.house_name },  {customer.phone_number},  {customer.email}, {customer.house_name},  {customer.street_name},  {customer.city}, {customer.county},  {customer.country}",
+                action_type=f"Added {customer.first_name} {customer.last_name}, {customer.phone_number}, {customer.email}",
                 keyevents=True,
-        )
+            )
+        
+        # Show success or error messages
         if message:
-            messages.error(request, f"Customer with email or phone number already exists: {', '.join(message)}")
+            messages.error(request, f"Customer(s) with duplicate email or phone number: {', '.join(message)}")
         else:
             messages.success(request, "Customers imported successfully.")
+        
         return redirect("customer_app:customer")
 
     campaigns = Campaign.objects.all()
-    client = Clients.objects.all()    
-
-
+    clients = Clients.objects.all()
+    
     return render(
         request,
         "home/import_customers.html",
-        {"excel_columns": excel_columns, "campaigns": campaigns, 'clients':client},
+        {"excel_columns": excel_columns, "campaigns": campaigns, "clients": clients},
     )
 
 
@@ -1392,43 +1409,32 @@ def remove_customer_route(request, customer_id):
     messages.success(request, "Route removed successfully!")
     return redirect(f"/customer-detail/{customer_id}")
 
-from .models import Customers
-from user.models import User
 
 def assign_agents(request):
     if request.method == "POST":
      try:
-        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
-        customers = request.POST.get("customers")
-        if customers == "All Unassigned Customers":
-            customer_ids = Customers.objects.filter(assigned_to=None).values_list('id', flat=True)
-        else:
-            agent_id = int(customers.split(' - ')[-1])
-            customer_ids = Customers.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
-            
-        num_customers = len(customer_ids)
-        num_agents = len(agent_ids)
-        customers_per_agent = num_customers // num_agents
-        extra_customers = num_customers % num_agents
-        
-        agent_index = 0
-        for agent_id in agent_ids:
-            agent = User.objects.get(pk=agent_id)
-            
-            if extra_customers > 0:
-                num_customers_for_agent = customers_per_agent + 1
-                extra_customers -= 1
+        agent_id = request.POST.get("agent_id")
+        customer_ids = request.POST.get("customers").split(",")
+        agent = User.objects.get(pk=agent_id)
+        clients_with_customers = Clients.objects.filter(assigned_to=agent).prefetch_related('customers')
+        customers_list = []
+        for client in clients_with_customers:
+            customers_list.extend(client.customers.all())
+        for customer_id in customer_ids:
+            customer = Customers.objects.get(pk=customer_id)
+            if customer not in customers_list:
+                messages.error(request,f"Customer {customer.first_name} {customer.last_name} can not be assigned to the {agent.first_name} {agent.last_name}")
             else:
-                num_customers_for_agent = customers_per_agent
-            
-            assigned_customers = customer_ids[:num_customers_for_agent]
-            Customers.objects.filter(id__in=assigned_customers).update(assigned_to=agent_id)
-            customer_ids = customer_ids[num_customers_for_agent:]
-            
-            agent_index += 1
-        
-        messages.success(request, "Customers Assigned successfully!")
-        return redirect("customer_app:customer")
+                customer.assigned_to =  agent
+                customer.save()
+                customer.add_action(
+                    agent=User.objects.get(email=request.user),
+                    date_time=datetime.now(pytz.timezone("Europe/London")),
+                    created_at=datetime.now(pytz.timezone("Europe/London")),
+                    action_type="Assigned to Agent",
+                )
+                messages.success(request, "Customers Assigned successfully!")
+                return redirect("customer_app:customer")
      except Exception as e:
         messages.error(request, f"Error assigning customers: {e}")
         return redirect("customer_app:customer")
@@ -1643,3 +1649,11 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
                 answer.save()
 
     return JsonResponse({'status': 'success'}, status=200)
+
+def get_agent_customers(request, agent_id):
+    agent = User.objects.get(pk=agent_id)
+    clients_with_customers = Clients.objects.filter(assigned_to=agent).prefetch_related('customers')
+    customers_list = []
+    for client in clients_with_customers:
+        customers_list.extend(client.customers.all())
+    return JsonResponse([{"customer_id": customer.id, "customer_first_name":customer.first_name, "customer_last_name":customer.last_name} for customer in customers_list], safe=False)

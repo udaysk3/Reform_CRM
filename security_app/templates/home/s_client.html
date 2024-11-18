@@ -31,112 +31,89 @@
              <a href="{% url "security_app:s_client" %}"> <h5 class="card-title fw-semibold text-primary ">Security Client Management</h5></a>
             </div>
 
-            <div>
-
-                <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
-                  <i class="bi bi-arrow-bar-right"></i> Assign to Agent
-                </button>
-  
-                <!-- Modal -->
-                <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Clients to the Agents</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <form method='post' action="{% url 'security_app:assign_agents'  %}">
-                        {% csrf_token %}
-                      <div class="modal-body flex-container">
-                        <div class="mb-3">
-                          <input
-                            type="text"
-                            id="clients"
-                            placeholder="Select the Clients you wish to assign to the employees"
-                            autocomplete="off"
-                            name= "clients"
-                          />
-                           </div>
-                        <div class="mb-3">
-                          <input
-                                type="text"
-                                id="agents"
-                                placeholder="Select the Employees you wish to assign to the clients"
-                                autocomplete="off"
-                                name= "agents"
-                              />
-                           </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="reform_btn">Submit</button>
-                      </div>
-                    </form>
-                    </div>
+            
+            <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
+              <i class="bi bi-arrow-bar-right"></i> Assign to Agent
+            </button>
+            
+            <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Clients to the Agents</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
+                  <form method='post' action="{% url 'security_app:assign_agents'  %}">
+                    {% csrf_token %}
+                  <div class="modal-body flex-container">
+                    <div class="mb-3">
+                      <input
+                        type="text"
+                        id="clients"
+                        placeholder="Select the Clients you wish to assign to the employees"
+                        autocomplete="off"
+                        name= "clients"
+                      />
+                       </div>
+                    <div class="mb-3">
+                      <input
+                            type="text"
+                            id="agents"
+                            placeholder="Select the Employees you wish to assign to the clients"
+                            autocomplete="off"
+                            name= "agents"
+                          />
+                       </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="reform_btn">Submit</button>
+                  </div>
+                </form>
                 </div>
-                
+              </div>
             </div>
-            
-            
           </div>
           
-          <div>
-                <table class="table">
-                  
-                  <thead>
-  <tr>
-    <th >
-      Client
-    </th>
-    <th >
-      Assigned To
-    </th>
-  </tr>
-</thead>
-
-                  <tbody id="myTable">
-                    {% if clients %}
-                    {% for client in clients %}
-
-                      <tr>
-                        <td class="text-underlined" style="width: 20%; color:#024753"><a class="text-primary" href="/client-detail/{{client.id}}">{{ client.first_name }} {{ client.last_name }}</a></td>
-                        <td style="width: 20%;">
-                          {% for agent in client.assigned_to.all %}
-                            <div>
-                              <span class="badge bg-primary">{{ agent.first_name }} {{ agent.last_name }}</span>
-                            </div>
-                          {% endfor %}
-                        </td>
-                      </tr>
-
+          <table class="table">
+            
+            <thead>
+              <tr>
+                <th >
+                  Client
+                </th>
+                <th >
+                  Assigned To
+                </th>
+              </tr>
+            </thead>
+            <tbody id="myTable">
+              {% if clients %}
+              {% for client in clients %}
+                <tr>
+                  <td class="text-underlined" style="width: 20%; color:#024753"><a class="text-primary" href="/client-detail/{{client.id}}">{{ client.company_name }}</a></td>
+                  <td style="width: 20%;">
+                    {% for agent in client.assigned_to.all %}
+                      <div>
+                        <span class="badge bg-primary">{{ agent.first_name }} {{ agent.last_name }}</span>
+                      </div>
                     {% endfor %}
-                  {% else %}
-                    <tr class="text-center display-flex align-items-center justify-content-center">
-                      <td colspan="6" class="text-center">No Clinets</td>
-                    </tr>
-                  {% endif %}
-                  </tbody>
-                </table>
-          </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="text-center display-flex align-items-center justify-content-center">
+                <td colspan="6" class="text-center">No Clinets</td>
+              </tr>
+            {% endif %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-{% comment %} <nav aria-label="Page navigation example" class="position-relative" style="top:-25px;">
-  <ul class="pagination pagination-lg justify-content-center">
-    {%if page_obj.has_previous %}
-    <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}">{{page_obj.previous_page_number}}</a></li>
-    {% endif %}
-    <li class="page-item active"><a class="page-link" href="#">{{page_obj.number}}</a></li>
-    {%if page_obj.has_next %}
-    <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">{{page_obj.next_page_number}}</a></li>
-    {% endif %}
-
-  </ul>
-</nav> {% endcomment %}
 
 {% endblock content %}
 
@@ -145,18 +122,12 @@
   
 <script type="module">
   jQuery(document).ready(function ($) {
-    const options = [
-      {
-        id:0,
-        title: 'All Unassigned Clients'
-      }
-    ]
+    const options = []
     let clients = JSON.parse("{{ clients_list | escapejs }}");
     for (let i = 0; i < clients.length; i++) {
-      console.log(clients[i].fields)
       options.push({
         id: i+1,
-        title: clients[i].fields.first_name + ' ' + clients[i].fields.last_name + ' - ' + clients[i].pk
+        title: clients[i].fields.company_name
       });
     }
     
@@ -165,6 +136,7 @@
       isMultiple: true,
       cascadeSelect: false,
       collapse: true,
+      selectAll: true,
     });
   });
 
@@ -175,7 +147,7 @@
     let comboSource2 = agents.map(agent => {
       return {
         id: agent.pk,
-        title: agent.fields.first_name + ' ' + agent.fields.last_name + ' - ' + agent.pk
+        title: agent.fields.first_name + ' ' + agent.fields.last_name
       };  
     });
     comboTree2 = $("#agents").comboTree({

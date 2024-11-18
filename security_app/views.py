@@ -24,49 +24,6 @@ def s_client(request):
     agents = User.objects.all().filter(is_employee=True)
     return render(request, 'home/s_client.html', {'clients': clients, "agents": serialize('json', agents), "clients_list": serialize('json', clients_list)})
 
-def assign_agents(request):
-    if request.method == "POST":
-     try:
-        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
-        clients = request.POST.get("clients")
-        if clients == "All Unassigned Clients":
-            client_ids = Clients.objects.filter(assigned_to=None).values_list('id', flat=True)
-        else:
-            agent_id = int(clients.split(' - ')[-1])
-            client_ids = Clients.objects.filter(assigned_to=agent_id).values_list('id', flat=True)
-            
-        num_clients = len(client_ids)
-        num_agents = len(agent_ids)
-        clients_per_agent = num_clients // num_agents
-        extra_clients = num_clients % num_agents
-        
-        agent_index = 0
-        for agent_id in agent_ids:
-            agent = User.objects.get(pk=agent_id)
-            
-            if extra_clients > 0:
-                num_clients_for_agent = clients_per_agent + 1
-                extra_clients -= 1
-            else:
-                num_clients_for_agent = clients_per_agent
-            
-            assigned_clients = client_ids[:num_clients_for_agent]
-            assign_clients = Clients.objects.filter(id__in=assigned_clients)
-            for assign_client in assign_clients:
-                assign_client.assigned_to.add(agent_id)
-            client_ids = client_ids[num_clients_for_agent:]
-            
-            agent_index += 1
-        
-        messages.success(request, "Clients Assigned successfully!")
-        return redirect("security_app:s_client")
-     except Exception as e:
-        messages.error(request, f"Error assigning clients: {e}")
-        return redirect("security_app:s_client")
-    else:
-        messages.error(request, "Cannot Assign clients!")
-        return redirect("security_app:s_client")
-
 
 @login_required
 def role(request):
@@ -226,6 +183,34 @@ def approve_role(request, emp_id):
 def deny_role(request, emp_id):
     emp = User.objects.get(pk=emp_id)
     emp.approved = 'deny'
+    emp.dashboard = False
+    emp.mcustomer = False
+    emp.customer = False
+    emp.archive = False
+    emp.client = False
+    emp.council = False
+    emp.admin = False
+    emp.product = False
+    emp.globals = False
+    emp.finance = False
+    emp.hr = False
+    emp.security = False
+    emp.funding_route = False
+    emp.CJ = False
+    emp.QA = False
+    emp.h_dashboard = False
+    emp.h_employee = False
+    emp.h_application = False
+    emp.h_onboarding = False
+    emp.h_timesheet = False
+    emp.h_emp_action = False
+    emp.h_emp_notify = False
+    emp.h_offboarding = False
+    emp.h_org_chart = False
+    emp.knowledge_base = False
+    emp.s_employee = False
+    emp.s_role = False
+    emp.s_client = False
     emp.save()
     emp.employee_user.add_emp_action(
         created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -290,6 +275,38 @@ def edit_role(request, role_id):
         role.s_role = request.POST.get('s_role') == 'on'
         role.s_client = request.POST.get('s_client') == 'on'
         role.save()
+        employees = User.objects.filter(role=role.name)
+        for emp in employees:
+            emp.dashboard = role.dashboard
+            emp.mcustomer = role.mcustomer
+            emp.customer = role.customer
+            emp.client = role.client
+            emp.council = role.council
+            emp.admin = role.admin
+            emp.archive = role.archive
+            emp.product = role.product
+            emp.globals = role.globals
+            emp.finance = role.finance
+            emp.hr = role.hr
+            emp.security = role.security
+            emp.funding_route = role.funding_route
+            emp.CJ = role.CJ
+            emp.QA = role.QA
+            emp.h_dashboard = role.h_dashboard
+            emp.h_employee = role.h_employee
+            emp.h_application = role.h_application
+            emp.h_onboarding = role.h_onboarding
+            emp.h_timesheet = role.h_timesheet
+            emp.h_emp_action = role.h_emp_action
+            emp.h_emp_notify = role.h_emp_notify
+            emp.h_offboarding = role.h_offboarding
+            emp.h_org_chart = role.h_org_chart
+            emp.knowledge_base = role.knowledge_base
+            emp.s_employee = role.s_employee
+            emp.s_role = role.s_role
+            emp.s_client = role.s_client
+            emp.save()
+            
         messages.success(request, 'Role updated successfully!')
         return redirect('security_app:role')
     return render(request, 'home/edit_role.html', {'role': role})
@@ -350,20 +367,65 @@ def upload_profile(request, emp_id):
     return redirect('/s_edit_employee/' + str(emp_id))
 
 
+def assign_agents(request):
+    if request.method == "POST":
+     try:
+        agent_names = [id_str.split(' ') for id_str in request.POST.get("agents").split(',')]
+        client_names = [id_str.strip() for id_str in request.POST.get("clients").split(',')]
+            
+        num_clients = len(client_names)
+        num_agents = len(agent_names)
+        clients_per_agent = num_clients // num_agents
+        extra_clients = num_clients % num_agents
+        
+        agent_index = 0
+        for agent_id in agent_names:
+            agent = User.objects.filter(first_name=agent_id[0], last_name=agent_id[1]).first()
+            if extra_clients > 0:
+                num_clients_for_agent = clients_per_agent + 1
+                extra_clients -= 1
+            else:
+                num_clients_for_agent = clients_per_agent
+            
+            assigned_clients = client_names[:num_clients_for_agent]
+            for client_name in assigned_clients:
+                client = Clients.objects.filter(company_name=client_name).first()
+                client.assigned_to.add(agent)
+                client.save()
+            client_names = client_names[num_clients_for_agent:]
+            
+            agent_index += 1
+        
+        messages.success(request, "Clients Assigned successfully!")
+        return redirect("security_app:s_client")
+     except Exception as e:
+        messages.error(request, f"Error assigning clients: {e}")
+        return redirect("security_app:s_client")
+    else:
+        messages.error(request, "Cannot Assign clients!")
+        return redirect("security_app:s_client")
+
 def assign_agent(request):
-    client_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("clients").split(',')]
+    client_ids = [id_str.strip() for id_str in request.POST.get("clients").split(',')]
     agent_id = request.POST.get("agent_id")
     agent = User.objects.get(pk=agent_id)
     try:
-        for client_id in client_ids:
-            client = Clients.objects.get(pk=client_id)
-            client.assigned_to.add(agent)
-            client.save()
-        all_clients = Clients.objects.all()
-        for client in all_clients:
-            if agent in client.assigned_to.all() and client.id not in client_ids:
-                client.assigned_to.remove(agent)
+        if client_ids == ['']:
+            all_clients = Clients.objects.all()
+            for client in all_clients:
+                if agent in client.assigned_to.all() and client.company_name not in client_ids:
+                    client.assigned_to.remove(agent)
+                    client.save()
+        else:
+            for client_id in client_ids:
+                client = Clients.objects.filter(company_name=client_id).first()
+                client.assigned_to.add(agent)
                 client.save()
+            all_clients = Clients.objects.all()
+            for client in all_clients:
+                if agent in client.assigned_to.all() and client.company_name not in client_ids:
+                    client.assigned_to.remove(agent)
+                    client.save()
         agent.employee_user.add_emp_action(
             created_at=datetime.now(pytz.timezone("Europe/London")),
             action_type="Clients Assigned",

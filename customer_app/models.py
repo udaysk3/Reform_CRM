@@ -8,7 +8,7 @@ from user.models import User
 class Customers(models.Model):
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=30, blank=True, null=True)
     email = models.EmailField(max_length=255, blank=True, null=True)
     postcode = models.CharField(max_length=255, blank=True, null=True)
     house_name = models.CharField(max_length=255, blank=True, null=True)
