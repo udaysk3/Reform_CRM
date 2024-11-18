@@ -25,7 +25,7 @@ from user.models import User
 from pytz import timezone
 from .task import getLA
 from .epc import getEPC
-import os
+import os, json
 from django.core.mail import send_mail
 london_tz = pytz.timezone("Europe/London")
 from datetime import datetime
@@ -1412,21 +1412,30 @@ def remove_customer_route(request, customer_id):
 
 def assign_agents(request):
     if request.method == "POST":
+     message = []
      try:
         agent_id = request.POST.get("agent_id")
-        customer_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("customers").split(',')]
+        customer_ids = request.POST.get("customers").split(",")
         agent = User.objects.get(pk=agent_id)
+        clients_with_customers = Clients.objects.filter(assigned_to=agent).prefetch_related('customers')
+        customers_list = []
+        for client in clients_with_customers:
+            customers_list.extend(client.customers.all())
         for customer_id in customer_ids:
             customer = Customers.objects.get(pk=customer_id)
-            customer.assigned_to =  agent
-            customer.save()
-            customer.add_action(
-                agent=User.objects.get(email=request.user),
-                date_time=datetime.now(pytz.timezone("Europe/London")),
-                created_at=datetime.now(pytz.timezone("Europe/London")),
-                action_type="Assigned to Agent",
-            )
-        
+            if customer not in customers_list:
+                message.append(f"Customer {customer.first_name} {customer.last_name} can not be assigned to the {agent.first_name} {agent.last_name}")
+            else:
+                customer.assigned_to =  agent
+                customer.save()
+                customer.add_action(
+                    agent=User.objects.get(email=request.user),
+                    date_time=datetime.now(pytz.timezone("Europe/London")),
+                    created_at=datetime.now(pytz.timezone("Europe/London")),
+                    action_type="Assigned to Agent",
+                )
+        if message:
+            messages.error(request, ', '.join(message))
         messages.success(request, "Customers Assigned successfully!")
         return redirect("customer_app:customer")
      except Exception as e:

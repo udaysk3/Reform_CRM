@@ -260,7 +260,7 @@
     let comboSource2 = clients.map(client => {
       return {
         id: client.pk,
-        title: client.fields.company_name + ' - ' + client.pk
+        title: client.fields.company_name
       };  
     });
     comboTree2 = $("#clients").comboTree({

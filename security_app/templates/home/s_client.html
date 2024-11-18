@@ -127,7 +127,7 @@
     for (let i = 0; i < clients.length; i++) {
       options.push({
         id: i+1,
-        title: clients[i].fields.company_name + ' - ' + clients[i].pk
+        title: clients[i].fields.company_name
       });
     }
     
@@ -147,7 +147,7 @@
     let comboSource2 = agents.map(agent => {
       return {
         id: agent.pk,
-        title: agent.fields.first_name + ' ' + agent.fields.last_name + ' - ' + agent.pk
+        title: agent.fields.first_name + ' ' + agent.fields.last_name
       };  
     });
     comboTree2 = $("#agents").comboTree({
