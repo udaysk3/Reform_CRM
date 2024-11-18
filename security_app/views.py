@@ -370,29 +370,29 @@ def upload_profile(request, emp_id):
 def assign_agents(request):
     if request.method == "POST":
      try:
-        agent_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("agents").split(',')]
-        client_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("clients").split(',')]
+        agent_names = [id_str.split(' ') for id_str in request.POST.get("agents").split(',')]
+        client_names = [id_str.strip() for id_str in request.POST.get("clients").split(',')]
             
-        num_clients = len(client_ids)
-        num_agents = len(agent_ids)
+        num_clients = len(client_names)
+        num_agents = len(agent_names)
         clients_per_agent = num_clients // num_agents
         extra_clients = num_clients % num_agents
         
         agent_index = 0
-        for agent_id in agent_ids:
-            agent = User.objects.get(pk=agent_id)
-            
+        for agent_id in agent_names:
+            agent = User.objects.filter(first_name=agent_id[0], last_name=agent_id[1]).first()
             if extra_clients > 0:
                 num_clients_for_agent = clients_per_agent + 1
                 extra_clients -= 1
             else:
                 num_clients_for_agent = clients_per_agent
             
-            assigned_clients = client_ids[:num_clients_for_agent]
-            assign_clients = Clients.objects.filter(id__in=assigned_clients)
-            for assign_client in assign_clients:
-                assign_client.assigned_to.add(agent_id)
-            client_ids = client_ids[num_clients_for_agent:]
+            assigned_clients = client_names[:num_clients_for_agent]
+            for client_name in assigned_clients:
+                client = Clients.objects.filter(company_name=client_name).first()
+                client.assigned_to.add(agent)
+                client.save()
+            client_names = client_names[num_clients_for_agent:]
             
             agent_index += 1
         
@@ -406,19 +406,26 @@ def assign_agents(request):
         return redirect("security_app:s_client")
 
 def assign_agent(request):
-    client_ids = [int(id_str.split(' - ')[-1]) for id_str in request.POST.get("clients").split(',')]
+    client_ids = [id_str.strip() for id_str in request.POST.get("clients").split(',')]
     agent_id = request.POST.get("agent_id")
     agent = User.objects.get(pk=agent_id)
     try:
-        for client_id in client_ids:
-            client = Clients.objects.get(pk=client_id)
-            client.assigned_to.add(agent)
-            client.save()
-        all_clients = Clients.objects.all()
-        for client in all_clients:
-            if agent in client.assigned_to.all() and client.id not in client_ids:
-                client.assigned_to.remove(agent)
+        if client_ids == ['']:
+            all_clients = Clients.objects.all()
+            for client in all_clients:
+                if agent in client.assigned_to.all() and client.company_name not in client_ids:
+                    client.assigned_to.remove(agent)
+                    client.save()
+        else:
+            for client_id in client_ids:
+                client = Clients.objects.filter(company_name=client_id).first()
+                client.assigned_to.add(agent)
                 client.save()
+            all_clients = Clients.objects.all()
+            for client in all_clients:
+                if agent in client.assigned_to.all() and client.company_name not in client_ids:
+                    client.assigned_to.remove(agent)
+                    client.save()
         agent.employee_user.add_emp_action(
             created_at=datetime.now(pytz.timezone("Europe/London")),
             action_type="Clients Assigned",

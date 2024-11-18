@@ -189,7 +189,7 @@
                               />
                            </div>
                            {% for client in emp.client_assigned_to.all %}
-                     {{ client.first_name }} {{ client.last_name }}
+                     {{ client.company_name }}
                    {% endfor %}
                       </div>
                       <div class="modal-footer">
@@ -260,7 +260,7 @@
     let comboSource2 = clients.map(client => {
       return {
         id: client.pk,
-        title: client.fields.company_name + ' - ' + client.pk
+        title: client.fields.company_name
       };  
     });
     comboTree2 = $("#clients").comboTree({
