@@ -1434,7 +1434,7 @@ def assign_agents(request):
                     action_type="Assigned to Agent",
                 )
                 messages.success(request, "Customers Assigned successfully!")
-                return redirect("customer_app:customer")
+            return redirect("customer_app:customer")
      except Exception as e:
         messages.error(request, f"Error assigning customers: {e}")
         return redirect("customer_app:customer")
