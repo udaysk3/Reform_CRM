@@ -111,6 +111,9 @@ i{
 .sidebar{
   padding-top: 20px;
 }
+#myInput{
+  background-color: #fff;
+}
 
   </style>
   {% block css %}
@@ -327,12 +330,19 @@ i{
         </nav>
         
         <div class="main_content" >
-          <a href="#" onclick="goBack();">
+          <div class="row">
+          <a href="#" onclick="goBack();" class="col-1">
             <span>
               <i class="bx bx-left-arrow-alt my-4 display-6"></i>
             </span>
           </a>
-          
+          <div class="col-7 pt-3">
+          </div>
+          <div class="col-3 pt-3">
+          {% block search %}
+          {% endblock search %}
+          </div>
+          </div>
           {% block content %}{% endblock content %}
         </div>
       </div>
