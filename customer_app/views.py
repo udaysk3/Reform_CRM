@@ -143,8 +143,9 @@ def customer_detail(request, customer_id, s_customer_id=None):
     display_regions =[]
     regions = Councils.objects.all()
     for region in regions:
-        if customer.postcode.split(' ')[0] in region.postcodes:
-            display_regions.append(region)
+        if customer.postcode:
+            if customer.postcode.split(' ')[0] in region.postcodes:
+                display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False).filter(is_client=False)
     show_customer = customer
@@ -1657,3 +1658,23 @@ def get_agent_customers(request, agent_id):
     for client in clients_with_customers:
         customers_list.extend(client.customers.all())
     return JsonResponse([{"customer_id": customer.id, "customer_first_name":customer.first_name, "customer_last_name":customer.last_name} for customer in customers_list], safe=False)
+
+def refresh_epc(request, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+    obj = getEPC(customer.postcode, customer.house_name, customer.street_name)
+    print(obj)
+    energy_rating = None
+    energy_certificate_link = None
+    constituency = None
+    if obj is not None:
+        energy_rating = obj["energy_rating"]
+        energy_certificate_link = obj["energy_certificate_link"]
+        constituency = obj["constituency"] if obj["constituency"] else None
+        recommendations = obj["recommendations"] if obj["recommendations"] else None
+    customer.energy_rating = energy_rating
+    customer.energy_certificate_link = energy_certificate_link
+    customer.constituency = constituency
+    customer.recommendations = recommendations
+    customer.save()
+    messages.success(request, "EPC refreshed successfully!")
+    return redirect(f"/customer-detail/{customer_id}")
