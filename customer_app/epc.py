@@ -74,4 +74,4 @@ def getEPC(postcode, house_name, street_name):
         else:
             return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None, "recommendations" : parsed_recommendations}
 
-print(getEPC('S663YB', '64', ''))
+# print(getEPC('S663YB', '64', ''))
