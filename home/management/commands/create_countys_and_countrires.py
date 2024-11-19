@@ -122,7 +122,7 @@ class Command(BaseCommand):
         else:
             for city in countys:
                 if not Countys.objects.filter(name=city).exists():
-                    Countys.objects.create(name=city, created_at=datetime.now(pytz.timezone('Europe/London')), agent=User.objects.get(email="burluudaysantoshkumar3@gmail.com"))
+                    Countys.objects.create(name=city, created_at=datetime.now(pytz.timezone('Europe/London')), agent=User.objects.get(email="systems@reform-group.uk"))
             self.stdout.write(self.style.SUCCESS('Objects created successfully.'))
             
         if Countries.objects.exists():
@@ -130,7 +130,7 @@ class Command(BaseCommand):
         else:
             for country in countries:
                 if not Countries.objects.filter(name=country).exists():
-                    Countries.objects.create(name=country, created_at=datetime.now(pytz.timezone('Europe/London')), agent=User.objects.get(email="burluudaysantoshkumar3@gmail.com"))
+                    Countries.objects.create(name=country, created_at=datetime.now(pytz.timezone('Europe/London')), agent=User.objects.get(email="systems@reform-group.uk"))
             self.stdout.write(self.style.SUCCESS('Objects created successfully.'))
 
 

@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='username',
-            field=models.CharField(default='admin@gmail.com', max_length=100, unique=True),
+            field=models.CharField(default='systems@reform-group.uk', max_length=100, unique=True),
             preserve_default=False,
         ),
     ]
