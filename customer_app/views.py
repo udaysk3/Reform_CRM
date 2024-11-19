@@ -143,7 +143,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
     display_regions =[]
     regions = Councils.objects.all()
     for region in regions:
-        if customer.postcode.split(' ')[0] in region.postcodes:
+        if customer.postcode and customer.postcode.split(' ')[0] in region.postcodes:
             display_regions.append(region)
     child_customers = Customers.objects.all().filter(parent_customer=customer)
     agents = User.objects.filter(is_superuser=False).filter(is_client=False)
