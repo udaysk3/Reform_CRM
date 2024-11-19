@@ -40,7 +40,7 @@
             
             <div class="mb-3 mb-sm-0">
               {% if request.GET.page == 'edit_customer' %}
-              <a href="{% url "customer_app:refresh_epc" customer.id %}"> <h5 class="card-title fw-semibold text-primary reform_btn">Refresh EPC</h5></a>
+              <a href="{% url "customer_app:refresh_epc" customer.id %}"> <h5 class="card-title fw-semibold reform_btn">Refresh EPC</h5></a>
               {% else %}
 
              <a href="{% url "customer_app:customer" %}"> <h5 class="card-title fw-semibold text-primary ">Customer Management</h5></a>
