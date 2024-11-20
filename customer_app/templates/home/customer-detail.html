@@ -1,6 +1,18 @@
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
 
 <style>
+
+  .upper-name{
+    background-color: #004652;
+    color:#fff;
+    padding: 10px;
+    border-radius: 15px;
+    z-index: 1000;
+    width: fit-content;
+    left: 50px;
+    top:-15px;
+  }
+
   .bx-copy-alt{
     cursor: pointer;
   }
@@ -529,23 +541,22 @@ table {
       <div class="card-body p-3 pb-0 m-0 row">
         <div class="col">
           <div class="card py-3 d-flex">
-            <div class="card-body p-3 pb-0 m-0 row">
-              <h6>Available Funding Routes</h6>
-
-              <div class="card p-0 m-0">
+            <div class="card-body p-3 pb-0 m-0 row ">
+              
+              <div class="card p-0 m-0 mb-4">
+                <h6 class="position-absolute upper-name">Available Funding Routes</h6>
                 <div class="card-body p-3 m-0 position-relative">
-                  <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
+                  <div class=" me-2 mb-2 tabs mt-4" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
                     {% for route in routes %}
                     <h6 class="reform_btn me-3">{{ route.name }}</h6>
                     {% endfor %}
                   </div>
                 </div>
               </div>
-
-              <h6 class="mt-3">Available Products</h6>
               
               <div class="card p-0 m-0">
-                <div class="card-body p-3 m-0">
+                <h6 class=" position-absolute upper-name">Available Products</h6>
+                <div class="card-body p-3 m-0 mt-4">
                   <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
                     {% for product in products %}
                     <h6 class="reform_btn me-3">{{ product.name }}</h6>
@@ -638,6 +649,7 @@ table {
         <div class="col">
           <div class="card py-3 d-flex">
             <div class="card-body p-3 pb-0 m-0 row">
+              <h6 class="position-absolute upper-name">Action History</h6>
               <h6 class="fs-6">
                 <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
                 {{latest_action.date_time }} {% endwith %}
@@ -1044,11 +1056,11 @@ table {
                         {% for v in value %}
                         <li class="mb-2"><div class="tooltipbas me-2"> <i class="bx bx-info-circle fs-6"></i>
                             <span class="tooltiptextbas"> {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
-                            {% if v.7 %}
-                            spoke to <b> {{ v.7 }}</b>
-                            {% endif %}
-                            - Next Action: {{ v.6 }}
- </span>
+                              {% if v.7 %}
+                                spoke to <b> {{ v.7 }}</b>
+                              {% endif %}
+                              - Next Action: {{ v.6 }}
+                            </span>
                           </div><b>{{ v.0 }} - {{ v.5 }}</b>
                           
                           {% if v.8 %}

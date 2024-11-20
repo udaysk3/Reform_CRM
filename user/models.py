@@ -114,6 +114,9 @@ class User(AbstractUser):
     s_role = models.BooleanField(default=False)
     s_client = models.BooleanField(default=False)
     is_client = models.BooleanField(default=False)
-    
+    suggestions = models.BooleanField(default=False)
+    suggestion = models.BooleanField(default=False)
+    new_suggestion = models.BooleanField(default=False)
+
 
     objects = UserManager()

@@ -87,3 +87,12 @@ class Client_Council_Route(models.Model):
     client = models.ForeignKey('client_app.Clients', on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
     council = models.ForeignKey('region_app.Councils', on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
     route = models.ForeignKey('funding_route_app.Route', on_delete=models.CASCADE, null=True, blank=True, related_name='client_council_route')
+
+class Suggestion(models.Model):
+    created_at = models.DateTimeField(blank=True, null=True)
+    priority = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(max_length=999, blank=True, null=True)
+    file = models.FileField(upload_to="suggestion", blank=True, null=True)
+    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='file_suggestion')

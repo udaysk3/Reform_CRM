@@ -120,6 +120,15 @@
                           </label>
                         </div>
 
+                        <div class="form-check my-3">
+                          <input class="form-check-input suggestions" type="checkbox" id="suggestions" name="suggestions">
+                          <label class="form-check-label" for="suggestions">
+                            Suggestion
+                          </label>
+                        </div>
+
+
+
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
@@ -167,6 +176,9 @@
                   <th>Security Employee</th>
                   <th>Security Role</th>
                   <th>Security Client</th>
+                  <th>Suggestion</th>
+                  <th>S-Suggestion</th>
+                  <th>New Suggestion</th>
                 </tr>
               </thead>
               <tbody id="myTable">
@@ -387,6 +399,31 @@
                                   <input class="form-check-input s_client" type="checkbox" id="s_client" name="s_client" {% if role.s_client %} checked {% endif %}>
                                   <label class="form-check-label" for="s_client">
                                     Client
+                                  </label>
+                                </div>
+
+                              {% endif %}
+
+                              <div class="form-check my-3">
+                                <input class="form-check-input suggestions" type="checkbox" id="suggestions" name="suggestions" {% if role.suggestions %} checked {% endif %}>
+                                <label class="form-check-label" for="suggestions">
+                                  Suggestion
+                                </label>
+                              </div>
+
+                              {% if role.suggestion or role.new_suggestion  %}
+
+                                <div class="form-check my-3 ms-3">
+                                  <input class="form-check-input suggestion" type="checkbox" id="suggestion" name="suggestion" {% if role.suggestion %} checked {% endif %}>
+                                  <label class="form-check-label" for="suggestion">
+                                    S suggestion
+                                  </label>
+                                </div>
+
+                                <div class="form-check my-3 ms-3">
+                                  <input class="form-check-input new_suggestion" type="checkbox" id="new_suggestion" name="new_suggestion" {% if role.new_suggestion %} checked {% endif %}>
+                                  <label class="form-check-label" for="new_suggestion">
+                                    New Suggestion
                                   </label>
                                 </div>
 
@@ -902,6 +939,67 @@
                     </svg>
                   </td>
                   {% endif %}
+                  {% if role.suggestions %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.suggestion %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+                  {% if role.new_suggestion %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check text-primary"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </td>
+                  {% else %}
+                  <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x text-danger"
+                      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M18 6l-12 12" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </td>
+                  {% endif %}
+
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -929,6 +1027,38 @@
 {% block js %}
 
   <script>
+
+    const suggestions = document.querySelectorAll('.suggestions');
+    suggestions.forEach(suggestion => {
+      suggestion.addEventListener('change', () => {
+        const s_suggestion = suggestion.closest('form').querySelector('.suggestion');
+        if( s_suggestion ){
+          s_suggestion.parentElement.remove();
+          suggestion.parentElement.parentElement.querySelector('.new_suggestion').parentElement.remove();
+        } else {
+          const new_newsuggestion = document.createElement('div');
+          new_newsuggestion.classList.add('form-check', 'my-3', 'ms-3');
+          new_newsuggestion.innerHTML = `
+            <input checked class="form-check-input new_suggestion" type="checkbox" id="new_suggestion" name="new_suggestion">
+            <label class="form-check-label" for="new_suggestion">
+              New Suggestion
+            </label>
+          `;
+
+          suggestion.parentElement.insertAdjacentElement('afterEnd', new_newsuggestion);
+          const newCustomer = document.createElement('div');
+          newCustomer.classList.add('form-check', 'my-3', 'ms-3');
+          newCustomer.innerHTML = `
+            <input checked class="form-check-input suggestion" type="checkbox" id="suggestion" name="suggestion">
+            <label class="form-check-label" for="suggestion">
+              S Suggestion
+            </label>
+          `;
+          suggestion.parentElement.insertAdjacentElement('afterEnd', newCustomer);
+        }
+      })
+    });
+
     const mcustomers = document.querySelectorAll('.mcustomer');
     mcustomers.forEach(mcustomer => {
       mcustomer.addEventListener('change', () => {
