@@ -73,7 +73,7 @@ def getEPC(postcode, house_name, street_name):
             print(parsed_recommendations)
             return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link, "county" : row['county'], "local_authority"  : row['local-authority-label'], "constituency" : row['constituency-label'], "town" : row['posttown'], "address" : row['address'], "recommendations" : parsed_recommendations, "epc_data" : most_similar_data}
         else:
-            return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None, "recommendations" : parsed_recommendations}
+            return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None, "recommendations" : parsed_recommendations,  "epc_data" : None}
 
 # print(getEPC('S663YB', '64', ''))
 
