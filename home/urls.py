@@ -6,6 +6,8 @@ app_name = "app"
 urlpatterns = [
     path("", views.home),
     path("finance", views.Finance, name="finance"),
+    path("suggestion", views.suggestion, name="suggestion"),
+    path("add_suggestion", views.add_suggestion, name="add_suggestion"),
     path("query/cities/<str:q>", views.query_city, name="query_city"),
     path("query/countys/<str:q>", views.query_county, name="query_county"),
     path("query/countries/<str:q>", views.query_country, name="query_country"),

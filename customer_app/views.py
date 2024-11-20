@@ -537,6 +537,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "next": next,
             "child_customers": child_customers,
             "recommendations_list": processed_recommendations,
+            "epc_data": customer.epc_data,
             "routes": routes,
             "stages": stages,
             "agents" : agents,
@@ -838,6 +839,7 @@ def add_customer(request):
         energy_certificate_link = None
         address = house_name + " " + street_name
         constituency = None
+        epc_data = None
         if obj is not None:
             energy_rating = obj["energy_rating"]
             energy_certificate_link = obj["energy_certificate_link"]
@@ -849,6 +851,13 @@ def add_customer(request):
                 obj["address"] if obj["address"] else house_name + " " + street_name
             )
             recommendations = obj["recommendations"] if obj["recommendations"] else None
+            if obj["epc_data"]:
+                for key, value in obj["epc_data"].items():
+                    key = key.replace("_", " ").replace("-"," ").title()
+                    if value == "":
+                        obj["epc_data"][key] = "Not Available"
+                    else:
+                        obj["epc_data"][key] = value
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -872,6 +881,7 @@ def add_customer(request):
             energy_rating=energy_rating,
             energy_certificate_link=energy_certificate_link,
             recommendations=recommendations,
+            epc_data=epc_data,
         )
         customer.add_action(
                 agent=User.objects.get(email=request.user),
@@ -947,6 +957,7 @@ def edit_customer(request, customer_id):
         energy_certificate_link = None
         address = customer.house_name + " " + customer.street_name
         constituency = None
+        epc_data = None
         if obj is not None:
             energy_rating = obj["energy_rating"]
             energy_certificate_link = obj["energy_certificate_link"]
@@ -958,12 +969,21 @@ def edit_customer(request, customer_id):
                 obj["address"] if obj["address"] else customer.house_name + " " + customer.street_name
             )
             recommendations = obj["recommendations"] if obj["recommendations"] else None
+            processed_epc_data = dict()
+            if obj["epc_data"]:
+                for key, value in obj["epc_data"].items():
+                    key_formatted = key.replace("_", " ").replace("-"," ").title()
+                    if value == "":
+                        processed_epc_data[key_formatted] = "Not Available"
+                    else:
+                        processed_epc_data[key_formatted] = value
         customer.postcode = postcode
         customer.energy_rating = energy_rating
         customer.energy_certificate_link = energy_certificate_link
         customer.address = address
         customer.constituency = constituency
         customer.recommendations = recommendations
+        customer.epc_data = processed_epc_data
         if district:
             customer.district = district
         customer.save()

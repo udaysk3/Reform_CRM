@@ -85,6 +85,9 @@ class Command(BaseCommand):
                 s_employee= True,
                 s_role= True,
                 s_client= True,
+                suggestions= True,
+                suggestion= True,
+                new_suggestion= True,
             )
             self.stdout.write(self.style.SUCCESS(f"User {email} created successfully."))
 

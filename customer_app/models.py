@@ -29,6 +29,7 @@ class Customers(models.Model):
     energy_rating = models.CharField(max_length=2, blank=True, null=True)
     energy_certificate_link = models.URLField(max_length=999, blank=True, null=True)
     recommendations = models.TextField(max_length=999, blank=True, null=True)
+    epc_data = models.JSONField(blank=True, null=True)
     route =  models.ForeignKey('funding_route_app.Route', related_name='customers', on_delete=models.SET_NULL, blank=True, null=True)
     stage_values = models.JSONField(blank= True, null=True)
     council = models.ForeignKey('region_app.Councils', on_delete=models.SET_NULL, null=True)

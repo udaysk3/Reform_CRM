@@ -61,6 +61,9 @@ def add_role(request):
         s_employee = request.POST.get('s_employee') == 'on'
         s_role = request.POST.get('s_role') == 'on'
         s_client = request.POST.get('s_client') == 'on'
+        suggestions = request.POST.get('suggestions') == 'on'
+        suggestion = request.POST.get('suggestion') == 'on'
+        new_suggestion = request.POST.get('new_suggestion') == 'on'
 
         Role.objects.create(
             name=name,
@@ -91,7 +94,10 @@ def add_role(request):
             knowledge_base=knowledge_base,
             s_employee=s_employee,
             s_role=s_role,
-            s_client=s_client
+            s_client=s_client,
+            suggestions=suggestions,
+            suggestion=suggestion,
+            new_suggestion=new_suggestion,
         )
         messages.success(request, "Role added successfully!")
         return redirect('security_app:role')
@@ -171,6 +177,9 @@ def approve_role(request, emp_id):
     emp.s_employee = role.s_employee
     emp.s_role = role.s_role
     emp.s_client = role.s_client
+    emp.suggestions = role.suggestions
+    emp.suggestion = role.suggestion
+    emp.new_suggestion = role.new_suggestion
     emp.save()
     emp.employee_user.add_emp_action(
         created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -211,6 +220,9 @@ def deny_role(request, emp_id):
     emp.s_employee = False
     emp.s_role = False
     emp.s_client = False
+    emp.suggestions = False
+    emp.suggestion = False
+    emp.new_suggestion = False
     emp.save()
     emp.employee_user.add_emp_action(
         created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -274,6 +286,9 @@ def edit_role(request, role_id):
         role.s_employee = request.POST.get('s_employee') == 'on'
         role.s_role = request.POST.get('s_role') == 'on'
         role.s_client = request.POST.get('s_client') == 'on'
+        role.suggestions = request.POST.get('suggestions') == 'on'
+        role.suggestion = request.POST.get('suggestion') == 'on'
+        role.new_suggestion = request.POST.get('new_suggestion') == 'on'
         role.save()
         employees = User.objects.filter(role=role.name)
         for emp in employees:
@@ -305,6 +320,9 @@ def edit_role(request, role_id):
             emp.s_employee = role.s_employee
             emp.s_role = role.s_role
             emp.s_client = role.s_client
+            emp.suggestions = role.suggestions
+            emp.suggestion = role.suggestion
+            emp.new_suggestion = role.new_suggestion
             emp.save()
             
         messages.success(request, 'Role updated successfully!')

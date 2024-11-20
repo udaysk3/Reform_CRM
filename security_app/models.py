@@ -31,4 +31,7 @@ class Role(models.Model):
     s_employee = models.BooleanField(default=False)
     s_role = models.BooleanField(default=False)
     s_client = models.BooleanField(default=False)
+    suggestions = models.BooleanField(default=False)
+    suggestion = models.BooleanField(default=False)
+    new_suggestion = models.BooleanField(default=False)
 

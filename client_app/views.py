@@ -953,51 +953,24 @@ def add_product_client(request, client_id):
 
 def add_coverage_areas(request, client_id):
     if request.method == "POST":
-        try:
-            # Fetch the client and region
-            client = Clients.objects.get(pk=client_id)
-            postcodes = [p.strip() for p in request.POST.get("postcodes", "").split(",") if p.strip()]
-            region = Councils.objects.get(name='UK')
-
-            # Load existing postcodes from the file
-            uk_postcodes_path = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
-            if os.path.exists(uk_postcodes_path):
-                with open(uk_postcodes_path, 'r') as f:
-                    file_postcodes = set(f.read().split(","))
-            else:
-                file_postcodes = set()
-
-            # Get current region postcodes
-            region_postcodes = set(region.postcodes.split(","))
-
-            # Combine both sources of postcodes
-            all_existing_postcodes = region_postcodes.union(file_postcodes)
-
-            # Process new postcodes
-            new_postcodes = set(postcodes) - all_existing_postcodes
-            for postcode in new_postcodes:
-                # Add the new postcode to the region's postcodes
-                region.postcodes += ',' + postcode if region.postcodes else postcode
-
-                # Append the new postcode to the file
-                with open(uk_postcodes_path, 'a') as f:
-                    f.write(',' + postcode if file_postcodes else postcode)
-
-                # Save the coverage area
-                CoverageAreas.objects.create(client=client, postcode=postcode)
-
-            # Save the updated region data
-            region.save()
-
-            if new_postcodes:
-                messages.success(request, "Coverage Area added successfully!")
-            else:
-                messages.warning(request, "No new postcodes were added.")
-
-        except Exception as e:
-            messages.error(request, f"Error adding coverage areas: {e}")
-
-        return redirect(f"/client-detail/{client_id}")
+        client = Clients.objects.get(pk=client_id)
+        postcodes = request.POST.get("postcodes").split(",")
+        region = Councils.objects.get(name='UK')
+        
+        for postcode in postcodes:
+            if postcode not in region.postcodes.split(','):
+                region.postcodes += ',' + postcode
+                uk_postcodes = os.path.join(os.path.dirname(__file__), '../uk_postcodes.txt')
+                with open(uk_postcodes, 'a') as f:
+                    f.write(',' + postcode)
+                region.save()    
+            CoverageAreas.objects.create(
+                client=client,
+                postcode=postcode,
+            )
+            messages.success(request, "Coverage Area added successfully!")
+                    
+        return redirect(r"/client-detail/" + str(client_id))
 
 
 def archive_campaign(request,client_id, campaign_id):

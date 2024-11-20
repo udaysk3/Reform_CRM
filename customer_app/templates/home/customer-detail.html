@@ -1,6 +1,18 @@
 {% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
 
 <style>
+
+  .upper-name{
+    background-color: #004652;
+    color:#fff;
+    padding: 10px;
+    border-radius: 15px;
+    z-index: 1000;
+    width: fit-content;
+    left: 50px;
+    top:-15px;
+  }
+
   .bx-copy-alt{
     cursor: pointer;
   }
@@ -429,6 +441,52 @@ table {
                   {% else %}
                   <h6><b>Recommendations</b>: -</h6>
                   {% endif %}
+                  {% if customer.epc_data %}
+                  <h6><b>EPC Data</b>:  
+                    <a href="#" class="" data-bs-toggle="modal" data-bs-target="#epcModal">
+                    Click Here
+                  </a>
+                
+                  <div class="modal fade" id="epcModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">EPC Data</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <div>
+                              <table style="border-collapse: collapse; width: 200%;">
+                                <thead>
+                                  <tr style="border-bottom: 1px solid black;">
+                                    <th style="padding: 8px; text-align: left;">Field</th>
+                                    <th style="padding: 8px; text-align: left;">Value</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for key, value in customer.epc_data.items %}
+                                  <tr style="border: 1px solid black;">
+                                  
+                                    <td style="padding: 8px; font-weight: bold;">{{ key }}</td>
+                                    <td style="padding: 8px;">{{ value }}</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </h6>
+                {% else %}
+                <h6><b>EPC Data</b>: -</h6>
+                {% endif %}
                   <h6><b>Google Maps Link</b>: <a target="_blank" href=
                   "
                     https://www.google.com/maps?q={% if customer.house_name %}{{ customer.house_name }}{% endif %}+{% if customer.street_name %}{{ customer.street_name }}{% endif %}+{% if customer.postcode %}{{ customer.postcode }}{% endif %}
@@ -483,23 +541,22 @@ table {
       <div class="card-body p-3 pb-0 m-0 row">
         <div class="col">
           <div class="card py-3 d-flex">
-            <div class="card-body p-3 pb-0 m-0 row">
-              <h6>Available Funding Routes</h6>
-
-              <div class="card p-0 m-0">
+            <div class="card-body p-3 pb-0 m-0 row ">
+              
+              <div class="card p-0 m-0 mb-4">
+                <h6 class="position-absolute upper-name">Available Funding Routes</h6>
                 <div class="card-body p-3 m-0 position-relative">
-                  <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
+                  <div class=" me-2 mb-2 tabs mt-4" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
                     {% for route in routes %}
                     <h6 class="reform_btn me-3">{{ route.name }}</h6>
                     {% endfor %}
                   </div>
                 </div>
               </div>
-
-              <h6 class="mt-3">Available Products</h6>
               
               <div class="card p-0 m-0">
-                <div class="card-body p-3 m-0">
+                <h6 class=" position-absolute upper-name">Available Products</h6>
+                <div class="card-body p-3 m-0 mt-4">
                   <div class=" me-2 mb-2 tabs" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
                     {% for product in products %}
                     <h6 class="reform_btn me-3">{{ product.name }}</h6>
@@ -592,6 +649,7 @@ table {
         <div class="col">
           <div class="card py-3 d-flex">
             <div class="card-body p-3 pb-0 m-0 row">
+              <h6 class="position-absolute upper-name">Action History</h6>
               <h6 class="fs-6">
                 <b>Next Action</b>: {% with latest_action=customer.get_created_at_action_history.first %}
                 {{latest_action.date_time }} {% endwith %}
@@ -998,11 +1056,11 @@ table {
                         {% for v in value %}
                         <li class="mb-2"><div class="tooltipbas me-2"> <i class="bx bx-info-circle fs-6"></i>
                             <span class="tooltiptextbas"> {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
-                            {% if v.7 %}
-                            spoke to <b> {{ v.7 }}</b>
-                            {% endif %}
-                            - Next Action: {{ v.6 }}
- </span>
+                              {% if v.7 %}
+                                spoke to <b> {{ v.7 }}</b>
+                              {% endif %}
+                              - Next Action: {{ v.6 }}
+                            </span>
                           </div><b>{{ v.0 }} - {{ v.5 }}</b>
                           
                           {% if v.8 %}
