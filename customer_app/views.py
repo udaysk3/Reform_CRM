@@ -851,13 +851,14 @@ def add_customer(request):
                 obj["address"] if obj["address"] else house_name + " " + street_name
             )
             recommendations = obj["recommendations"] if obj["recommendations"] else None
+            processed_epc_data = dict()
             if obj["epc_data"]:
                 for key, value in obj["epc_data"].items():
-                    key = key.replace("_", " ").replace("-"," ").title()
+                    key_formatted = key.replace("_", " ").replace("-"," ").title()
                     if value == "":
-                        obj["epc_data"][key] = "Not Available"
+                        processed_epc_data[key_formatted] = "Not Available"
                     else:
-                        obj["epc_data"][key] = value
+                        processed_epc_data[key_formatted] = value
         customer = Customers.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -881,7 +882,7 @@ def add_customer(request):
             energy_rating=energy_rating,
             energy_certificate_link=energy_certificate_link,
             recommendations=recommendations,
-            epc_data=epc_data,
+            epc_data=processed_epc_data,
         )
         customer.add_action(
                 agent=User.objects.get(email=request.user),
@@ -1692,17 +1693,19 @@ def refresh_epc(request, customer_id):
         energy_certificate_link = obj["energy_certificate_link"]
         constituency = obj["constituency"] if obj["constituency"] else None
         recommendations = obj["recommendations"] if obj["recommendations"] else None
+        processed_epc_data = dict()
         if obj["epc_data"]:
-                for key, value in obj["epc_data"].items():
-                    key = key.replace("_", " ").replace("-"," ").title()
-                    if value == "":
-                        obj["epc_data"][key] = "Not Available"
-                    else:
-                        obj["epc_data"][key] = value
+            for key, value in obj["epc_data"].items():
+                key_formatted = key.replace("_", " ").replace("-"," ").title()
+                if value == "":
+                    processed_epc_data[key_formatted] = "Not Available"
+                else:
+                    processed_epc_data[key_formatted] = value
     customer.energy_rating = energy_rating
     customer.energy_certificate_link = energy_certificate_link
     customer.constituency = constituency
     customer.recommendations = recommendations
+    customer.epc_data = processed_epc_data
     customer.save()
     messages.success(request, "EPC refreshed successfully!")
     return redirect(f"/customer-detail/{customer_id}")
