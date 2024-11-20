@@ -12,7 +12,9 @@ from .models import (
     Countys,
     Countries,
     Stage,
+    Suggestion,
 )
+from django.http import HttpResponseRedirect
 from customer_app.models import Customers
 from client_app.models import Clients
 from region_app.models import Councils
@@ -40,6 +42,35 @@ def Finance(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
     return render(request, "home/finance.html")
+
+@login_required
+def suggestion(request):
+    if request.session.get("first_name"):
+        delete_customer_session(request)
+    suggestions = Suggestion.objects.all()
+    return render(request, "home/suggestion.html", {"suggestions": suggestions})
+
+
+def add_suggestion(request):
+    if request.method == "POST":
+        description = request.POST.get("description")
+        type = request.POST.get("type")
+        agent = request.user
+        location = request.POST.get("location")
+        priority = request.POST.get("priority")
+        file = request.FILES.get("file")
+        Suggestion.objects.create(
+            description=description,
+            type=type,
+            agent=agent,
+            location=location,
+            priority=priority,
+            file=file,
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+        )
+        
+        messages.success(request, "Suggestion added successfully!")
+        return HttpResponseRedirect(location)
 
 def query_city(request, q):
     cities = Cities.objects.all()
@@ -153,7 +184,7 @@ def get_message(historyId,userId):
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
                         action_type="Email Received",
-                        agent=User.objects.get(email='admin@gmail.com'),
+                        agent=User.objects.get(email='systems@reform-group.uk'),
                         text=f'Subject: {subject_header} \n Body: {body}',
                     )
                 else:
@@ -165,14 +196,14 @@ def get_message(historyId,userId):
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
                         action_type=f"Added {customer.email}",
-                        agent=User.objects.get(email='admin@gmail.com'),
+                        agent=User.objects.get(email='systems@reform-group.uk'),
                         keyevents=True,
                     )
                     customer.add_action(
                         date_time=datetime.now(pytz.timezone("Europe/London")),
                         created_at=datetime.now(pytz.timezone("Europe/London")),
                         action_type="Email Received",
-                        agent=User.objects.get(email='admin@gmail.com'),
+                        agent=User.objects.get(email='systems@reform-group.uk'),
                         text=f'Subject: {subject_header} \n Body: {body}',
                     )
             

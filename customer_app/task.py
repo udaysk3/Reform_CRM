@@ -25,7 +25,7 @@ def sign_url(url, key, secret):
                 first_area = json_response["area-array"][0]
                 short_label = first_area.get("shortLabel", None)
                 if short_label:
-                    print(f"Short Label: {short_label}")
+                    # print(f"Short Label: {short_label}")
                     return short_label
                 else:
                     print("Short Label not found in the response.")

@@ -18,7 +18,7 @@ class Command(BaseCommand):
         else:
             for city in cities:
                 if not Cities.objects.filter(name=city).exists():
-                    Cities.objects.create(name=city, created_at=datetime.now(pytz.timezone('Europe/London')), agent=User.objects.get(email="burluudaysantoshkumar3@gmail.com"))
+                    Cities.objects.create(name=city, created_at=datetime.now(pytz.timezone('Europe/London')), agent=User.objects.get(email="systems@reform-group.uk"))
             self.stdout.write(self.style.SUCCESS('Objects created successfully.'))
 
 

@@ -32,7 +32,6 @@ def parse_recommendations(recommendations_url, headers):
 def getEPC(postcode, house_name, street_name):
     customer_address = f"{house_name} {street_name}".lower()
     token = "YnVybHV1ZGF5c2FudG9zaGt1bWFyM0BnbWFpbC5jb206ZjBjZmYxNjIwYWMwZWUyMGNmNzhjYmUwNzQ5MTAzYzE1NTYxYjk5Yw=="
-
     headers = {
         'Accept': 'text/csv',
         'Authorization': f'Basic {token}'
@@ -40,7 +39,7 @@ def getEPC(postcode, house_name, street_name):
     postcode = postcode.replace(' ', '')
     base_url = 'https://epc.opendatacommunities.org/api/v1/domestic/search'
     recommendations_url = "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/"
-    query_params = {'postcode': postcode,'from-month':1, 'from-year':2008, 'to-month':1, 'to-year':2024}
+    query_params = {'postcode': postcode,'from-month':1, 'from-year':2008, 'to-month':1, 'to-year':2024, 'size': 1000}
 
     encoded_params = urlencode(query_params)
 
@@ -65,11 +64,16 @@ def getEPC(postcode, house_name, street_name):
                 break
         parsed_recommendations = []
         if most_similar_data:
+
+            # print(most_similar_data)
             energy_rating = most_similar_data['current-energy-rating']
             certificate_link = f"https://epc.opendatacommunities.org/domestic/certificate/{most_similar_data['lmk-key']}"
             recommendations_url += most_similar_data['lmk-key']
             parsed_recommendations = parse_recommendations(recommendations_url, headers)
             print(parsed_recommendations)
-            return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link, "county" : row['county'], "local_authority"  : row['local-authority-label'], "constituency" : row['constituency-label'], "town" : row['posttown'], "address" : row['address'], "recommendations" : parsed_recommendations}
+            return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link, "county" : row['county'], "local_authority"  : row['local-authority-label'], "constituency" : row['constituency-label'], "town" : row['posttown'], "address" : row['address'], "recommendations" : parsed_recommendations, "epc_data" : most_similar_data}
         else:
-            return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None, "recommendations" : parsed_recommendations}
+            return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None, "recommendations" : parsed_recommendations,  "epc_data" : None}
+
+# print(getEPC('S663YB', '64', ''))
+
