@@ -1686,11 +1686,19 @@ def refresh_epc(request, customer_id):
     energy_rating = None
     energy_certificate_link = None
     constituency = None
+    epc_data = None
     if obj is not None:
         energy_rating = obj["energy_rating"]
         energy_certificate_link = obj["energy_certificate_link"]
         constituency = obj["constituency"] if obj["constituency"] else None
         recommendations = obj["recommendations"] if obj["recommendations"] else None
+        if obj["epc_data"]:
+                for key, value in obj["epc_data"].items():
+                    key = key.replace("_", " ").replace("-"," ").title()
+                    if value == "":
+                        obj["epc_data"][key] = "Not Available"
+                    else:
+                        obj["epc_data"][key] = value
     customer.energy_rating = energy_rating
     customer.energy_certificate_link = energy_certificate_link
     customer.constituency = constituency
