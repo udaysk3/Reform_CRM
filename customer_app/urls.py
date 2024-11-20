@@ -80,4 +80,5 @@ urlpatterns = [
         name="add_stage_ans",
     ),
     path("get_agent_customers/<int:agent_id>", views.get_agent_customers, name="get_agent_customers"),
+    path("refresh_epc/<int:customer_id>", views.refresh_epc, name="refresh_epc"),
 ]

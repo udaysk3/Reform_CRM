@@ -1,6 +1,8 @@
 # Byte-compiled Python files
 *.pyc
 
+db.sqlite3
+reform_crm/*
 
 # Secret key file
 secret_key.txt
