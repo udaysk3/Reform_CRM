@@ -47,7 +47,6 @@ def getEPC(postcode, house_name, street_name):
 
     with urllib.request.urlopen(urllib.request.Request(full_url, headers=headers)) as response:
         response_body = response.read().decode('utf-8')
-        # print(response_body)
         csv_reader = csv.DictReader(io.StringIO(response_body))
         most_similar_data = None
         max_similarity_score = 0
@@ -65,13 +64,16 @@ def getEPC(postcode, house_name, street_name):
                 break
         parsed_recommendations = []
         if most_similar_data:
+
+            # print(most_similar_data)
             energy_rating = most_similar_data['current-energy-rating']
             certificate_link = f"https://epc.opendatacommunities.org/domestic/certificate/{most_similar_data['lmk-key']}"
             recommendations_url += most_similar_data['lmk-key']
             parsed_recommendations = parse_recommendations(recommendations_url, headers)
             print(parsed_recommendations)
-            return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link, "county" : row['county'], "local_authority"  : row['local-authority-label'], "constituency" : row['constituency-label'], "town" : row['posttown'], "address" : row['address'], "recommendations" : parsed_recommendations}
+            return {'energy_rating': energy_rating, 'energy_certificate_link': certificate_link, "county" : row['county'], "local_authority"  : row['local-authority-label'], "constituency" : row['constituency-label'], "town" : row['posttown'], "address" : row['address'], "recommendations" : parsed_recommendations, "epc_data" : most_similar_data}
         else:
             return {'energy_rating': None, 'energy_certificate_link': None, "county" : None, "local_authority"  : None, "constituency" : None, "town" : None, "address" : None, "recommendations" : parsed_recommendations}
 
 # print(getEPC('S663YB', '64', ''))
+

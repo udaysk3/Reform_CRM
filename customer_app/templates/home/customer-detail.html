@@ -429,6 +429,52 @@ table {
                   {% else %}
                   <h6><b>Recommendations</b>: -</h6>
                   {% endif %}
+                  {% if customer.epc_data %}
+                  <h6><b>EPC Data</b>:  
+                    <a href="#" class="" data-bs-toggle="modal" data-bs-target="#epcModal">
+                    Click Here
+                  </a>
+                
+                  <div class="modal fade" id="epcModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">EPC Data</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <div>
+                              <table style="border-collapse: collapse; width: 200%;">
+                                <thead>
+                                  <tr style="border-bottom: 1px solid black;">
+                                    <th style="padding: 8px; text-align: left;">Field</th>
+                                    <th style="padding: 8px; text-align: left;">Value</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for key, value in customer.epc_data.items %}
+                                  <tr style="border: 1px solid black;">
+                                  
+                                    <td style="padding: 8px; font-weight: bold;">{{ key }}</td>
+                                    <td style="padding: 8px;">{{ value }}</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </h6>
+                {% else %}
+                <h6><b>EPC Data</b>: -</h6>
+                {% endif %}
                   <h6><b>Google Maps Link</b>: <a target="_blank" href=
                   "
                     https://www.google.com/maps?q={% if customer.house_name %}{{ customer.house_name }}{% endif %}+{% if customer.street_name %}{{ customer.street_name }}{% endif %}+{% if customer.postcode %}{{ customer.postcode }}{% endif %}
