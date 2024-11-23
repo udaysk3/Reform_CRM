@@ -9,7 +9,8 @@ from .models import (
     Countys,
     Countries,
     Client_Council_Route,
-    Suggestion
+    Suggestion,
+    Sub_suggestions,
 )
 
 from admin_app.models import Signature
@@ -43,3 +44,4 @@ admin.site.register(Client_Council_Route)
 admin.site.register(CJStage)
 admin.site.register(Answer)
 admin.site.register(Suggestion)
+admin.site.register(Sub_suggestions)
