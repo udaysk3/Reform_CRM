@@ -182,7 +182,7 @@ label.add{
                           {% for sub_suggestion in sub_suggestions %}
                           <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span> {{ sub_suggestion.description }} </span>
-                            <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent;">
+                            <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent; color:#fff">
                             <i class="far fa-trash-alt delete" ></i></button>
                           </li>
                           {% endfor %}
@@ -190,7 +190,11 @@ label.add{
                         
                         <div class="add text-center my-4">
                           <label for="add" class="add text-dark">Add a new suggestion:</label>
-                          <input type="text" class="form-control m-auto form" name="add" id="add">
+                          <div class="row mx-1 input-group">
+                            <input type="text" class="form-control m-auto form col" name="add" id="add">
+                            <button class="btn btn-primary col-2 addSub" type="button" style="width: fit-content;">Add</button>
+
+                          </div>
                         </div>
                       </div>
                       <div class="modal-footer">
@@ -284,6 +288,15 @@ label.add{
         return; // Exit early to let the browser handle the key normally
       }
     });
+
+    function handleAddSubSuggestions() {
+      const inputValue = addForm.value.trim(); 
+      if (inputValue.length) handleAddItem(inputValue); 
+      addForm.value = "";
+    }
+
+    const addSub = document.querySelector(".addSub");
+    addSub.addEventListener("click", handleAddSubSuggestions);
 
 
 

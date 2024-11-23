@@ -212,7 +212,10 @@ def edit_suggestion(request, suggestion_id):
         suggestion.location = location
         if file:
             suggestion.file = file
-        suggestion.expected_completion_date = expected_completion_date
+        if expected_completion_date:
+            suggestion.expected_completion_date = expected_completion_date
+        else:
+            suggestion.expected_completion_date = None
         suggestion.status = status
         suggestion.save()
         messages.success(request, "Suggestion edited successfully!")
