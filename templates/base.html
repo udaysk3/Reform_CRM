@@ -121,21 +121,6 @@ i{
   </style>
   {% block css %}
   {% endblock %}
-  <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1480301302605956');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1480301302605956&ev=PageView&noscript=1"
-    /></noscript>
 </head>
 
 <body>
@@ -403,14 +388,6 @@ i{
                 <div class="mb-3">
                   <label for="type" class="form-label">What type of issue?</label>
                   <input type="text" class="form-control" id="type" name="type">
-                </div>
-                <div class="mb-3">
-                  <label for="type" class="form-label">What is the priority of issue?</label>
-                  <select class="form-select" name="priority">
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="description" class="form-label">Please decribe the issue</label>

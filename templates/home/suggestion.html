@@ -2,6 +2,16 @@
 {% load static %}
 {% block css %}
 
+<style>
+  .suggestiondrag, .archivesuggestiondrag {
+  cursor: move;
+}
+
+.suggestiondrag.dragging, .archivesuggestiondrag.dragging {
+  opacity: .5;
+}
+</style>
+
 {% endblock %}
 {% block search %}
 
@@ -29,7 +39,7 @@
 
             <div class="mb-3 mb-sm-0">
               <a href="#">
-                <h5 class="card-title fw-semibold text-primary text-decoration-underline">Suggestion Management</h5>
+                <h5 class="card-title fw-semibold text-primary text-decoration-underline">Suggestion</h5>
               </a>
             </div>
           </div>
@@ -40,37 +50,107 @@
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Priority</th>
-                  <th>Type</th>
+                  <th>Suggestion</th>
+                  <th>Status</th>
                   <th>Location</th>
-                  <th>Description</th>
                   <th>File</th>
                   <th>Requester</th>
+                  <th>Archive</th>
                 </tr>
               </thead>
-              <tbody id="myTable">
+              <tbody id="myTable" class="suggestion-container">
                 {% if suggestions %}
                 {% for suggestion in suggestions %}
-                <tr>
-                  <td style="width: 20%;">{{ suggestion.created_at }}</td>
-                  <td style="width: 10%;
-                  {% if suggestion.priority == 'High' %}
-                  color: red;
-                  {% elif suggestion.priority == 'Medium' %}
-                  color: yellow;
+                <tr class="suggestiondrag" data-suggestion-id="{{ suggestion.id }}" draggable="true" 
+                style="
+                {% if suggestion.status == 'Completed' %}
+                  background-color: #d4edda;
+                {% elif suggestion.expected_completion_date %}
+                  {% if suggestion.expected_completion_date < current_date_time %}
+                    background-color: #f8d7da;
+                  {% elif suggestion.expected_completion_date <= yesterday %}
+                    background-color: #ffd493;
                   {% endif %}
-                  ">{{ suggestion.priority }}</td>
-                  <td style="width: 10%;">{{ suggestion.type }}</td>
+
+                {% endif %}
+                "
+                >
+                  <td style="width: 20%;">{{ suggestion.created_at }}</td>
+                  <td style="width: 20%;"><a href="{% url 'app:detail_suggestion' suggestion.id %}"> {{ suggestion.description }} </a></td>
+                  <td style="width: 10%;">{{ suggestion.status }}</td>
                   <td style="width: 10%;">{{ suggestion.location }}</td>
-                  <td style="width: 30%;">{{ suggestion.description }}</td>
                   <td style="width: 10%;">
                     {% if suggestion.file %}
-                    <a href="{{ suggestion.file.url }}" target="_blank" class="btn btn-primary">View</a>
+                    <a href="{{ suggestion.file.url }}" target="_blank" class="reform_btn">View</a>
                     {% else %}
                     No File
                     {% endif %}
                   </td>
                   <td style="width: 10%;">{{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }}</td>
+                  <td style="width: 10%;">
+                    <a href="{% url 'app:archive_suggestion' suggestion.id %}" class="reform_btn">Archive</a>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr class="text-center display-flex align-items-center justify-content-center">
+                  <td colspan="6" class="text-center">No Suggestion</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-strech w-100">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+
+            <div class="mb-3 mb-sm-0">
+              <a href="#">
+                <h5 class="card-title fw-semibold text-primary text-decoration-underline">Archived Suggestion</h5>
+              </a>
+            </div>
+          </div>
+      
+          <div>
+            <table class="table">
+
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Description</th>
+                  <th>File</th>
+                  <th>Requester</th>
+                  <th>Archive</th>
+                </tr>
+              </thead>
+              <tbody id="myTable" class="archive-suggestion-container">
+                {% if archive_suggestions %}
+                {% for suggestion in archive_suggestions %}
+                <tr class="archivesuggestiondrag" data-suggestion-id="{{ suggestion.id }}" draggable="true">
+                  <td style="width: 20%;">{{ suggestion.created_at }}</td>
+                  <td style="width: 10%;">{{ suggestion.type }}</td>
+                  <td style="width: 10%;">{{ suggestion.location }}</td>
+                  <td style="width: 20%;">{{ suggestion.description }}</td>
+                  <td style="width: 10%;">
+                    {% if suggestion.file %}
+                    <a href="{{ suggestion.file.url }}" target="_blank" class="reform_btn">View</a>
+                    {% else %}
+                    No File
+                    {% endif %}
+                  </td>
+                  <td style="width: 10%;">{{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }}</td>
+                  <td style="width: 10%;">
+                    <a href="{% url 'app:archive_suggestion' suggestion.id %}" class="reform_btn">UnArchive</a>
+                  </td>
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -95,5 +175,137 @@
 
 
 {% block js %}
+
+  <script>
+    
+      const container = document.querySelector('.suggestion-container');
+      const draggables = document.querySelectorAll('.suggestiondrag');
+      draggables.forEach(draggable => {
+        let sent = false;
+
+        draggable.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          draggable.classList.add('dragging');
+        });
+
+        draggable.addEventListener('dragend', (e) => {
+          e.stopPropagation();
+          draggable.classList.remove('dragging');
+
+          if (!sent) {
+            const suggestions = document.querySelectorAll('.suggestiondrag');
+            const order_suggestions = [];
+            suggestions.forEach((suggestion, i) => {
+              order_suggestions.push({
+                suggestion: suggestion.dataset.suggestionId,
+                order: i + 1
+              });
+            });
+
+            fetch('/suggestion_order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+              },
+              body: JSON.stringify({ 'order_suggestions': order_suggestions })
+            });
+
+            sent = true;
+          }
+        });
+      });
+
+      container.addEventListener('dragover', e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(container, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (draggable && Array.from(draggables).includes(draggable)) {
+          if (afterElement == null) {
+            container.appendChild(draggable);
+          } else {
+            container.insertBefore(draggable, afterElement);
+          }
+        }
+      });
+
+      function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.suggestiondrag:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
+          }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+      }
+    
+      const acontainer = document.querySelector('.archive-suggestion-container');
+      const archivedraggables = document.querySelectorAll('.archivesuggestiondrag');
+      archivedraggables.forEach(draggable => {
+        let sent = false;
+
+        draggable.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          draggable.classList.add('dragging');
+        });
+
+        draggable.addEventListener('dragend', (e) => {
+          e.stopPropagation();
+          draggable.classList.remove('dragging');
+
+          if (!sent) {
+            const suggestions = document.querySelectorAll('.archivesuggestiondrag');
+            const order_suggestions = [];
+            suggestions.forEach((suggestion, i) => {
+              order_suggestions.push({
+                suggestion: suggestion.dataset.suggestionId,
+                order: i + 1
+              });
+            });
+
+            fetch('/suggestion_order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+              },
+              body: JSON.stringify({ 'order_suggestions': order_suggestions })
+            });
+
+            sent = true;
+          }
+        });
+      });
+
+      acontainer.addEventListener('dragover', e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(acontainer, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (draggable && Array.from(archivedraggables).includes(draggable)) {
+          if (afterElement == null) {
+            acontainer.appendChild(draggable);
+          } else {
+            acontainer.insertBefore(draggable, afterElement);
+          }
+        }
+      });
+
+      function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.archivesuggestiondrag:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
+          }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+      }
+
+  </script>
 
 {% endblock js %}

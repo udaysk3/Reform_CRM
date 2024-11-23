@@ -8,6 +8,7 @@ from product_app.models import Product
 from funding_route_app.models import Route
 from customer_journey_app.models import CJStage
 from question_actions_requirements_app.models import Rule_Regulation, Questions
+from security_app.models import Role
 import pytz
 london_tz = pytz.timezone("Europe/London")
 
@@ -52,16 +53,18 @@ def cj_product(request ,route_id ,product_id):
     route = Route.objects.get(pk=route_id)
     product = Product.objects.get(pk=product_id)
     stages = Stage.objects.all().filter(global_archive=False)
+    roles = Role.objects.all()
     cjstages = CJStage.objects.all().filter(route=route,product=product,client=None)
     
     
     if request.method == 'POST':
         stage = Stage.objects.get(pk=request.POST.get('stage'))
-        CJStage.objects.get_or_create(route=route, product=product,stage=stage)
+        role = Role.objects.get(pk=request.POST.get('role'))
+        CJStage.objects.get_or_create(route=route, product=product,stage=stage, role=role)
         messages.success(request, "Stage added to product successfully!")
         return redirect(f"/cj_product/{route_id}/{product_id}")
     return render(
-        request, "home/cj_product.html", {"product": product, "stages": stages, "route":route, "cjstages":cjstages}
+        request, "home/cj_product.html", {"product": product, "stages": stages, "route":route, "cjstages":cjstages, "roles":roles}
     )
 
 
@@ -145,7 +148,7 @@ def delete_cj_stage(request, route_id ,product_id, stage_id):
     product = Product.objects.get(pk=product_id)
     stage = Stage.objects.get(pk=stage_id)
     route = Route.objects.get(pk=route_id)
-    CJStage.objects.get(route=route, product=product, stage=stage).delete()
+    CJStage.objects.filter(route=route, product=product, stage=stage).delete()
     messages.success(request, "Stage deleted successfully!")
     return redirect(f"/cj_product/{route_id}/{product_id}")
 

@@ -1,0 +1,307 @@
+{% extends 'base.html' %} {% load static %} {% load custom %} {% block css %}
+
+<style>
+
+  
+input[type=text],
+input[type=text]:focus{
+  color: #000;
+  border: none;
+  background-color: rgba(0, 0, 0, .2);
+}
+
+li.list-group-item{
+  background-color: #004652;
+  color: #fff;
+}
+
+.delete{
+  cursor: pointer;
+}
+
+label.add{
+  margin-bottom: 15px;
+}
+
+.filtred{
+  display: none !important;
+}
+
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
+{% endblock %} {% block content %}
+
+{% for message in messages %}
+<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+
+<div class="row container-fluid ">
+
+  <div class="card mb-3" >
+    <div class="card-body pb-0 row">
+      <div class="col">
+        <div class="row">
+          <div class="row pb-3" style="border-bottom: 2px solid #91E0DA;">
+            {% comment %} <div class="cnav-item col-1 position-absolute" style="left:-0px; top:8px;">
+              <a href="/customer-detail/{{prev}}" >
+                <i class="bx bx-left-arrow my-4 fs-6"></i>
+              </a>
+            </div> {% endcomment %}
+
+            <div class="col-11">
+              <h3>Suggestion</h3>
+            </div>
+            
+            <div class="col-1">
+              <button class="col-1" style="border: none; background-color: transparent;" data-bs-toggle="modal"
+                data-bs-target="#staticBackdrop">
+                <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="28"
+                  height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                  <path d="M13.5 6.5l4 4" />
+                </svg>
+              </button>
+              <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Sub Suggestion</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{% url 'app:edit_suggestion' suggestion.id %}" method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label for="location" class="form-label">Tab</label>
+                          <input type="text" class="form-control" id="location" name="location" value="{{ suggestion.location }}">
+                        </div>
+                        <div class="mb-3">
+                          <label for="type" class="form-label">What type of issue?</label>
+                          <input type="text" class="form-control" id="type" name="type" value="{{ suggestion.type }}">
+                        </div>
+                        <div class="mb-3">
+                          <label for="expected_completion_date" class="form-label">What type of issue?</label>
+                          <input type="date" class="form-control" id="expected_completion_date" name="expected_completion_date" value="{{ formatted_date }}">
+                        </div>
+                        <div class="mb-3">
+                          <label for="type" class="form-label">The status of suggestion?</label>
+                          <select class="form-select" name="status">
+                            <option value="Not yet started">Not yet started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                          </select>
+                        </div>
+                        <div class="mb-3">
+                          <label for="description" class="form-label">Please decribe the issue</label>
+                          <input type="text" class="form-control" id="description" name="description" value="{{ suggestion.description }}">
+                        </div>
+                        <div class="mb-3">
+                          <label for="file" class="form-label">Upload file</label>
+                          <input type="file" class="form-control" id="file" name="file">
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button class="reform_btn">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+          <div class="row mt-4">
+            <div class="col-sm-4 mb-sm-0 px-2">
+              <div class="card">
+                <div class="card-body py-3">
+                  <h6><b> Suggestion: </b> {{ suggestion.description }}</h6>
+                  <h6><b> Type: </b> {{ suggestion.type }}</h6>
+                  <h6><b> Location: </b> {{ suggestion.location }}</h6>
+                  <h6><b> File: </b> {% if suggestion.file %}
+                    <a href="{{ suggestion.file.url }}" target="_blank" class="btn btn-primary">View</a>
+                    {% else %}
+                    No File
+                    {% endif %}</h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {% comment %} <div class="cnav-item fs-6 col-1 position-absolute" style="right:-30px; top:8px;">
+         <a href="/customer-detail/{{next}}"><i class="bx bx-right-arrow my-4 fs-6"></i></a>
+      </div> {% endcomment %}
+    </div>
+  </div>
+</div>
+
+
+<div class="row  container-fluid">
+<div class="container-fluid pt-4">
+  <div class="row">
+
+    <div class="card py-3 d-flex">
+      <div class="card-body p-3 pb-0 m-0 row">
+        <div class="col">
+          <div class="card py-3 d-flex">
+            <div class="card-body p-3 pb-0 m-0 row " style="height: 250px; overflow-y:auto;">
+              <div class="row">
+                <h4 class="card-title col-11">Sub Suggestions</h4>
+                <button class="col-1" style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#edit_sub_suggestion">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="text-warning icon icon-tabler icon-tabler-pencil" width="28"
+                    height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <path d="M13.5 6.5l4 4" />
+                  </svg>
+                </button>
+                <div class="modal fade" id="edit_sub_suggestion" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Sub Suggestion</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form action="{% url 'app:add_sub_suggestion' suggestion.id %}" method="post">
+                        {% csrf_token %}
+                      <div class="modal-body">
+                        <ul class="list-group todos mx-auto text-light">
+                          {% for sub_suggestion in sub_suggestions %}
+                          <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span> {{ sub_suggestion.description }} </span>
+                            <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent;">
+                            <i class="far fa-trash-alt delete" ></i></button>
+                          </li>
+                          {% endfor %}
+                        </ul>
+                        
+                        <div class="add text-center my-4">
+                          <label for="add" class="add text-dark">Add a new suggestion:</label>
+                          <input type="text" class="form-control m-auto form" name="add" id="add">
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button class="reform_btn">Submit</button>
+                      </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <table class="table">
+                <tbody id="myTable">
+                  {% if sub_suggestions %}
+                  {% for sub_suggestion in sub_suggestions %}
+                  <tr>
+                    <td style="width: 30%;">{{ sub_suggestion.description }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr class="text-center display-flex align-items-center justify-content-center">
+                    <td colspan="6" class="text-center">No Sub Suggestion</td>
+                  </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card py-3 d-flex">
+            <h4 class="card-title ms-4">ETA</h4>
+            <div class="card-body p-3 pb-0 m-0 row" style="height: 220px; overflow-y:auto;  display: flex; flex-direction: column-reverse;">
+              <ul class="ps-3">
+                {% for key,value in events.items %}
+                  <li><b>{{ key }}</b></li>
+                  <ul class="ps-3">
+                    {% for v in value %}
+                      <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}: {{ v.3 }} </li>
+                    {% endfor %}
+                  </ul>
+                {% endfor %}
+              </ul>
+            </div>
+            <form action="{% url 'app:add_comment' suggestion.id %}" method="post">
+              {% csrf_token %}
+              <div class="input-group m-3" style="width: 95%;">
+                <input type="text" class="form-control" placeholder="Add a Comment" aria-label="Add a Comment" aria-describedby="button-addon2" name="comment">
+                <button class="btn btn-outline-primary" id="button-addon2"><i class="bi bi-send"></i></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    
+{% endblock %} {% block js %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const addForm = document.querySelector(".form");
+    const ul = document.querySelector("ul.todos");
+
+    const handleAddItem = (inputValue) => {
+      const html = `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>${inputValue}</span>
+          <input type="hidden" name="suggestion" value="${inputValue}">
+          <div><i class="far fa-trash-alt delete"></i></div>
+        </li>
+      `;
+      ul.innerHTML += html;
+    };
+
+    addForm.addEventListener("keydown", (e) => {
+      // Check if the pressed key is "Enter"
+      if (e.key === "Enter") {
+        e.preventDefault(); // Prevent form submission
+        const inputValue = addForm.value.trim(); // Trim to remove extra spaces
+        if (inputValue.length) handleAddItem(inputValue); // Handle adding the item
+        addForm.value = ""; // Clear the input field
+      } else if (/^[a-zA-Z0-9\s]$/.test(e.key)) {
+        // Allow only alphabetic characters, numbers, and spaces
+        // No need to manually append; let the default behavior handle typing
+      } else {
+        // Allow default behavior for all other keys
+        return; // Exit early to let the browser handle the key normally
+      }
+    });
+
+
+
+    ul.addEventListener("click", (e) => {
+      if (e.target.classList.contains("delete")) {
+        e.target.parentElement.parentElement.remove();
+      }
+    });
+  });
+
+  const deleteBtns = document.querySelectorAll(".delete-btn");
+  deleteBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute('data-delete-btn');
+      fetch(`/delete_sub_suggestion/${id}`)
+    });
+  });
+
+</script>
+
+{% endblock %}

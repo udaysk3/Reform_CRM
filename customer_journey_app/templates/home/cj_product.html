@@ -48,11 +48,18 @@
                   </div>
                   <div class="modal-body">
                     {% csrf_token %}
-                    <select class="form-select" name="stage" aria-label="Default select example">
+                    <select class="form-select mb-3" name="stage" aria-label="Default select example">
                       {% for stage in stages %}
                         <option value="{{stage.id}}">{{stage.name}}</option>
                       {% endfor %}
                     </select>
+
+                    <select class="form-select mb-3" name="role" aria-label="Default select example">
+                      {% for role in roles %}
+                        <option value="{{role.id}}">{{role.name}}</option>
+                      {% endfor %}
+                    </select>
+
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>

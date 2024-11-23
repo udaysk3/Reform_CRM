@@ -260,6 +260,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
             else:
                 cjstages = CJStage.objects.filter(route=route, product=product, client=None)
             for cjstage in cjstages:
+                user = request.user
+                if user.is_employee:
+                    if user.role != cjstage.role.name:
+                        continue
                 all_answered = True
             
                 questions = []
@@ -672,13 +676,23 @@ def Customer(request):
         )
 
     current_time = datetime.now(london_tz)
-    user  = User.objects.get(email=request.user)
-    customers = (
-        Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
-        .filter(parent_customer=None)
-        .filter(closed=False)
-        .order_by("earliest_action_date")
-    )
+    user  = request.user
+    if user.is_employee:
+        customers = (
+            Customers.objects.all()
+            .filter(assigned_to=user)
+            .annotate(earliest_action_date=Max("action__date_time"))
+            .filter(parent_customer=None)
+            .filter(closed=False)
+            .order_by("earliest_action_date")
+        )
+    else:
+        customers = (
+            Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
+            .filter(parent_customer=None)
+            .filter(closed=False)
+            .order_by("earliest_action_date")
+        )
 
     customers = list(customers)
     new_customers = []

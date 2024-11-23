@@ -3,6 +3,7 @@ from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
 import pytz
+from pytz import timezone
 from .models import (
     Cities,
     Campaign,
@@ -13,12 +14,13 @@ from .models import (
     Countries,
     Stage,
     Suggestion,
+    Sub_suggestions,
 )
 from django.http import HttpResponseRedirect
 from customer_app.models import Customers
 from client_app.models import Clients
 from region_app.models import Councils
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import HttpResponse, JsonResponse
 import json
 import os
@@ -31,6 +33,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
+
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
@@ -47,9 +50,100 @@ def Finance(request):
 def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
-    suggestions = Suggestion.objects.all()
-    return render(request, "home/suggestion.html", {"suggestions": suggestions})
+    suggestions = Suggestion.objects.all().filter(archive=False).order_by("order")
+    current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
+    yesterday = current_date_time + timedelta(days=1)
+    archive_suggestions = Suggestion.objects.all().filter(archive=True).order_by("order")
+    return render(request, "home/suggestion.html", {"suggestions": suggestions, "archive_suggestions": archive_suggestions, "current_date_time": current_date_time, "yesterday": yesterday})
 
+@login_required
+def detail_suggestion(request, suggestion_id):
+    suggestion = Suggestion.objects.get(pk=suggestion_id)
+    sub_suggestions = Sub_suggestions.objects.all().filter(suggestion=suggestion)
+    if suggestion.expected_completion_date:
+        formatted_date = suggestion.expected_completion_date.strftime("%Y-%m-%d")
+    else:
+        formatted_date = ""
+    london_tz = timezone("Europe/London")
+    keyevents = suggestion.get_created_at_action_history()
+    events = {}
+    for i in keyevents:
+        if i.created_at.replace(tzinfo=london_tz).date() not in events:
+            events[i.created_at.replace(tzinfo=london_tz).date()] = []
+    for i in keyevents:
+        events[i.created_at.replace(tzinfo=london_tz).date()].append(
+                [
+                    i.created_at.astimezone(london_tz).time(),
+                    i.agent.first_name,
+                    i.agent.last_name,
+                    i.text
+                ]
+            )
+    return render(request, "home/detail_suggestion.html", {"suggestion": suggestion, "sub_suggestions": sub_suggestions, "formatted_date": formatted_date, "events": events})
+
+def add_sub_suggestion(request, suggestion_id):
+    if request.method == "POST":
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+        descriptions = request.POST.getlist("suggestion")
+        print(descriptions)
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+        for description in descriptions:
+            Sub_suggestions.objects.create(
+                description=description,
+                suggestion=suggestion,
+            )
+            suggestion.add_suggestion_action(
+                agent=User.objects.get(email=request.user),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                text=f"Added sub suggestion: {description}",
+            )
+        messages.success(request, "Sub suggestion added successfully!")
+        return HttpResponseRedirect(f"/detail_suggestion/{suggestion_id}")
+    
+def delete_sub_suggestion(request, sub_suggestion_id):
+    sub_suggestion = Sub_suggestions.objects.get(pk=sub_suggestion_id)
+    suggestion = sub_suggestion.suggestion
+    suggestion.add_suggestion_action(
+        agent=User.objects.get(email=request.user),
+        created_at=datetime.now(pytz.timezone("Europe/London")),
+        text=f"Deleted sub suggestion: {sub_suggestion.description}",
+    )
+    sub_suggestion.delete()
+    return HttpResponse(200)
+
+def archive_suggestion(request, suggestion_id):
+    suggestion = Suggestion.objects.get(pk=suggestion_id)
+    if suggestion.archive:
+        suggestion.archive = False
+    else:
+        suggestion.archive = True
+    suggestion.save()
+    if suggestion.archive:
+        messages.success(request, "Suggestion archived successfully!")
+        suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=f"Archived suggestion",
+        )
+    else:
+        messages.success(request, "Suggestion unarchived successfully!")
+        suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=f"Unarchived suggestion",
+        )
+    return HttpResponseRedirect("/suggestion")
+
+def suggestion_order(request):
+    if request.method == 'POST':
+        body = request.body
+        response = json.loads(body)
+        order_suggestions = response["order_suggestions"]
+        for suggestion in order_suggestions:
+            suggestion_obj = Suggestion.objects.get(pk=suggestion["suggestion"])
+            suggestion_obj.order = suggestion["order"]
+            suggestion_obj.save()
+        return HttpResponse(200)
 
 def add_suggestion(request):
     if request.method == "POST":
@@ -57,19 +151,71 @@ def add_suggestion(request):
         type = request.POST.get("type")
         agent = request.user
         location = request.POST.get("location")
-        priority = request.POST.get("priority")
         file = request.FILES.get("file")
-        Suggestion.objects.create(
+        suggestion = Suggestion.objects.create(
             description=description,
             type=type,
             agent=agent,
+            status="Not yet started",
             location=location,
-            priority=priority,
             file=file,
             created_at=datetime.now(pytz.timezone("Europe/London")),
         )
+        suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=f"Added suggestion {description} of type {type} at location {location}",
+        )
         
         messages.success(request, "Suggestion added successfully!")
+        return HttpResponseRedirect(location)
+    
+def add_comment(request, suggestion_id):
+    if request.method == "POST":
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+        comment = request.POST.get("comment")
+        suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=f"{comment}",
+        )
+        messages.success(request, "Comment added successfully!")
+        return HttpResponseRedirect(f"/detail_suggestion/{suggestion_id}")
+
+def edit_suggestion(request, suggestion_id):
+    if request.method == "POST":
+        description = request.POST.get("description")
+        type = request.POST.get("type")
+        location = request.POST.get("location")
+        file = request.FILES.get("file")
+        expected_completion_date = request.POST.get("expected_completion_date")
+        status = request.POST.get("status")
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+        text = "Changed "
+        if suggestion.description != description:
+            text += f"description to {description}"
+        if suggestion.type != type:
+            text += f"type to {type}"
+        if suggestion.location != location:
+            text += f"location to {location}"
+        if suggestion.expected_completion_date != expected_completion_date:
+            text += f"expected completion date to {expected_completion_date}"
+        if suggestion.status != status:
+            text += f"status to {status}"
+        suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=text,
+        )
+        suggestion.description = description
+        suggestion.type = type
+        suggestion.location = location
+        if file:
+            suggestion.file = file
+        suggestion.expected_completion_date = expected_completion_date
+        suggestion.status = status
+        suggestion.save()
+        messages.success(request, "Suggestion edited successfully!")
         return HttpResponseRedirect(location)
 
 def query_city(request, q):
