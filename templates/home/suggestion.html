@@ -76,7 +76,7 @@
                 "
                 >
                   <td style="width: 20%;">{{ suggestion.created_at }}</td>
-                  <td style="width: 20%;"><a href="{% url 'app:detail_suggestion' suggestion.id %}"> {{ suggestion.description }} </a></td>
+                  <td style="width: 20%;"><a href="{% url 'app:detail_suggestion' suggestion.id %}"> {{ suggestion.type }} </a></td>
                   <td style="width: 10%;">{{ suggestion.status }}</td>
                   <td style="width: 10%;">{{ suggestion.location }}</td>
                   <td style="width: 10%;">
