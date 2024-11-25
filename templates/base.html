@@ -325,7 +325,7 @@ i{
                     
                     {% endif %}
                     {% if request.user.suggestion %}
-                    <a href="{% url 'app:suggestion' %}" class="nav_link sublink">Suggestions</a>
+                    <a href="{% url 'app:suggestion' %}?page=In Progress" class="nav_link sublink">Suggestions</a>
                     {% endif %}
                   </ul>
                 </li>

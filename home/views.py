@@ -16,6 +16,7 @@ from .models import (
     Suggestion,
     Sub_suggestions,
 )
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from customer_app.models import Customers
 from client_app.models import Clients
@@ -50,7 +51,12 @@ def Finance(request):
 def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
-    suggestions = Suggestion.objects.all().filter(archive=False).order_by("order")
+    if request.GET.get("page") == "New" or request.GET.get("page") == "":
+        suggestions = Suggestion.objects.filter(Q(status="New") | Q(status="Not yet started")).filter(archive=False).order_by("order")
+    elif request.GET.get("page") == "Archive":
+        suggestions = Suggestion.objects.filter(archive=True).order_by("order")
+    else:
+        suggestions = Suggestion.objects.all().filter(archive=False).filter(status=request.GET.get("page")).order_by("order")
     current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
     yesterday = current_date_time + timedelta(days=1)
     archive_suggestions = Suggestion.objects.all().filter(archive=True).order_by("order")
@@ -115,8 +121,14 @@ def archive_suggestion(request, suggestion_id):
     suggestion = Suggestion.objects.get(pk=suggestion_id)
     if suggestion.archive:
         suggestion.archive = False
+        suggestions = Suggestion.objects.all().filter(archive=False).filter(status=suggestion.status)
+        length = len(suggestions)
+        suggestion.order = length + 1
     else:
         suggestion.archive = True
+        suggestions = Suggestion.objects.all().filter(archive=True)
+        length = len(suggestions)
+        suggestion.order = length + 1
     suggestion.save()
     if suggestion.archive:
         messages.success(request, "Suggestion archived successfully!")
@@ -132,7 +144,8 @@ def archive_suggestion(request, suggestion_id):
             created_at=datetime.now(pytz.timezone("Europe/London")),
             text=f"Unarchived suggestion",
         )
-    return HttpResponseRedirect("/suggestion")
+    redirect = '/suggestion?page=' + str(request.GET.get("page"))
+    return HttpResponseRedirect(redirect)
 
 def suggestion_order(request):
     if request.method == 'POST':
@@ -156,10 +169,11 @@ def add_suggestion(request):
             description=description,
             type=type,
             agent=agent,
-            status="Not yet started",
+            status="New",
             location=location,
             file=file,
             created_at=datetime.now(pytz.timezone("Europe/London")),
+
         )
         suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
@@ -191,6 +205,15 @@ def edit_suggestion(request, suggestion_id):
         expected_completion_date = request.POST.get("expected_completion_date")
         status = request.POST.get("status")
         suggestion = Suggestion.objects.get(pk=suggestion_id)
+        if suggestion.status != status and status != "Archive":
+            suggestions = Suggestion.objects.all().filter(status=status)
+            length = len(suggestions)
+            suggestion.order = length + 1
+        elif suggestion.status != status and status == "Archive":
+            suggestions = Suggestion.objects.all().filter(archive=True)
+            length = len(suggestions)
+            suggestion.order = length + 1
+
         text = "Changed "
         if suggestion.description != description:
             text += f"description to {description}"

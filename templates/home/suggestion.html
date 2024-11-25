@@ -23,7 +23,23 @@
 
 
 <div class="container-fluid" style="max-width:1500px">
-  <!-- Row 1 -->
+  
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch w-100">
+      <div class="card w-100 p-0">
+        <div class="card-body row m-0 p-3 ">
+          <a href="{% url 'app:suggestion' %}?page=New" class="col fs-5">New</a>
+          <a href="{% url 'app:suggestion' %}?page=Not Started" class="col fs-5">Not Started</a>
+          <a href="{% url 'app:suggestion' %}?page=In Progress" class="col fs-5">In Progress</a>
+          <a href="{% url 'app:suggestion' %}?page=Complete" class="col fs-5">Complete</a>
+          <a href="{% url 'app:suggestion' %}?page=Paused" class="col fs-5">Paused</a>
+          <a href="{% url 'app:suggestion' %}?page=Rejected" class="col fs-5">Rejected</a>
+          <a href="{% url 'app:suggestion' %}?page=Archive" class="col fs-5">Archive</a>
+        </div>
+      </div>
+    </div>
+    
+
   <div class="row">
     <div class="col-lg-12 d-flex align-items-strech w-100">
       <div class="card w-100">
@@ -35,6 +51,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
           {% endfor %}
+
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
 
             <div class="mb-3 mb-sm-0">
@@ -58,7 +75,7 @@
                   <th>Archive</th>
                 </tr>
               </thead>
-              <tbody id="myTable" class="suggestion-container">
+              <tbody class="suggestion-container">
                 {% if suggestions %}
                 {% for suggestion in suggestions %}
                 <tr class="suggestiondrag" data-suggestion-id="{{ suggestion.id }}" draggable="true" 
@@ -88,68 +105,7 @@
                   </td>
                   <td style="width: 10%;">{{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }}</td>
                   <td style="width: 10%;">
-                    <a href="{% url 'app:archive_suggestion' suggestion.id %}" class="reform_btn">Archive</a>
-                  </td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                <tr class="text-center display-flex align-items-center justify-content-center">
-                  <td colspan="6" class="text-center">No Suggestion</td>
-                </tr>
-                {% endif %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="row">
-    <div class="col-lg-12 d-flex align-items-strech w-100">
-      <div class="card w-100">
-        <div class="card-body">
-          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
-
-            <div class="mb-3 mb-sm-0">
-              <a href="#">
-                <h5 class="card-title fw-semibold text-primary text-decoration-underline">Archived Suggestion</h5>
-              </a>
-            </div>
-          </div>
-      
-          <div>
-            <table class="table">
-
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Location</th>
-                  <th>Description</th>
-                  <th>File</th>
-                  <th>Requester</th>
-                  <th>Archive</th>
-                </tr>
-              </thead>
-              <tbody id="myTable" class="archive-suggestion-container">
-                {% if archive_suggestions %}
-                {% for suggestion in archive_suggestions %}
-                <tr class="archivesuggestiondrag" data-suggestion-id="{{ suggestion.id }}" draggable="true">
-                  <td style="width: 20%;">{{ suggestion.created_at }}</td>
-                  <td style="width: 10%;">{{ suggestion.type }}</td>
-                  <td style="width: 10%;">{{ suggestion.location }}</td>
-                  <td style="width: 20%;">{{ suggestion.description }}</td>
-                  <td style="width: 10%;">
-                    {% if suggestion.file %}
-                    <a href="{{ suggestion.file.url }}" target="_blank" class="reform_btn">View</a>
-                    {% else %}
-                    No File
-                    {% endif %}
-                  </td>
-                  <td style="width: 10%;">{{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }}</td>
-                  <td style="width: 10%;">
-                    <a href="{% url 'app:archive_suggestion' suggestion.id %}" class="reform_btn">UnArchive</a>
+                    <a href="{% url 'app:archive_suggestion' suggestion.id %}?page={{ request.GET.page }}" class="reform_btn">Archive</a>
                   </td>
                 </tr>
                 {% endfor %}
@@ -228,7 +184,7 @@
           }
         }
       });
-
+      
       function getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('.suggestiondrag:not(.dragging)')];
         return draggableElements.reduce((closest, child) => {
@@ -241,71 +197,6 @@
           }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
       }
-    
-      const acontainer = document.querySelector('.archive-suggestion-container');
-      const archivedraggables = document.querySelectorAll('.archivesuggestiondrag');
-      archivedraggables.forEach(draggable => {
-        let sent = false;
-
-        draggable.addEventListener('dragstart', (e) => {
-          e.stopPropagation();
-          draggable.classList.add('dragging');
-        });
-
-        draggable.addEventListener('dragend', (e) => {
-          e.stopPropagation();
-          draggable.classList.remove('dragging');
-
-          if (!sent) {
-            const suggestions = document.querySelectorAll('.archivesuggestiondrag');
-            const order_suggestions = [];
-            suggestions.forEach((suggestion, i) => {
-              order_suggestions.push({
-                suggestion: suggestion.dataset.suggestionId,
-                order: i + 1
-              });
-            });
-
-            fetch('/suggestion_order', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-              },
-              body: JSON.stringify({ 'order_suggestions': order_suggestions })
-            });
-
-            sent = true;
-          }
-        });
-      });
-
-      acontainer.addEventListener('dragover', e => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(acontainer, e.clientY);
-        const draggable = document.querySelector('.dragging');
-        if (draggable && Array.from(archivedraggables).includes(draggable)) {
-          if (afterElement == null) {
-            acontainer.appendChild(draggable);
-          } else {
-            acontainer.insertBefore(draggable, afterElement);
-          }
-        }
-      });
-
-      function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.archivesuggestiondrag:not(.dragging)')];
-        return draggableElements.reduce((closest, child) => {
-          const box = child.getBoundingClientRect();
-          const offset = y - box.top - box.height / 2;
-          if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-          } else {
-            return closest;
-          }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-      }
-
   </script>
 
 {% endblock js %}
