@@ -51,7 +51,7 @@ def Finance(request):
 def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
-    if request.GET.get("page") == "New" or request.GET.get("page") == "":
+    if request.GET.get("page") == "New" or request.GET.get("page") == None:
         suggestions = Suggestion.objects.filter(Q(status="New") | Q(status="Not yet started")).filter(archive=False).order_by("order")
     elif request.GET.get("page") == "Archive":
         suggestions = Suggestion.objects.filter(archive=True).order_by("order")
