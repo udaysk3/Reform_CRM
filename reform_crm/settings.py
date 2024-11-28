@@ -111,23 +111,23 @@ AUTH_PASSWORD_VALIDATORS = [
 WSGI_APPLICATION = 'reform_crm.wsgi.application'
 
 # Database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'reform',
-#         'USER': 'reform',
-#         'PASSWORD': 'Reform@123',
-#         'HOST': '35.179.137.230',
-#         'PORT': 5432,
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'reform',
+        'USER': 'reform',
+        'PASSWORD': 'Reform@123',
+        'HOST': '35.179.137.230',
+        'PORT': 5432,
+    }
+}
 
 # DATABASES = {
 #     'default': {
@@ -158,8 +158,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # Here I am using gmail smtp server
@@ -194,19 +194,19 @@ CSRF_TRUSTED_ORIGINS = [
 # Ensure Two Factor Authentication URLs
 LOGIN_URL = '/user/login'
 
-# MEDIAFILES_LOCATION = 'media'
+MEDIAFILES_LOCATION = 'media'
 
-# AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-# AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = "reform-media"
-# AWS_S3_REGION_NAME = "eu-west-2"
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = "reform-media"
+AWS_S3_REGION_NAME = "eu-west-2"
 
-# class MediaStorage(S3Boto3Storage):
-#     location = MEDIAFILES_LOCATION
-#     file_overwrite = False
+class MediaStorage(S3Boto3Storage):
+    location = MEDIAFILES_LOCATION
+    file_overwrite = False
 
-# DEFAULT_FILE_STORAGE = 'reform_crm.settings.MediaStorage'
-# AWS_DEFAULT_ACL = 'private'
-# AWS_S3_ADDRESSING_STYLE = 'virtual'
+DEFAULT_FILE_STORAGE = 'reform_crm.settings.MediaStorage'
+AWS_DEFAULT_ACL = 'private'
+AWS_S3_ADDRESSING_STYLE = 'virtual'
 
-# MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{MEDIAFILES_LOCATION}/'
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{MEDIAFILES_LOCATION}/'
