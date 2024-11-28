@@ -3,8 +3,8 @@
 from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
-# from decouple import config
-# from storages.backends.s3boto3 import S3Boto3Storage
+from decouple import config
+from storages.backends.s3boto3 import S3Boto3Storage
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
