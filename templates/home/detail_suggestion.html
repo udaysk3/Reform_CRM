@@ -233,8 +233,9 @@ label.add{
               <div class="card">
                 <div class="card-body py-3" style="height:150px">
                   <h6><b> Suggestion: </b> {{ suggestion.type }}</h6>
-                  <h6><b> Description: </b> {{ suggestion.description|truncatechars:200 }}</h6>
+                  <h6><b> Description: </b> {{ suggestion.description|truncatechars:100 }}</h6>
                   <h6><b> Tab: </b> {{ suggestion.location }}</h6>
+                  <h6><b> Requester: </b> {{ suggestion.agent.first_name }} {{ sub_suggestion.agent.last_name }} </h6>
                   <h6><b> File: </b> {% if suggestion.file %}
                     <a href="{{ suggestion.file.url }}" target="_blank">View</a>
                     {% else %}
@@ -259,6 +260,7 @@ label.add{
                     {% endif %}
                   </h6>
                   <h6><b> Requested: </b> {% if suggestion.requested %} {{ suggestion.requested }} {% else %} 0 {% endif %} </h6>
+                  <h6><b> Expected complition date: </b>{{ suggestion.expected_completion_date }} </h6>
                 </div>
               </div>
             </div>
@@ -331,7 +333,7 @@ label.add{
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="reform_btn" onclick="print_data()">Submit</button>
+                        <button class="reform_btn" >Submit</button>
                       </div>
                       </form>
                     </div>
@@ -381,7 +383,7 @@ label.add{
                       </div>
                     </td>
                     <td>
-                      <button type="button" style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_assigned_to{{ forloop.counter }}">{{ sub_suggestion.assigned_to.first_name }} {{ sub_suggestion.assigned_to.last_name }}</button>
+                      <button type="button" style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_assigned_to{{ forloop.counter }}"> {% if sub_suggestion.assigned_to %} {{ sub_suggestion.assigned_to.first_name }} {{ sub_suggestion.assigned_to.last_name }} {% else %} None {% endif %} </button>
 
                       <div class="modal fade" id="sub_suggestion_assigned_to{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div class="modal-dialog">

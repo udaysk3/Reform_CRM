@@ -1459,6 +1459,7 @@ def assign_agents(request):
         for client in clients_with_customers:
             customers_list.extend(client.customers.all())
         for customer_id in customer_ids:
+            print(customer_ids, customers_list)
             customer = Customers.objects.get(pk=customer_id)
             if customer not in customers_list:
                 messages.error(request,f"Customer {customer.first_name} {customer.last_name} can not be assigned to the {agent.first_name} {agent.last_name}")
@@ -1471,8 +1472,8 @@ def assign_agents(request):
                     created_at=datetime.now(pytz.timezone("Europe/London")),
                     action_type="Assigned to Agent",
                 )
-                messages.success(request, "Customers Assigned successfully!")
-            return redirect("customer_app:customer")
+        messages.success(request, "Customers Assigned successfully!")
+        return redirect("customer_app:customer")
      except Exception as e:
         messages.error(request, f"Error assigning customers: {e}")
         return redirect("customer_app:customer")
