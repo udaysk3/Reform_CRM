@@ -5,7 +5,7 @@ from user.models import User
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_user', blank=True, null=True)
     employee_image = models.ImageField(upload_to='employee_images', blank=True, null=True)
-    reporting_to = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='emp_reporting_to')
+    reporting_to = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='emp_reporting_to')
     work_setup = models.CharField(max_length=100, blank=True, null=True)
     phone_number = models.CharField(max_length=100, blank=True, null=True)
     gender = models.CharField(max_length=100, blank=True, null=True)
@@ -49,7 +49,7 @@ class Emergency_contact(models.Model):
 class Employee_Action(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
-    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    agent = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     text = models.TextField(max_length=999, blank= True, null=True)
     action_type = models.CharField(max_length=225, blank= True, null=True)
 

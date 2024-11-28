@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from .models import Customers, Answer
+from django.db.models.functions import Lower
 from home.models import Campaign, Stage, Client_Council_Route
 from admin_app.models import Email, Reason,Signature
 from client_app.models import Clients, ClientArchive
@@ -678,17 +679,15 @@ def Customer(request):
     current_time = datetime.now(london_tz)
     user  = request.user
     if user.is_employee:
-        customers = (
-            Customers.objects.all()
-            .filter(assigned_to=user)
-            .annotate(earliest_action_date=Max("action__date_time"))
-            .filter(parent_customer=None)
-            .filter(closed=False)
-            .order_by("earliest_action_date")
-        )
+        clients_with_customers = Clients.objects.filter(assigned_to=user).prefetch_related('customers')
+        customers_list = []
+        for client in clients_with_customers:
+            customers_list.extend(client.customers.all())
+        customers = customers_list
     else:
         customers = (
-            Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
+            Customers.objects
+            .annotate(earliest_action_date=Max("action__date_time"))
             .filter(parent_customer=None)
             .filter(closed=False)
             .order_by("earliest_action_date")
@@ -769,7 +768,7 @@ def add_customer(request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
-        email = request.POST.get("email")
+        email = request.POST.get("email").lower()
         postcode = request.POST.get("postcode").upper()
         street_name = request.POST.get("street_name")
         house_name = request.POST.get("house_name")
@@ -800,7 +799,7 @@ def add_customer(request):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
 
-        if Customers.objects.filter(email=email).filter(client=client).exists():
+        if Customers.objects.annotate(lower_email=Lower('email')).filter(Lower_email=email).filter(client=client).exists():
             messages.error(request, "Email with this Client already exists")
             request.session['first_name'] = first_name,
             request.session['last_name'] = last_name,
@@ -919,7 +918,7 @@ def edit_customer(request, customer_id):
         changed = ''
         if customer.phone_number != request.POST.get("phone_number"):
             changed += f'{request.POST.get("phone_number")}, '
-        if customer.email != request.POST.get('email'):
+        if customer.email != request.POST.get('email').lower():
             changed += f'{request.POST.get("email")}, '
         if customer.postcode != request.POST.get("postcode"):
             changed += f'{request.POST.get("postcode")}, '
@@ -947,7 +946,11 @@ def edit_customer(request, customer_id):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
         customer.phone_number = phone_number
-        customer.email = request.POST.get("email")
+        if Customers.objects.annotate(lower_email=Lower('email')).filter(Lower_email=email).filter(client=client).exists():
+            messages.error(request, "Email with this Client already exists")
+            return redirect(f"/customer?page=edit_customer&id={customer_id}")
+        email = request.POST.get("email").lower()
+        customer.email = email
         postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         customer.street_name = request.POST.get("street_name")
         customer.city = request.POST.get("city")

@@ -7,7 +7,7 @@ from user.models import User
 class Councils(models.Model):
     name = models.CharField(max_length=999, unique=True)
     created_at = models.DateTimeField(blank= True, null=True)
-    agent = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    agent = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     postcodes = models.TextField(blank=True, null=True)
 
     def __str__(self):
