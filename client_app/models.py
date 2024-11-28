@@ -4,7 +4,7 @@ from user.models import User
 
 class Clients(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='client_profile')
-    agent = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='clients_as_agent')
+    agent = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='clients_as_agent')
     acc_number = models.CharField(max_length=255, blank=True, null=True)
     sort_code = models.CharField(max_length=255, blank=True, null=True)
     iban = models.CharField(max_length=255, blank=True, null=True)
@@ -28,8 +28,8 @@ class Clients(models.Model):
     county = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank= True, null=True)
-    client_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='client_user')
-    parent_client = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
+    client_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='client_user')
+    parent_client = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.SET_NULL)
     primary_client = models.BooleanField(default=False)
     council = models.ForeignKey('region_app.Councils', on_delete=models.SET_NULL, null=True)
     closed = models.BooleanField(default=False)
@@ -59,13 +59,13 @@ class Clients(models.Model):
         return f"{self.company_name}"
 
 class CoverageAreas(models.Model):
-    client = models.ForeignKey('client_app.Clients', related_name='coverage_areas', on_delete=models.CASCADE)
+    client = models.ForeignKey('client_app.Clients', related_name='coverage_areas', on_delete=models.SET_NULL, null=True, blank=True)
     postcode = models.CharField(max_length=255, blank=True, null=True)
-    council = models.ForeignKey('region_app.Councils', on_delete=models.CASCADE, null=True)
+    council = models.ForeignKey('region_app.Councils', on_delete=models.SET_NULL, blank=True, null=True)
 
 class ClientArchive(models.Model):
-    client = models.ForeignKey('client_app.Clients', on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-    route = models.ForeignKey('funding_route_app.Route', on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-    councils = models.ForeignKey('region_app.Councils', on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
-    product = models.ForeignKey('product_app.Product', on_delete=models.CASCADE, null=True, blank=True, related_name='client_archive')
+    client = models.ForeignKey('client_app.Clients', on_delete=models.SET_NULL, null=True, blank=True, related_name='client_archive')
+    stage = models.ForeignKey(Stage, on_delete=models.SET_NULL, null=True, blank=True, related_name='client_archive')
+    route = models.ForeignKey('funding_route_app.Route', on_delete=models.SET_NULL, null=True, blank=True, related_name='client_archive')
+    councils = models.ForeignKey('region_app.Councils', on_delete=models.SET_NULL, null=True, blank=True, related_name='client_archive')
+    product = models.ForeignKey('product_app.Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='client_archive')

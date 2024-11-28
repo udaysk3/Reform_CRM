@@ -18,28 +18,28 @@ class Rule_Regulation(models.Model):
     route = models.ForeignKey(
         'funding_route_app.Route',
         related_name="rules_regulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     product = models.ForeignKey(
         'product_app.Product',
         related_name="rules_regulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     stage = models.ForeignKey(
         Stage,
         related_name="rules_regulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     question = models.ForeignKey(
         Questions,
         related_name="rules_regulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )

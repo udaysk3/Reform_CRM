@@ -21,10 +21,10 @@ class Customers(models.Model):
     created_at = models.DateTimeField(blank= True, null=True)
     campaign = models.ForeignKey('home.Campaign', related_name='customers', on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey('client_app.Clients', related_name='customers', on_delete=models.SET_NULL, null=True)
-    agent = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    assigned_to = models.ForeignKey(User, related_name= 'assigned_to', on_delete=models.CASCADE, null=True)
+    agent = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    assigned_to = models.ForeignKey(User, related_name= 'assigned_to', on_delete=models.SET_NULL, null=True, blank=True)
     district = models.CharField(max_length=255, blank=True, null=True)
-    parent_customer = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.CASCADE)
+    parent_customer = models.ForeignKey('self', blank=True, null=True, related_name='+', on_delete=models.SET_NULL)
     primary_customer = models.BooleanField(default=False)
     energy_rating = models.CharField(max_length=2, blank=True, null=True)
     energy_certificate_link = models.URLField(max_length=999, blank=True, null=True)
@@ -60,35 +60,35 @@ class Answer(models.Model):
     route = models.ForeignKey(
         'funding_route_app.Route',
         related_name="answer",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     product = models.ForeignKey(
         'product_app.Product',
         related_name="answer",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     stage = models.ForeignKey(
         Stage,
         related_name="answer",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     question = models.ForeignKey(
         'question_actions_requirements_app.Questions',
         related_name="answer",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
     customer = models.ForeignKey(
         'customer_app.Customers',
         related_name="answer",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )

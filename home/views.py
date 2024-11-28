@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils.html import escape
 import pytz, json, os
 from pytz import timezone
 from .models import (
@@ -168,11 +169,11 @@ def add_sub_suggestion(request, suggestion_id):
     if request.method == "POST":
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         descriptions = request.POST.getlist("suggestion")
-        print(descriptions)
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         for description in descriptions:
+            clean_description = escape(description)
             Sub_suggestions.objects.create(
-                description=description,
+                description=clean_description,
                 suggestion=suggestion,
                 created_at=datetime.now(pytz.timezone("Europe/London")),
                 status="New",
@@ -181,7 +182,7 @@ def add_sub_suggestion(request, suggestion_id):
             suggestion.add_suggestion_action(
                 agent=User.objects.get(email=request.user),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                text=f"Added sub suggestion: {description}",
+                text=f"Added sub suggestion: {clean_description}",
             )
         messages.success(request, "Sub suggestion added successfully!")
         return HttpResponseRedirect(f"/detail_suggestion/{suggestion_id}")
