@@ -111,7 +111,6 @@ AUTH_PASSWORD_VALIDATORS = [
 WSGI_APPLICATION = 'reform_crm.wsgi.application'
 
 # Database configuration
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -193,7 +192,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Ensure Two Factor Authentication URLs
-# LOGIN_URL = '/user/login'
+LOGIN_URL = '/user/login'
 
 # MEDIAFILES_LOCATION = 'media'
 
