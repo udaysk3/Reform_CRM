@@ -320,12 +320,12 @@ i{
                   </div>
                   <ul class="menu_items submenu">
                     {% if request.user.new_suggestion %}
-                    <button class="nav_link sublink new" style="border:none; background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">New</button>
+                    <button class="nav_link sublink new_suggestion" style="border:none; background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">New</button>
                     
                     
                     {% endif %}
                     {% if request.user.suggestion %}
-                    <a href="{% url 'app:suggestion' %}?page=In Progress" class="nav_link sublink">Suggestions</a>
+                    <a href="{% url 'app:suggestion' %}?page=New" class="nav_link sublink">Suggestions</a>
                     {% endif %}
                   </ul>
                 </li>
@@ -383,7 +383,7 @@ i{
               <div class="modal-body">
                 <div class="mb-3">
                   <label for="location" class="form-label">Tab</label>
-                  <input type="text" class="form-control" id="location" name="location">
+                  <input type="text" class="form-control" id="location_sugg" name="location">
                 </div>
                 <div class="mb-3">
                   <label for="type" class="form-label">What type of issue?</label>
@@ -408,9 +408,10 @@ i{
     </div>
     <script>
 
-      const new_suggestion = document.querySelector('.new');
+      const new_suggestion = document.querySelector('.new_suggestion');
       new_suggestion.addEventListener('click', () => {
-        document.getElementById('location').value = window.location.pathname;
+        document.getElementById('location_sugg').value = window.location.pathname;
+        console.log(window.location.pathname);
       });
 
       function goBack() {

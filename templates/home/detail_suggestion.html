@@ -22,6 +22,32 @@ label.add{
 }
 
 
+.tooltipbas {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipbas .tooltiptextbas {
+  display: none;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1000;
+  width: 320px;
+  top: 100%;
+  left: 0%;
+  transition: 0.3s;
+}
+
+.tooltipbas:hover .tooltiptextbas, .tooltiptextbas:hover {
+  display: block;
+}
+
+
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
@@ -43,13 +69,56 @@ label.add{
         <div class="row">
           <div class="row pb-3" style="border-bottom: 2px solid #91E0DA;">
             {% comment %} <div class="cnav-item col-1 position-absolute" style="left:-0px; top:8px;">
-              <a href="/customer-detail/{{prev}}" >
+              <a href="/suggition-detail/{{prev}}" >
                 <i class="bx bx-left-arrow my-4 fs-6"></i>
               </a>
             </div> {% endcomment %}
 
-            <div class="col-11">
+            <div class="col-5">
               <h3>Suggestion</h3>
+            </div>
+
+            <div class="col-6">
+              <h5 class="col">Assigned To: 
+                  <div class="mt-1 link-primary" id="assigned_to">
+                    {% if suggestion.assigned_to %}
+                     {{ suggestion.assigned_to.first_name }} {{ suggestion.assigned_to.last_name }}
+
+                    {% else %}
+                      Unassigned
+                    {% endif %}
+                  </div>
+                  <div class="d-grid gap-2 d-md-block">
+                    <!-- Button trigger modal -->
+                    <!-- Modal -->
+                    <div class="modal fade" id="assigned_to_modal" data-bs-backdrop="static" data-bs-keyboard="false"
+                      tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Change the Agent</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <form method='post' action="{% url 'app:assign_agent'  %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                              <input type"text" hidden value="{{ suggestion.id }}" name="suggestion_id">
+                              <select class="form-select" aria-label="Default select example" name="agent_id">
+                                {% for agent in agents %}
+                                <option value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                              <button type="submit" class="reform_btn">Submit</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </h5>
             </div>
             
             <div class="col-1">
@@ -89,13 +158,12 @@ label.add{
                         <div class="mb-3">
                           <label for="type" class="form-label">The status of suggestion?</label>
                           <select class="form-select" name="status">
-                            <option value="New">New</option>
-                            <option value="Not Started">Not Started</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Complete">Complete</option>
-                            <option value="Paused">Paused</option>
-                            <option value="Rejected">Rejected</option>
-                            <option value="Archive">Archive</option>
+                            <option {% if suggestion.status == "New" %} selected {% endif %} value="New">New</option>
+                            <option {% if suggestion.status == "Not Started" %} selected {% endif %} value="Not Started">Not Started</option>
+                            <option {% if suggestion.status == "In Progress" %} selected {% endif %} value="In Progress">In Progress</option>
+                            <option {% if suggestion.status == "Complete" %} selected {% endif %} value="Complete">Complete</option>
+                            <option {% if suggestion.status == "Paused" %} selected {% endif %} value="Paused">Paused</option>
+                            <option {% if suggestion.status == "Rejected" %} selected {% endif %} value="Rejected">Rejected</option>
                           </select>
                         </div>
                         <div class="mb-3">
@@ -122,15 +190,33 @@ label.add{
           <div class="row mt-4">
             <div class="col-sm-4 mb-sm-0 px-2">
               <div class="card">
-                <div class="card-body py-3">
-                  <h6><b> Suggestion: </b> {{ suggestion.description }}</h6>
-                  <h6><b> Type: </b> {{ suggestion.type }}</h6>
-                  <h6><b> Location: </b> {{ suggestion.location }}</h6>
+                <div class="card-body py-3" style="height:150px">
+                  <h6><b> Suggestion: </b> {{ suggestion.type }}</h6>
+                  <h6><b> Description: </b> {{ suggestion.description|truncatechars:200 }}</h6>
+                  <h6><b> Tab: </b> {{ suggestion.location }}</h6>
                   <h6><b> File: </b> {% if suggestion.file %}
-                    <a href="{{ suggestion.file.url }}" target="_blank" class="btn btn-primary">View</a>
+                    <a href="{{ suggestion.file.url }}" target="_blank">View</a>
                     {% else %}
                     No File
                     {% endif %}</h6>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-4 mb-sm-0 px-2">
+                <div class="card">
+                  <div class="card-body py-3" style="height:150px">
+                  <h6><b> Date: </b> {{ suggestion.created_at }}</h6>
+                  <h6><b> Status: </b> {{ suggestion.status }}</h6>
+                  <h6><b> Requester: </b> {{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }} </h6>
+                  <h6><b> Additional requesters: </b>
+                    {% if suggestion.requesters %}
+                    {% for requester in suggestion.requesters.all %}
+                    {{ requester.first_name }} {{ requester.last_name }},
+                    {% endfor %}
+                    {% else %}
+                    No Requesters
+                    {% endif %}
+                  </h6>
                 </div>
               </div>
             </div>
@@ -139,7 +225,7 @@ label.add{
       </div>
       
       {% comment %} <div class="cnav-item fs-6 col-1 position-absolute" style="right:-30px; top:8px;">
-         <a href="/customer-detail/{{next}}"><i class="bx bx-right-arrow my-4 fs-6"></i></a>
+         <a href="/suggition-detail/{{next}}"><i class="bx bx-right-arrow my-4 fs-6"></i></a>
       </div> {% endcomment %}
     </div>
   </div>
@@ -152,7 +238,7 @@ label.add{
 
     <div class="card py-3 d-flex">
       <div class="card-body p-3 pb-0 m-0 row">
-        <div class="col">
+        <div class="col-6">
           <div class="card py-3 d-flex">
             <div class="card-body p-3 pb-0 m-0 row " style="height: 250px; overflow-y:auto;">
               <div class="row">
@@ -180,9 +266,11 @@ label.add{
                         <ul class="list-group todos mx-auto text-light">
                           {% for sub_suggestion in sub_suggestions %}
                           <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span> {{ sub_suggestion.description }} </span>
-                            <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent; color:#fff">
-                            <i class="far fa-trash-alt delete" ></i></button>
+                            <span style="width:300px"> <div class="tooltipbas me-2"> {{ sub_suggestion.description|truncatechars:20 }}
+                              <span class="tooltiptextbas p-3">{{ sub_suggestion.description }}</span>
+                            </div> </span>
+
+                            <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent; color:#fff"><i class="far fa-trash-alt delete" ></i></button>
                           </li>
                           {% endfor %}
                         </ul>
@@ -207,10 +295,77 @@ label.add{
               </div>
               <table class="table">
                 <tbody id="myTable">
-                  {% if sub_suggestions %}
+                {% if sub_suggestions %}
                   {% for sub_suggestion in sub_suggestions %}
                   <tr>
-                    <td style="width: 30%;">{{ sub_suggestion.description }}</td>
+                    <td><div class="tooltipbas me-2"> {{ sub_suggestion.description|truncatechars:20 }}
+                      <span class="tooltiptextbas p-3">{{ sub_suggestion.description }}</span>
+                    </div></td>
+                    <td>
+                      <button style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_status{{ forloop.counter }}">{{ sub_suggestion.status }}</button>
+
+                      <div class="modal fade" id="sub_suggestion_status{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change status</h1>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{% url 'app:change_sub_suggestion_status' sub_suggestion.id %}" method="post">
+                              {% csrf_token %}
+                              <div class="modal-body">
+                                <div class="mb-3">
+                                  <label for="type" class="form-label">The status of sub suggestion?</label>
+                                  <select class="form-select" name="status">
+                                    <option {% if sub_suggestion.status == "New" %} selected {% endif %} value="New">New</option>
+                                    <option {% if sub_suggestion.status == "Not Started" %} selected {% endif %} value="Not Started">Not Started</option>
+                                    <option {% if sub_suggestion.status == "In Progress" %} selected {% endif %} value="In Progress">In Progress</option>
+                                    <option {% if sub_suggestion.status == "Complete" %} selected {% endif %} value="Complete">Complete</option>
+                                    <option {% if sub_suggestion.status == "Paused" %} selected {% endif %} value="Paused">Paused</option>
+                                    <option {% if sub_suggestion.status == "Rejected" %} selected {% endif %} value="Rejected">Rejected</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                                <button class="reform_btn">Submit</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button" style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_assigned_to{{ forloop.counter }}">{{ sub_suggestion.assigned_to.first_name }} {{ sub_suggestion.assigned_to.last_name }}</button>
+
+                      <div class="modal fade" id="sub_suggestion_assigned_to{{ forloop.counter }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h1 class="modal-title fs-5" id="staticBackdropLabel">Change agent</h1>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{% url 'app:change_sub_suggestion_agent' sub_suggestion.id %}" method="post">
+                            <div class="modal-body">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                  <label for="type" class="form-label">The agent of sub suggestion?</label>
+                                  <select class="form-select" name="agent">
+                                    {% for agent in agents %}
+                                    <option {% if sub_suggestion.assigned_to == agent %} selected {% endif %} value="{{ agent.id }}">{{ agent.first_name }} {{ agent.last_name }}</option>
+                                    {% endfor %}
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                                <button class="reform_btn">Submit</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                   </tr>
                   {% endfor %}
                   {% else %}
@@ -224,7 +379,7 @@ label.add{
           </div>
         </div>
 
-        <div class="col">
+        <div class="col-6">
           <div class="card py-3 d-flex">
             <h4 class="card-title ms-4">ETA</h4>
             <div class="card-body p-3 pb-0 m-0 row" style="height: 220px; overflow-y:auto;  display: flex; flex-direction: column-reverse;">
@@ -233,7 +388,12 @@ label.add{
                   <li><b>{{ key }}</b></li>
                   <ul class="ps-3">
                     {% for v in value %}
-                      <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}: {{ v.3 }} </li>
+                      <li class="mb-2">
+                        <div class="tooltipbas me-2"> <b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}:{{ v.3|truncatechars:40 }}
+                          <span class="tooltiptextbas"> {{ v.3 }}
+                          </span>
+                        </div>
+                      </li>
                     {% endfor %}
                   </ul>
                 {% endfor %}
@@ -313,6 +473,14 @@ label.add{
       fetch(`/delete_sub_suggestion/${id}`)
     });
   });
+
+  document.getElementById('assigned_to').addEventListener('click',()=>{
+    let assigned_to_modal = new bootstrap.Modal(
+          document.getElementById("assigned_to_modal"),
+          {}
+        );
+        assigned_to_modal.show();
+    });
 
 </script>
 

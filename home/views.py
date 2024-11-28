@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-import pytz
+import pytz, json, os
 from pytz import timezone
 from .models import (
     Cities,
@@ -23,8 +23,7 @@ from client_app.models import Clients
 from region_app.models import Councils
 from datetime import datetime, timedelta
 from django.http import HttpResponse, JsonResponse
-import json
-import os
+from django.core.serializers import serialize
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import base64 
@@ -52,20 +51,85 @@ def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
     if request.GET.get("page") == "New" or request.GET.get("page") == None:
-        suggestions = Suggestion.objects.filter(Q(status="New") | Q(status="Not yet started")).filter(archive=False).order_by("order")
-    elif request.GET.get("page") == "Archive":
-        suggestions = Suggestion.objects.filter(archive=True).order_by("order")
+        suggestions = Suggestion.objects.filter(Q(status="New") | Q(status="Not yet started")).order_by("order")
     else:
-        suggestions = Suggestion.objects.all().filter(archive=False).filter(status=request.GET.get("page")).order_by("order")
+        suggestions = Suggestion.objects.all().filter(status=request.GET.get("page")).order_by("order")
     current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
     yesterday = current_date_time + timedelta(days=1)
-    archive_suggestions = Suggestion.objects.all().filter(archive=True).order_by("order")
-    return render(request, "home/suggestion.html", {"suggestions": suggestions, "archive_suggestions": archive_suggestions, "current_date_time": current_date_time, "yesterday": yesterday})
+    agents = User.objects.all().filter(is_staff=True)
+
+    return render(request, "home/suggestion.html", {"suggestions": suggestions, "suggestions_list" :serialize('json', suggestions), "agents": serialize('json', agents), "current_date_time": current_date_time, "yesterday": yesterday})
+
+def assign_agents(request):
+    if request.method == "POST":
+     try:
+        agent_names = [id_str.split(' ') for id_str in request.POST.get("agents").split(',')]
+        suggestion_names = [id_str.strip() for id_str in request.POST.get("suggestions").split(',')]
+            
+        num_suggestions = len(suggestion_names)
+        num_agents = len(agent_names)
+        suggestions_per_agent = num_suggestions // num_agents
+        extra_suggestions = num_suggestions % num_agents
+        
+        agent_index = 0
+        for agent_id in agent_names:
+            if len(agent_id) == 2:
+                agent = User.objects.filter(first_name=agent_id[0], last_name=agent_id[1]).first()
+            elif len(agent_id) == 3:
+                agent = User.objects.filter(first_name=agent_id[1], last_name=agent_id[2]).first()
+            if extra_suggestions > 0:
+                num_suggestions_for_agent = suggestions_per_agent + 1
+                extra_suggestions -= 1
+            else:
+                num_suggestions_for_agent = suggestions_per_agent
+            
+            assigned_suggestions = suggestion_names[:num_suggestions_for_agent]
+            for suggestion_name in assigned_suggestions:
+                suggestion = Suggestion.objects.filter(type=suggestion_name).first()
+                suggestion.assigned_to = agent
+                suggestion.save()
+                suggestion.add_suggestion_action(
+                    agent=User.objects.get(email=request.user),
+                    created_at=datetime.now(pytz.timezone("Europe/London")),
+                    text=f"Assigned to Agent {agent.first_name} {agent.last_name}",
+                )
+            suggestion_names = suggestion_names[num_suggestions_for_agent:]
+            
+            agent_index += 1
+        
+        messages.success(request, "Suggestions Assigned successfully!")
+        return redirect("app:suggestion")
+     except Exception as e:
+        messages.error(request, f"Error assigning suggestions: {e}")
+        return redirect("app:suggestion")
+    else:
+        messages.error(request, "Cannot Assign suggestions!")
+        return redirect("app:suggestion")
+
+
+def assign_agent(request):
+    suggestion_id = request.POST.get("suggestion_id")
+    agent_id = request.POST.get("agent_id")
+    agent = User.objects.get(pk=agent_id)
+    try:
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+        suggestion.assigned_to =  User.objects.get(pk=agent_id)
+        suggestion.save()
+        suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=f"Assigned to Agent {agent.first_name} {agent.last_name}",
+        )
+        messages.success(request, "Agent Assigned successfully!")
+        return HttpResponseRedirect("/detail_suggestion/" + str(suggestion_id))
+    except Exception as e:
+        messages.error(request, f"Error assigning suggestion: {e}")
+        return HttpResponseRedirect("/detail_suggestion/" + str(suggestion_id))
 
 @login_required
 def detail_suggestion(request, suggestion_id):
     suggestion = Suggestion.objects.get(pk=suggestion_id)
-    sub_suggestions = Sub_suggestions.objects.all().filter(suggestion=suggestion)
+    sub_suggestions = Sub_suggestions.objects.all().filter(suggestion=suggestion).order_by("created_at")
     if suggestion.expected_completion_date:
         formatted_date = suggestion.expected_completion_date.strftime("%Y-%m-%d")
     else:
@@ -85,7 +149,8 @@ def detail_suggestion(request, suggestion_id):
                     i.text
                 ]
             )
-    return render(request, "home/detail_suggestion.html", {"suggestion": suggestion, "sub_suggestions": sub_suggestions, "formatted_date": formatted_date, "events": events})
+    agents = User.objects.all().filter(is_staff=True)
+    return render(request, "home/detail_suggestion.html", {"suggestion": suggestion, "sub_suggestions": sub_suggestions, "formatted_date": formatted_date, "events": events, "agents": agents})
 
 def add_sub_suggestion(request, suggestion_id):
     if request.method == "POST":
@@ -97,6 +162,9 @@ def add_sub_suggestion(request, suggestion_id):
             Sub_suggestions.objects.create(
                 description=description,
                 suggestion=suggestion,
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                status="New",
+                assigned_to=suggestion.assigned_to,
             )
             suggestion.add_suggestion_action(
                 agent=User.objects.get(email=request.user),
@@ -117,35 +185,32 @@ def delete_sub_suggestion(request, sub_suggestion_id):
     sub_suggestion.delete()
     return HttpResponse(200)
 
-def archive_suggestion(request, suggestion_id):
-    suggestion = Suggestion.objects.get(pk=suggestion_id)
-    if suggestion.archive:
-        suggestion.archive = False
-        suggestions = Suggestion.objects.all().filter(archive=False).filter(status=suggestion.status)
-        length = len(suggestions)
-        suggestion.order = length + 1
-    else:
-        suggestion.archive = True
-        suggestions = Suggestion.objects.all().filter(archive=True)
-        length = len(suggestions)
-        suggestion.order = length + 1
-    suggestion.save()
-    if suggestion.archive:
-        messages.success(request, "Suggestion archived successfully!")
-        suggestion.add_suggestion_action(
-            agent=User.objects.get(email=request.user),
-            created_at=datetime.now(pytz.timezone("Europe/London")),
-            text=f"Archived suggestion",
-        )
-    else:
-        messages.success(request, "Suggestion unarchived successfully!")
-        suggestion.add_suggestion_action(
-            agent=User.objects.get(email=request.user),
-            created_at=datetime.now(pytz.timezone("Europe/London")),
-            text=f"Unarchived suggestion",
-        )
-    redirect = '/suggestion?page=' + str(request.GET.get("page"))
-    return HttpResponseRedirect(redirect)
+def change_sub_suggestion_status(request, sub_suggestion_id):
+    sub_suggestion = Sub_suggestions.objects.get(pk=sub_suggestion_id)
+    suggestion = sub_suggestion.suggestion
+    status = request.POST.get("status")
+    sub_suggestion.status = status
+    sub_suggestion.save()
+    suggestion.add_suggestion_action(
+        agent=User.objects.get(email=request.user),
+        created_at=datetime.now(pytz.timezone("Europe/London")),
+        text=f"Changed sub suggestion status to {status}",
+    )
+    return redirect(f"/detail_suggestion/{suggestion.id}")
+
+def change_sub_suggestion_agent(request, sub_suggestion_id):
+    sub_suggestion = Sub_suggestions.objects.get(pk=sub_suggestion_id)
+    suggestion = sub_suggestion.suggestion
+    agent_id = request.POST.get("agent")
+    agent = User.objects.get(pk=agent_id)
+    sub_suggestion.assigned_to = agent
+    sub_suggestion.save()
+    suggestion.add_suggestion_action(
+        agent=User.objects.get(email=request.user),
+        created_at=datetime.now(pytz.timezone("Europe/London")),
+        text=f"Assigned sub suggestion to {agent.first_name} {agent.last_name}",
+    )
+    return redirect(f"/detail_suggestion/{suggestion.id}")
 
 def suggestion_order(request):
     if request.method == 'POST':

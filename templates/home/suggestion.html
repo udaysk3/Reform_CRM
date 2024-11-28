@@ -34,7 +34,6 @@
           <a href="{% url 'app:suggestion' %}?page=Complete" class="col fs-5">Complete</a>
           <a href="{% url 'app:suggestion' %}?page=Paused" class="col fs-5">Paused</a>
           <a href="{% url 'app:suggestion' %}?page=Rejected" class="col fs-5">Rejected</a>
-          <a href="{% url 'app:suggestion' %}?page=Archive" class="col fs-5">Archive</a>
         </div>
       </div>
     </div>
@@ -52,12 +51,44 @@
           </div>
           {% endfor %}
 
-          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9 row">
 
-            <div class="mb-3 mb-sm-0">
+            <div class="mb-3 mb-sm-0 col">
               <a href="#">
                 <h5 class="card-title fw-semibold text-primary text-decoration-underline">Suggestion</h5>
               </a>
+            </div>
+            <div class="col-2">
+              <button type="button" class="reform_btn position-relative" data-bs-toggle="modal" data-bs-target="#fundingroute">
+                <i class="bi bi-arrow-bar-right"></i> Assign to Agent
+              </button>
+              
+              <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Suggestions to the Agents</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method='post' action="{% url 'app:assign_agents' %}">
+                      {% csrf_token %}
+                      <div class="modal-body flex-container">
+                        <div class="mb-3">
+                          <input type="text" id="suggestions" placeholder="Select the Suggestions you wish to assign to the employees" autocomplete="off" name="suggestions" />
+                        </div>
+                        <div class="mb-3">
+                          <input type="text" id="agents" placeholder="Select the Employees you wish to assign to the suggestions" autocomplete="off" name="agents" />
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="reform_btn">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
       
@@ -72,7 +103,7 @@
                   <th>Location</th>
                   <th>File</th>
                   <th>Requester</th>
-                  <th>Archive</th>
+                  <th>Assigned to</th>
                 </tr>
               </thead>
               <tbody class="suggestion-container">
@@ -88,7 +119,6 @@
                   {% elif suggestion.expected_completion_date <= yesterday %}
                     background-color: #ffd493;
                   {% endif %}
-
                 {% endif %}
                 "
                 >
@@ -105,8 +135,8 @@
                   </td>
                   <td style="width: 10%;">{{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }}</td>
                   <td style="width: 10%;">
-                    <a href="{% url 'app:archive_suggestion' suggestion.id %}?page={{ request.GET.page }}" class="reform_btn">Archive</a>
-                  </td>
+                    {{ suggestion.assigned_to.first_name }} {{ suggestion.assigned_to.last_name }}
+                  </td> 
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -197,6 +227,46 @@
           }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
       }
+  </script>
+
+<script type="module">
+    jQuery(document).ready(function ($) {
+      const options = []
+      let suggestions = JSON.parse("{{ suggestions_list | escapejs }}");
+      for (let i = 0; i < suggestions.length; i++) {
+        options.push({
+          id: i + 1,
+          title: suggestions[i].fields.type,
+        });
+      }
+
+      comboTree1 = $("#suggestions").comboTree({
+        source: options,
+        isMultiple: true,
+        cascadeSelect: false,
+        collapse: true,
+        selectAll: true,
+      });
+    });
+
+
+    jQuery(document).ready(function ($) {
+      let agents = JSON.parse("{{ agents | escapejs }}");
+
+      let comboSource2 = agents.map(agent => {
+        return {
+          id: agent.pk,
+          title: agent.fields.first_name + ' ' + agent.fields.last_name
+        };
+      });
+      comboTree2 = $("#agents").comboTree({
+        source: comboSource2,
+        isMultiple: true,
+        cascadeSelect: false,
+        collapse: true,
+        selectAll: true,
+      });
+    });
   </script>
 
 {% endblock js %}

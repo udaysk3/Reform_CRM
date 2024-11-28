@@ -220,7 +220,7 @@ table {
 }
 
 .tooltipbas .tooltiptextbas {
-  visibility: hidden;
+  display: none;
   width: 120px;
   background-color: black;
   color: #fff;
@@ -231,11 +231,12 @@ table {
   z-index: 1000;
   width: 320px;
   top: 100%;
-  left: 100%;
+  left: 0%;
+  transition: 0.3s;
 }
 
-.tooltipbas:hover .tooltiptextbas {
-  visibility: visible;
+.tooltipbas:hover .tooltiptextbas, .tooltiptextbas:hover {
+  display: block;
 }
 
 </style>

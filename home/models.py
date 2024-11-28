@@ -95,7 +95,9 @@ class Suggestion(models.Model):
     location = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(max_length=999, blank=True, null=True)
     file = models.FileField(upload_to="suggestion", blank=True, null=True)
-    archive = models.BooleanField(default=False)
+    assigned_to = models.ForeignKey(User, related_name= 'assigned_to_suggestion', on_delete=models.DO_NOTHING, null=True)
+    aditional_requesters = models.ManyToManyField(User, related_name='aditional_requesters', blank=True)
+    requested = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True)
     expected_completion_date = models.DateField(blank=True, null=True)
@@ -114,3 +116,6 @@ class Suggestion(models.Model):
 class Sub_suggestions(models.Model):
     suggestion = models.ForeignKey('home.Suggestion', on_delete=models.CASCADE, null=True, related_name='sub_suggestions')
     description = models.TextField(max_length=999, blank=True, null=True)
+    assigned_to = models.ForeignKey(User, related_name= 'assigned_to_sub_suggestion', on_delete=models.DO_NOTHING, null=True)
+    status = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
