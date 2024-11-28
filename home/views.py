@@ -130,6 +130,18 @@ def assign_agent(request):
 def detail_suggestion(request, suggestion_id):
     suggestion = Suggestion.objects.get(pk=suggestion_id)
     sub_suggestions = Sub_suggestions.objects.all().filter(suggestion=suggestion).order_by("created_at")
+    completed_sub_suggestions = Sub_suggestions.objects.all().filter(suggestion=suggestion, status="Completed")
+    length_sub_suggestions = len(sub_suggestions)
+    length_completed_sub_suggestions = len(completed_sub_suggestions)
+    if len(sub_suggestions) == 0:
+        if suggestion.status == "Completed":
+            length_completed_sub_suggestions = 1
+            length_sub_suggestions = 0
+        else:
+            length_sub_suggestions = 1
+            length_completed_sub_suggestions = 0
+
+    merge_suggestions = Suggestion.objects.filter(Q(status="In Progress") | Q(status="Not Started"))
     if suggestion.expected_completion_date:
         formatted_date = suggestion.expected_completion_date.strftime("%Y-%m-%d")
     else:
@@ -150,7 +162,7 @@ def detail_suggestion(request, suggestion_id):
                 ]
             )
     agents = User.objects.all().filter(is_staff=True)
-    return render(request, "home/detail_suggestion.html", {"suggestion": suggestion, "sub_suggestions": sub_suggestions, "formatted_date": formatted_date, "events": events, "agents": agents})
+    return render(request, "home/detail_suggestion.html", {"suggestion": suggestion, "sub_suggestions": sub_suggestions, "formatted_date": formatted_date, "events": events, "agents": agents, "merge_suggestions": merge_suggestions, "length_sub_suggestions": length_sub_suggestions, "length_completed_sub_suggestions": length_completed_sub_suggestions})
 
 def add_sub_suggestion(request, suggestion_id):
     if request.method == "POST":
@@ -248,6 +260,36 @@ def add_suggestion(request):
         
         messages.success(request, "Suggestion added successfully!")
         return HttpResponseRedirect(location)
+    
+def merge_suggestions(request, suggestion_id):
+    if request.method == "POST":
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+        merge_suggestion_id = request.POST.get("merge_suggestion")
+        merge_suggestion = Suggestion.objects.get(pk=merge_suggestion_id)
+        for requester in suggestion.aditional_requesters.all():
+            merge_suggestion.aditional_requesters.add(requester)
+        merge_suggestion.aditional_requesters.add(suggestion.agent)            
+        for sub_suggestion in suggestion.sub_suggestions.all():
+            sub_suggestion.suggestion = merge_suggestion
+            sub_suggestion.save()
+        merge_suggestion.add_suggestion_action(
+            agent=User.objects.get(email=request.user),
+            created_at=datetime.now(pytz.timezone("Europe/London")),
+            text=f"Merged suggestion information: {suggestion.description}",
+        )
+        merge_suggestion.status = "New"
+        suggestions = Suggestion.objects.all().filter(status="New")
+        length = len(suggestions)
+        merge_suggestion.order = length + 1
+        if merge_suggestion.requested:
+            merge_suggestion.requested += 1
+        else:
+            merge_suggestion.requested = 1
+        suggestion.delete()
+        merge_suggestion.save()
+        messages.success(request, "Suggestion merged successfully!")
+        return HttpResponseRedirect(f"/suggestion?page=New")
+
     
 def add_comment(request, suggestion_id):
     if request.method == "POST":

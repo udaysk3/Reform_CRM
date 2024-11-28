@@ -12,6 +12,7 @@ urlpatterns = [
     path("edit_suggestion/<int:suggestion_id>", views.edit_suggestion, name="edit_suggestion"),
     path("add_sub_suggestion/<int:suggestion_id>", views.add_sub_suggestion, name="add_sub_suggestion"),
     path("add_comment/<int:suggestion_id>", views.add_comment, name="add_comment"),
+    path("merge_suggestions/<int:suggestion_id>", views.merge_suggestions, name="merge_suggestions"),
     path('delete_sub_suggestion/<int:sub_suggestion_id>', views.delete_sub_suggestion, name='delete_sub_suggestion'),
     path("query/cities/<str:q>", views.query_city, name="query_city"),
     path("query/countys/<str:q>", views.query_county, name="query_county"),

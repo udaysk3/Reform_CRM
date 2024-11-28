@@ -141,8 +141,6 @@ DATABASES = {
     }
 }
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = None  
-DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",

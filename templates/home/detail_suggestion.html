@@ -47,6 +47,11 @@ label.add{
   display: block;
 }
 
+#myChart{
+    width: 45% !important;
+    height: 70% !important;
+}
+
 
 </style>
 
@@ -78,7 +83,7 @@ label.add{
               <h3>Suggestion</h3>
             </div>
 
-            <div class="col-6">
+            <div class="col-3">
               <h5 class="col">Assigned To: 
                   <div class="mt-1 link-primary" id="assigned_to">
                     {% if suggestion.assigned_to %}
@@ -119,6 +124,42 @@ label.add{
                     </div>
                   </div>
                 </h5>
+            </div>
+
+            <div class="col-3">
+
+              <button type="button" class="link-primary" style="border: none; background-color: transparent;" data-bs-toggle="modal"
+                data-bs-target="#merge">Merge Suggestions</button>
+              
+              <div class="modal fade" id="merge" data-bs-backdrop="static"
+                data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Merge Suggestions</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{% url 'app:merge_suggestions' suggestion.id %}" method="post">
+                      <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                          <label for="type" class="form-label">Suggestion</label>
+                          <select class="form-select" name="merge_suggestion">
+                            {% for merge_suggestion in merge_suggestions %}
+                              <option value="{{ merge_suggestion.id }}">{{ merge_suggestion.type }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                        <button class="reform_btn">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              
             </div>
             
             <div class="col-1">
@@ -198,27 +239,31 @@ label.add{
                     <a href="{{ suggestion.file.url }}" target="_blank">View</a>
                     {% else %}
                     No File
-                    {% endif %}</h6>
-                  </div>
+                    {% endif %}
+                  </h6>
                 </div>
               </div>
-              <div class="col-sm-4 mb-sm-0 px-2">
-                <div class="card">
-                  <div class="card-body py-3" style="height:150px">
+            </div>
+            <div class="col-sm-4 mb-sm-0 px-2">
+              <div class="card">
+                <div class="card-body py-3" style="height:150px">
                   <h6><b> Date: </b> {{ suggestion.created_at }}</h6>
                   <h6><b> Status: </b> {{ suggestion.status }}</h6>
-                  <h6><b> Requester: </b> {{ suggestion.agent.first_name }} {{ suggestion.agent.last_name }} </h6>
                   <h6><b> Additional requesters: </b>
-                    {% if suggestion.requesters %}
-                    {% for requester in suggestion.requesters.all %}
-                    {{ requester.first_name }} {{ requester.last_name }},
+                    {% if suggestion.aditional_requesters %}
+                    {% for requester in suggestion.aditional_requesters.all %}
+                    {{ requester.first_name }} {{ requester.last_name }}
                     {% endfor %}
                     {% else %}
                     No Requesters
                     {% endif %}
                   </h6>
+                  <h6><b> Requested: </b> {% if suggestion.requested %} {{ suggestion.requested }} {% else %} 0 {% endif %} </h6>
                 </div>
               </div>
+            </div>
+            <div class="col-sm-4 mb-sm-0 px-2 d-flex flex-column">
+              <canvas id="myChart" class="align-self-center"></canvas>
             </div>
           </div>
         </div>
@@ -481,6 +526,30 @@ label.add{
         );
         assigned_to_modal.show();
     });
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+  const ctx = document.getElementById('myChart');
+
+
+  const currentNums = {{ length_completed_sub_suggestions }};
+  const totalNums = {{ length_sub_suggestions }};
+  const remaining = totalNums - currentNums;
+  console.log(currentNums, totalNums, remaining);
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Remaining'],
+      datasets: [{
+        data: [currentNums, remaining], borderWidth: 1
+      }]
+    },
+    options: {
+      cutout: '85%'
+    }
+  });
 
 </script>
 
