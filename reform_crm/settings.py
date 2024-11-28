@@ -111,7 +111,6 @@ AUTH_PASSWORD_VALIDATORS = [
 WSGI_APPLICATION = 'reform_crm.wsgi.application'
 
 # Database configuration
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -141,6 +140,7 @@ DATABASES = {
 #     }
 # }
 
+
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
     messages.INFO: "alert-info",
@@ -157,9 +157,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# # Media files
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # Here I am using gmail smtp server
