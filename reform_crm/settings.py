@@ -111,12 +111,12 @@ AUTH_PASSWORD_VALIDATORS = [
 WSGI_APPLICATION = 'reform_crm.wsgi.application'
 
 # Database configuration
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Using SQLite for simplicity
+    }
+}
 
 # DATABASES = {
 #     'default': {
@@ -129,16 +129,16 @@ WSGI_APPLICATION = 'reform_crm.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'reformCRM',
-        'USER': 'postgres',
-        'PASSWORD': 'Gowtham839938',
-        'HOST': 'localhost',
-        'PORT': 5432,
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'reformCRM',
+#         'USER': 'postgres',
+#         'PASSWORD': 'Gowtham839938',
+#         'HOST': 'localhost',
+#         'PORT': 5432,
+#     }
+# }
 
 
 MESSAGE_TAGS = {
@@ -157,7 +157,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files
+# # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
