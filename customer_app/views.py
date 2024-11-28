@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from .models import Customers, Answer
-from django.db.models.functions import Lower
 from home.models import Campaign, Stage, Client_Council_Route
 from admin_app.models import Email, Reason,Signature
 from client_app.models import Clients, ClientArchive
@@ -799,7 +798,7 @@ def add_customer(request):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
 
-        if Customers.objects.annotate(lower_email=Lower('email')).filter(Lower_email=email).filter(client=client).exists():
+        if Customers.objects.filter(email__iexact=email).filter(client=client).exists():
             messages.error(request, "Email with this Client already exists")
             request.session['first_name'] = first_name,
             request.session['last_name'] = last_name,
@@ -946,7 +945,7 @@ def edit_customer(request, customer_id):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
         customer.phone_number = phone_number
-        if Customers.objects.annotate(lower_email=Lower('email')).filter(Lower_email=email).filter(client=client).exists():
+        if Customers.objects.filter(email__iexact=email).filter(client=customer.client).exists():
             messages.error(request, "Email with this Client already exists")
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
         email = request.POST.get("email").lower()

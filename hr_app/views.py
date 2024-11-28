@@ -7,8 +7,6 @@ import pytz
 from user.models import User
 from security_app.models import Role
 from .models import Employee, Emergency_contact
-from django.db.models.functions import Lower
-
 
 @login_required
 def employee(request):
@@ -49,9 +47,9 @@ def add_employee(request):
     users = User.objects.all().filter(is_employee=False, is_client=False)
     if request.method == 'POST':
         email = request.POST.get('email').lower()
-        if User.objects.annotate(lower_email=Lower('email')).filter(Lower_email=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             messages.error(request, 'Agent with this email already exists!')
-            return redirect('admin_app:admin') 
+            return redirect('hr_app:add_employee') 
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         role = request.POST.get('role')

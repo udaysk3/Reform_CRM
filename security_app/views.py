@@ -9,7 +9,6 @@ from user.models import User
 from .models import Role
 from django.contrib.auth.hashers import make_password
 from client_app.models import Clients
-from django.db.models.functions import Lower
 
 @login_required
 def s_employee(request):
@@ -239,7 +238,7 @@ def change_otp_mail(request, emp_id):
     if request.method == 'POST':
         new_email = request.POST.get('email').lower()
         if new_email:
-            if User.objects.annotate(lower_email=Lower('email')).filter(Lower_email=new_email).exists():
+            if User.objects.filter(email__iexact=new_email).exists():
                 messages.error(request, 'This email is already in use!')
                 return redirect('/s_edit_employee/' + str(emp_id))
             emp.email = new_email

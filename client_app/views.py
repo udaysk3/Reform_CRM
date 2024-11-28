@@ -18,7 +18,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-from django.db.models.functions import Lower
 from admin_app.models import Email, Reason, Signature
 from client_app.models import ClientArchive, Clients, CoverageAreas
 from customer_app.models import Action
@@ -441,7 +440,7 @@ def add_client(request):
         county = request.POST.get("county")
         country = request.POST.get("country")
         agent = request.user
-        if User.objects.annotate(lower_email=Lower('username')).filter(Lower_email=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             messages.error(request, "User with this email already exists")
             return redirect("/client?page=add_client")
         user = User.objects.create(
@@ -461,7 +460,7 @@ def add_client(request):
         else:
             phone_number = "+44" + phone_number
 
-        if Clients.objects.annotate(lower_email=Lower('username')).filter(Lower_email=email).exists():
+        if Clients.objects.filter(email__iexact=email).exists():
             messages.error(request, "Email already exists")
             return redirect("/client?page=add_client")
 
@@ -548,9 +547,9 @@ def edit_client(request, client_id):
     user.last_name = request.POST.get("last_name")
     email = request.POST.get("email").lower()
     user.password = make_password('123')
-    if Clients.objects.annotate(lower_email=Lower('username')).filter(Lower_email=email).exists():
+    if User.objects.filter(email__iexact=email).exists():
         messages.error(request, "Email already exists")
-        return redirect("/client?page=add_client")
+        return redirect(f"/client-detail/{client_id}")
     user.email = email
 
     user.save()
