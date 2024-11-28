@@ -331,7 +331,7 @@ label.add{
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                        <button class="reform_btn">Submit</button>
+                        <button type="button" class="reform_btn" onclick="print_data()">Submit</button>
                       </div>
                       </form>
                     </div>
@@ -463,6 +463,9 @@ label.add{
 {% endblock %} {% block js %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+
+    
+
     const addForm = document.querySelector(".form");
     const ul = document.querySelector("ul.todos");
 
@@ -478,18 +481,14 @@ label.add{
     };
 
     addForm.addEventListener("keydown", (e) => {
-      // Check if the pressed key is "Enter"
       if (e.key === "Enter") {
-        e.preventDefault(); // Prevent form submission
-        const inputValue = addForm.value.trim(); // Trim to remove extra spaces
-        if (inputValue.length) handleAddItem(inputValue); // Handle adding the item
-        addForm.value = ""; // Clear the input field
+        e.preventDefault();
+        const inputValue = addForm.value.trim();
+        if (inputValue.length) handleAddItem(inputValue);
+        addForm.value = "";
       } else if (/^[a-zA-Z0-9\s]$/.test(e.key)) {
-        // Allow only alphabetic characters, numbers, and spaces
-        // No need to manually append; let the default behavior handle typing
       } else {
-        // Allow default behavior for all other keys
-        return; // Exit early to let the browser handle the key normally
+        return;
       }
     });
 
