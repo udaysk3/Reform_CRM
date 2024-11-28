@@ -432,7 +432,7 @@ def add_client(request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
-        email = request.POST.get("email")
+        email = request.POST.get("email").lower()
         postcode = request.POST.get("postcode").upper()
         street_name = request.POST.get("street_name")
         house_name = request.POST.get("house_name")
@@ -440,7 +440,7 @@ def add_client(request):
         county = request.POST.get("county")
         country = request.POST.get("country")
         agent = request.user
-        if User.objects.filter(username=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             messages.error(request, "User with this email already exists")
             return redirect("/client?page=add_client")
         user = User.objects.create(
@@ -460,7 +460,7 @@ def add_client(request):
         else:
             phone_number = "+44" + phone_number
 
-        if Clients.objects.filter(email=email).exists():
+        if Clients.objects.filter(email__iexact=email).exists():
             messages.error(request, "Email already exists")
             return redirect("/client?page=add_client")
 
@@ -545,8 +545,13 @@ def edit_client(request, client_id):
     user = client.user
     user.first_name = request.POST.get("first_name")
     user.last_name = request.POST.get("last_name")
-    user.email = request.POST.get("email")
+    email = request.POST.get("email").lower()
     user.password = make_password('123')
+    if User.objects.filter(email__iexact=email).exists():
+        messages.error(request, "Email already exists")
+        return redirect(f"/client-detail/{client_id}")
+    user.email = email
+
     user.save()
     if request.method == "POST":
         changed = ''
@@ -588,7 +593,7 @@ def edit_client(request, client_id):
         client.first_name = request.POST.get("first_name")
         client.last_name = request.POST.get("last_name").upper()
         client.phone_number = request.POST.get("phone_number")
-        client.email = request.POST.get("email")
+        client.email = request.POST.get("email").lower()
         client.postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         client.street_name = request.POST.get("street_name")
         client.city = request.POST.get("city")

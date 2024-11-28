@@ -1,5 +1,6 @@
 from django.db import models
 from home.models import Stage
+from security_app.models import Role
 
 class CJStage(models.Model):
     route = models.ForeignKey(
@@ -33,3 +34,4 @@ class CJStage(models.Model):
     question = models.ForeignKey("question_actions_requirements_app.Questions", on_delete=models.CASCADE, null=True, blank=True)
     questions = models.JSONField(blank=True, null=True)
     order = models.IntegerField(blank=True, null=True)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True)

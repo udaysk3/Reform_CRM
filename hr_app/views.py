@@ -8,7 +8,6 @@ from user.models import User
 from security_app.models import Role
 from .models import Employee, Emergency_contact
 
-
 @login_required
 def employee(request):
     if request.session.get("first_name"):
@@ -47,10 +46,10 @@ def add_employee(request):
     roles = Role.objects.all()
     users = User.objects.all().filter(is_employee=False, is_client=False)
     if request.method == 'POST':
-        email = request.POST.get('email')
-        if User.objects.filter(email=email).exists():
+        email = request.POST.get('email').lower()
+        if User.objects.filter(email__iexact=email).exists():
             messages.error(request, 'Agent with this email already exists!')
-            return redirect('admin_app:admin') 
+            return redirect('hr_app:add_employee') 
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         role = request.POST.get('role')
@@ -118,7 +117,7 @@ def add_emergency_contact(request, emp_id):
     if request.method == 'POST':
         name = request.POST.get('name')
         phno = request.POST.get('phno')
-        email = request.POST.get('email')
+        email = request.POST.get('email').lower()
         emergency_contact = Emergency_contact.objects.create(
             name=name,
             phone=phno,
@@ -141,7 +140,7 @@ def edit_emergency_contact(request, contact_id):
     if request.method == 'POST':
         name = request.POST.get('name')
         phno = request.POST.get('phno')
-        email = request.POST.get('email')
+        email = request.POST.get('email').lower()
         contact.name = name
         contact.phone = phno
         contact.email = email
@@ -170,7 +169,7 @@ def edit_basic_information(request, emp_id):
         emp.employee_user.religion = request.POST.get('religion')
         emp.employee_user.nationality = request.POST.get('nationality')
         emp.employee_user.dob = request.POST.get('dob')
-        emp.employee_user.personal_email = request.POST.get('personal_email')
+        emp.employee_user.personal_email = request.POST.get('personal_email').lower()
         emp.employee_user.personal_phon = request.POST.get('personal_phon')
         emp.employee_user.city = request.POST.get('city')
         emp.employee_user.region = request.POST.get('region')

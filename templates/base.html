@@ -121,21 +121,6 @@ i{
   </style>
   {% block css %}
   {% endblock %}
-  <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1480301302605956');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1480301302605956&ev=PageView&noscript=1"
-    /></noscript>
 </head>
 
 <body>
@@ -335,12 +320,12 @@ i{
                   </div>
                   <ul class="menu_items submenu">
                     {% if request.user.new_suggestion %}
-                    <button class="nav_link sublink new" style="border:none; background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">New</button>
+                    <button class="nav_link sublink new_suggestion" style="border:none; background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">New</button>
                     
                     
                     {% endif %}
                     {% if request.user.suggestion %}
-                    <a href="{% url 'app:suggestion' %}" class="nav_link sublink">Suggestions</a>
+                    <a href="{% url 'app:suggestion' %}?page=New" class="nav_link sublink">Suggestions</a>
                     {% endif %}
                   </ul>
                 </li>
@@ -390,7 +375,7 @@ i{
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">Suaaestions/Error</h1>
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Suggestions/Error</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{% url 'app:add_suggestion' %}" method="post" enctype="multipart/form-data">
@@ -398,19 +383,11 @@ i{
               <div class="modal-body">
                 <div class="mb-3">
                   <label for="location" class="form-label">Tab</label>
-                  <input type="text" class="form-control" id="location" name="location">
+                  <input type="text" class="form-control" id="location_sugg" name="location">
                 </div>
                 <div class="mb-3">
                   <label for="type" class="form-label">What type of issue?</label>
                   <input type="text" class="form-control" id="type" name="type">
-                </div>
-                <div class="mb-3">
-                  <label for="type" class="form-label">What is the priority of issue?</label>
-                  <select class="form-select" name="priority">
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="description" class="form-label">Please decribe the issue</label>
@@ -431,9 +408,10 @@ i{
     </div>
     <script>
 
-      const new_suggestion = document.querySelector('.new');
+      const new_suggestion = document.querySelector('.new_suggestion');
       new_suggestion.addEventListener('click', () => {
-        document.getElementById('location').value = window.location.pathname;
+        document.getElementById('location_sugg').value = window.location.pathname;
+        console.log(window.location.pathname);
       });
 
       function goBack() {

@@ -260,6 +260,10 @@ def customer_detail(request, customer_id, s_customer_id=None):
             else:
                 cjstages = CJStage.objects.filter(route=route, product=product, client=None)
             for cjstage in cjstages:
+                user = request.user
+                if user.is_employee:
+                    if user.role != cjstage.role.name:
+                        continue
                 all_answered = True
             
                 questions = []
@@ -672,13 +676,21 @@ def Customer(request):
         )
 
     current_time = datetime.now(london_tz)
-    user  = User.objects.get(email=request.user)
-    customers = (
-        Customers.objects.annotate(earliest_action_date=Max("action__date_time"))
-        .filter(parent_customer=None)
-        .filter(closed=False)
-        .order_by("earliest_action_date")
-    )
+    user  = request.user
+    if user.is_employee:
+        clients_with_customers = Clients.objects.filter(assigned_to=user).prefetch_related('customers')
+        customers_list = []
+        for client in clients_with_customers:
+            customers_list.extend(client.customers.all())
+        customers = customers_list
+    else:
+        customers = (
+            Customers.objects
+            .annotate(earliest_action_date=Max("action__date_time"))
+            .filter(parent_customer=None)
+            .filter(closed=False)
+            .order_by("earliest_action_date")
+        )
 
     customers = list(customers)
     new_customers = []
@@ -755,7 +767,7 @@ def add_customer(request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name").upper()
         phone_number = request.POST.get("phone_number")
-        email = request.POST.get("email")
+        email = request.POST.get("email").lower()
         postcode = request.POST.get("postcode").upper()
         street_name = request.POST.get("street_name")
         house_name = request.POST.get("house_name")
@@ -786,7 +798,7 @@ def add_customer(request):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
 
-        if Customers.objects.filter(email=email).filter(client=client).exists():
+        if Customers.objects.filter(email__iexact=email).filter(client=client).exists():
             messages.error(request, "Email with this Client already exists")
             request.session['first_name'] = first_name,
             request.session['last_name'] = last_name,
@@ -905,7 +917,7 @@ def edit_customer(request, customer_id):
         changed = ''
         if customer.phone_number != request.POST.get("phone_number"):
             changed += f'{request.POST.get("phone_number")}, '
-        if customer.email != request.POST.get('email'):
+        if customer.email != request.POST.get('email').lower():
             changed += f'{request.POST.get("email")}, '
         if customer.postcode != request.POST.get("postcode"):
             changed += f'{request.POST.get("postcode")}, '
@@ -933,7 +945,11 @@ def edit_customer(request, customer_id):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
         customer.phone_number = phone_number
-        customer.email = request.POST.get("email")
+        if Customers.objects.filter(email__iexact=email).filter(client=customer.client).exists():
+            messages.error(request, "Email with this Client already exists")
+            return redirect(f"/customer?page=edit_customer&id={customer_id}")
+        email = request.POST.get("email").lower()
+        customer.email = email
         postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         customer.street_name = request.POST.get("street_name")
         customer.city = request.POST.get("city")
