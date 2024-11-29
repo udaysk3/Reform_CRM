@@ -53,39 +53,36 @@
 
           <div class="d-sm-flex d-block align-items-center justify-content-between mb-9 row">
 
-            <div class="mb-3 mb-sm-0 col">
-              <a href="#">
-                <h5 class="card-title fw-semibold text-primary text-decoration-underline">Suggestion</h5>
-              </a>
-            </div>
-            <div class="col-2">
-              <button type="button" class="reform_btn position-relative" data-bs-toggle="modal" data-bs-target="#fundingroute">
+            <button type="button" class="reform_btn position-relative"  data-bs-toggle="modal" data-bs-target="#fundingroute">
                 <i class="bi bi-arrow-bar-right"></i> Assign to Agent
-              </button>
-              
-              <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              </button> 
+              <!-- Modal -->
+              <div class="modal fade" id="fundingroute" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Suggestions to the Agents</h1>
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Suggestions to the Agent</h1>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method='post' action="{% url 'app:assign_agents' %}">
+                    <form method='post' action="{% url 'app:assign_agents'  %}">
                       {% csrf_token %}
-                      <div class="modal-body flex-container">
-                        <div class="mb-3">
-                          <input type="text" id="suggestions" placeholder="Select the Suggestions you wish to assign to the employees" autocomplete="off" name="suggestions" />
-                        </div>
-                        <div class="mb-3">
-                          <input type="text" id="agents" placeholder="Select the Employees you wish to assign to the suggestions" autocomplete="off" name="agents" />
-                        </div>
+                    <div class="modal-body">
+                      <div class="mb-3">
+                      <label for="agents" class="form-label">Agents</label>
+                      <select class="form-select agents" aria-label="Default select example" name="agent_id">
+                        <option value="nan">Select a agent</option>
+                        {% for agent in agents %}
+                          <option value="{{agent.id}}">{{agent.first_name}} {{agent.last_name}}</option>
+                        {% endfor %}
+                      </select>
+                      <input type="hidden" name="suggestions" id="suggestion_ids">
                       </div>
-                      <div class="modal-footer">
-                        <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="reform_btn">Submit</button>
-                      </div>
-                    </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
+                      <button type="button" id="assignSelectedBtn" class="reform_btn">Submit</button>
+                    </div>
+                  </form>
                   </div>
                 </div>
               </div>
@@ -97,6 +94,9 @@
 
               <thead>
                 <tr>
+                  <th>
+                    <input type="checkbox" id="selectAll">
+                  </th>
                   <th>Date</th>
                   <th>Suggestion</th>
                   <th>Status</th>
@@ -109,6 +109,7 @@
               <tbody class="suggestion-container">
                 {% if suggestions %}
                 {% for suggestion in suggestions %}
+               
                 <tr class="suggestiondrag" data-suggestion-id="{{ suggestion.id }}" draggable="true" 
                 style="
                 {% if suggestion.status == 'Completed' %}
@@ -122,6 +123,9 @@
                 {% endif %}
                 "
                 >
+                  <td>
+                    <input type="checkbox" class="select-suggestion" data-suggestion-id="{{ suggestion.id }}">
+                  </td>
                   <td style="width: 20%;">{{ suggestion.created_at }}</td>
                   <td style="width: 20%;"><a href="{% url 'app:detail_suggestion' suggestion.id %}"> {{ suggestion.type }} </a></td>
                   <td style="width: 10%;">{{ suggestion.status }}</td>
@@ -268,5 +272,42 @@
       });
     });
   </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const customerCheckboxes = document.querySelectorAll('.select-suggestion');
+
+  selectAllCheckbox.addEventListener('change', function () {
+    customerCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+  });
+
+  const assignSelectedBtn = document.getElementById('assignSelectedBtn');
+
+  assignSelectedBtn.addEventListener('click', function () {
+    const selectedCustomerIds = Array.from(customerCheckboxes)
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.getAttribute('data-suggestion-id'));
+
+    if (selectedCustomerIds.length > 0) {
+      const agentId = document.querySelector('.agents').value;
+      if (agentId === 'nan') {
+        alert('Please select an agent to assign suggestions to.');
+        return;
+      }
+
+      const form = assignSelectedBtn.closest('form');
+      document.getElementById('suggestion_ids').value = selectedCustomerIds
+      form.submit();
+
+
+    } else {
+      alert('Please select suggestions to assign.');
+    }
+  });
+});
+</script>
 
 {% endblock js %}

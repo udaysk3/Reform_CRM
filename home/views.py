@@ -59,52 +59,31 @@ def suggestion(request):
     yesterday = current_date_time + timedelta(days=1)
     agents = User.objects.all().filter(is_staff=True)
 
-    return render(request, "home/suggestion.html", {"suggestions": suggestions, "suggestions_list" :serialize('json', suggestions), "agents": serialize('json', agents), "current_date_time": current_date_time, "yesterday": yesterday})
+    return render(request, "home/suggestion.html", {"suggestions": suggestions, "suggestions_list" :serialize('json', suggestions), "agents": agents, "current_date_time": current_date_time, "yesterday": yesterday})
 
 def assign_agents(request):
     if request.method == "POST":
      try:
-        agent_names = [id_str.split(' ') for id_str in request.POST.get("agents").split(',')]
-        suggestion_names = [id_str.strip() for id_str in request.POST.get("suggestions").split(',')]
-            
-        num_suggestions = len(suggestion_names)
-        num_agents = len(agent_names)
-        suggestions_per_agent = num_suggestions // num_agents
-        extra_suggestions = num_suggestions % num_agents
-        
-        agent_index = 0
-        for agent_id in agent_names:
-            if len(agent_id) == 2:
-                agent = User.objects.filter(first_name=agent_id[0], last_name=agent_id[1]).first()
-            elif len(agent_id) == 3:
-                agent = User.objects.filter(first_name=agent_id[1], last_name=agent_id[2]).first()
-            if extra_suggestions > 0:
-                num_suggestions_for_agent = suggestions_per_agent + 1
-                extra_suggestions -= 1
-            else:
-                num_suggestions_for_agent = suggestions_per_agent
-            
-            assigned_suggestions = suggestion_names[:num_suggestions_for_agent]
-            for suggestion_name in assigned_suggestions:
-                suggestion = Suggestion.objects.filter(type=suggestion_name).first()
-                suggestion.assigned_to = agent
-                suggestion.save()
-                suggestion.add_suggestion_action(
-                    agent=User.objects.get(email=request.user),
-                    created_at=datetime.now(pytz.timezone("Europe/London")),
-                    text=f"Assigned to Agent {agent.first_name} {agent.last_name}",
-                )
-            suggestion_names = suggestion_names[num_suggestions_for_agent:]
-            
-            agent_index += 1
-        
-        messages.success(request, "Suggestions Assigned successfully!")
+        agent_id = request.POST.get("agent_id")
+        suggestion_ids = request.POST.get("suggestions").split(",")
+        agent = User.objects.get(pk=agent_id)
+        for suggestion_id in suggestion_ids:
+            suggestion = Suggestion.objects.get(pk=suggestion_id)
+            suggestion.assigned_to =  agent
+            suggestion.save()
+            suggestion.add_suggestion_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Assigned to Agent",
+            )
+        messages.success(request, "Suggestion Assigned successfully!")
         return redirect("app:suggestion")
      except Exception as e:
-        messages.error(request, f"Error assigning suggestions: {e}")
+        messages.error(request, f"Error assigning suggestion: {e}")
         return redirect("app:suggestion")
     else:
-        messages.error(request, "Cannot Assign suggestions!")
+        messages.error(request, "Cannot Assign suggestion!")
         return redirect("app:suggestion")
 
 
@@ -350,7 +329,7 @@ def edit_suggestion(request, suggestion_id):
         suggestion.status = status
         suggestion.save()
         messages.success(request, "Suggestion edited successfully!")
-        return HttpResponseRedirect(location)
+        return redirect(f"/detail_suggestion/{suggestion_id}")
 
 def query_city(request, q):
     cities = Cities.objects.all()
