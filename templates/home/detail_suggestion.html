@@ -313,10 +313,9 @@ label.add{
                         <ul class="list-group todos mx-auto text-light">
                           {% for sub_suggestion in sub_suggestions %}
                           <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span style="width:300px"> <div class="tooltipbas me-2"> {{ sub_suggestion.description|truncatechars:20 }}
-                              <span class="tooltiptextbas p-3">{{ sub_suggestion.description }}</span>
+                            <span style="width:300px"> <div class="tooltipbas me-2"> {{ sub_suggestion.description|safe|truncatechars:20 }}
+                              <span class="tooltiptextbas p-3">{{ sub_suggestion.description|safe }}</span>
                             </div> </span>
-
                             <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent; color:#fff"><i class="far fa-trash-alt delete" ></i></button>
                           </li>
                           {% endfor %}
@@ -345,8 +344,8 @@ label.add{
                 {% if sub_suggestions %}
                   {% for sub_suggestion in sub_suggestions %}
                   <tr>
-                    <td><div class="tooltipbas me-2"> {{ sub_suggestion.description|truncatechars:20 }}
-                      <span class="tooltiptextbas p-3">{{ sub_suggestion.description }}</span>
+                    <td><div class="tooltipbas me-2"> {{ sub_suggestion.description|safe|safe|truncatechars:20 }}
+                      <span class="tooltiptextbas p-3">{{ sub_suggestion.description|safe }}</span>
                     </div></td>
                     <td>
                       <button style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_status{{ forloop.counter }}">{{ sub_suggestion.status }}</button>
@@ -470,17 +469,27 @@ label.add{
 
     const addForm = document.querySelector(".form");
     const ul = document.querySelector("ul.todos");
+    
+    const escapeAttribute = (unsafe) => {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
 
     const handleAddItem = (inputValue) => {
-      const html = `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span>${inputValue}</span>
-          <input type="hidden" name="suggestion" value="${inputValue}">
-          <div><i class="far fa-trash-alt delete"></i></div>
-        </li>
-      `;
+      const sanitizedAttributeValue = escapeAttribute(inputValue); // Sanitize for attribute
+    const html = `
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>${inputValue}</span> <!-- Visible as entered -->
+        <input type="hidden" name="suggestion" value="${sanitizedAttributeValue}">
+        <div><i class="far fa-trash-alt delete"></i></div>
+      </li>
+    `;
       ul.innerHTML += html;
     };
+
+    
 
     addForm.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
