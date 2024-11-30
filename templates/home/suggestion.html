@@ -10,6 +10,13 @@
 .suggestiondrag.dragging, .archivesuggestiondrag.dragging {
   opacity: .5;
 }
+
+.active-nav {
+  background-color: #02475315;
+  color: black;
+  padding: 10px;
+  border-radius: 50px;
+}
 </style>
 
 {% endblock %}
@@ -28,12 +35,41 @@
     <div class="col-lg-12 d-flex align-items-stretch w-100">
       <div class="card w-100 p-0">
         <div class="card-body row m-0 p-3 ">
-          <a href="{% url 'app:suggestion' %}?page=New" class="col fs-5">New</a>
-          <a href="{% url 'app:suggestion' %}?page=Not Started" class="col fs-5">Not Started</a>
-          <a href="{% url 'app:suggestion' %}?page=In Progress" class="col fs-5">In Progress</a>
-          <a href="{% url 'app:suggestion' %}?page=Complete" class="col fs-5">Complete</a>
-          <a href="{% url 'app:suggestion' %}?page=Paused" class="col fs-5">Paused</a>
-          <a href="{% url 'app:suggestion' %}?page=Rejected" class="col fs-5">Rejected</a>
+          <a href="{% url 'app:suggestion' %}?page=In Review" class="col  fs-5 ">
+            <span class=" {% if request.GET.page == 'In Review' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            In Review
+            </span>
+          </a>
+          <a href="{% url 'app:suggestion' %}?page=Not Started" class="col fs-5">
+            <span class=" {% if request.GET.page == 'Not Started' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            Not Started
+            </span>
+          </a>
+          <a href="{% url 'app:suggestion' %}?page=In Progress" class="col fs-5">
+            <span class=" {% if request.GET.page == 'In Progress' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            In Progress
+            </span>
+          </a>
+          <a href="{% url 'app:suggestion' %}?page=Test" class="col fs-5">
+            <span class=" {% if request.GET.page == 'Test' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            Test
+            </span>
+          </a>
+          <a href="{% url 'app:suggestion' %}?page=Complete" class="col fs-5">
+            <span class=" {% if request.GET.page == 'Complete' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            Complete
+            </span>
+          </a>
+          <a href="{% url 'app:suggestion' %}?page=On Hold" class="col fs-5">
+            <span class=" {% if request.GET.page == 'On Hold' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            On Hold
+            </span>
+          </a>
+          <a href="{% url 'app:suggestion' %}?page=Rejected" class="col fs-5">
+            <span class=" {% if request.GET.page == 'Rejected' %} active-nav {% endif %} position-relative" style="width:fit-content;">
+            Rejected
+            </span>
+          </a>
         </div>
       </div>
     </div>
@@ -231,46 +267,6 @@
           }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
       }
-  </script>
-
-<script type="module">
-    jQuery(document).ready(function ($) {
-      const options = []
-      let suggestions = JSON.parse("{{ suggestions_list | escapejs }}");
-      for (let i = 0; i < suggestions.length; i++) {
-        options.push({
-          id: i + 1,
-          title: suggestions[i].fields.type,
-        });
-      }
-
-      comboTree1 = $("#suggestions").comboTree({
-        source: options,
-        isMultiple: true,
-        cascadeSelect: false,
-        collapse: true,
-        selectAll: true,
-      });
-    });
-
-
-    jQuery(document).ready(function ($) {
-      let agents = JSON.parse("{{ agents | escapejs }}");
-
-      let comboSource2 = agents.map(agent => {
-        return {
-          id: agent.pk,
-          title: agent.fields.first_name + ' ' + agent.fields.last_name
-        };
-      });
-      comboTree2 = $("#agents").comboTree({
-        source: comboSource2,
-        isMultiple: true,
-        cascadeSelect: false,
-        collapse: true,
-        selectAll: true,
-      });
-    });
   </script>
 
 <script>

@@ -17,6 +17,187 @@
   <link rel="stylesheet" href="{% static 'css/layout_style.css' %}">
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+
+  
+<style>
+
+    svg{
+      cursor: pointer;
+    }
+.container{
+    text-align: center;
+    margin: auto;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 1px 0px inset, rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+}
+
+.header-section{
+    padding: 25px 0px;
+}
+.header-section h1{
+    font-weight: 500;
+    font-size: 1.7rem;
+    text-transform: uppercase;
+    color: #707EA0;
+    margin: 0px;
+    margin-bottom: 8px;
+}
+.header-section p{
+    margin: 5px;
+    font-size: 0.95rem;
+    color: #707EA0;
+}
+
+.drop-section{
+    border: 1px dashed #A8B3E3;
+    background-image: linear-gradient(180deg, white, #F1F6FF);
+    margin: 5px 35px 35px 35px;
+    border-radius: 12px;
+    position: relative;
+}
+.drop-section div.col:first-child{
+    opacity: 1;
+    visibility: visible;
+    transition-duration: 0.2s;
+    transform: scale(1);
+    margin: auto;
+}
+.drop-section div.col:last-child{
+    font-size: 40px;
+    font-weight: 700;
+    color: #c0cae1;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.6);
+    transition-duration: 0.2s;
+}
+/* we will use "drag-over-effect" class in js */
+.drag-over-effect div.col:first-child{
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(1.1);
+}
+.drag-over-effect div.col:last-child{
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+.drop-section span,
+.drop-section button{
+    display: block;
+    margin: auto;
+    color: #707EA0;
+    margin-bottom: 10px;
+}
+.drop-section button{
+    color: white;
+    background-color: #5874C6;
+    border: none;
+    outline: none;
+    padding: 7px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+}
+.drop-section input{
+    display: none;
+}
+
+.list-section{
+    display: none;
+    text-align: left;
+    padding-bottom: 20px;
+}
+.list-section .list-title{
+    font-size: 0.95rem;
+    color: #707EA0;
+}
+.list-section li{
+    display: flex;
+    padding-top: 4px;
+    padding-bottom: 2px;
+    border-radius: 8px;
+    transition-duration: 0.2s;
+}
+.list-section li:hover{
+    box-shadow: #E3EAF9 0px 0px 4px 0px, #E3EAF9 0px 12px 16px 0px;
+}
+.list-section li .col{
+    flex: .1;
+}
+.list-section li .col:nth-child(1){
+    flex: .15;
+    text-align: center;
+}
+.list-section li .col:nth-child(2){
+    flex: .75;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #3e4046;
+    padding: 8px 10px;
+}
+.list-section li .col:nth-child(2) div.name{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
+.list-section li .col .file-name span{
+    color: #707EA0;
+    float: right;
+}
+.list-section li .file-progress{
+    height: 5px;
+    margin-top: 8px;
+    border-radius: 8px;
+    background-color: #dee6fd;
+}
+.list-section li .file-progress span{
+    display: block;
+    border-radius: 8px;
+    background-image: linear-gradient(120deg, #6b99fd, #9385ff);
+    transition-duration: 0.4s;
+}
+.list-section li .col .file-size{
+    font-size: 0.75rem;
+    margin-top: 3px;
+    color: #707EA0;
+}
+.list-section li .col svg.cross,
+.list-section li .col svg.tick{
+    fill: #8694d2;
+    background-color: #dee6fd;
+    position: relative;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.list-section li .col svg.tick{
+    fill: #50a156;
+    background-color: transparent;
+}
+.list-section li.complete span,
+.list-section li.complete .file-progress,
+.list-section li.complete svg.cross{
+    display: none;
+}
+.list-section li.in-prog .file-size,
+.list-section li.in-prog svg.tick{
+    display: none;
+}
+
+  </style>
+
+
   <style>
     .nav_link:hover, .navlink_icon:hover{
       background-color: #004652;
@@ -325,7 +506,7 @@ i{
                     
                     {% endif %}
                     {% if request.user.suggestion %}
-                    <a href="{% url 'app:suggestion' %}?page=New" class="nav_link sublink">Suggestions</a>
+                    <a href="{% url 'app:suggestion' %}?page=In Review" class="nav_link sublink">Suggestions</a>
                     {% endif %}
                   </ul>
                 </li>
@@ -408,15 +589,58 @@ i{
     </div>
     <script>
 
-      const new_suggestion = document.querySelector('.new_suggestion');
-      new_suggestion.addEventListener('click', () => {
-        document.getElementById('location_sugg').value = window.location.pathname;
-        console.log(window.location.pathname);
-      });
+// Function to navigate to the previous valid URL
+function goBack() {
+  let historyStack = JSON.parse(sessionStorage.getItem('historyStack')) || [];
 
-      function goBack() {
-        window.history.back();
-      }
+  // Ensure the current URL is stored if it's not already in the stack
+  let currentURL = window.location.href;
+  if (historyStack.length === 0 || historyStack[historyStack.length - 1] !== currentURL) {
+    historyStack.push(currentURL);
+    sessionStorage.setItem('historyStack', JSON.stringify(historyStack));
+  }
+
+  // Remove duplicate URLs or similar ones with/without #
+  while (historyStack.length > 1) {
+    let lastURL = historyStack.pop();
+    let secondLastURL = historyStack[historyStack.length - 1];
+
+    // Normalize URLs (remove trailing # if present)
+    let normalizedLastURL = lastURL.replace(/#$/, '');
+    let normalizedSecondLastURL = secondLastURL.replace(/#$/, '');
+
+    if (normalizedLastURL !== normalizedSecondLastURL) {
+      // Put back the last valid URL and break
+      historyStack.push(lastURL);
+      sessionStorage.setItem('historyStack', JSON.stringify(historyStack));
+      window.location.href = secondLastURL; // Navigate to the second last valid URL
+      return;
+    }
+  }
+
+  // If no valid previous URL is found, go back in browser history
+  if (historyStack.length <= 1) {
+    window.history.back();
+  }
+}
+
+// Call this function whenever the page URL changes to update the history stack
+function updateHistory() {
+  let historyStack = JSON.parse(sessionStorage.getItem('historyStack')) || [];
+  let currentURL = window.location.href;
+
+  // Add the current URL to the stack if it's not already the latest one
+  if (historyStack.length === 0 || historyStack[historyStack.length - 1] !== currentURL) {
+    historyStack.push(currentURL);
+    sessionStorage.setItem('historyStack', JSON.stringify(historyStack));
+  }
+}
+
+// Attach the updateHistory function to events that may change the URL
+window.addEventListener('load', updateHistory);
+window.addEventListener('popstate', updateHistory);
+
+
     </script>
     <script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>

@@ -2,7 +2,6 @@ from django.contrib.auth.decorators import login_required
 from user.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.utils.html import escape
 import pytz, json, os
 from pytz import timezone
 from .models import (
@@ -15,6 +14,7 @@ from .models import (
     Countries,
     Stage,
     Suggestion,
+    Document,
     Sub_suggestions,
 )
 from django.db.models import Q
@@ -38,6 +38,8 @@ from googleapiclient.errors import HttpError
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
+
+
 def home(request):
     return render(request, "home/index.html")
 
@@ -51,8 +53,8 @@ def Finance(request):
 def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
-    if request.GET.get("page") == "New" or request.GET.get("page") == None:
-        suggestions = Suggestion.objects.filter(Q(status="New") | Q(status="Not yet started")).order_by("order")
+    if request.GET.get("page") == "In Review" or request.GET.get("page") == None:
+        suggestions = Suggestion.objects.filter(Q(status="In Review") | Q(status="New")).order_by("order")
     else:
         suggestions = Suggestion.objects.all().filter(status=request.GET.get("page")).order_by("order")
     current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
@@ -150,18 +152,17 @@ def add_sub_suggestion(request, suggestion_id):
         descriptions = request.POST.getlist("suggestion")
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         for description in descriptions:
-            clean_description = escape(description)
             Sub_suggestions.objects.create(
-                description=clean_description,
+                description=description,
                 suggestion=suggestion,
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                status="New",
+                status="In Review",
                 assigned_to=suggestion.assigned_to,
             )
             suggestion.add_suggestion_action(
                 agent=User.objects.get(email=request.user),
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                text=f"Added sub suggestion: {clean_description}",
+                text=f"Added sub suggestion: {description}",
             )
         messages.success(request, "Sub suggestion added successfully!")
         return HttpResponseRedirect(f"/detail_suggestion/{suggestion_id}")
@@ -221,17 +222,21 @@ def add_suggestion(request):
         type = request.POST.get("type")
         agent = request.user
         location = request.POST.get("location")
-        file = request.FILES.get("file")
+        files = request.FILES.getlist("files")
         suggestion = Suggestion.objects.create(
             description=description,
             type=type,
             agent=agent,
-            status="New",
+            status="In Review",
             location=location,
             file=file,
             created_at=datetime.now(pytz.timezone("Europe/London")),
 
         )
+        for file in files:
+            doc = Document.objects.create(document=file)
+            suggestion.file.add(doc)
+
         suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
             created_at=datetime.now(pytz.timezone("Europe/London")),
@@ -254,21 +259,13 @@ def merge_suggestions(request, suggestion_id):
             sub_suggestion.save()
         merge_suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
-            created_at=datetime.now(pytz.timezone("Europe/London")),
+            created_at= datetime.now(pytz.timezone("Europe/London")),
             text=f"Merged suggestion information: {suggestion.description}",
         )
-        merge_suggestion.status = "New"
-        suggestions = Suggestion.objects.all().filter(status="New")
-        length = len(suggestions)
-        merge_suggestion.order = length + 1
-        if merge_suggestion.requested:
-            merge_suggestion.requested += 1
-        else:
-            merge_suggestion.requested = 1
         suggestion.delete()
         merge_suggestion.save()
         messages.success(request, "Suggestion merged successfully!")
-        return HttpResponseRedirect(f"/suggestion?page=New")
+        return HttpResponseRedirect(f"/suggestion?page=In Review")
 
     
 def add_comment(request, suggestion_id):
@@ -288,7 +285,7 @@ def edit_suggestion(request, suggestion_id):
         description = request.POST.get("description")
         type = request.POST.get("type")
         location = request.POST.get("location")
-        file = request.FILES.get("file")
+        files = request.FILES.getlist("files")
         expected_completion_date = request.POST.get("expected_completion_date")
         status = request.POST.get("status")
         suggestion = Suggestion.objects.get(pk=suggestion_id)
@@ -320,8 +317,11 @@ def edit_suggestion(request, suggestion_id):
         suggestion.description = description
         suggestion.type = type
         suggestion.location = location
-        if file:
-            suggestion.file = file
+        if files:
+            for file in files:
+                doc = Document.objects.create(document=file)
+                suggestion.file.add(doc)
+
         if expected_completion_date:
             suggestion.expected_completion_date = expected_completion_date
         else:

@@ -198,27 +198,48 @@ label.add{
                         </div>
                         <div class="mb-3">
                           <label for="type" class="form-label">The status of suggestion?</label>
-                          <select class="form-select" name="status">
-                            <option {% if suggestion.status == "New" %} selected {% endif %} value="New">New</option>
+                          <select class="form-select" id="status" name="status">
+                            <option {% if suggestion.status == "In Review" %} selected {% endif %} value="In Review">In Review</option>
                             <option {% if suggestion.status == "Not Started" %} selected {% endif %} value="Not Started">Not Started</option>
                             <option {% if suggestion.status == "In Progress" %} selected {% endif %} value="In Progress">In Progress</option>
+                            <option {% if suggestion.status == "Test" %} selected {% endif %} value="Test">Test</option>
                             <option {% if suggestion.status == "Complete" %} selected {% endif %} value="Complete">Complete</option>
-                            <option {% if suggestion.status == "Paused" %} selected {% endif %} value="Paused">Paused</option>
+                            <option {% if suggestion.status == "On Hold" %} selected {% endif %} value="On Hold">On Hold</option>
                             <option {% if suggestion.status == "Rejected" %} selected {% endif %} value="Rejected">Rejected</option>
                           </select>
                         </div>
                         <div class="mb-3">
                           <label for="description" class="form-label">Please decribe the issue</label>
-                          <input type="text" class="form-control" id="description" name="description" value="{{ suggestion.description }}">
+                          <textarea class="form-control" id="description" name="description" rows="5">{{ suggestion.description }}</textarea>
                         </div>
                         <div class="mb-3">
                           <label for="file" class="form-label">Upload file</label>
-                          <input type="file" class="form-control" id="file" name="file">
+                          <div class="container">
+                            <div class="drop-section">
+                                <div class="col">
+                                    <button type="button" class="file-selector">Browse Files</button>
+                                    <input type="file" id="formFile" name="document" accept="application/pdf" class="from-input file-selector-input" multiple>
+                                </div>
+                                <div class="col">
+                                    <div class="drop-here">Drop Here</div>
+                                </div>
+                            </div>
+                            <div class="list-section">
+                                <div class="list-title">Uploaded Files</div>
+                                <div class="list"></div>
+                            </div>
+                            {% for link in suggestion.file.all %}
+                              <div class="row">
+                                <b><a href="{{ link.document.url }}" target="_blank">{{ link.document.name }} </a></b>
+
+                              </div>
+                            {% endfor %}
+                          </div>
                         </div>
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">Close</button>
-                        <button class="reform_btn">Submit</button>
+                        <button type="button" id="submitBtn" class="reform_btn">Submit</button>
                       </div>
                     </form>
                   </div>
@@ -233,7 +254,12 @@ label.add{
               <div class="card">
                 <div class="card-body py-3" style="height:150px">
                   <h6><b> Suggestion: </b> {{ suggestion.type }}</h6>
-                  <h6><b> Description: </b> {{ suggestion.description|truncatechars:100 }}</h6>
+                  <h6><b> Description: </b> 
+                    <div class="tooltipbas me-2"> {{ suggestion.description|truncatechars:50 }}
+                      <span class="tooltiptextbas p-3"> {{ suggestion.description }}
+                      </span>
+                    </div> 
+                  </h6>
                   <h6><b> Tab: </b> {{ suggestion.location }}</h6>
                   <h6><b> Requester: </b> {{ suggestion.agent.first_name }} {{ sub_suggestion.agent.last_name }} </h6>
                   <h6><b> File: </b> {% if suggestion.file %}
@@ -313,9 +339,7 @@ label.add{
                         <ul class="list-group todos mx-auto text-light">
                           {% for sub_suggestion in sub_suggestions %}
                           <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span style="width:300px"> <div class="tooltipbas me-2"> {{ sub_suggestion.description|safe|truncatechars:20 }}
-                              <span class="tooltiptextbas p-3">{{ sub_suggestion.description|safe }}</span>
-                            </div> </span>
+                            <span style="width:350px"> {{ sub_suggestion.description }}</span>
                             <button class="delete-btn" data-delete-btn="{{ sub_suggestion.id }}" style="border: none; background-color: transparent; color:#fff"><i class="far fa-trash-alt delete" ></i></button>
                           </li>
                           {% endfor %}
@@ -344,9 +368,7 @@ label.add{
                 {% if sub_suggestions %}
                   {% for sub_suggestion in sub_suggestions %}
                   <tr>
-                    <td><div class="tooltipbas me-2"> {{ sub_suggestion.description|safe|safe|truncatechars:20 }}
-                      <span class="tooltiptextbas p-3">{{ sub_suggestion.description|safe }}</span>
-                    </div></td>
+                    <td>{{ sub_suggestion.description }}</td>
                     <td>
                       <button style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_status{{ forloop.counter }}">{{ sub_suggestion.status }}</button>
 
@@ -391,7 +413,7 @@ label.add{
                               <h1 class="modal-title fs-5" id="staticBackdropLabel">Change agent</h1>
                               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <form action="{% url 'app:change_sub_suggestion_agent' sub_suggestion.id %}" method="post">
+                            <form  action="{% url 'app:change_sub_suggestion_agent' sub_suggestion.id %}" method="post">
                             <div class="modal-body">
                                 {% csrf_token %}
                                 <div class="mb-3">
@@ -434,12 +456,7 @@ label.add{
                   <li><b>{{ key }}</b></li>
                   <ul class="ps-3">
                     {% for v in value %}
-                      <li class="mb-2">
-                        <div class="tooltipbas me-2"> <b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}:{{ v.3|truncatechars:40 }}
-                          <span class="tooltiptextbas"> {{ v.3 }}
-                          </span>
-                        </div>
-                      </li>
+                      <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}:{{ v.3 }}</li>
                     {% endfor %}
                   </ul>
                 {% endfor %}
@@ -463,6 +480,10 @@ label.add{
     
 {% endblock %} {% block js %}
 <script>
+
+
+
+
   document.addEventListener("DOMContentLoaded", () => {
 
     
@@ -470,19 +491,17 @@ label.add{
     const addForm = document.querySelector(".form");
     const ul = document.querySelector("ul.todos");
     
-    const escapeAttribute = (unsafe) => {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  };
 
     const handleAddItem = (inputValue) => {
-      const sanitizedAttributeValue = escapeAttribute(inputValue); // Sanitize for attribute
+      if (inputValue.length >100) {
+        alert("Please enter a value less than 100 characters");
+        return;
+      }
+
     const html = `
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <span>${inputValue}</span> <!-- Visible as entered -->
-        <input type="hidden" name="suggestion" value="${sanitizedAttributeValue}">
+        <input type="hidden" name="suggestion" value="${inputValue.replace(/"/g, '&quot;')}">
         <div><i class="far fa-trash-alt delete"></i></div>
       </li>
     `;
@@ -562,5 +581,183 @@ label.add{
   });
 
 </script>
+
+
+<script >
+
+const dropArea = document.querySelector(".drop-section");
+const listSection = document.querySelector(".list-section");
+const listContainer = document.querySelector(".list");
+const fileSelector = document.querySelector(".file-selector");
+const fileSelectorInput = document.querySelector(".file-selector-input");
+
+// upload files with browse button
+fileSelector.onclick = () => fileSelectorInput.click();
+fileSelectorInput.onchange = () => {
+  [...fileSelectorInput.files].forEach((file) => {
+    if (typeValidation(file.type)) {
+      uploadFile(file);
+    }
+  });
+};
+
+// check the file type
+function typeValidation(type) {
+  var splitType = type.split("/")[0];
+  if (type == "application/pdf") {
+    return true;
+  }
+}
+
+// when file is over the drag area
+dropArea.ondragover = (e) => {
+  e.preventDefault();
+  [...e.dataTransfer.items].forEach((item) => {
+    if (typeValidation(item.type)) {
+      dropArea.classList.add("drag-over-effect");
+    }
+  });
+};
+// when file leave the drag area
+dropArea.ondragleave = () => {
+  dropArea.classList.remove("drag-over-effect");
+};
+// when file drop on the drag area
+dropArea.ondrop = (e) => {
+  e.preventDefault();
+  dropArea.classList.remove("drag-over-effect");
+  if (e.dataTransfer.items) {
+    [...e.dataTransfer.items].forEach((item) => {
+      if (item.kind === "file") {
+        const file = item.getAsFile();
+        if (typeValidation(file.type)) {
+          uploadFile(file);
+        }
+      }
+    });
+  } else {
+    [...e.dataTransfer.files].forEach((file) => {
+      if (typeValidation(file.type)) {
+        uploadFile(file);
+      }
+    });
+  }
+};
+
+// Array to store uploaded files
+let queuedFiles = [];
+
+// Upload file function
+function uploadFile(file) {
+  listSection.style.display = "block";
+  var li = document.createElement("li");
+  li.classList.add("in-prog");
+  li.innerHTML = `
+        <div class="col">
+            <img src="icons/${iconSelector(file.type)}" alt="">
+        </div>
+        <div class="col">
+            <div class="file-name">
+                <div class="name">${file.name}</div>
+                <span></span>
+            </div>
+            <div class="file-size">${(file.size / (1024 * 1024)).toFixed(
+              2
+            )} MB</div>
+        </div>
+        <div class="col">
+            <svg xmlns="http://www.w3.org/2000/svg" class="cross" height="20" width="20"><path d="m5.979 14.917-.854-.896 4-4.021-4-4.062.854-.896 4.042 4.062 4-4.062.854.896-4 4.062 4 4.021-.854.896-4-4.063Z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="tick" height="20" width="20"><path d="m8.229 14.438-3.896-3.917 1.438-1.438 2.458 2.459 6-6L15.667 7Z"/></svg>
+        </div>
+    `;
+  listContainer.prepend(li);
+
+  // Create FormData object and append necessary fields
+  var data = new FormData();
+  data.append("documents", file);
+  // Add file to queued files
+  queuedFiles.push({ file: file, formData: data, listItem: li });
+
+  // Set up remove handler
+  li.querySelector(".cross").onclick = () => {
+    // Remove file from queuedFiles array
+    const index = queuedFiles.findIndex((item) => item.file === file);
+    if (index !== -1) {
+      queuedFiles.splice(index, 1);
+    }
+    // Remove the list item from the DOM
+    li.remove();
+  };
+  console.log(queuedFiles);
+}
+
+// Submit button click handler
+document.querySelector("#submitBtn").addEventListener("click", (event) => {
+    document.querySelector("#submitBtn").innerHTML = "Loading...";
+    document.querySelector("#submitBtn").disabled = true;
+    document.querySelector("#submitBtn").classList.add("disabled");
+    event.preventDefault(); 
+
+    
+    var location = document.querySelector("#location").value;
+    var type = document.querySelector("#type").value;
+    var expected_completion_date = document.querySelector("#expected_completion_date").value;
+    var status = document.querySelector("#status").value;
+    var description = document.querySelector("#description").value;
+
+    var allData = new FormData();
+    allData.append("location", location);
+    allData.append("type", type);
+    allData.append("expected_completion_date", expected_completion_date);
+    allData.append("status", status);
+    allData.append("description", description);
+
+
+    queuedFiles.forEach((queuedFile) => {
+        allData.append("files", queuedFile.file);
+    });
+
+    var http = new XMLHttpRequest();
+    http.onload = () => {
+        console.log("Files uploaded successfully");
+        queuedFiles = [];
+        document.querySelector(".list").innerHTML = "";
+        window.location.href=`/detail_suggestion/{{ suggestion.id }}`;
+    };
+    const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+    http.open("POST", `/edit_suggestion/{{ suggestion.id }}`, true);
+    http.setRequestHeader("X-CSRFToken", csrftoken);
+    http.send(allData);
+});
+
+
+// Helper function to get CSRF token from cookie
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// find icon for file
+function iconSelector(type) {
+  var splitType =
+    type.split("/")[0] == "application"
+      ? type.split("/")[1]
+      : type.split("/")[0];
+  return splitType + ".png";
+}
+
+</script>
+
 
 {% endblock %}
