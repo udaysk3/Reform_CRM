@@ -54,14 +54,14 @@ def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
     if request.GET.get("page") == "In Review" or request.GET.get("page") == None:
-        suggestions = Suggestion.objects.filter(Q(status="In Review") | Q(status="New")).order_by("order")
+        suggestions = Suggestion.objects.filter(Q(status="In Review") | Q(status="New") | Q(status="Not yet started")).order_by("order")
     else:
         suggestions = Suggestion.objects.all().filter(status=request.GET.get("page")).order_by("order")
     current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
     yesterday = current_date_time + timedelta(days=1)
     agents = User.objects.all().filter(is_staff=True)
 
-    return render(request, "home/suggestion.html", {"suggestions": suggestions, "suggestions_list" :serialize('json', suggestions), "agents": agents, "current_date_time": current_date_time, "yesterday": yesterday})
+    return render(request, "home/suggestion.html", {"suggestions": suggestions, "agents": agents, "current_date_time": current_date_time, "yesterday": yesterday})
 
 def assign_agents(request):
     if request.method == "POST":
@@ -116,9 +116,9 @@ def detail_suggestion(request, suggestion_id):
     length_sub_suggestions = len(sub_suggestions)
     length_completed_sub_suggestions = len(completed_sub_suggestions)
     if len(sub_suggestions) == 0:
-        if suggestion.status == "Completed":
+        if suggestion.status == "Complete":
             length_completed_sub_suggestions = 1
-            length_sub_suggestions = 0
+            length_sub_suggestions = 1
         else:
             length_sub_suggestions = 1
             length_completed_sub_suggestions = 0
@@ -222,20 +222,20 @@ def add_suggestion(request):
         type = request.POST.get("type")
         agent = request.user
         location = request.POST.get("location")
-        files = request.FILES.getlist("files")
+        files = request.FILES.getlist("file")
         suggestion = Suggestion.objects.create(
             description=description,
             type=type,
             agent=agent,
             status="In Review",
             location=location,
-            file=file,
             created_at=datetime.now(pytz.timezone("Europe/London")),
 
         )
         for file in files:
             doc = Document.objects.create(document=file)
-            suggestion.file.add(doc)
+            suggestion.files.add(doc)
+        suggestion.save()
 
         suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
@@ -320,7 +320,7 @@ def edit_suggestion(request, suggestion_id):
         if files:
             for file in files:
                 doc = Document.objects.create(document=file)
-                suggestion.file.add(doc)
+                suggestion.files.add(doc)
 
         if expected_completion_date:
             suggestion.expected_completion_date = expected_completion_date

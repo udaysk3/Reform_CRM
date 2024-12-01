@@ -228,7 +228,7 @@ label.add{
                                 <div class="list-title">Uploaded Files</div>
                                 <div class="list"></div>
                             </div>
-                            {% for link in suggestion.file.all %}
+                            {% for link in suggestion.files.all %}
                               <div class="row">
                                 <b><a href="{{ link.document.url }}" target="_blank">{{ link.document.name }} </a></b>
 
@@ -262,8 +262,10 @@ label.add{
                   </h6>
                   <h6><b> Tab: </b> {{ suggestion.location }}</h6>
                   <h6><b> Requester: </b> {{ suggestion.agent.first_name }} {{ sub_suggestion.agent.last_name }} </h6>
-                  <h6><b> File: </b> {% if suggestion.file %}
-                    <a href="{{ suggestion.file.url }}" target="_blank">View</a>
+                  <h6><b> File: </b> {% if suggestion.files %}
+                    {% for sugg in  suggestion.files.all %}
+                      <a href="{{ sugg.document.url }}" target="_blank">File {{ forloop.counter }}</a>
+                    {% endfor %}
                     {% else %}
                     No File
                     {% endif %}
@@ -368,7 +370,7 @@ label.add{
                 {% if sub_suggestions %}
                   {% for sub_suggestion in sub_suggestions %}
                   <tr>
-                    <td>{{ sub_suggestion.description }}</td>
+                    <td ><p style="width:350px">{{ sub_suggestion.description }}</p></td>
                     <td>
                       <button style="border: none; background-color: transparent;" data-bs-toggle="modal" data-bs-target="#sub_suggestion_status{{ forloop.counter }}">{{ sub_suggestion.status }}</button>
 
@@ -385,10 +387,10 @@ label.add{
                                 <div class="mb-3">
                                   <label for="type" class="form-label">The status of sub suggestion?</label>
                                   <select class="form-select" name="status">
-                                    <option {% if sub_suggestion.status == "New" %} selected {% endif %} value="New">New</option>
+                                    <option {% if sub_suggestion.status == "In Review" %} selected {% endif %} value="In Review">In Review</option>
                                     <option {% if sub_suggestion.status == "Not Started" %} selected {% endif %} value="Not Started">Not Started</option>
                                     <option {% if sub_suggestion.status == "In Progress" %} selected {% endif %} value="In Progress">In Progress</option>
-                                    <option {% if sub_suggestion.status == "Complete" %} selected {% endif %} value="Complete">Complete</option>
+                                    <option {% if sub_suggestion.status == "Completed" %} selected {% endif %} value="Completed">Completed</option>
                                     <option {% if sub_suggestion.status == "Paused" %} selected {% endif %} value="Paused">Paused</option>
                                     <option {% if sub_suggestion.status == "Rejected" %} selected {% endif %} value="Rejected">Rejected</option>
                                   </select>
@@ -500,7 +502,7 @@ label.add{
 
     const html = `
       <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span>${inputValue}</span> <!-- Visible as entered -->
+        <span style="width:350px">${inputValue}</span>
         <input type="hidden" name="suggestion" value="${inputValue.replace(/"/g, '&quot;')}">
         <div><i class="far fa-trash-alt delete"></i></div>
       </li>

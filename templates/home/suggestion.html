@@ -167,8 +167,10 @@
                   <td style="width: 10%;">{{ suggestion.status }}</td>
                   <td style="width: 10%;">{{ suggestion.location }}</td>
                   <td style="width: 10%;">
-                    {% if suggestion.file %}
-                    <a href="{{ suggestion.file.url }}" target="_blank" class="reform_btn">View</a>
+                    {% if suggestion.files %}
+                    {% for sugg in  suggestion.files.all %}
+                      <a href="{{ sugg.document.url }}" target="_blank">File {{ forloop.counter }}</a><br>
+                    {% endfor %}
                     {% else %}
                     No File
                     {% endif %}

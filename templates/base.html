@@ -589,6 +589,12 @@ i{
     </div>
     <script>
 
+      const new_suggestion = document.querySelector('.new_suggestion');
+      new_suggestion.addEventListener('click', () => {
+        document.getElementById('location_sugg').value = window.location.pathname;
+        console.log(window.location.pathname);
+      });
+
 // Function to navigate to the previous valid URL
 function goBack() {
   let historyStack = JSON.parse(sessionStorage.getItem('historyStack')) || [];
@@ -636,7 +642,6 @@ function updateHistory() {
   }
 }
 
-// Attach the updateHistory function to events that may change the URL
 window.addEventListener('load', updateHistory);
 window.addEventListener('popstate', updateHistory);
 
