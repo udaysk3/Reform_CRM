@@ -588,62 +588,34 @@ i{
       </div>
     </div>
     <script>
-
-      const new_suggestion = document.querySelector('.new_suggestion');
-      new_suggestion.addEventListener('click', () => {
-        document.getElementById('location_sugg').value = window.location.pathname;
-        console.log(window.location.pathname);
+      window.addEventListener('load', () => {
+        var urls = JSON.parse(sessionStorage.getItem('urls')) || [];
+        if (urls.includes(window.location.pathname) ) {
+          var new_urls = urls.filter(url => url !== window.location.pathname);
+          urls = new_urls;
+          urls.push(window.location.pathname);
+        } else if (urls.includes(window.location.pathname + '#')) {
+          var new_urls = urls.filter(url => url !== window.location.pathname + '#');
+          urls = new_urls;
+          urls.push(window.location.pathname + '#');
+        } else {
+          urls.push(window.location.pathname);
+        }
+        sessionStorage.setItem('urls', JSON.stringify(urls));
       });
 
-// Function to navigate to the previous valid URL
-function goBack() {
-  let historyStack = JSON.parse(sessionStorage.getItem('historyStack')) || [];
+      function goBack() {
+        var urls = JSON.parse(sessionStorage.getItem('urls')) || [];
+        if (urls.length > 1) {
+          urls.pop();
+          var url = urls.pop();
+          sessionStorage.setItem('urls', JSON.stringify(urls));
+          window.location.href = url;
+        } else {
+          window.location.href = "{% url 'dashboard_app:dashboard' %}";
+        }
+      }
 
-  // Ensure the current URL is stored if it's not already in the stack
-  let currentURL = window.location.href;
-  if (historyStack.length === 0 || historyStack[historyStack.length - 1] !== currentURL) {
-    historyStack.push(currentURL);
-    sessionStorage.setItem('historyStack', JSON.stringify(historyStack));
-  }
-
-  // Remove duplicate URLs or similar ones with/without #
-  while (historyStack.length > 1) {
-    let lastURL = historyStack.pop();
-    let secondLastURL = historyStack[historyStack.length - 1];
-
-    // Normalize URLs (remove trailing # if present)
-    let normalizedLastURL = lastURL.replace(/#$/, '');
-    let normalizedSecondLastURL = secondLastURL.replace(/#$/, '');
-
-    if (normalizedLastURL !== normalizedSecondLastURL) {
-      // Put back the last valid URL and break
-      historyStack.push(lastURL);
-      sessionStorage.setItem('historyStack', JSON.stringify(historyStack));
-      window.location.href = secondLastURL; // Navigate to the second last valid URL
-      return;
-    }
-  }
-
-  // If no valid previous URL is found, go back in browser history
-  if (historyStack.length <= 1) {
-    window.history.back();
-  }
-}
-
-// Call this function whenever the page URL changes to update the history stack
-function updateHistory() {
-  let historyStack = JSON.parse(sessionStorage.getItem('historyStack')) || [];
-  let currentURL = window.location.href;
-
-  // Add the current URL to the stack if it's not already the latest one
-  if (historyStack.length === 0 || historyStack[historyStack.length - 1] !== currentURL) {
-    historyStack.push(currentURL);
-    sessionStorage.setItem('historyStack', JSON.stringify(historyStack));
-  }
-}
-
-window.addEventListener('load', updateHistory);
-window.addEventListener('popstate', updateHistory);
 
 
     </script>
@@ -661,9 +633,14 @@ window.addEventListener('popstate', updateHistory);
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js" integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
   <script src="{% static 'js/comboTreePlugin.js' %} " type="text/javascript"></script>
+  <script>
+    const new_suggestion = document.querySelector('.new_suggestion');
+      new_suggestion.addEventListener('click', () => {
+        document.getElementById('location_sugg').value = window.location.pathname;
+        console.log(window.location.pathname);
+      });
+  </script>
 
   {% block js %}
   

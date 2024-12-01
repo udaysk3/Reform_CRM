@@ -292,8 +292,9 @@ label.add{
                 </div>
               </div>
             </div>
-            <div class="col-sm-4 mb-sm-0 px-2 d-flex flex-column">
+            <div class="col-sm-4 mb-sm-0 px-2 d-flex flex-column position-relative">
               <canvas id="myChart" class="align-self-center"></canvas>
+              <h4 class="position-absolute percentage" style="top:25%; left:47%;">hi</h1>
             </div>
           </div>
         </div>
@@ -563,12 +564,12 @@ label.add{
 <script>
 
   const ctx = document.getElementById('myChart');
-
+  const percentage = document.querySelector('.percentage');
 
   const currentNums = {{ length_completed_sub_suggestions }};
   const totalNums = {{ length_sub_suggestions }};
   const remaining = totalNums - currentNums;
-  console.log(currentNums, totalNums, remaining);
+  percentage.innerHTML = `${Math.round((currentNums / totalNums) * 100)}%`;
   new Chart(ctx, {
     type: 'doughnut',
     data: {
