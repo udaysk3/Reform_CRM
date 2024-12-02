@@ -288,7 +288,7 @@ label.add{
                     {% endif %}
                   </h6>
                   <h6><b> Requested: </b> {% if suggestion.requested %} {{ suggestion.requested }} {% else %} 0 {% endif %} </h6>
-                  <h6><b> Expected complition date: </b>{{ suggestion.expected_completion_date }} </h6>
+                  <h6><b> Expected completion date: </b>{{ suggestion.expected_completion_date }} </h6>
                 </div>
               </div>
             </div>
@@ -392,7 +392,7 @@ label.add{
                                     <option {% if sub_suggestion.status == "Not Started" %} selected {% endif %} value="Not Started">Not Started</option>
                                     <option {% if sub_suggestion.status == "In Progress" %} selected {% endif %} value="In Progress">In Progress</option>
                                     <option {% if sub_suggestion.status == "Completed" %} selected {% endif %} value="Completed">Completed</option>
-                                    <option {% if sub_suggestion.status == "Paused" %} selected {% endif %} value="Paused">Paused</option>
+                                    <option {% if sub_suggestion.status == "On Hold" %} selected {% endif %} value="On Hold">On Hold</option>
                                     <option {% if sub_suggestion.status == "Rejected" %} selected {% endif %} value="Rejected">Rejected</option>
                                   </select>
                                 </div>
