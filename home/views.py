@@ -54,7 +54,7 @@ def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
     if request.GET.get("page") == "In Review" or request.GET.get("page") == None:
-        suggestions = Suggestion.objects.filter(Q(status="In Review") | Q(status="New") | Q(status="Not yet started")).order_by("order")
+        suggestions = Suggestion.objects.filter(Q(status="In Review")).order_by("order")
     else:
         suggestions = Suggestion.objects.all().filter(status=request.GET.get("page")).order_by("order")
     current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
@@ -289,14 +289,14 @@ def edit_suggestion(request, suggestion_id):
         expected_completion_date = request.POST.get("expected_completion_date")
         status = request.POST.get("status")
         suggestion = Suggestion.objects.get(pk=suggestion_id)
-        if suggestion.status != status and status != "Archive":
+        if suggestion.status != status:
             suggestions = Suggestion.objects.all().filter(status=status)
             length = len(suggestions)
             suggestion.order = length + 1
-        elif suggestion.status != status and status == "Archive":
-            suggestions = Suggestion.objects.all().filter(archive=True)
-            length = len(suggestions)
-            suggestion.order = length + 1
+            if request.POST.get("status") == "Complete":
+                Sub_suggestions.objects.filter(suggestion=suggestion).update(status="Completed")
+            elif request.POST.get("status") == "Test":
+                Sub_suggestions.objects.filter(suggestion=suggestion).update(status="Test")
 
         text = "Changed "
         if suggestion.description != description:
