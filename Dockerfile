@@ -30,4 +30,4 @@ RUN chmod +x /app/entrypoint.sh
 
 # Set entrypoint and default command
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "-w", "4", "reform_crm.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "-w", "8","--timeout","600", "reform_crm.wsgi"]
