@@ -251,17 +251,37 @@ def merge_suggestions(request, suggestion_id):
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         merge_suggestion_id = request.POST.get("merge_suggestion")
         merge_suggestion = Suggestion.objects.get(pk=merge_suggestion_id)
+
         for requester in suggestion.aditional_requesters.all():
             merge_suggestion.aditional_requesters.add(requester)
-        merge_suggestion.aditional_requesters.add(suggestion.agent)            
+        merge_suggestion.aditional_requesters.add(suggestion.agent)    
+        sub_suggestion_data = ''
         for sub_suggestion in suggestion.sub_suggestions.all():
-            sub_suggestion.suggestion = merge_suggestion
-            sub_suggestion.save()
+            if sub_suggestion.assigned_to:
+                sub_suggestion_data += f"Description - {sub_suggestion.description} Status - {sub_suggestion.status} Assigned To - {sub_suggestion.assigned_to.first_name} {sub_suggestion.assigned_to.last_name} \n"
+            else:
+                sub_suggestion_data += f"Description - {sub_suggestion.description} Status - {sub_suggestion.status} Assigned To - None \n"
+            sub_suggestion.delete()
+
+        aditional_requesters = ''
+        for requester in suggestion.aditional_requesters.all():
+            aditional_requesters += f"{requester.first_name} {requester.last_name}, "
+
+        files = ''
+        for file in suggestion.files.all():
+            files += f"{file.document}, "
+            file.delete()
+
+        assigned_to = 'None'
+        if suggestion.assigned_to:
+            assigned_to = f"{suggestion.assigned_to.first_name} {suggestion.assigned_to.last_name}"
+
         merge_suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
             created_at= datetime.now(pytz.timezone("Europe/London")),
-            text=f"Merged suggestion information: {suggestion.description}",
+            text=f"A suggestion was merged into this \n Suggestion - {suggestion.description} \n Type - {suggestion.type} \n Date - {suggestion.created_at} \n Location - {suggestion.location} \n Status - {suggestion.status} \n Expected Completion Date - {suggestion.expected_completion_date} \n Assigned to - {assigned_to} \n Additional Requesters - {aditional_requesters} \n Files - {files} \n Sub Suggestions - {sub_suggestion_data} \n",
         )
+
         suggestion.delete()
         merge_suggestion.save()
         messages.success(request, "Suggestion merged successfully!")
