@@ -459,7 +459,7 @@ label.add{
                   <li><b>{{ key }}</b></li>
                   <ul class="ps-3">
                     {% for v in value %}
-                      <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}:{{ v.3 }}</li>
+                      <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} {{ v.2 }}:{{ v.3|linebreaks }}</li>
                     {% endfor %}
                   </ul>
                 {% endfor %}
