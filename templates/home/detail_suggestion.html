@@ -598,18 +598,14 @@ const fileSelectorInput = document.querySelector(".file-selector-input");
 fileSelector.onclick = () => fileSelectorInput.click();
 fileSelectorInput.onchange = () => {
   [...fileSelectorInput.files].forEach((file) => {
-    if (typeValidation(file.type)) {
       uploadFile(file);
-    }
   });
 };
 
 // check the file type
 function typeValidation(type) {
   var splitType = type.split("/")[0];
-  if (type == "application/pdf") {
     return true;
-  }
 }
 
 // when file is over the drag area
@@ -633,16 +629,12 @@ dropArea.ondrop = (e) => {
     [...e.dataTransfer.items].forEach((item) => {
       if (item.kind === "file") {
         const file = item.getAsFile();
-        if (typeValidation(file.type)) {
           uploadFile(file);
-        }
       }
     });
   } else {
     [...e.dataTransfer.files].forEach((file) => {
-      if (typeValidation(file.type)) {
         uploadFile(file);
-      }
     });
   }
 };
