@@ -232,9 +232,13 @@ def add_suggestion(request):
             created_at=datetime.now(pytz.timezone("Europe/London")),
 
         )
+        
         for file in files:
             doc = Document.objects.create(document=file)
             suggestion.files.add(doc)
+        suggestions = Suggestion.objects.all().filter(status="In Review")
+        length = len(suggestions)
+        suggestion.order = length
         suggestion.save()
 
         suggestion.add_suggestion_action(
@@ -242,6 +246,7 @@ def add_suggestion(request):
             created_at=datetime.now(pytz.timezone("Europe/London")),
             text=f"Added suggestion {description} of type {type} at location {location}",
         )
+        
         
         messages.success(request, "Suggestion added successfully!")
         return HttpResponseRedirect(location)

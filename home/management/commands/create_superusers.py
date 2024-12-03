@@ -3,13 +3,6 @@ from user.models import User
 
 users = [
     {
-        'username': 'OliverH',
-        'first_name': 'Oliver',
-        'last_name': 'H',
-        'email': 'Oliver.h@reform-group.uk',
-        'password': 'Oliver@123',
-    },
-    {
         'username': 'SystemS',
         'first_name': 'System',
         'last_name': 'S',
