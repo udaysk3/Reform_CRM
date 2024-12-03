@@ -94,7 +94,6 @@ class Suggestion(models.Model):
     type = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(max_length=999, blank=True, null=True)
-    file = models.FileField(upload_to="suggestion", blank= True, null=True)
     files = models.ManyToManyField('home.Document', related_name='suggestion', blank=True)
     assigned_to = models.ForeignKey(User, related_name= 'assigned_to_suggestion', on_delete=models.SET_NULL, blank=True, null=True)
     aditional_requesters = models.ManyToManyField(User, related_name='aditional_requesters', blank=True)
