@@ -32,6 +32,7 @@ from datetime import datetime
 import requests
 import os.path
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
@@ -674,7 +675,7 @@ def Customer(request):
                 "customers": customers,
             },
         )
-
+    search_query = request.GET.get("search", "").strip()
     current_time = datetime.now(london_tz)
     user  = request.user
     if user.is_employee:
@@ -692,26 +693,33 @@ def Customer(request):
             .order_by("earliest_action_date")
         )
 
-    customers = list(customers)
-    new_customers = []
-    for customer in customers:
-        actions = customer.get_created_at_action_history()
-        flag = False
-        for action in actions:
-            if action.imported == False:
-                new_customers.append(customer)
-                break
+    if search_query:
+        # Filter by first name, last name, or postcode
+        customers = Customers.objects.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(postcode__icontains=search_query)
+        )
+    else:
+        # Sort and prepare customers as usual
+        customers = list(customers)
+        new_customers = []
+        for customer in customers:
+            actions = customer.get_created_at_action_history()
+            flag = False
+            for action in actions:
+                if action.imported == False:
+                    new_customers.append(customer)
+                    break
 
-    new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
-
-    result = [x for x in customers if x not in new_customers] 
-
-    customers= new_customers + result
-    customers = customers[::-1]
+        new_customers.sort(key=lambda x: x.get_created_at_action_history()[0].date_time)
+        result = [x for x in customers if x not in new_customers]
+        customers = new_customers + result
+        customers = customers[::-1]
     campaigns = Campaign.objects.all()
     unassigned_customers = Customers.objects.filter(assigned_to=None)
     agents = User.objects.filter(is_employee=True)
-    p_customers = Paginator(customers, 50)
+    p_customers = Paginator(customers, 15)
     page_number = request.GET.get('page')
     try:
         page_obj = p_customers.get_page(page_number)
@@ -724,7 +732,7 @@ def Customer(request):
     if request.session.get("first_name") and request.GET.get("page") != "add_customer":
         delete_customer_session(request)
     return render(
-        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "agents": agents, 'page_obj': page_obj, 'clients':client}
+        request, "home/customer.html", {"customers": p_customers, "current_date": datetime.now(london_tz).date, "campaigns": campaigns, "agents": agents, 'page_obj': page_obj, 'clients':client,  "search_query": search_query}
     )
 
 
