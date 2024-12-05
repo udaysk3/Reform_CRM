@@ -4,13 +4,18 @@
 {% load custom %}
 {% block search %}
 
-<input
-  class="form-control me-2"
-  type="search"
-  placeholder="Search"
-  aria-label="Search"
-  id="myInput"
-/>
+<form method="get" action="{% url 'customer_app:customer' %}">
+  <input
+     class="form-control me-2"
+      id="myInput"
+     placeholder="Search"
+      aria-label="Search"
+      type="text"
+      name="search"
+      placeholder="Search by name or postcode..."
+      value="{{ search_query|default:'' }}" />
+  {% comment %} <button type="submit" class="btn">Search</button> {% endcomment %}
+</form>
 
 {% endblock %}
 {% block content %}
@@ -415,49 +420,66 @@
 </div>
 
 {% if request.GET.page != 'add_customer' and request.GET.page != 'edit_customer' %}
-
-
 <nav aria-label="Page navigation example" style="margin-top: 10px;">
   <ul class="pagination pagination-lg justify-content-center">
-{% if page_obj.has_previous %}
-  <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
-
-{% if page_obj.number > 3 %}
-      <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
-    {% if page_obj.number > 4 %}
-      <li class="page-item"><a class="page-link" >...</a></li>
+    <!-- Previous Button -->
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <a class="page-link">Prev</a>
+      </li>
     {% endif %}
-  {% endif %}
-{% endif %}
 
-{% for num in page_obj.paginator.page_range %}
-  {% if page_obj.number == num %}
-      <li class="page-item"><a class="page-link active" href="?page={{ num }}">{{ num }}</a></li>
-  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-      <li class="page-item"><a class="page-link " href="?page={{ num }}">{{ num }}</a></li>
-  {% endif %}
-{% endfor %}
+    <!-- First Page and Ellipsis -->
+    {% if page_obj.number > 3 %}
+      <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+      {% if page_obj.number > 4 %}
+        <li class="page-item disabled"><a class="page-link">...</a></li>
+      {% endif %}
+    {% endif %}
 
-{% if page_obj.has_next %}
-  {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
-    <li class="page-item"><a class="page-link">...</a></li>
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
-      {{ page_obj.paginator.num_pages }}
-    </a></li>
-  {% elif page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
-      {{ page_obj.paginator.num_pages }}
-    </a></li>
-  {% endif %}
+    <!-- Page Range -->
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+        {% if page_obj.number == num %}
+          <li class="page-item active">
+            <a class="page-link" href="?page={{ num }}&search={{ request.GET.search }}">{{ num }}</a>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}&search={{ request.GET.search }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
 
-  <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-{% endif %}
+    <!-- Last Page and Ellipsis -->
+    {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+      {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+        <li class="page-item disabled"><a class="page-link">...</a></li>
+      {% endif %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ request.GET.search }}">{{ page_obj.paginator.num_pages }}</a>
+      </li>
+    {% endif %}
 
+    <!-- Next Button -->
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <a class="page-link">Next</a>
+      </li>
+    {% endif %}
   </ul>
 </nav>
 
 {% endif %}
-
 
 {% endblock content %}
 
@@ -580,14 +602,14 @@
     document.getElementById('addCustomerForm').submit()
   }
 
-$(document).ready(function(){
+{% comment %} $(document).ready(function(){
   $("#myInput").on("keyup", function() {
     var value = $(this).val().toLowerCase();
     $("#myTable tr").filter(function() {
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
     });
   });
-});
+}); {% endcomment %}
 
 function sortTable(colIndex) {
   var table,
