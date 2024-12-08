@@ -1077,8 +1077,6 @@ def customer_jr_order(request,client_id):
                     client=client
                 )
             
-            
-            
             cjstage.questions = i['questions']
             cjstage.order = i['order']
             cjstage.save()

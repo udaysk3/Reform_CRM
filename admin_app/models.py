@@ -1,4 +1,5 @@
 from django.db import models
+from user.models import User
 
 # Create your models here.
 
@@ -6,6 +7,7 @@ from django.db import models
 class Signature(models.Model):
     signature = models.TextField(max_length=999, blank=True, null=True)
     signature_img = models.FileField(upload_to="signatures", blank= True, null=True)
+    employee = models.ManyToManyField(User, blank=True, null=True, related_name="signature")
     
 class Email(models.Model):
     name = models.CharField(max_length=255)

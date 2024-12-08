@@ -15,10 +15,6 @@ urlpatterns = [
     path("add_reason", views.add_reason, name="add_reason"),
     path("edit_reason/<int:reason_id>", views.edit_reason, name="edit_reason"),
     path("remove_reason/<int:reason_id>", views.remove_reason, name="remove_reason"),
-    path("add_signature", views.add_signature, name="add_signature"),
-    path(
-        "edit_signature/<int:signature_id>", views.edit_signature, name="edit_signature"
-    ),
     path(
         "remove_signature/<int:signature_id>",
         views.remove_signature,

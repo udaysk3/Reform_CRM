@@ -7,6 +7,7 @@ import pytz
 from user.models import User
 from security_app.models import Role
 from .models import Employee, Emergency_contact
+from admin_app.models import Signature
 
 @login_required
 def employee(request):
@@ -266,6 +267,30 @@ def bulk_archive_employes(request):
         except Exception as e:
             messages.error(request, f"Error deleting employes: {e}")
         return redirect("hr_app:employee")
+    
+
+def add_signature(request, emp_id):
+    if request.method == "POST":
+        signature = request.POST.get("signature")
+        signature_img = request.FILES.get("signature_img")
+        template = Signature.objects.create(
+            signature=signature,
+            signature_img=signature_img,
+        )
+        template.employee.add(User.objects.get(pk=emp_id))
+        template.save()
+        messages.success(request, "Signature added successfully!")
+        return redirect("hr_app:job_info", emp_id=emp_id)
+    
+def edit_signature(request, signature_id):
+    signature = Signature.objects.get(pk=signature_id)
+    if request.method == "POST":
+        signature.signature = request.POST.get("signature")
+        signature.signature_img = request.FILES.get("signature_img")
+        signature.save()
+        messages.success(request, "Signature updated successfully!")
+        return redirect("hr_app:job_info", emp_id=signature.employee.first().id)
+    return redirect("hr_app:job_info", emp_id=signature.employee.first().id)
 
 def delete_customer_session(request):
     del request.session['first_name']
