@@ -129,16 +129,16 @@ DATABASES = {
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'reformCRM',
-        'USER': 'postgres',
-        'PASSWORD': 'Gowtham839938',
-        'HOST': 'localhost',
-        'PORT': 5432,
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'reformCRM',
+#         'USER': 'postgres',
+#         'PASSWORD': 'Gowtham839938',
+#         'HOST': 'localhost',
+#         'PORT': 5432,
+#     }
+# }
 
 
 MESSAGE_TAGS = {
