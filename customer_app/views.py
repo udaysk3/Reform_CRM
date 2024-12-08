@@ -263,8 +263,9 @@ def customer_detail(request, customer_id, s_customer_id=None):
             for cjstage in cjstages:
                 user = request.user
                 if user.is_employee:
-                    if user.role != cjstage.role.name:
-                        continue
+                    if cjstage.role:
+                        if user.role != cjstage.role.name:
+                            continue
                 all_answered = True
             
                 questions = []

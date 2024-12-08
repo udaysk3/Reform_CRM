@@ -1310,6 +1310,7 @@ document.addEventListener("DOMContentLoaded", function () {
         alert('Please answer all questions before moving to the next stage.');
         return;
       }
+
       const url = forms[0].action;
       const routeId = url.split('/')[4];
       const productId = url.split('/')[5];
@@ -1318,9 +1319,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!confirm) {
           return;
       }
-      
-
-
       fetch(`/add_submit_stage_ans/${routeId}/${productId}/${stageId}/{{customer.id}}`, {
           method: 'POST',
           headers: {
@@ -1335,7 +1333,7 @@ document.addEventListener("DOMContentLoaded", function () {
           console.error('There was a problem with the fetch operation:', error);
       });
       window.location.reload();
-      
+
   } else {
 
     forms.forEach((form) => {
