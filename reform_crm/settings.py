@@ -4,12 +4,14 @@ from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
 from decouple import config
+import secrets
 # from storages.backends.s3boto3 import S3Boto3Storage
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'your-secret-key'
+# Generate a random secret key
+SECRET_KEY = secrets.token_urlsafe(50)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
