@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from user.models import User
+from decouple import config
 
 users = [
     {
@@ -7,21 +8,21 @@ users = [
         'first_name': 'System',
         'last_name': 'S',
         'email': 'systems@reform-group.uk',
-        'password': 'Systems@123',
+        'password': config('Systems_Password'),
     },
     {
         'username': 'UdayB',
         'first_name': 'Uday',
         'last_name': 'B',
         'email': 'burluudaysantoshkumar3@gmail.com',
-        'password': 'Uday@123',
+        'password': config('Uday_Password'),
     },
     {
         'username': 'Sai Gowtham',
         'first_name': 'Sai',
         'last_name': 'P',
         'email': 'puvvulasaigowtham@gmail.com',
-        'password': '123',
+        'password':config('Gowtam_Password')
     },
 ]
 
