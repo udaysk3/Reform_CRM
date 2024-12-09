@@ -148,8 +148,8 @@
                
                 <tr class="suggestiondrag" data-suggestion-id="{{ suggestion.id }}" draggable="true" 
                 style="
-                {% if suggestion.status == 'Completed' %}
-                  background-color: #d4edda;
+                {% if suggestion.status == 'Complete' or suggestion.status == 'On Hold' or suggestion.status == 'Rejected' %}
+                  
                 {% elif suggestion.expected_completion_date %}
                   {% if suggestion.expected_completion_date < current_date_time %}
                     background-color: #f8d7da;

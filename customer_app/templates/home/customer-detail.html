@@ -829,15 +829,10 @@ button:disabled {
                                 style="height: 100px" name="text"></textarea>
                               <label for="floatingTextarea">Body</label>
                             </div>
-                            <div class="form-floating mt-3">
-                              <select id="select" class="form-select py-0" name="signature">
-                
-                                <option value="nan"> Select a signature </option>
-                                {% for signature in signatures %}
-                                <option value="{{ signature.id }}">{{ signature.signature|truncatechars:50 }}</option>
-                                {% endfor %}
-                              </select>
-                            </div>
+                            
+
+                            <input type="text" hidden value="{{ request.user.signature.all.0.id }}" name="signature">
+                            
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="secondary_reform_btn" data-bs-dismiss="modal">
@@ -1297,6 +1292,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     const forms = modalContent.querySelectorAll('.ans_form');
     if (method === 'submit') {
+      onFormsSubmit('next');
       const answers = document.querySelectorAll('[name="dynamicRule"]');
       var all_answered = true;
       for(let i = 0; i < answers.length; i++) {
@@ -1310,16 +1306,13 @@ document.addEventListener("DOMContentLoaded", function () {
         alert('Please answer all questions before moving to the next stage.');
         return;
       }
-
+      
       const url = forms[0].action;
       const routeId = url.split('/')[4];
       const productId = url.split('/')[5];
       const stageId = url.split('/')[6];
-      const confirm = window.confirm('Current stage is failed because the requirements are not met. \nAre you sure you want to move to next customer journey?');
-      if (!confirm) {
-          return;
-      }
-      fetch(`/add_submit_stage_ans/${routeId}/${productId}/${stageId}/{{customer.id}}`, {
+      
+      fetch(`/check_stage_ans/${routeId}/${productId}/${stageId}/{{customer.id}}`, {
           method: 'POST',
           headers: {
               'X-CSRFToken': '{{ csrf_token }}'
@@ -1329,10 +1322,32 @@ document.addEventListener("DOMContentLoaded", function () {
               return response.json();
           }
           throw new Error('Network response was not ok.');
+      }).then(data => {
+        console.log(data)
+          if (data.all_correct) {
+              window.location.reload();
+          } else {
+              const confirm = window.confirm('Current stage is failed because the requirements are not met. \nAre you sure you want to move to next customer journey?');
+              if (confirm) {
+                  fetch(`/add_submit_stage_ans/${routeId}/${productId}/${stageId}/{{customer.id}}`, {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRFToken': '{{ csrf_token }}'
+                      }
+                  }).then(response => {
+                      if (response.ok) {
+                          return response.json();
+                      }
+                      throw new Error('Network response was not ok.');
+                  }).catch(error => {
+                      console.error('There was a problem with the fetch operation:', error);
+                  });
+                  window.location.reload();
+              }
+          }
       }).catch(error => {
           console.error('There was a problem with the fetch operation:', error);
-      });
-      window.location.reload();
+      })
 
   } else {
 

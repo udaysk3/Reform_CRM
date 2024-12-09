@@ -516,15 +516,12 @@ def customer_detail(request, customer_id, s_customer_id=None):
         all_true_for_product = True  
 
         for i, (stage, question_ans, all_ans) in enumerate(stages):
-            current_nums += 1
             if not all_ans:
-                total_nums = len(stages)
                 current_route_product = [stages, 100 / len(stages), route_product]
                 all_true_for_product = False
                 break
 
         if all_true_for_product:
-            total_nums = len(stages)
             last_route_product = [stages, 100 / len(stages), route_product]
         else:
             break
@@ -532,6 +529,16 @@ def customer_detail(request, customer_id, s_customer_id=None):
     if current_route_product is None:
         current_route_product = last_route_product
 
+
+    for route_product, stages in display_stages.items():
+        if current_route_product[2] == route_product:
+            for i, (stage, question_ans, all_ans) in enumerate(stages):
+                current_nums += 1
+                if not all_ans:
+                    total_nums = len(stages)
+                    break
+
+    
 
     current_stage = None
     for route_product, stages in display_stages.items():
@@ -543,8 +550,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
 
             break
     
-    current_stage_len = len(current_stage)
-
     return render(
         request,
         "home/customer-detail.html",
@@ -575,7 +580,6 @@ def customer_detail(request, customer_id, s_customer_id=None):
             "current_stage": current_stage,
             "current_nums": current_nums,
             "total_nums": total_nums,
-            "current_stage_len": current_stage_len,
         },
     )
 
@@ -968,10 +972,10 @@ def edit_customer(request, customer_id):
         if phone_number[-2:] == ".0":
             phone_number = phone_number[:-2]
         customer.phone_number = phone_number
+        email = request.POST.get("email").lower()
         if Customers.objects.filter(email__iexact=email).filter(client=customer.client).exists():
             messages.error(request, "Email with this Client already exists")
             return redirect(f"/customer?page=edit_customer&id={customer_id}")
-        email = request.POST.get("email").lower()
         customer.email = email
         postcode = re.sub(r'\s+', ' ', request.POST.get("postcode").upper())
         customer.street_name = request.POST.get("street_name")
@@ -1711,6 +1715,273 @@ def add_stage_ans(request, route_id, product_id, stage_id, question_id, customer
 
     return JsonResponse({'status': 'success'}, status=200)
 
+def check_stage_ans(request, route_id, product_id, stage_id, customer_id):
+    customer = Customers.objects.get(pk=customer_id)
+    route = Route.objects.get(pk=route_id)
+    product = Product.objects.get(pk=product_id)
+    main_stage = Stage.objects.get(pk=stage_id)
+    stages = []
+
+    if CJStage.objects.filter(route=route, product=product, client=customer.client).exists():
+        cjstages = CJStage.objects.filter(route=route, product=product, client=customer.client)
+    else:
+        cjstages = CJStage.objects.filter(route=route, product=product, client=None)
+    for cjstage in cjstages:
+        user = request.user
+        if user.is_employee:
+            if cjstage.role:
+                if user.role != cjstage.role.name:
+                    continue
+        all_answered = True
+    
+        questions = []
+        questions_with_ans = []
+        added_ans = set()
+        if cjstage.questions:
+            for question in cjstage.questions:
+                qus = Questions.objects.get(pk=question)
+                if qus.is_archive == False:
+                    if qus.is_client_archive == False:
+                        questions.append(qus)
+        else: 
+            for rule in Rule_Regulation.objects.filter(route=route, product=product, stage=cjstage. stage):
+                if rule.question.is_archive == False:
+                    if rule.question.is_client_archive == False:
+                        questions.append(rule.question)
+        
+        
+        for question in questions:
+            ans = (Answer.objects.filter(route=route)
+                                 .filter(product=product)
+                                 .filter(stage=cjstage.stage)
+                                 .filter(question=question)
+                                 .filter(customer=customer))
+            if question not in added_ans:
+                if ans.exists():
+                    questions_with_ans.append([question, ans[0], route, product, cjstage.stage])
+                    
+                else:
+                    questions_with_ans.append([question, None, route, product, cjstage.stage])
+                    all_answered = False
+                added_ans.add(question)
+        stages.append({
+            'route': route,
+            'product': product,
+            'stage': cjstage.stage,
+            'order': cjstage.order,
+            'questions': questions_with_ans,
+            'all_answered': all_answered
+        })
+
+    stages = sorted(stages, key=lambda x: x['order'] if x['order'] is not None else float('inf'))
+    previous_all_answered = True
+    for i, stage in enumerate(stages):
+        stage['all_answered'], previous_all_answered = previous_all_answered, stage['all_answered']
+        
+
+    display_stages = {}
+    for stage in stages:
+        key = f'{stage["route"].name} - {stage["product"].name}'
+        if key in display_stages:
+            display_stages[key].append([stage['stage'], stage['questions'], stage['all_answered']])
+        else:
+            display_stages[key] = [[stage['stage'], stage['questions'], stage['all_answered']]]
+
+    for route_product, stages in display_stages.items():
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            route = route_product.split(' - ')[0]
+            product = route_product.split(' - ')[1]
+            correct_stage = True
+            new_question_ans = []
+            for question, ans, route, product, stage in question_ans:
+                correct_ans = True
+                if ans == None:
+                    correct_ans = False
+                elif ans.submit == True:
+                    correct_ans = True
+                elif ans.question.type == 'file':
+                    if ans.file != '':
+                        correct_ans = True
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
+                    correct_ans = False
+                else:
+                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
+                    if rule_requirements:
+                        if rule_requirements[0].rules_regulation:
+                            rule = rule_requirements[0]
+                            
+                            type = question.type.split(',')
+                            if len(type) > 1:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    rule_values = rule.rules_regulation[0].split(',')
+                                    correct_ans = False
+                                    if 'all_value' in rule.rules_regulation:
+                                        arr = ans.answer[0].split(',')
+                                        correct_ans = arr == rule_values
+                                    else:
+                                        for el in ans.answer[0].split(','):
+                                            if el in rule_values:
+                                                correct_ans = True
+                                                break
+                            if type[0] in ['text', 'email', 'password', 'phone']:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                    print(ans.answer, rule.rules_regulation)
+                                else:
+                                    correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] == 'checkbox':
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    correct_ans = ans.answer == rule.rules_regulation
+                            
+                            if type[0] in ['date', 'month', 'time', 'number']:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    if type[0] == 'date' or type[0] == 'month':
+                                        answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
+                                        rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date < rule_date
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date > rule_date
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date == rule_date
+
+                                    elif type[0] == 'time':
+                                        answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
+                                        rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time < rule_time
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time > rule_time
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time == rule_time
+
+                                    elif type[0] == 'number':
+                                        answer_number = int(ans.answer[0])
+                                        rule_number = int(rule.rules_regulation[0].split(',')[0])
+
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number < rule_number
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number > rule_number
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number == rule_number
+                    else:
+                        correct_ans = True
+                
+                correct_stage =  correct_stage and correct_ans
+                new_question_ans.append((question, ans, route, product, stage, correct_ans))
+
+            stages[i] = (stage, new_question_ans, correct_stage)
+    
+
+    
+    for route_product, stages in display_stages.items():
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            if all_ans == False:
+                route = route_product.split(' - ')[0]
+                product = route_product.split(' - ')[1]
+                correct_stage = True
+                new_question_ans = []
+                for question, ans, route, product, stage, is_correct in question_ans:
+                    correct_ans = True
+                    if ans == None:
+                        correct_ans = False
+                    elif ans.submit == True:
+                        correct_ans = True
+                    elif ans.question.type == 'file':
+                        if ans.file != '':
+                            correct_ans = True
+                    elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
+                        correct_ans = False
+                    elif ans and all_ans == False:
+                        rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
+                        if rule_requirements:
+                            if rule_requirements[0].rules_regulation:
+                                rule = rule_requirements[0]
+                                type = question.type.split(',')
+                                if len(type) > 1:
+                                    if ans.answer == [''] or ans.answer[0] == '':
+                                        correct_ans = False
+                                    else:
+                                        rule_values = rule.rules_regulation[0].split(',')
+                                        correct_ans = False
+                                        if 'all_value' in rule.rules_regulation:
+                                            arr = ans.answer[0].split(',')
+                                            correct_ans = arr == rule_values
+                                        else:
+                                            for el in ans.answer[0].split(','):
+                                                if el in rule_values:
+                                                    correct_ans = True
+                                                    break
+                                if type[0] in ['text', 'email', 'password', 'phone']:
+                                    if ans.answer == [''] or ans.answer[0] == '':
+                                        correct_ans = False
+                                    else:
+                                        correct_ans = ans.answer == rule.rules_regulation
+                                if type[0] == 'checkbox':
+                                    if ans.answer == [''] or ans.answer[0] == '':
+                                        correct_ans = False
+                                    else:
+                                        correct_ans = ans.answer == rule.rules_regulation
+                                if type[0] in ['date', 'month', 'time', 'number']:
+                                    if ans.answer == [''] or ans.answer[0] == '':
+                                        correct_ans = False
+                                    else:
+                                        if type[0] == 'date' or type[0] == 'month':
+                                            answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
+                                            rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
+                                            if 'Less Than' in rule.rules_regulation[0]:
+                                                correct_ans = answer_date < rule_date
+                                            elif 'Greater Than' in rule.rules_regulation[0]:
+                                                correct_ans = answer_date > rule_date
+                                            elif 'Equal' in rule.rules_regulation[0]:
+                                                correct_ans = answer_date == rule_date
+
+                                        elif type[0] == 'time':
+                                            answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
+                                            rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
+                                            if 'Less Than' in rule.rules_regulation[0]:
+                                                correct_ans = answer_time < rule_time
+                                            elif 'Greater Than' in rule.rules_regulation[0]:
+                                                correct_ans = answer_time > rule_time
+                                            elif 'Equal' in rule.rules_regulation[0]:
+                                                correct_ans = answer_time == rule_time
+
+                                        elif type[0] == 'number':
+                                            answer_number = int(ans.answer[0])
+                                            rule_number = int(rule.rules_regulation[0].split(',')[0])
+
+                                            if 'Less Than' in rule.rules_regulation[0]:
+                                                correct_ans = answer_number < rule_number
+                                            elif 'Greater Than' in rule.rules_regulation[0]:
+                                                correct_ans = answer_number > rule_number
+                                            elif 'Equal' in rule.rules_regulation[0]:
+                                                correct_ans = answer_number == rule_number
+                        else:
+                            correct_ans = True
+                    correct_stage =  correct_stage and correct_ans
+                    
+                    new_question_ans.append((question, ans, route, product, stage, correct_ans))
+
+                stages[i] = (stage, new_question_ans, correct_stage)
+
+    all_correct = True
+    for route_product, stages in display_stages.items():
+        for i, (stage, question_ans, all_ans) in enumerate(stages):
+            if main_stage == stage:
+                if all_ans == False:
+                    all_correct = False
+                    break
+    
+    return JsonResponse({'status': 'success', 'all_correct': all_correct}, status=200)
+
+
 def add_submit_stage_ans(request, route_id, product_id, stage_id, customer_id):
     customer = Customers.objects.get(pk=customer_id)
     route = Route.objects.get(pk=route_id)
@@ -1718,14 +1989,14 @@ def add_submit_stage_ans(request, route_id, product_id, stage_id, customer_id):
     stage = Stage.objects.get(pk=stage_id)
 
     if request.method == "POST":
-        rules = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, is_client=False)
+        rules = Rule_Regulation.objects.filter(route=route, product=product, is_client=False)
         for rule in rules:
-            if Answer.objects.filter(route=route, product=product, stage=stage, customer=customer, question=rule.question).exists():
-                answer = Answer.objects.get(route=route, product=product, stage=stage, customer=customer, question=rule.question)
+            if Answer.objects.filter(route=route, product=product, stage=rule.stage, customer=customer, question=rule.question).exists():
+                answer = Answer.objects.get(route=route, product=product, stage=rule.stage, customer=customer, question=rule.question)
                 answer.submit = True
                 answer.save()
             else:
-                Answer.objects.create(route=route, product=product, stage=stage, customer=customer, question=rule.question, submit=True)
+                Answer.objects.create(route=route, product=product, stage=rule.stage, customer=customer, question=rule.question, submit=True)
     return JsonResponse({'status': 'success'}, status=200)
 
 def get_agent_customers(request, agent_id):

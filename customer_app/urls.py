@@ -80,6 +80,11 @@ urlpatterns = [
         name="add_stage_ans",
     ),
     path(
+        "check_stage_ans/<int:route_id>/<int:product_id>/<int:stage_id>/<int:customer_id>",
+        views.check_stage_ans,
+        name="check_stage_ans",
+    ),
+    path(
         "add_submit_stage_ans/<int:route_id>/<int:product_id>/<int:stage_id>/<int:customer_id>",
         views.add_submit_stage_ans,
         name="add_submit_stage_ans",
