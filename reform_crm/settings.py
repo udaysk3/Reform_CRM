@@ -3,7 +3,7 @@
 from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
-# from decouple import config
+from decouple import config
 # from storages.backends.s3boto3 import S3Boto3Storage
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,16 +129,16 @@ DATABASES = {
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'reformCRM',
-#         'USER': 'postgres',
-#         'PASSWORD': 'Gowtham839938',
-#         'HOST': 'localhost',
-#         'PORT': 5432,
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'reformCRM',
+        'USER': 'postgres',
+        'PASSWORD': 'Gowtham839938',
+        'HOST': 'localhost',
+        'PORT': 5432,
+    }
+}
 
 
 MESSAGE_TAGS = {
@@ -162,10 +162,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"  # Here I am using gmail smtp server
-EMAIL_PORT = 587  # gmail smtp server port
-EMAIL_HOST_USER = "support@reform-group.uk"  # Use your email account
-EMAIL_HOST_PASSWORD = "nrhethtofrfhryjo"  # For gmail use app password
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 

@@ -342,7 +342,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
                 else:
-                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
+                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
                     if rule_requirements:
                         if rule_requirements[0].rules_regulation:
                             rule = rule_requirements[0]
@@ -420,93 +420,88 @@ def customer_detail(request, customer_id, s_customer_id=None):
     
     for route_product, stages in display_stages.items():
         for i, (stage, question_ans, all_ans) in enumerate(stages):
-            if all_ans == False:
-                route = route_product.split(' - ')[0]
-                product = route_product.split(' - ')[1]
-                correct_stage = True
-                new_question_ans = []
-                for question, ans, route, product, stage, is_correct in question_ans:
+            route = route_product.split(' - ')[0]
+            product = route_product.split(' - ')[1]
+            correct_stage = True
+            new_question_ans = []
+            for question, ans, route, product, stage, is_correct in question_ans:
+                correct_ans = True
+                if ans == None:
+                    correct_ans = False
+                elif ans.submit == True:
                     correct_ans = True
-                    if ans == None:
-                        correct_ans = False
-                    elif ans.submit == True:
+                elif ans.question.type == 'file':
+                    if ans.file != '':
                         correct_ans = True
-                    elif ans.question.type == 'file':
-                        if ans.file != '':
-                            correct_ans = True
-                    elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
-                        correct_ans = False
-                    elif ans and all_ans == False:
-                        rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
-                        if rule_requirements:
-                            if rule_requirements[0].rules_regulation:
-                                rule = rule_requirements[0]
-                                type = question.type.split(',')
-                                if len(type) > 1:
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
+                    correct_ans = False
+                elif ans and all_ans == False:
+                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
+                    if rule_requirements:
+                        if rule_requirements[0].rules_regulation:
+                            rule = rule_requirements[0]
+                            type = question.type.split(',')
+                            if len(type) > 1:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    rule_values = rule.rules_regulation[0].split(',')
+                                    correct_ans = False
+                                    if 'all_value' in rule.rules_regulation:
+                                        arr = ans.answer[0].split(',')
+                                        correct_ans = arr == rule_values
                                     else:
-                                        rule_values = rule.rules_regulation[0].split(',')
-                                        correct_ans = False
-                                        if 'all_value' in rule.rules_regulation:
-                                            arr = ans.answer[0].split(',')
-                                            correct_ans = arr == rule_values
-                                        else:
-                                            for el in ans.answer[0].split(','):
-                                                if el in rule_values:
-                                                    correct_ans = True
-                                                    break
-                                if type[0] in ['text', 'email', 'password', 'phone']:
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
-                                    else:
-                                        correct_ans = ans.answer == rule.rules_regulation
-                                if type[0] == 'checkbox':
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
-                                    else:
-                                        correct_ans = ans.answer == rule.rules_regulation
-                                if type[0] in ['date', 'month', 'time', 'number']:
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
-                                    else:
-                                        if type[0] == 'date' or type[0] == 'month':
-                                            answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
-                                            rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
-                                            if 'Less Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_date < rule_date
-                                            elif 'Greater Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_date > rule_date
-                                            elif 'Equal' in rule.rules_regulation[0]:
-                                                correct_ans = answer_date == rule_date
-
-                                        elif type[0] == 'time':
-                                            answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
-                                            rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
-                                            if 'Less Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_time < rule_time
-                                            elif 'Greater Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_time > rule_time
-                                            elif 'Equal' in rule.rules_regulation[0]:
-                                                correct_ans = answer_time == rule_time
-
-                                        elif type[0] == 'number':
-                                            answer_number = int(ans.answer[0])
-                                            rule_number = int(rule.rules_regulation[0].split(',')[0])
-
-                                            if 'Less Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_number < rule_number
-                                            elif 'Greater Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_number > rule_number
-                                            elif 'Equal' in rule.rules_regulation[0]:
-                                                correct_ans = answer_number == rule_number
-                        else:
-                            correct_ans = True
-                    correct_stage =  correct_stage and correct_ans
-                    
-                    new_question_ans.append((question, ans, route, product, stage, correct_ans))
-
-                stages[i] = (stage, new_question_ans, correct_stage)
+                                        for el in ans.answer[0].split(','):
+                                            if el in rule_values:
+                                                correct_ans = True
+                                                break
+                            if type[0] in ['text', 'email', 'password', 'phone']:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] == 'checkbox':
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] in ['date', 'month', 'time', 'number']:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    if type[0] == 'date' or type[0] == 'month':
+                                        answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
+                                        rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date < rule_date
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date > rule_date
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date == rule_date
+                                    elif type[0] == 'time':
+                                        answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
+                                        rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time < rule_time
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time > rule_time
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time == rule_time
+                                    elif type[0] == 'number':
+                                        answer_number = int(ans.answer[0])
+                                        rule_number = int(rule.rules_regulation[0].split(',')[0])
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number < rule_number
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number > rule_number
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number == rule_number
+                    else:
+                        correct_ans = True
+                correct_stage =  correct_stage and correct_ans
+                
+                new_question_ans.append((question, ans, route, product, stage, correct_ans))
+            stages[i] = (stage, new_question_ans, correct_stage)
 
     current_route_product = None
     last_route_product = None
@@ -1805,7 +1800,7 @@ def check_stage_ans(request, route_id, product_id, stage_id, customer_id):
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
                 else:
-                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
+                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
                     if rule_requirements:
                         if rule_requirements[0].rules_regulation:
                             rule = rule_requirements[0]
@@ -1883,93 +1878,88 @@ def check_stage_ans(request, route_id, product_id, stage_id, customer_id):
     
     for route_product, stages in display_stages.items():
         for i, (stage, question_ans, all_ans) in enumerate(stages):
-            if all_ans == False:
-                route = route_product.split(' - ')[0]
-                product = route_product.split(' - ')[1]
-                correct_stage = True
-                new_question_ans = []
-                for question, ans, route, product, stage, is_correct in question_ans:
+            route = route_product.split(' - ')[0]
+            product = route_product.split(' - ')[1]
+            correct_stage = True
+            new_question_ans = []
+            for question, ans, route, product, stage, is_correct in question_ans:
+                correct_ans = True
+                if ans == None:
+                    correct_ans = False
+                elif ans.submit == True:
                     correct_ans = True
-                    if ans == None:
-                        correct_ans = False
-                    elif ans.submit == True:
+                elif ans.question.type == 'file':
+                    if ans.file != '':
                         correct_ans = True
-                    elif ans.question.type == 'file':
-                        if ans.file != '':
-                            correct_ans = True
-                    elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
-                        correct_ans = False
-                    elif ans and all_ans == False:
-                        rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=False)
-                        if rule_requirements:
-                            if rule_requirements[0].rules_regulation:
-                                rule = rule_requirements[0]
-                                type = question.type.split(',')
-                                if len(type) > 1:
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
+                elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
+                    correct_ans = False
+                elif ans and all_ans == False:
+                    rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
+                    if rule_requirements:
+                        if rule_requirements[0].rules_regulation:
+                            rule = rule_requirements[0]
+                            type = question.type.split(',')
+                            if len(type) > 1:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    rule_values = rule.rules_regulation[0].split(',')
+                                    correct_ans = False
+                                    if 'all_value' in rule.rules_regulation:
+                                        arr = ans.answer[0].split(',')
+                                        correct_ans = arr == rule_values
                                     else:
-                                        rule_values = rule.rules_regulation[0].split(',')
-                                        correct_ans = False
-                                        if 'all_value' in rule.rules_regulation:
-                                            arr = ans.answer[0].split(',')
-                                            correct_ans = arr == rule_values
-                                        else:
-                                            for el in ans.answer[0].split(','):
-                                                if el in rule_values:
-                                                    correct_ans = True
-                                                    break
-                                if type[0] in ['text', 'email', 'password', 'phone']:
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
-                                    else:
-                                        correct_ans = ans.answer == rule.rules_regulation
-                                if type[0] == 'checkbox':
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
-                                    else:
-                                        correct_ans = ans.answer == rule.rules_regulation
-                                if type[0] in ['date', 'month', 'time', 'number']:
-                                    if ans.answer == [''] or ans.answer[0] == '':
-                                        correct_ans = False
-                                    else:
-                                        if type[0] == 'date' or type[0] == 'month':
-                                            answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
-                                            rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
-                                            if 'Less Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_date < rule_date
-                                            elif 'Greater Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_date > rule_date
-                                            elif 'Equal' in rule.rules_regulation[0]:
-                                                correct_ans = answer_date == rule_date
-
-                                        elif type[0] == 'time':
-                                            answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
-                                            rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
-                                            if 'Less Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_time < rule_time
-                                            elif 'Greater Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_time > rule_time
-                                            elif 'Equal' in rule.rules_regulation[0]:
-                                                correct_ans = answer_time == rule_time
-
-                                        elif type[0] == 'number':
-                                            answer_number = int(ans.answer[0])
-                                            rule_number = int(rule.rules_regulation[0].split(',')[0])
-
-                                            if 'Less Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_number < rule_number
-                                            elif 'Greater Than' in rule.rules_regulation[0]:
-                                                correct_ans = answer_number > rule_number
-                                            elif 'Equal' in rule.rules_regulation[0]:
-                                                correct_ans = answer_number == rule_number
-                        else:
-                            correct_ans = True
-                    correct_stage =  correct_stage and correct_ans
-                    
-                    new_question_ans.append((question, ans, route, product, stage, correct_ans))
-
-                stages[i] = (stage, new_question_ans, correct_stage)
+                                        for el in ans.answer[0].split(','):
+                                            if el in rule_values:
+                                                correct_ans = True
+                                                break
+                            if type[0] in ['text', 'email', 'password', 'phone']:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] == 'checkbox':
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    correct_ans = ans.answer == rule.rules_regulation
+                            if type[0] in ['date', 'month', 'time', 'number']:
+                                if ans.answer == [''] or ans.answer[0] == '':
+                                    correct_ans = False
+                                else:
+                                    if type[0] == 'date' or type[0] == 'month':
+                                        answer_date = datetime.strptime(ans.answer[0], '%Y-%m-%d')
+                                        rule_date = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%Y-%m-%d')
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date < rule_date
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date > rule_date
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_date == rule_date
+                                    elif type[0] == 'time':
+                                        answer_time = datetime.strptime(ans.answer[0], '%H:%M:%S').time()
+                                        rule_time = datetime.strptime(rule.rules_regulation[0].split(',')[0], '%H:%M:%S').time()
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time < rule_time
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time > rule_time
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_time == rule_time
+                                    elif type[0] == 'number':
+                                        answer_number = int(ans.answer[0])
+                                        rule_number = int(rule.rules_regulation[0].split(',')[0])
+                                        if 'Less Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number < rule_number
+                                        elif 'Greater Than' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number > rule_number
+                                        elif 'Equal' in rule.rules_regulation[0]:
+                                            correct_ans = answer_number == rule_number
+                    else:
+                        correct_ans = True
+                correct_stage =  correct_stage and correct_ans
+                
+                new_question_ans.append((question, ans, route, product, stage, correct_ans))
+            stages[i] = (stage, new_question_ans, correct_stage)
 
     all_correct = True
     for route_product, stages in display_stages.items():

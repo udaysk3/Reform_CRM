@@ -163,7 +163,7 @@ def delete_cj_stage_question(request, route_id, product_id, stage_id, question_i
         ).first()
     cjstages = CJStage.objects.all().filter(route=route,product=product, stage=stage)
     for cjstage in cjstages:
-        if cjstage.questions:
+        if cjstage.questions and question.id in cjstage.questions:
             print(cjstage.id)
             cjstage.questions.remove(question.id)
             cjstage.save()
