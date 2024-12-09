@@ -435,7 +435,7 @@ def customer_detail(request, customer_id, s_customer_id=None):
                         correct_ans = True
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
-                elif ans and all_ans == False:
+                else:
                     rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
                     if rule_requirements:
                         if rule_requirements[0].rules_regulation:
@@ -1893,7 +1893,7 @@ def check_stage_ans(request, route_id, product_id, stage_id, customer_id):
                         correct_ans = True
                 elif ans.answer == [''] or ans.answer == '' or ans.answer == []:
                     correct_ans = False
-                elif ans and all_ans == False:
+                else:
                     rule_requirements = Rule_Regulation.objects.filter(route=route, product=product, stage=stage, question=question, is_client=True)
                     if rule_requirements:
                         if rule_requirements[0].rules_regulation:
