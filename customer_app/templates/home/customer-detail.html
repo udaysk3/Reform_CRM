@@ -239,6 +239,75 @@ table {
   display: block;
 }
 
+
+.page {
+    margin: 0 auto;
+    padding: 0;
+    display: none;
+}
+
+.page li {
+    list-style: none;
+    margin: 10px auto;
+    padding: 12px;
+    background: white;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.pagination {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.active {
+  display: block;
+}
+
+button {
+    width: 120px;
+    padding: 8px 16px;
+    background-color: #ffffff00;
+    color: #0057b3;
+    border: none;
+    cursor: pointer;
+    margin: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+button:disabled {
+    background-color: #ffffff00;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+#prevPage {
+    margin-right: 20px;
+}
+
+#nextPage {
+    margin-left: 20px;
+}
+
+.arrow {
+    font-size: 1.2em;
+}
+
+.nav-text {
+    font-size: 0.7em;
+    letter-spacing: 0.3em;
+}
+
+.name_btn{
+  border-radius: 50px;
+  clip-path: none;
+}
+
 </style>
 
 <link rel="stylesheet" href="{% static 'css/progressbar.css' %}">
@@ -320,12 +389,12 @@ table {
             <div class="col-sm-4 mb-sm-0 px-2">
               <div class="card">
                 <div class="card-body py-0">
-                  <div class="btn-group me-2 mb-2 position-relative tabs d-block" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
+                  <div class="btn-group me-2 mb-2 position-relative tabs d-flex" style="right:30px; width:370px; overflow-x:auto;" role="group" aria-label="Second group">
                     <a href="{% url 'customer_app:customer_detail' customer.id customer.id %}" type="button"
-                      class="{% if customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}">{% if customer == show_customer %}{{ customer.first_name }} {{ c_customer.last_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {%endif%} </a>
+                      class="{% if customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %} name_btn">{% if customer == show_customer %}{{ customer.first_name }} {{ c_customer.last_name }} {% else %} {{ customer.first_name|truncatechars:5 }} {%endif%} </a>
                     {% for c_customer in child_customers %}
                     <a href="{% url 'customer_app:customer_detail' customer.id c_customer.id %}" type="button"
-                      class="{% if c_customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %}"
+                      class="{% if c_customer.primary_customer %} reform_btn {% else %} secondary_reform_btn {% endif %} name_btn"
                       style="margin-left:-3px">
                       {% if c_customer == show_customer %}{{ c_customer.first_name }} {{ c_customer.last_name }} {% else %} {{ c_customer.first_name|truncatechars:5 }} {% endif %}
                     </a>
@@ -538,13 +607,93 @@ table {
       </div>
     </div>
 
-    <div class="card py-3 d-flex">
-      <div class="card-body p-3 pb-0 m-0 row">
         <div class="col">
-          <div class="card py-3 d-flex">
-            <div class="card-body p-3 pb-0 m-0 row ">
+
+              <div class="card p-0 m-0 mb-5">
+                <h6 class=" position-absolute upper-name">Current Stage: <b> {{ current_stage.0.4 }} </b></h6>
+                <div class="card-body answerform p-3 pt-5 m-0" style="height: 260px; overflow-y: auto;">
+                  <div class="single_questions" >
+
+                    {% if current_stage %}
+                      {% for question, answer, route, product, stage, is_correct in current_stage %}
+                        <div class="col page">
+                          <div class="row ms-3">
+                            {{ question.question }}
+                          </div>
+                          <div class="row mb-3">
+                            <form class="ans_form" action="/add_stage_ans/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{customer.id}}" method="post" enctype="multipart/form-data">
+                              {% csrf_token %}
+                              {% with b=answer.answer %}
+                                {% with field=question.type|firstsplit:',' %}
+                                  {% if field.1 %}
+                                  {% with options=field.1|split:',' %}
+                                  {% if field.0 == 'radio' %}
+                                    {% for option in options %}
+                                      <div class="form-check">
+                                        <input class="form-check checkboxinput" {% if option == b.0 %}
+                                          checked="checked"
+                                        {% endif %} type="radio" value="{{ option }}" id="{{ forloop.parentloop.counter }}radio{{ forloop.counter }}" name="dynamicRule">
+                                        <label class="form-check
+                                        {% if option == b.0 %}
+                                          checked
+                                        {% endif %}" for="{{ forloop.parentloop.counter }}radio{{ forloop.counter }}">
+                                          {{option}}
+                                        </label>
+                                      </div>
+                                    {% endfor %}
+                                    
+                                  {% else %}
+                                    <div class="col-6 rules mt-3 ms-3">
+                                      <input type="hidden" class="cb" id="name" name="dynamicRule">
+                                        {% for option in options %}
+                                          <div class="form-check">
+                                            <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}{{ forloop.parentloop.counter }}">
+                                            <label class="form-check-label" for="check{{ forloop.counter }}{{ forloop.parentloop.counter }}">
+                                              {{option}}
+                                            </label>
+                                          </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                  {% endwith %}
+                                  {% else %}
+                                    {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
+                                      <div class="col-6 rules mt-3 ms-3">
+                                        <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                                      </div>
+                                    {% elif field.0 == "checkbox" %}
+                                      <div class="col-6 rules mt-3 ms-3">
+                                        <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
+                                      </div>
+                                    {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
+                                    <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
+                                    {% elif field.0 == 'file' %}
+                                    <input type="file" name="dynamicRule" class="form-control file" value="{{ b.0 }}" placeholder="Enter The Value">
+                                    
+                                    {% endif %}
+                                  {% endif %}
+                                {% endwith %}
+                              {% endwith %}
+                            </form>
+                          </div>
+                            </div>
+                            
+                      {% endfor %}
+                    {% else %}
+                          
+                      <h4> Questions are not allocated </h4>
+                    {% endif %}
+                      <div class="pagination">
+                          <button class="arrow" id="prevPage" disabled>← <span class="nav-text">PREV</span></button>
+                          <div class="submit-next-btn">
+                            <button class="arrow" id="nextPageBtn"><span class="nav-text">NEXT</span> →</button>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
               
-              <div class="card p-0 m-0 mb-4">
+              <div class="card p-0 m-0 mb-5">
                 <h6 class="position-absolute upper-name">Available Funding Routes</h6>
                 <div class="card-body p-3 m-0 position-relative">
                   <div class=" me-2 mb-2 tabs mt-4" style=" width:450px; overflow-x:auto; display:inline-flex; vertical-align:middle;">
@@ -566,85 +715,8 @@ table {
                 </div>
               </div>
 
-              <h6 class="mt-3">Current Stage: <b> {{ current_stage.0.4 }} </b></h6>
+              
 
-              <div class="card p-0 m-0">
-                <div class="card-body p-3 m-0" style="height: 260px; overflow-y: auto;">
-                  {% if current_stage %}
-                    {% for question, answer, route, product, stage in current_stage %}
-                      <div class="col">
-                        <div class="row ms-3">
-                          {{ question.question }}
-                        </div>
-                        <div class="row mb-3">
-                          <form class="ans_form" action="/add_stage_ans/{{route.id}}/{{product.id}}/{{stage.id}}/{{question.id}}/{{customer.id}}" method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                          {% with b=answer.answer %}
-                          {% with field=question.type|firstsplit:',' %}
-                            {% if field.1 %}
-                            {% with options=field.1|split:',' %}
-                            {% if field.0 == 'radio' %}
-                              {% for option in options %}
-                                <div class="form-check">
-                                  <input class="form-check checkboxinput" {% if option == b.0 %}
-                                    checked="checked"
-                                  {% endif %} type="radio" value="{{ option }}" id="{{ forloop.parentloop.counter }}radio{{ forloop.counter }}" name="dynamicRule">
-                                  <label class="form-check
-                                  {% if option == b.0 %}
-                                    checked
-                                  {% endif %}" for="{{ forloop.parentloop.counter }}radio{{ forloop.counter }}">
-                                    {{option}}
-                                  </label>
-                                </div>
-                              {% endfor %}
-                                  
-                            {% else %}
-                              <div class="col-6 rules mt-3 ms-3">
-                                <input type="hidden" class="cb" id="name" name="dynamicRule">
-                                  {% for option in options %}
-                                    <div class="form-check">
-                                      <input class="form-check-input check-box" {% if option in b.0 %} checked {% endif %}  type="checkbox" value="{{ option }}" id="check{{ forloop.counter }}{{ forloop.parentloop.counter }}">
-                                      <label class="form-check-label" for="check{{ forloop.counter }}{{ forloop.parentloop.counter }}">
-                                        {{option}}
-                                      </label>
-                                    </div>
-                                  {% endfor %}
-                              </div>
-                              {% endif %}
-                            {% endwith %}
-                            {% else %}
-                              {% if field.0 == "text" or field.0 == "email" or field.0 == "password" or field.0 == "url" %}
-                                <div class="col-6 rules mt-3 ms-3">
-                                  <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
-                                </div>
-                              {% elif field.0 == "checkbox" %}
-                                <div class="col-6 rules mt-3 ms-3">
-                                  <input type="{{field.0}}" {% if b == 'on' %} checked {% endif %} name="dynamicRule" class="form-check-input " placeholder="Enter The Value"> <label for="checkbox">Check Box</label>
-                                </div>
-                              {% elif field.0 == "date" or field.0 == "time" or field.0 == "month" or field.0 == "number" %}
-                              <input type="{{field.0}}" name="dynamicRule" class="form-control " value="{{ b.0 }}" placeholder="Enter The Value">
-                              {% elif field.0 == 'file' %}
-                              <input type="file" name="dynamicRule" class="form-control file" value="{{ b.0 }}" placeholder="Enter The Value">
-
-                              {% endif %}
-                            {% endif %}
-                        {% endwith %}
-                        {% endwith %}
-                        </form>
-                        </div>
-                          </div>
-                        
-                    {% endfor %}
-                        {% else %}
-                        
-                      <h4> Questions are not allocated </h4>
-                    {% endif %}
-                    <button type="button" class="reform_btn" onClick="onFormsSubmit(event);">Submit</button>
-                </div>
-              </div>
-
-            </div>
-          </div>
         </div>
 
         <div class="col">
@@ -757,10 +829,13 @@ table {
                                 style="height: 100px" name="text"></textarea>
                               <label for="floatingTextarea">Body</label>
                             </div>
+                            
+
+                            <input type="text" hidden value="{{ request.user.signature.all.0.id }}" name="signature">
                             <div class="form-floating mt-3">
-                              <select id="select" class="form-select py-0" name="signature">
+                              <select id="select" class="form-select py-0" disabled>
                 
-                                <option value="nan"> Select a signature </option>
+                                <option> {{ request.user.signature.all.0.signature|truncatechars:50 }} </option>
                                 {% for signature in signatures %}
                                 <option value="{{ signature.id }}">{{ signature.signature|truncatechars:50 }}</option>
                                 {% endfor %}
@@ -1120,13 +1195,14 @@ table {
                       <li><b>{{ key }}</b></li>
                       <ul class="ps-3">
                         {% for v in value %}
-                        <li class="mb-2"><b>{{ v.0 }}</b> - {{ v.1 }} - {{ v.2 }} <b>{{ v.3 }} {{ v.4 }}</b> - <b> {{ v.5 }} </b>
-                          {% if v.5 == 'CB' %}
-                          {{ v.6 }}
-                          {% endif %}
-                          {% if v.7 %}
-                          spoke to <b> {{ v.7 }}</b>
-                          {% endif %}
+                        <li class="mb-2"><div class="tooltipbas me-2"> <i class="bx bx-info-circle fs-6"></i>
+                            <span class="tooltiptextbas"> {{ v.2 }} - {{ v.1 }} - <b>{{ v.3 }} {{ v.4 }}</b>
+                              {% if v.7 %}
+                                spoke to <b> {{ v.7 }}</b>
+                              {% endif %}
+                              - Next Action: {{ v.6 }}
+                            </span>
+                          </div><b>{{ v.0 }} - {{ v.5 }}</b>
                           {% if v.8 %}
                           - {{ v.8 }}
                           {% endif %}
@@ -1134,6 +1210,8 @@ table {
                         {% endfor %}
                       </ul>
                       {% endfor %}
+
+
                       {% if customer.imported %}
                       <li class="mb-2"> <b>{{ customer.created_at }}</b> - {{ customer.house_name }} - {{ customer.postcode }} -
                         Imported/Added by {{ customer.agent.first_name }} {{ customer.agent.last_name }} </li>
@@ -1145,45 +1223,142 @@ table {
             </div>
           </div>
         </div>
-      </div>
-    </div>
   </div>
 </div>
-    
 
 
 {% endblock %} {% block js %}
 
 <script>
 
-  document.querySelector('.copyBtn').addEventListener('click', () => {
-    const copyNumber = document.querySelector('.copy-number'); 
-    navigator.clipboard.writeText(copyNumber.textContent)
-    document.querySelector('.copyBtn').classList.remove('bx-copy-alt');
-    document.querySelector('.copyBtn').classList.add('bx-check');
-    document.querySelector('.copyBtn').style.color = '#91E0DA';
+document.addEventListener("DOMContentLoaded", function () {
+    const pages = document.querySelectorAll(".page");
+    const prevButton = document.getElementById("prevPage");
+    let currentPage = 0;
 
-  });
+    function showPage(pageNumber) {
+        pages.forEach((page, index) => {
+            if (index === pageNumber) {
+                page.classList.add("active");
+            } else {
+                page.classList.remove("active");
+            }
+        });
+    }
 
-  document.getElementById('assigned_to').addEventListener('click',()=>{
-    let assigned_to_modal = new bootstrap.Modal(
-          document.getElementById("assigned_to_modal"),
-          {}
-        );
-        // https://getbootstrap.com/docs/5.0/components/modal/#show
-        assigned_to_modal.show();
+    function updateButtons() {
+        const submitNextBtn = document.querySelector(".submit-next-btn");
+        const isLastPage = currentPage === pages.length - 1;
+
+        prevButton.disabled = currentPage === 0;
+
+        if (isLastPage) {
+            if (submitNextBtn.querySelector('.arrow')) {
+                submitNextBtn.innerHTML = `<button type="button" class="reform_btn" onClick="onFormsSubmit('submit');">Submit</button>`;
+            }
+        } else {
+            if (!submitNextBtn.querySelector('.arrow')) {
+                submitNextBtn.innerHTML = '<button class="arrow" id="nextPageBtn"><span class="nav-text">NEXT</span> →</button>';
+                document.getElementById("nextPageBtn").addEventListener("click", NextPageBtn);
+            }
+        }
+    }
+
+    prevButton.addEventListener("click", function () {
+        if (currentPage > 0) {
+            currentPage--;
+            showPage(currentPage);
+            updateButtons();
+        }
     });
-
-function onFormsSubmit(e) {
-    e.preventDefault();
     
-    const modalContent = e.target.closest('.card-body');
+    function NextPageBtn(e) {
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        showPage(currentPage);
+        updateButtons();
+        onFormsSubmit('next');
+      }
+    }
+
+    showPage(currentPage);
+    updateButtons();
+    
+    const nextPageBtn = document.getElementById("nextPageBtn");
+    if (nextPageBtn) {
+      nextPageBtn.addEventListener("click", NextPageBtn);
+    }
+  });
+  
+  
+  function onFormsSubmit(method) {
+    
+    const modalContent = document.querySelector('.answerform');
     if (!modalContent) {
         console.error('No modal content found');
         return;
     }
-
     const forms = modalContent.querySelectorAll('.ans_form');
+    if (method === 'submit') {
+      onFormsSubmit('next');
+      const answers = document.querySelectorAll('[name="dynamicRule"]');
+      var all_answered = true;
+      for(let i = 0; i < answers.length; i++) {
+        const answer = answers[i];
+        if (!answer.value) {
+          all_answered = false;
+          break;
+        }
+      }
+      if (!all_answered) {
+        alert('Please answer all questions before moving to the next stage.');
+        return;
+      }
+      
+      const url = forms[0].action;
+      const routeId = url.split('/')[4];
+      const productId = url.split('/')[5];
+      const stageId = url.split('/')[6];
+      
+      fetch(`/check_stage_ans/${routeId}/${productId}/${stageId}/{{customer.id}}`, {
+          method: 'POST',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          }
+      }).then(response => {
+          if (response.ok) {
+              return response.json();
+          }
+          throw new Error('Network response was not ok.');
+      }).then(data => {
+        console.log(data)
+          if (data.all_correct) {
+              window.location.reload();
+          } else {
+              const confirm = window.confirm('Current stage is failed because the requirements are not met. \nAre you sure you want to move to next customer journey?');
+              if (confirm) {
+                  fetch(`/add_submit_stage_ans/${routeId}/${productId}/${stageId}/{{customer.id}}`, {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRFToken': '{{ csrf_token }}'
+                      }
+                  }).then(response => {
+                      if (response.ok) {
+                          return response.json();
+                      }
+                      throw new Error('Network response was not ok.');
+                  }).catch(error => {
+                      console.error('There was a problem with the fetch operation:', error);
+                  });
+                  window.location.reload();
+              }
+          }
+      }).catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+      })
+
+  } else {
+
     forms.forEach((form) => {
 
       const formData = new FormData(form);
@@ -1233,7 +1408,6 @@ function onFormsSubmit(e) {
             }
         });
 
-        console.log(FormData);
 
         fetch(form.action, {
             method: 'POST',
@@ -1250,8 +1424,28 @@ function onFormsSubmit(e) {
             console.error('There was a problem with the fetch operation:', error);
         });
     });
-    window.location.reload();
+  }
 }
+
+
+  document.querySelector('.copyBtn').addEventListener('click', () => {
+    const copyNumber = document.querySelector('.copy-number'); 
+    navigator.clipboard.writeText(copyNumber.textContent)
+    document.querySelector('.copyBtn').classList.remove('bx-copy-alt');
+    document.querySelector('.copyBtn').classList.add('bx-check');
+    document.querySelector('.copyBtn').style.color = '#91E0DA';
+
+  });
+
+  document.getElementById('assigned_to').addEventListener('click',()=>{
+    let assigned_to_modal = new bootstrap.Modal(
+          document.getElementById("assigned_to_modal"),
+          {}
+        );
+        // https://getbootstrap.com/docs/5.0/components/modal/#show
+        assigned_to_modal.show();
+    });
+
 
 
 </script>

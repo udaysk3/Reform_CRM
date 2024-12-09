@@ -18,4 +18,5 @@ urlpatterns = [
     path('upload_profile/<int:emp_id>',views.upload_profile,name='upload_profile'),
     path('edit_role/<int:role_id>',views.edit_role,name='edit_role'),
     path('bulk_delete_roles',views.bulk_delete_roles,name='bulk_delete_roles'),
+    
 ]

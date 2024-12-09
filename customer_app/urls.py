@@ -79,6 +79,16 @@ urlpatterns = [
         views.add_stage_ans,
         name="add_stage_ans",
     ),
+    path(
+        "check_stage_ans/<int:route_id>/<int:product_id>/<int:stage_id>/<int:customer_id>",
+        views.check_stage_ans,
+        name="check_stage_ans",
+    ),
+    path(
+        "add_submit_stage_ans/<int:route_id>/<int:product_id>/<int:stage_id>/<int:customer_id>",
+        views.add_submit_stage_ans,
+        name="add_submit_stage_ans",
+    ),
     path("get_agent_customers/<int:agent_id>", views.get_agent_customers, name="get_agent_customers"),
     path("refresh_epc/<int:customer_id>", views.refresh_epc, name="refresh_epc"),
 ]

@@ -203,7 +203,7 @@
                 
             </div>
           </div>
-
+          
           <div class="mb-3 d-flex justify-content-between field">
             <h4>Activate Profile</h4>
             <form method="post" class="row" action="{% url 'security_app:s_edit_employee' emp.id %}">
@@ -211,13 +211,13 @@
               <div class="form-check my-3 col">
                 <input class="form-check-input" type="checkbox" name="status" {% if emp.status %} checked {% endif %}
                   id="status">
-                <label class="form-check-label" for="status">
+                  <label class="form-check-label" for="status">
                   Active
                 </label>
               </div>
-
+              
               <button type="submit" class="reform_btn col">Submit</button>
-
+              
             </form>
           </div>
 

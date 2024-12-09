@@ -14,6 +14,7 @@ from .models import (
     Countries,
     Stage,
     Suggestion,
+    Document,
     Sub_suggestions,
 )
 from django.db.models import Q
@@ -37,6 +38,8 @@ from googleapiclient.errors import HttpError
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
+
+
 def home(request):
     return render(request, "home/index.html")
 
@@ -50,60 +53,39 @@ def Finance(request):
 def suggestion(request):
     if request.session.get("first_name"):
         delete_customer_session(request)
-    if request.GET.get("page") == "New" or request.GET.get("page") == None:
-        suggestions = Suggestion.objects.filter(Q(status="New") | Q(status="Not yet started")).order_by("order")
+    if request.GET.get("page") == "In Review" or request.GET.get("page") == None:
+        suggestions = Suggestion.objects.filter(Q(status="In Review")).order_by("order")
     else:
         suggestions = Suggestion.objects.all().filter(status=request.GET.get("page")).order_by("order")
     current_date_time = datetime.now(pytz.timezone("Europe/London")).date()
     yesterday = current_date_time + timedelta(days=1)
     agents = User.objects.all().filter(is_staff=True)
 
-    return render(request, "home/suggestion.html", {"suggestions": suggestions, "suggestions_list" :serialize('json', suggestions), "agents": serialize('json', agents), "current_date_time": current_date_time, "yesterday": yesterday})
+    return render(request, "home/suggestion.html", {"suggestions": suggestions, "agents": agents, "current_date_time": current_date_time, "yesterday": yesterday})
 
 def assign_agents(request):
     if request.method == "POST":
      try:
-        agent_names = [id_str.split(' ') for id_str in request.POST.get("agents").split(',')]
-        suggestion_names = [id_str.strip() for id_str in request.POST.get("suggestions").split(',')]
-            
-        num_suggestions = len(suggestion_names)
-        num_agents = len(agent_names)
-        suggestions_per_agent = num_suggestions // num_agents
-        extra_suggestions = num_suggestions % num_agents
-        
-        agent_index = 0
-        for agent_id in agent_names:
-            if len(agent_id) == 2:
-                agent = User.objects.filter(first_name=agent_id[0], last_name=agent_id[1]).first()
-            elif len(agent_id) == 3:
-                agent = User.objects.filter(first_name=agent_id[1], last_name=agent_id[2]).first()
-            if extra_suggestions > 0:
-                num_suggestions_for_agent = suggestions_per_agent + 1
-                extra_suggestions -= 1
-            else:
-                num_suggestions_for_agent = suggestions_per_agent
-            
-            assigned_suggestions = suggestion_names[:num_suggestions_for_agent]
-            for suggestion_name in assigned_suggestions:
-                suggestion = Suggestion.objects.filter(type=suggestion_name).first()
-                suggestion.assigned_to = agent
-                suggestion.save()
-                suggestion.add_suggestion_action(
-                    agent=User.objects.get(email=request.user),
-                    created_at=datetime.now(pytz.timezone("Europe/London")),
-                    text=f"Assigned to Agent {agent.first_name} {agent.last_name}",
-                )
-            suggestion_names = suggestion_names[num_suggestions_for_agent:]
-            
-            agent_index += 1
-        
-        messages.success(request, "Suggestions Assigned successfully!")
+        agent_id = request.POST.get("agent_id")
+        suggestion_ids = request.POST.get("suggestions").split(",")
+        agent = User.objects.get(pk=agent_id)
+        for suggestion_id in suggestion_ids:
+            suggestion = Suggestion.objects.get(pk=suggestion_id)
+            suggestion.assigned_to =  agent
+            suggestion.save()
+            suggestion.add_suggestion_action(
+                agent=User.objects.get(email=request.user),
+                date_time=datetime.now(pytz.timezone("Europe/London")),
+                created_at=datetime.now(pytz.timezone("Europe/London")),
+                action_type="Assigned to Agent",
+            )
+        messages.success(request, "Suggestion Assigned successfully!")
         return redirect("app:suggestion")
      except Exception as e:
-        messages.error(request, f"Error assigning suggestions: {e}")
+        messages.error(request, f"Error assigning suggestion: {e}")
         return redirect("app:suggestion")
     else:
-        messages.error(request, "Cannot Assign suggestions!")
+        messages.error(request, "Cannot Assign suggestion!")
         return redirect("app:suggestion")
 
 
@@ -134,9 +116,9 @@ def detail_suggestion(request, suggestion_id):
     length_sub_suggestions = len(sub_suggestions)
     length_completed_sub_suggestions = len(completed_sub_suggestions)
     if len(sub_suggestions) == 0:
-        if suggestion.status == "Completed":
+        if suggestion.status == "Complete":
             length_completed_sub_suggestions = 1
-            length_sub_suggestions = 0
+            length_sub_suggestions = 1
         else:
             length_sub_suggestions = 1
             length_completed_sub_suggestions = 0
@@ -168,14 +150,13 @@ def add_sub_suggestion(request, suggestion_id):
     if request.method == "POST":
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         descriptions = request.POST.getlist("suggestion")
-        print(descriptions)
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         for description in descriptions:
             Sub_suggestions.objects.create(
                 description=description,
                 suggestion=suggestion,
                 created_at=datetime.now(pytz.timezone("Europe/London")),
-                status="New",
+                status="In Review",
                 assigned_to=suggestion.assigned_to,
             )
             suggestion.add_suggestion_action(
@@ -241,22 +222,31 @@ def add_suggestion(request):
         type = request.POST.get("type")
         agent = request.user
         location = request.POST.get("location")
-        file = request.FILES.get("file")
+        files = request.FILES.getlist("file")
         suggestion = Suggestion.objects.create(
             description=description,
             type=type,
             agent=agent,
-            status="New",
+            status="In Review",
             location=location,
-            file=file,
             created_at=datetime.now(pytz.timezone("Europe/London")),
 
         )
+        
+        for file in files:
+            doc = Document.objects.create(document=file)
+            suggestion.files.add(doc)
+        suggestions = Suggestion.objects.all().filter(status="In Review")
+        length = len(suggestions)
+        suggestion.order = length
+        suggestion.save()
+
         suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
             created_at=datetime.now(pytz.timezone("Europe/London")),
             text=f"Added suggestion {description} of type {type} at location {location}",
         )
+        
         
         messages.success(request, "Suggestion added successfully!")
         return HttpResponseRedirect(location)
@@ -266,29 +256,41 @@ def merge_suggestions(request, suggestion_id):
         suggestion = Suggestion.objects.get(pk=suggestion_id)
         merge_suggestion_id = request.POST.get("merge_suggestion")
         merge_suggestion = Suggestion.objects.get(pk=merge_suggestion_id)
+
         for requester in suggestion.aditional_requesters.all():
             merge_suggestion.aditional_requesters.add(requester)
-        merge_suggestion.aditional_requesters.add(suggestion.agent)            
+        merge_suggestion.aditional_requesters.add(suggestion.agent)    
+        sub_suggestion_data = ''
         for sub_suggestion in suggestion.sub_suggestions.all():
-            sub_suggestion.suggestion = merge_suggestion
-            sub_suggestion.save()
+            if sub_suggestion.assigned_to:
+                sub_suggestion_data += f"Description - {sub_suggestion.description} Status - {sub_suggestion.status} Assigned To - {sub_suggestion.assigned_to.first_name} {sub_suggestion.assigned_to.last_name} \n"
+            else:
+                sub_suggestion_data += f"Description - {sub_suggestion.description} Status - {sub_suggestion.status} Assigned To - None \n"
+            sub_suggestion.delete()
+
+        aditional_requesters = ''
+        for requester in suggestion.aditional_requesters.all():
+            aditional_requesters += f"{requester.first_name} {requester.last_name}, "
+
+        files = ''
+        for file in suggestion.files.all():
+            files += f"{file.document}, "
+            file.delete()
+
+        assigned_to = 'None'
+        if suggestion.assigned_to:
+            assigned_to = f"{suggestion.assigned_to.first_name} {suggestion.assigned_to.last_name}"
+
         merge_suggestion.add_suggestion_action(
             agent=User.objects.get(email=request.user),
-            created_at=datetime.now(pytz.timezone("Europe/London")),
-            text=f"Merged suggestion information: {suggestion.description}",
+            created_at= datetime.now(pytz.timezone("Europe/London")),
+            text=f"A suggestion was merged into this \n Suggestion - {suggestion.description} \n Type - {suggestion.type} \n Date - {suggestion.created_at} \n Location - {suggestion.location} \n Status - {suggestion.status} \n Expected Completion Date - {suggestion.expected_completion_date} \n Assigned to - {assigned_to} \n Additional Requesters - {aditional_requesters} \n Files - {files} \n Sub Suggestions - {sub_suggestion_data} \n",
         )
-        merge_suggestion.status = "New"
-        suggestions = Suggestion.objects.all().filter(status="New")
-        length = len(suggestions)
-        merge_suggestion.order = length + 1
-        if merge_suggestion.requested:
-            merge_suggestion.requested += 1
-        else:
-            merge_suggestion.requested = 1
+
         suggestion.delete()
         merge_suggestion.save()
         messages.success(request, "Suggestion merged successfully!")
-        return HttpResponseRedirect(f"/suggestion?page=New")
+        return HttpResponseRedirect(f"/suggestion?page=In Review")
 
     
 def add_comment(request, suggestion_id):
@@ -308,18 +310,18 @@ def edit_suggestion(request, suggestion_id):
         description = request.POST.get("description")
         type = request.POST.get("type")
         location = request.POST.get("location")
-        file = request.FILES.get("file")
+        files = request.FILES.getlist("files")
         expected_completion_date = request.POST.get("expected_completion_date")
         status = request.POST.get("status")
         suggestion = Suggestion.objects.get(pk=suggestion_id)
-        if suggestion.status != status and status != "Archive":
+        if suggestion.status != status:
             suggestions = Suggestion.objects.all().filter(status=status)
             length = len(suggestions)
             suggestion.order = length + 1
-        elif suggestion.status != status and status == "Archive":
-            suggestions = Suggestion.objects.all().filter(archive=True)
-            length = len(suggestions)
-            suggestion.order = length + 1
+            if request.POST.get("status") == "Complete":
+                Sub_suggestions.objects.filter(suggestion=suggestion).update(status="Completed")
+            elif request.POST.get("status") == "Test":
+                Sub_suggestions.objects.filter(suggestion=suggestion).update(status="Test")
 
         text = "Changed "
         if suggestion.description != description:
@@ -340,8 +342,11 @@ def edit_suggestion(request, suggestion_id):
         suggestion.description = description
         suggestion.type = type
         suggestion.location = location
-        if file:
-            suggestion.file = file
+        if files:
+            for file in files:
+                doc = Document.objects.create(document=file)
+                suggestion.files.add(doc)
+
         if expected_completion_date:
             suggestion.expected_completion_date = expected_completion_date
         else:
@@ -349,7 +354,7 @@ def edit_suggestion(request, suggestion_id):
         suggestion.status = status
         suggestion.save()
         messages.success(request, "Suggestion edited successfully!")
-        return HttpResponseRedirect(location)
+        return redirect(f"/detail_suggestion/{suggestion_id}")
 
 def query_city(request, q):
     cities = Cities.objects.all()

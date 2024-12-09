@@ -454,3 +454,4 @@ def assign_agent(request):
     except Exception as e:
         messages.error(request, f"Error assigning client: {e}")
         return HttpResponseRedirect("/s_edit_employee/" + str(agent_id))
+    

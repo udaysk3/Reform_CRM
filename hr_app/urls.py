@@ -18,4 +18,6 @@ urlpatterns = [
     path('edit_employment_status/<int:emp_id>', views.edit_employment_status, name="edit_employment_status"),
     path('add_emergency_contact/<int:emp_id>', views.add_emergency_contact, name="add_emergency_contact"),
     path('edit_emergency_contact/<int:contact_id>', views.edit_emergency_contact, name="edit_emergency_contact"),
+    path('add_signature/<int:emp_id>',views.add_signature,name='add_signature'),
+    path('edit_signature/<int:signature_id>',views.edit_signature,name='edit_signature'),
 ]

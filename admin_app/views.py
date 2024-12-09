@@ -101,29 +101,6 @@ def remove_reason(request, reason_id):
     return redirect("admin_app:admin")
 
 
-def add_signature(request):
-    if request.method == "POST":
-        signature = request.POST.get("signature")
-        signature_img = request.FILES.get("signature_img")
-        template = Signature.objects.create(
-            signature=signature,
-            signature_img=signature_img,
-        )
-        messages.success(request, "Signature added successfully!")
-        return redirect("admin_app:admin")
-    return render(request, "home/admin.html")
-
-
-def edit_signature(request, signature_id):
-    signature = Signature.objects.get(pk=signature_id)
-    if request.method == "POST":
-        signature.signature = request.POST.get("signature")
-        signature.signature_img = request.FILES.get("signature_img")
-        signature.save()
-        messages.success(request, "Signature updated successfully!")
-        return redirect("admin_app:admin")
-    return redirect("admin_app:admin")
-
 def remove_signature(request, signature_id):
     signature = Signature.objects.get(pk=signature_id)
     signature.delete()

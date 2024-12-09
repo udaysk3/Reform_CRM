@@ -17,6 +17,187 @@
   <link rel="stylesheet" href="{% static 'css/layout_style.css' %}">
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+
+  
+<style>
+
+    svg{
+      cursor: pointer;
+    }
+.container{
+    text-align: center;
+    margin: auto;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 1px 0px inset, rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+}
+
+.header-section{
+    padding: 25px 0px;
+}
+.header-section h1{
+    font-weight: 500;
+    font-size: 1.7rem;
+    text-transform: uppercase;
+    color: #707EA0;
+    margin: 0px;
+    margin-bottom: 8px;
+}
+.header-section p{
+    margin: 5px;
+    font-size: 0.95rem;
+    color: #707EA0;
+}
+
+.drop-section{
+    border: 1px dashed #A8B3E3;
+    background-image: linear-gradient(180deg, white, #F1F6FF);
+    margin: 5px 35px 35px 35px;
+    border-radius: 12px;
+    position: relative;
+}
+.drop-section div.col:first-child{
+    opacity: 1;
+    visibility: visible;
+    transition-duration: 0.2s;
+    transform: scale(1);
+    margin: auto;
+}
+.drop-section div.col:last-child{
+    font-size: 40px;
+    font-weight: 700;
+    color: #c0cae1;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.6);
+    transition-duration: 0.2s;
+}
+/* we will use "drag-over-effect" class in js */
+.drag-over-effect div.col:first-child{
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(1.1);
+}
+.drag-over-effect div.col:last-child{
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+.drop-section span,
+.drop-section button{
+    display: block;
+    margin: auto;
+    color: #707EA0;
+    margin-bottom: 10px;
+}
+.drop-section button{
+    color: white;
+    background-color: #5874C6;
+    border: none;
+    outline: none;
+    padding: 7px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+}
+.drop-section input{
+    display: none;
+}
+
+.list-section{
+    display: none;
+    text-align: left;
+    padding-bottom: 20px;
+}
+.list-section .list-title{
+    font-size: 0.95rem;
+    color: #707EA0;
+}
+.list-section li{
+    display: flex;
+    padding-top: 4px;
+    padding-bottom: 2px;
+    border-radius: 8px;
+    transition-duration: 0.2s;
+}
+.list-section li:hover{
+    box-shadow: #E3EAF9 0px 0px 4px 0px, #E3EAF9 0px 12px 16px 0px;
+}
+.list-section li .col{
+    flex: .1;
+}
+.list-section li .col:nth-child(1){
+    flex: .15;
+    text-align: center;
+}
+.list-section li .col:nth-child(2){
+    flex: .75;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #3e4046;
+    padding: 8px 10px;
+}
+.list-section li .col:nth-child(2) div.name{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
+.list-section li .col .file-name span{
+    color: #707EA0;
+    float: right;
+}
+.list-section li .file-progress{
+    height: 5px;
+    margin-top: 8px;
+    border-radius: 8px;
+    background-color: #dee6fd;
+}
+.list-section li .file-progress span{
+    display: block;
+    border-radius: 8px;
+    background-image: linear-gradient(120deg, #6b99fd, #9385ff);
+    transition-duration: 0.4s;
+}
+.list-section li .col .file-size{
+    font-size: 0.75rem;
+    margin-top: 3px;
+    color: #707EA0;
+}
+.list-section li .col svg.cross,
+.list-section li .col svg.tick{
+    fill: #8694d2;
+    background-color: #dee6fd;
+    position: relative;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.list-section li .col svg.tick{
+    fill: #50a156;
+    background-color: transparent;
+}
+.list-section li.complete span,
+.list-section li.complete .file-progress,
+.list-section li.complete svg.cross{
+    display: none;
+}
+.list-section li.in-prog .file-size,
+.list-section li.in-prog svg.tick{
+    display: none;
+}
+
+  </style>
+
+
   <style>
     .nav_link:hover, .navlink_icon:hover{
       background-color: #004652;
@@ -320,12 +501,12 @@ i{
                   </div>
                   <ul class="menu_items submenu">
                     {% if request.user.new_suggestion %}
-                    <button class="nav_link sublink new_suggestion" style="border:none; background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">New</button>
+                    <button class="nav_link sublink new_suggestion" style="border:none; color:black;background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">New</button>
                     
                     
                     {% endif %}
                     {% if request.user.suggestion %}
-                    <a href="{% url 'app:suggestion' %}?page=New" class="nav_link sublink">Suggestions</a>
+                    <a href="{% url 'app:suggestion' %}?page=In Review" class="nav_link sublink">Suggestions</a>
                     {% endif %}
                   </ul>
                 </li>
@@ -407,16 +588,36 @@ i{
       </div>
     </div>
     <script>
-
-      const new_suggestion = document.querySelector('.new_suggestion');
-      new_suggestion.addEventListener('click', () => {
-        document.getElementById('location_sugg').value = window.location.pathname;
-        console.log(window.location.pathname);
+      window.addEventListener('load', () => {
+        var urls = JSON.parse(sessionStorage.getItem('urls')) || [];
+        if (urls.includes(window.location.pathname) ) {
+          var new_urls = urls.filter(url => url !== window.location.pathname);
+          urls = new_urls;
+          urls.push(window.location.pathname);
+        } else if (urls.includes(window.location.pathname + '#')) {
+          var new_urls = urls.filter(url => url !== window.location.pathname + '#');
+          urls = new_urls;
+          urls.push(window.location.pathname + '#');
+        } else {
+          urls.push(window.location.pathname);
+        }
+        sessionStorage.setItem('urls', JSON.stringify(urls));
       });
 
       function goBack() {
-        window.history.back();
+        var urls = JSON.parse(sessionStorage.getItem('urls')) || [];
+        if (urls.length > 1) {
+          urls.pop();
+          var url = urls.pop();
+          sessionStorage.setItem('urls', JSON.stringify(urls));
+          window.location.href = url;
+        } else {
+          window.location.href = "{% url 'dashboard_app:dashboard' %}";
+        }
       }
+
+
+
     </script>
     <script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
@@ -432,9 +633,14 @@ i{
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js" integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
   <script src="{% static 'js/comboTreePlugin.js' %} " type="text/javascript"></script>
+  <script>
+    const new_suggestion = document.querySelector('.new_suggestion');
+      new_suggestion.addEventListener('click', () => {
+        document.getElementById('location_sugg').value = window.location.pathname;
+        console.log(window.location.pathname);
+      });
+  </script>
 
   {% block js %}
   

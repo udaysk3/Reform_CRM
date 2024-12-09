@@ -4,13 +4,15 @@ from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
 from decouple import config
+import secrets
 from storages.backends.s3boto3 import S3Boto3Storage
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'your-secret-key'
-
+# Generate a random secret key
+SECRET_KEY = secrets.token_urlsafe(50)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -110,7 +112,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 WSGI_APPLICATION = 'reform_crm.wsgi.application'
 
-# Database configuration
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -123,8 +124,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'reform',
         'USER': 'reform',
-        'PASSWORD': 'Reform@123',
-        'HOST': '35.179.137.230',
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
         'PORT': 5432,
     }
 }
@@ -134,7 +135,7 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'reformCRM',
 #         'USER': 'postgres',
-#         'PASSWORD': 'Gowtham839938',
+#         'PASSWORD': 'Your Password',
 #         'HOST': 'localhost',
 #         'PORT': 5432,
 #     }
@@ -162,10 +163,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"  # Here I am using gmail smtp server
-EMAIL_PORT = 587  # gmail smtp server port
-EMAIL_HOST_USER = "support@reform-group.uk"  # Use your email account
-EMAIL_HOST_PASSWORD = "nrhethtofrfhryjo"  # For gmail use app password
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
