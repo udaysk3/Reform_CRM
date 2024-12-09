@@ -123,8 +123,8 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'reform',
 #         'USER': 'reform',
-#         'PASSWORD': 'Reform@123',
-#         'HOST': '35.179.137.230',
+#         'PASSWORD': config('DB_PASSWORD'),
+#         'HOST': config('DB_HOST'),
 #         'PORT': 5432,
 #     }
 # }
@@ -134,7 +134,7 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'reformCRM',
 #         'USER': 'postgres',
-#         'PASSWORD': 'Gowtham839938',
+#         'PASSWORD': 'Your Password',
 #         'HOST': 'localhost',
 #         'PORT': 5432,
 #     }
